@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -18,12 +19,13 @@ import { Disciple } from '@/modules/disciple/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
 import { FamilyHouse } from '@/modules/family-house/entities';
 
-@Entity({ name: 'church' })
+@Entity({ name: 'churches' })
 export class Church {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   //General info
+  @Index()
   @Column('text', { name: 'church_name', unique: true })
   churchName: string;
 
@@ -35,6 +37,38 @@ export class Church {
 
   @Column('date', { name: 'founding_date' })
   foundingDate: Date;
+
+  // Contact Info
+  @Index()
+  @Column('text', { name: 'email', unique: true, nullable: true })
+  email: string;
+
+  @Column('text', { name: 'phone_number', nullable: true })
+  phoneNumber: string;
+
+  @Column('text', { name: 'country', default: 'Peru' })
+  country: string;
+
+  @Column('text', { name: 'department', default: 'Lima' })
+  department: string;
+
+  @Column('text', { name: 'province', default: 'Lima' })
+  province: string;
+
+  @Index()
+  @Column('text', { name: 'district' })
+  district: string;
+
+  @Index()
+  @Column('text', { name: 'urban_sector' })
+  urbanSector: string;
+
+  @Index()
+  @Column('text', { name: 'address' })
+  address: string;
+
+  @Column('text', { name: 'reference_address' })
+  referenceAddress: string;
 
   // Roles amount under their charge
   @Column('int', { name: 'number_anexes', default: 0 })
@@ -61,46 +95,18 @@ export class Church {
   @Column('int', { name: 'number_disciples', default: 0 })
   numberDisciples: number;
 
-  // Contact Info
-  @Column('text', { name: 'email', unique: true, nullable: true })
-  email: string;
-
-  @Column('text', { name: 'phone_number', nullable: true })
-  phoneNumber: string;
-
-  @Column('text', { name: 'country', default: 'Peru' })
-  country: string;
-
-  @Column('text', { name: 'department', default: 'Lima' })
-  department: string;
-
-  @Column('text', { name: 'province', default: 'Lima' })
-  province: string;
-
-  @Column('text', { name: 'district' })
-  district: string;
-
-  @Column('text', { name: 'urban_sector' })
-  urbanSector: string;
-
-  @Column('text', { name: 'address' })
-  address: string;
-
-  @Column('text', { name: 'reference_address' })
-  referenceAddress: string;
-
   // Info register and update date
   @Column('timestamp', { name: 'created_at', nullable: true })
   createdAt: string | Date;
 
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne(() => User, { eager: true, nullable: true })
   @JoinColumn({ name: 'created_by' })
   createdBy: User;
 
   @Column('timestamp', { name: 'updated_at', nullable: true })
   updatedAt: string | Date;
 
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne(() => User, { eager: true, nullable: true })
   @JoinColumn({ name: 'updated_by' })
   updatedBy: User;
 
@@ -134,6 +140,6 @@ export class Church {
 
   // Relations(FK)
   @ManyToOne(() => Church, (church) => church.anexes, { nullable: true })
-  @JoinColumn({ name: 'their_main_church' })
+  @JoinColumn({ name: 'their_main_church_id' })
   theirMainChurch: Church;
 }

@@ -56,9 +56,9 @@ export class AuthController {
     return this.authService.login(loginUserDto);
   }
 
-  //* Check is_active
-  @ApiBearerAuth()
-  @Get('check-is_active')
+  //* Check auth status (regenerate new token)
+  @ApiBearerAuth('check-auth-status')
+  @Get('check-auth-status')
   @Auth()
   @ApiOkResponse({
     description: 'Successful operation',

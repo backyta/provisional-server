@@ -25,6 +25,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  //* Create user
   async register(createUserDto: CreateUserDto, user: User) {
     const { password, ...userData } = createUserDto;
 
@@ -47,6 +48,7 @@ export class AuthService {
     }
   }
 
+  //* Login user
   async login(loginUserDto: LoginUserDto): Promise<any> {
     const { password, email } = loginUserDto;
 
@@ -56,11 +58,11 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException(`Credential are not valid (email)`);
+      throw new UnauthorizedException(`Email or password are not valid`);
     }
 
     if (!bcrypt.compareSync(password, user.password)) {
-      throw new UnauthorizedException(`Credential are not valid (password)`);
+      throw new UnauthorizedException(`Email or password are not valid`);
     }
 
     return {
@@ -69,6 +71,7 @@ export class AuthService {
     };
   }
 
+  //* Check auth status (regenerate token)
   async checkAuthStatus(user: User) {
     return {
       ...user,
@@ -76,11 +79,14 @@ export class AuthService {
     };
   }
 
+  //? PRIVATE METHODS
+  // Sign token
   private getJetToken(payload: JwtPayload) {
     const token = this.jwtService.sign(payload);
     return token;
   }
 
+  // For future index errors or constrains with code.
   private handleDBErrors(error: any): never {
     if (error.code == '23505') {
       throw new BadRequestException(error.detail);

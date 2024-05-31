@@ -18,13 +18,13 @@ export class UserRoleGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const validRoles: string = this.reflector.get(
+    const validUserRoles: string = this.reflector.get(
       META_ROLES,
       context.getHandler(),
     );
 
-    if (!validRoles) return true;
-    if (validRoles.length === 0) return true;
+    if (!validUserRoles) return true;
+    if (validUserRoles.length === 0) return true;
 
     const req = context.switchToHttp().getRequest();
     const user = req.user as User;
@@ -34,13 +34,13 @@ export class UserRoleGuard implements CanActivate {
     }
 
     for (const role of user.roles) {
-      if (validRoles.includes(role)) {
+      if (validUserRoles.includes(role)) {
         return true;
       }
     }
 
     throw new ForbiddenException(
-      `User ${user.firstName}, ${user.lastName} need a valid roles ${validRoles}`,
+      `User ${user.firstName}, ${user.lastName} need a valid roles ${validUserRoles}`,
     );
   }
 }

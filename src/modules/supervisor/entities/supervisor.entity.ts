@@ -3,6 +3,7 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -20,16 +21,24 @@ import { Copastor } from '@/modules/copastor/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { FamilyHouse } from '@/modules/family-house/entities';
+// TODO : los supervisores tmb se podrán ligar directamente al pastor, ya que si se crea un anexo
+// Habrán un pastor y no hay copastor los supervisores se encargaran de las casas, se podría mandar
+// un copastor como entrenamiento o apoyo a esa zona y este copastor apoyaría a los supervisores.
+// este copastor englobaría a los supervisores y al pastor y se enlaza directo al pastor.
 
+// TODO : hacer un valor true o false para poder asignar un theirPastor directo al supervisor
 @Entity({ name: 'supervisors' })
+@Index(['firstName', 'lastName'])
 export class Supervisor {
   //General and Personal info
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Index()
   @Column('text', { name: 'first_name' })
   firstName: string;
 
+  @Index()
   @Column('text', { name: 'last_name' })
   lastName: string;
 
@@ -39,12 +48,14 @@ export class Supervisor {
   @Column('text', { name: 'origin_country' })
   originCountry: string;
 
+  @Index()
   @Column('date', { name: 'date_birth' })
   dateBirth: Date;
 
   @Column('int', { name: 'age' })
   age: number;
 
+  @Index()
   @Column('text', { name: 'marital_status' })
   maritalStatus: string;
 
@@ -55,6 +66,7 @@ export class Supervisor {
   conversionDate: Date;
 
   // Contact Info
+  @Index()
   @Column('text', { name: 'email', unique: true, nullable: true })
   email: string;
 
@@ -70,12 +82,15 @@ export class Supervisor {
   @Column('text', { name: 'province_residence', default: 'Lima' })
   provinceResidence: string;
 
+  @Index()
   @Column('text', { name: 'district_residence' })
   districtResidence: string;
 
+  @Index()
   @Column('text', { name: 'urban_sector_residence' })
   urbanSectorResidence: string;
 
+  @Index()
   @Column('text', { name: 'address_residence' })
   addressResidence: string;
 
@@ -84,6 +99,30 @@ export class Supervisor {
 
   @Column({ name: 'roles', type: 'text', array: true })
   roles: string[];
+
+  // Info register and update date
+  @Column('timestamp', { name: 'created_at', nullable: true })
+  createdAt: string | Date;
+
+  @ManyToOne(() => User, { eager: true, nullable: true })
+  @JoinColumn({ name: 'created_by' })
+  createdBy: User;
+
+  @Column('timestamp', { name: 'updated_at', nullable: true })
+  updatedAt: string | Date;
+
+  @ManyToOne(() => User, { eager: true, nullable: true })
+  @JoinColumn({ name: 'updated_by' })
+  updatedBy: User;
+
+  @Column('text', { name: 'status', default: Status.Active })
+  status: string;
+
+  @Column('boolean', {
+    name: 'is_direct_relation_to_pastor',
+    default: false,
+  })
+  isDirectRelationToPastor: boolean;
 
   // Roles amount under their charge
   @Column('int', { name: 'number_zones', default: 0 })
@@ -98,25 +137,7 @@ export class Supervisor {
   @Column('int', { name: 'number_disciples', default: 0 })
   numberDisciples: number;
 
-  // Info register and update date
-  @Column('timestamp', { name: 'created_at', nullable: true })
-  createdAt: string | Date;
-
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'created_by' })
-  createdBy: User;
-
-  @Column('timestamp', { name: 'updated_at', nullable: true })
-  updatedAt: string | Date;
-
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'updated_by' })
-  updatedBy: User;
-
-  @Column('text', { name: 'status', default: Status.Active })
-  status: string;
-
-  // Relations (Array)
+  //* Relations (Array)
   @OneToMany(() => Preacher, (preacher) => preacher.theirSupervisor)
   preachers: Preacher[];
 
@@ -126,22 +147,30 @@ export class Supervisor {
   @OneToMany(() => Disciple, (disciple) => disciple.theirSupervisor)
   disciples: Disciple[];
 
-  // Relations (FK)
-  @ManyToOne(() => Pastor, (pastor) => pastor.supervisors)
-  @JoinColumn({ name: 'their_pastor' })
-  theirPastor: Pastor;
-
-  @ManyToOne(() => Copastor, (copastor) => copastor.supervisors)
-  @JoinColumn({ name: 'their_copastor' })
-  theirCopastor: Copastor;
-
-  @ManyToOne(() => Church, (church) => church.supervisors)
-  @JoinColumn({ name: 'their_church' })
+  //* Relations (FK)
+  @ManyToOne(() => Church, (church) => church.supervisors, {
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 
-  // TODO : cambiar el nombre de la db y el de backend a zona a cargo en ingles
-  @OneToOne(() => Zone)
-  @JoinColumn({ name: 'their_zone' })
+  @ManyToOne(() => Pastor, (pastor) => pastor.supervisors, {
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'their_pastor_id' })
+  theirPastor: Pastor;
+
+  @ManyToOne(() => Copastor, (copastor) => copastor.supervisors, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'their_copastor_id' })
+  theirCopastor: Copastor;
+
+  @OneToOne(() => Zone, {
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'their_zone_id' })
   theirZone: Zone;
 
   // Internal Functions

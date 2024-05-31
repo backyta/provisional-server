@@ -4,6 +4,8 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -16,6 +18,8 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 
 import { UserRoles } from '@/modules/auth/enums';
@@ -29,6 +33,8 @@ import {
 } from '@/modules/supervisor/dto';
 import { Supervisor } from '@/modules/supervisor/entities';
 import { SupervisorService } from '@/modules/supervisor/supervisor.service';
+import { Copastor } from '@/modules/copastor/entities';
+import { PaginationDto } from '@/common/dtos';
 
 @ApiTags('Supervisors')
 @ApiBearerAuth()
@@ -61,9 +67,17 @@ export class SupervisorController {
     return this.supervisorService.create(createSupervisorDto, user);
   }
 
+  //* Find All
   @Get()
-  findAll() {
-    return this.supervisorService.findAll();
+  @Auth()
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found resource.',
+  })
+  findAll(@Query() paginationDto: PaginationDto): Promise<Supervisor[]> {
+    return this.supervisorService.findAll(paginationDto);
   }
 
   @Get(':id')
@@ -71,16 +85,36 @@ export class SupervisorController {
     return this.supervisorService.findOne(+id);
   }
 
+  //* Update
   @Patch(':id')
+  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @ApiOkResponse({
+    description: 'Successful operation',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
   update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateSupervisorDto: UpdateSupervisorDto,
-  ) {
-    return this.supervisorService.update(+id, updateSupervisorDto);
+    @GetUser() user: User,
+  ): Promise<Supervisor | Copastor> {
+    return this.supervisorService.update(id, updateSupervisorDto, user);
   }
 
+  //! Delete
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.supervisorService.remove(+id);
+  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
+  remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @GetUser() user: User,
+  ): Promise<void> {
+    return this.supervisorService.remove(id, user);
   }
 }

@@ -10,15 +10,23 @@ import { SupervisorController } from '@/modules/supervisor/supervisor.controller
 import { PastorModule } from '@/modules/pastor/pastor.module';
 import { ChurchModule } from '@/modules/church/church.module';
 import { CopastorModule } from '@/modules/copastor/copastor.module';
+import { ZoneModule } from '@/modules/zone/zone.module';
+import { PreacherModule } from '@/modules/preacher/preacher.module';
+import { FamilyHouseModule } from '@/modules/family-house/family-house.module';
+import { DiscipleModule } from '@/modules/disciple/disciple.module';
 
 @Module({
   controllers: [SupervisorController],
   providers: [SupervisorService],
   imports: [
     TypeOrmModule.forFeature([Supervisor]),
-    ChurchModule,
+    forwardRef(() => ChurchModule),
     forwardRef(() => PastorModule),
-    CopastorModule,
+    forwardRef(() => CopastorModule),
+    forwardRef(() => ZoneModule),
+    forwardRef(() => PreacherModule),
+    forwardRef(() => FamilyHouseModule),
+    forwardRef(() => DiscipleModule),
     AuthModule,
   ],
   exports: [TypeOrmModule, SupervisorService],

@@ -8,7 +8,7 @@ import { User } from '@/modules/user/entities';
 
 @Injectable()
 export class SuperUserService {
-  private readonly logger = new Logger('SuperUSerService');
+  private readonly logger = new Logger('SuperUserService');
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,

@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 
 import { ZoneService } from '@/modules/zone/zone.service';
@@ -20,9 +22,12 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { PaginationDto } from '@/common/dtos';
 
 @ApiTags('Zones')
 @ApiBearerAuth()
@@ -55,9 +60,17 @@ export class ZoneController {
     return this.zoneService.create(createZoneDto, user);
   }
 
+  //* Find All
   @Get()
-  findAll() {
-    return this.zoneService.findAll();
+  @Auth()
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found resource.',
+  })
+  findAll(@Query() paginationDto: PaginationDto): Promise<Zone[]> {
+    return this.zoneService.findAll(paginationDto);
   }
 
   @Get(':id')
@@ -65,13 +78,36 @@ export class ZoneController {
     return this.zoneService.findOne(+id);
   }
 
+  //* Update
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateZoneDto: UpdateZoneDto) {
-    return this.zoneService.update(+id, updateZoneDto);
+  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @ApiOkResponse({
+    description: 'Successful operation',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateZoneDto: UpdateZoneDto,
+    @GetUser() user: User,
+  ): Promise<Zone> {
+    return this.zoneService.update(id, updateZoneDto, user);
   }
 
+  //* Delete
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.zoneService.remove(+id);
+  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
+  remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @GetUser() user: User,
+  ): Promise<void> {
+    return this.zoneService.remove(id, user);
   }
 }

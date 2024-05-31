@@ -4,23 +4,28 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
 @Entity({ name: 'users' })
+@Index(['firstName', 'lastName'])
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   //General info
+  @Index()
   @Column('text')
   firstName: string;
 
+  @Index()
   @Column('text')
   lastName: string;
 
+  @Index()
   @Column('text', { unique: true })
   email: string;
 

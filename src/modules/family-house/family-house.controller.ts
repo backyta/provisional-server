@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 
 import {
@@ -14,6 +16,8 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -27,6 +31,7 @@ import {
   CreateFamilyHouseDto,
   UpdateFamilyHouseDto,
 } from '@/modules/family-house/dto';
+import { PaginationDto } from '@/common/dtos';
 
 @ApiTags('Family-Houses')
 @ApiBearerAuth()
@@ -59,9 +64,17 @@ export class FamilyHouseController {
     return this.familyHouseService.create(createFamilyHouseDto, user);
   }
 
+  //* Find All
   @Get()
-  findAll() {
-    return this.familyHouseService.findAll();
+  @Auth()
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found resource.',
+  })
+  findAll(@Query() paginationDto: PaginationDto): Promise<FamilyHouse[]> {
+    return this.familyHouseService.findAll(paginationDto);
   }
 
   @Get(':id')
@@ -69,16 +82,33 @@ export class FamilyHouseController {
     return this.familyHouseService.findOne(+id);
   }
 
+  //* Update
   @Patch(':id')
+  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @ApiOkResponse({
+    description: 'Successful operation',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
   update(
-    @Param('id') id: string,
-    @Body() updateFamilyHouseDto: UpdateFamilyHouseDto,
-  ) {
-    return this.familyHouseService.update(+id, updateFamilyHouseDto);
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateFamilyHomeDto: UpdateFamilyHouseDto,
+    @GetUser() user: User,
+  ): Promise<FamilyHouse> {
+    return this.familyHouseService.update(id, updateFamilyHomeDto, user);
   }
 
+  //* Delete
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.familyHouseService.remove(+id);
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
+  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  remove(@Param('id') id: string, @GetUser() user: User): Promise<void> {
+    return this.familyHouseService.remove(id, user);
   }
 }

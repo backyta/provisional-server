@@ -28,6 +28,7 @@ export class UserService {
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<User[]> {
     const { limit = 10, offset = 0 } = paginationDto;
+
     return this.userRepository.find({
       where: { status: Status.Active },
       take: limit,
@@ -136,6 +137,7 @@ export class UserService {
     if (!member) throw new NotFoundException(`Member with ${term} not found`);
   }
 
+  //* UPDATE USER
   async update(
     id: string,
     updateUserDto: UpdateUserDto,
@@ -153,6 +155,12 @@ export class UserService {
       throw new NotFoundException(`User not found with id: ${id}`);
     }
 
+    if (dataUser.status === Status.Active && status === Status.Inactive) {
+      throw new BadRequestException(
+        `You cannot update it to "inactive", you must delete the record`,
+      );
+    }
+
     try {
       const updateUser = await this.userRepository.preload({
         id: id,
@@ -168,6 +176,7 @@ export class UserService {
     }
   }
 
+  //! DELETE USER
   async delete(id: string, user: User): Promise<void> {
     if (!isUUID(id)) {
       throw new BadRequestException(`Not valid UUID`);
@@ -176,7 +185,7 @@ export class UserService {
     const dataUser = await this.userRepository.findOneBy({ id });
 
     if (!dataUser) {
-      throw new NotFoundException(`Pastor with id: ${id} not exits`);
+      throw new NotFoundException(`User with id: ${id} not exits`);
     }
 
     try {
@@ -193,9 +202,9 @@ export class UserService {
     }
   }
 
-  //! PRIVATE METHODS
-  //* For future index errors or constrains with code.
-  private handleDBExceptions(error: any) {
+  //? PRIVATE METHODS
+  // For future index errors or constrains with code.
+  private handleDBExceptions(error: any): never {
     if (error.code === '23505') throw new BadRequestException(error.detail);
     this.logger.error(error);
     throw new InternalServerErrorException(

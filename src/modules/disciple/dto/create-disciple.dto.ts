@@ -58,7 +58,7 @@ export class CreateDiscipleDto {
   })
   @IsString()
   @IsNotEmpty()
-  dateBirth: string | Date;
+  birthDate: string | Date;
 
   @ApiProperty({
     example: '2',

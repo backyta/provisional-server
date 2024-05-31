@@ -1,3 +1,4 @@
+import { IncomeModule } from './modules/offering/income/income.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,15 +12,19 @@ import { PastorModule } from '@/modules/pastor/pastor.module';
 import { DiscipleModule } from '@/modules/disciple/disciple.module';
 import { PreacherModule } from '@/modules/preacher/preacher.module';
 import { CopastorModule } from '@/modules/copastor/copastor.module';
-import { OfferingModule } from '@/modules/offering/offering.module';
 import { SupervisorModule } from '@/modules/supervisor/supervisor.module';
 import { FamilyHouseModule } from '@/modules/family-house/family-house.module';
+import { AuthModule } from '@/modules/auth/auth.module';
 
 import { SuperUserService } from '@/utils';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
+import { FilesModule } from './modules/files/files.module';
+import { ExpensesModule } from './modules/offering/expenses/expenses.module';
+import { SeedModule } from './modules/seed/seed.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot(), // access to environment variables global in all modules
     TypeOrmModule.forRoot({
       ssl: process.env.STAGE === 'prod',
       extra: {
@@ -44,8 +49,13 @@ import { SuperUserService } from '@/utils';
     PreacherModule,
     FamilyHouseModule,
     ZoneModule,
-    OfferingModule,
     ChurchModule,
+    AuthModule,
+    CloudinaryModule,
+    FilesModule,
+    IncomeModule,
+    ExpensesModule,
+    SeedModule,
   ],
   providers: [SuperUserService],
 })

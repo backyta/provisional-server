@@ -11,3 +11,7 @@ export function Auth(...roles: UserRoles[]) {
     UseGuards(AuthGuard(), UserRoleGuard),
   );
 }
+
+// RoleProtected() -> Used to establish the allowed roles in the metadata
+// AuthGuard() -> Used to validate with the jwtStrategy and adds the user to the request
+// UserRoleGuard() -> Used to remove the user from context and role metadata and validate and allow access

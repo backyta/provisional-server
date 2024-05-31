@@ -19,7 +19,7 @@ import { DiscipleModule } from '@/modules/disciple/disciple.module';
   providers: [PastorService],
   imports: [
     TypeOrmModule.forFeature([Pastor]),
-    ChurchModule,
+    forwardRef(() => ChurchModule),
     forwardRef(() => CopastorModule),
     forwardRef(() => SupervisorModule),
     forwardRef(() => ZoneModule),

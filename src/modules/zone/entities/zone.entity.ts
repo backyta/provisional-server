@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -25,6 +26,7 @@ export class Zone {
   id: string;
 
   //General info
+  @Index()
   @Column('text', { name: 'zone_name', unique: true })
   zoneName: string;
 
@@ -37,8 +39,27 @@ export class Zone {
   @Column('text', { name: 'province', default: 'Lima' })
   province: string;
 
+  @Index()
   @Column('text', { name: 'district' })
   district: string;
+
+  // Info register and update date
+  @Column('timestamp', { name: 'created_at', nullable: true })
+  createdAt: string | Date;
+
+  @ManyToOne(() => User, { eager: true, nullable: true })
+  @JoinColumn({ name: 'created_by' })
+  createdBy: User;
+
+  @Column('timestamp', { name: 'updated_at', nullable: true })
+  updatedAt: string | Date;
+
+  @ManyToOne(() => User, { eager: true, nullable: true })
+  @JoinColumn({ name: 'updated_by' })
+  updatedBy: User;
+
+  @Column('text', { default: Status.Active })
+  status: string;
 
   // Roles amount under their charge
   @Column('int', { name: 'number_preachers', default: 0 })
@@ -50,25 +71,7 @@ export class Zone {
   @Column('int', { name: 'number_disciples', default: 0 })
   numberDisciples: number;
 
-  // Info register and update date
-  @Column('timestamp', { name: 'created_at', nullable: true })
-  createdAt: string | Date;
-
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'created_by' })
-  createdBy: User;
-
-  @Column('timestamp', { name: 'updated_at', nullable: true })
-  updatedAt: string | Date;
-
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'updated_by' })
-  updatedBy: User;
-
-  @Column('text', { default: Status.Active })
-  status: string;
-
-  // Relations (Array)
+  //* Relations (Array)
   @OneToMany(() => Preacher, (preacher) => preacher.theirZone)
   preachers: Preacher[];
 
@@ -78,20 +81,30 @@ export class Zone {
   @OneToMany(() => Disciple, (disciple) => disciple.theirZone)
   disciples: Disciple[];
 
-  // Relation (FK)
-  @ManyToOne(() => Pastor, (pastor) => pastor.zones)
-  @JoinColumn({ name: 'their_pastor' })
+  //* Relation (FK)
+  @ManyToOne(() => Pastor, (pastor) => pastor.zones, {
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'their_pastor_id' })
   theirPastor: Pastor;
 
-  @ManyToOne(() => Copastor, (copastor) => copastor.zones)
-  @JoinColumn({ name: 'their_copastor' })
+  @ManyToOne(() => Copastor, (copastor) => copastor.zones, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'their_copastor_id' })
   theirCopastor: Copastor;
 
-  @ManyToOne(() => Church, (church) => church.zones)
-  @JoinColumn({ name: 'their_church' })
+  @ManyToOne(() => Church, (church) => church.zones, {
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 
-  @OneToOne(() => Supervisor)
-  @JoinColumn({ name: 'their_supervisor' })
+  @OneToOne(() => Supervisor, {
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'their_supervisor_id' })
   theirSupervisor: Supervisor;
 }

@@ -20,7 +20,7 @@ import { FamilyHouseModule } from '@/modules/family-house/family-house.module';
   providers: [DiscipleService],
   imports: [
     TypeOrmModule.forFeature([Disciple]),
-    ChurchModule,
+    forwardRef(() => ChurchModule),
     forwardRef(() => PastorModule),
     forwardRef(() => CopastorModule),
     forwardRef(() => SupervisorModule),

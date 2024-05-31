@@ -3,6 +3,7 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -21,14 +22,17 @@ import { Supervisor } from '@/modules/supervisor/entities';
 import { FamilyHouse } from '@/modules/family-house/entities';
 
 @Entity({ name: 'copastors' })
+@Index(['firstName', 'lastName'])
 export class Copastor {
   //General and Personal info
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Index()
   @Column('text', { name: 'first_name' })
   firstName: string;
 
+  @Index()
   @Column('text', { name: 'last_name' })
   lastName: string;
 
@@ -38,12 +42,14 @@ export class Copastor {
   @Column('text', { name: 'origin_country' })
   originCountry: string;
 
+  @Index()
   @Column('date', { name: 'date_birth' })
   dateBirth: Date;
 
   @Column('int', { name: 'age' })
   age: number;
 
+  @Index()
   @Column('text', { name: 'marital_status' })
   maritalStatus: string;
 
@@ -54,6 +60,7 @@ export class Copastor {
   conversionDate: Date;
 
   // Contact Info
+  @Index()
   @Column('text', { name: 'email', unique: true, nullable: true })
   email: string;
 
@@ -69,12 +76,15 @@ export class Copastor {
   @Column('text', { name: 'province_residence', default: 'Lima' })
   provinceResidence: string;
 
+  @Index()
   @Column('text', { name: 'district_residence' })
   districtResidence: string;
 
+  @Index()
   @Column('text', { name: 'urban_sector_residence' })
   urbanSectorResidence: string;
 
+  @Index()
   @Column('text', { name: 'address_residence' })
   addressResidence: string;
 
@@ -83,6 +93,24 @@ export class Copastor {
 
   @Column({ name: 'roles', type: 'text', array: true })
   roles: string[];
+
+  // Info register and update date
+  @Column('timestamp', { name: 'created_at', nullable: true })
+  createdAt: string | Date;
+
+  @ManyToOne(() => User, { eager: true, nullable: true })
+  @JoinColumn({ name: 'created_by' })
+  createdBy: User;
+
+  @Column('timestamp', { name: 'updated_at', nullable: true })
+  updatedAt: string | Date;
+
+  @ManyToOne(() => User, { eager: true, nullable: true })
+  @JoinColumn({ name: 'updated_by' })
+  updatedBy: User;
+
+  @Column('text', { name: 'status', default: Status.Active })
+  status: string;
 
   // Roles amount under their charge
   @Column('int', { name: 'number_supervisors', default: 0 })
@@ -100,25 +128,7 @@ export class Copastor {
   @Column('int', { name: 'number_disciples', default: 0 })
   numberDisciples: number;
 
-  // Info register and update date
-  @Column('timestamp', { name: 'created_at', nullable: true })
-  createdAt: string | Date;
-
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'created_by' })
-  createdBy: User;
-
-  @Column('timestamp', { name: 'updated_at', nullable: true })
-  updatedAt: string | Date;
-
-  @ManyToOne(() => User, { nullable: true })
-  @JoinColumn({ name: 'updated_by' })
-  updatedBy: User;
-
-  @Column('text', { name: 'status', default: Status.Active })
-  status: string;
-
-  // Relations (Array)
+  //* Relations (Array)
   @OneToMany(() => Supervisor, (supervisor) => supervisor.theirCopastor)
   supervisors: Supervisor[];
 
@@ -134,13 +144,17 @@ export class Copastor {
   @OneToMany(() => Disciple, (disciple) => disciple.theirCopastor)
   disciples: Disciple[];
 
-  // Relations(FK);
-  @ManyToOne(() => Pastor, (pastor) => pastor.copastors)
-  @JoinColumn({ name: 'their_pastor' })
+  //* Relations(FK);
+  @ManyToOne(() => Pastor, (pastor) => pastor.copastors, {
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'their_pastor_id' })
   theirPastor: Pastor;
 
-  @ManyToOne(() => Church, (church) => church.copastors)
-  @JoinColumn({ name: 'their_church' })
+  @ManyToOne(() => Church, (church) => church.copastors, {
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 
   // Internal Functions

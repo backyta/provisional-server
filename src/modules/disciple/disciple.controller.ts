@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 
 import { DiscipleService } from '@/modules/disciple/disciple.service';
@@ -14,15 +16,19 @@ import { Auth, GetUser } from '@/modules/auth/decorators';
 import { UserRoles } from '@/modules/auth/enums';
 import { Disciple } from '@/modules/disciple/entities';
 import { User } from '@/modules/user/entities';
+import { Preacher } from '@/modules/preacher/entities';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { PaginationDto } from '@/common/dtos';
 
 @ApiTags('Disciples')
 @ApiBearerAuth()
@@ -55,9 +61,17 @@ export class DiscipleController {
     return this.discipleService.create(createDiscipleDto, user);
   }
 
+  //* Find All
   @Get()
-  findAll() {
-    return this.discipleService.findAll();
+  @Auth()
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found resource.',
+  })
+  findAll(@Query() paginationDto: PaginationDto): Promise<Disciple[]> {
+    return this.discipleService.findAll(paginationDto);
   }
 
   @Get(':id')
@@ -65,16 +79,36 @@ export class DiscipleController {
     return this.discipleService.findOne(+id);
   }
 
+  //* Update
   @Patch(':id')
+  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @ApiOkResponse({
+    description: 'Successful operation',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
   update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateDiscipleDto: UpdateDiscipleDto,
-  ) {
-    return this.discipleService.update(+id, updateDiscipleDto);
+    @GetUser() user: User,
+  ): Promise<Disciple | Preacher> {
+    return this.discipleService.update(id, updateDiscipleDto, user);
   }
 
+  //* Delete
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.discipleService.remove(+id);
+  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
+  remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @GetUser() user: User,
+  ): Promise<void> {
+    return this.discipleService.remove(id, user);
   }
 }

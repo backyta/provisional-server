@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 
 import {
@@ -14,6 +16,8 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -24,6 +28,8 @@ import { UserRoles } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
 import { Preacher } from '@/modules/preacher/entities';
 import { User } from '@/modules/user/entities';
+import { Supervisor } from '@/modules/supervisor/entities';
+import { PaginationDto } from '@/common/dtos';
 
 @ApiTags('Preachers')
 @ApiBearerAuth()
@@ -56,9 +62,17 @@ export class PreacherController {
     return this.preacherService.create(createPreacherDto, user);
   }
 
+  //* Find All
   @Get()
-  findAll() {
-    return this.preacherService.findAll();
+  @Auth()
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found resource.',
+  })
+  findAll(@Query() paginationDto: PaginationDto): Promise<Preacher[]> {
+    return this.preacherService.findAll(paginationDto);
   }
 
   @Get(':id')
@@ -66,16 +80,33 @@ export class PreacherController {
     return this.preacherService.findOne(+id);
   }
 
+  //* Update
   @Patch(':id')
+  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @ApiOkResponse({
+    description: 'Successful operation',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
   update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updatePreacherDto: UpdatePreacherDto,
-  ) {
-    return this.preacherService.update(+id, updatePreacherDto);
+    @GetUser() user: User,
+  ): Promise<Preacher | Supervisor> {
+    return this.preacherService.update(id, updatePreacherDto, user);
   }
 
+  //* Delete
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.preacherService.remove(+id);
+  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
+  remove(@Param('id') id: string, @GetUser() user: User): Promise<void> {
+    return this.preacherService.remove(id, user);
   }
 }

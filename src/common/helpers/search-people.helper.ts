@@ -8,7 +8,7 @@ import { Pastor } from '@/modules/pastor/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Preacher } from '@/modules/preacher/entities';
-import { Offering } from '@/modules/offering/entities';
+import { Income } from '@/modules/offering/income/entities';
 import { FamilyHouse } from '@/modules/family-house/entities';
 
 export const searchPeopleBy = async ({
@@ -37,7 +37,7 @@ export const searchPeopleBy = async ({
     //! Search in Module Offerings
     if (type_entity === TypeEntity.offeringEntity) {
       const offerings = await entity_repository.find();
-      let offeringsByName: Offering[][];
+      let offeringsByName: Income[][];
 
       if (type_of_name === SearchTypeOfName.offeringMember) {
         offeringsByName = members.map((member) => {
@@ -393,7 +393,7 @@ export const searchPeopleBy = async ({
     //! Search in Module Offerings
     if (type_entity === TypeEntity.offeringEntity) {
       const offerings = await entity_repository.find();
-      let offeringsByName: Offering[][];
+      let offeringsByName: Income[][];
 
       if (type_of_name === SearchTypeOfName.offeringMember) {
         offeringsByName = members.map((member) => {

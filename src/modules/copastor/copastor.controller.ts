@@ -4,6 +4,8 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -15,6 +17,8 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 
 import { UserRoles } from '@/modules/auth/enums';
@@ -25,6 +29,8 @@ import { User } from '@/modules/user/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { CopastorService } from '@/modules/copastor/copastor.service';
 import { CreateCopastorDto, UpdateCopastorDto } from '@/modules/copastor/dto';
+import { Pastor } from '@/modules/pastor/entities';
+import { PaginationDto } from '@/common/dtos';
 
 @ApiTags('Copastors')
 @ApiBearerAuth()
@@ -57,9 +63,17 @@ export class CopastorController {
     return this.copastorService.create(createCopastorDto, user);
   }
 
+  //* Find All
   @Get()
-  findAll() {
-    return this.copastorService.findAll();
+  @Auth()
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found resource.',
+  })
+  findAll(@Query() paginationDto: PaginationDto): Promise<Copastor[]> {
+    return this.copastorService.findAll(paginationDto);
   }
 
   @Get(':id')
@@ -67,16 +81,33 @@ export class CopastorController {
     return this.copastorService.findOne(+id);
   }
 
+  //* UPDATE
   @Patch(':id')
+  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @ApiOkResponse({
+    description: 'Successful operation',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
   update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateCopastorDto: UpdateCopastorDto,
-  ) {
-    return this.copastorService.update(+id, updateCopastorDto);
+    @GetUser() user: User,
+  ): Promise<Copastor | Pastor> {
+    return this.copastorService.update(id, updateCopastorDto, user);
   }
 
+  //! DELETE
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.copastorService.remove(+id);
+  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
+  remove(@Param('id') id: string, @GetUser() user: User): Promise<void> {
+    return this.copastorService.remove(id, user);
   }
 }

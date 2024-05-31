@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -14,6 +15,7 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -27,6 +29,7 @@ import { User } from '@/modules/user/entities';
 import { Pastor } from '@/modules/pastor/entities';
 import { PastorService } from '@/modules/pastor/pastor.service';
 import { CreatePastorDto, UpdatePastorDto } from '@/modules/pastor/dto';
+import { PaginationDto } from '@/common/dtos';
 
 @ApiTags('Pastors')
 @ApiBearerAuth()
@@ -59,9 +62,17 @@ export class PastorController {
     return this.pastorService.create(createPastorDto, user);
   }
 
+  //* Find All
   @Get()
-  findAll() {
-    return this.pastorService.findAll();
+  @Auth()
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found resource.',
+  })
+  findAll(@Query() paginationDto: PaginationDto): Promise<Pastor[]> {
+    return this.pastorService.findAll(paginationDto);
   }
 
   @Get(':id')
@@ -86,8 +97,16 @@ export class PastorController {
     return this.pastorService.update(id, updatePastorDto, user);
   }
 
+  //! Delete
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.pastorService.remove(+id);
+  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
+  remove(@Param('id') id: string, @GetUser() user: User): Promise<void> {
+    return this.pastorService.remove(id, user);
   }
 }
