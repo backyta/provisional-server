@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -17,7 +18,9 @@ import { Pastor } from '@/modules/pastor/entities';
 import { Zone } from '@/modules/zone/entities';
 
 //TODO : seguir con la semilla , revisar antes si al crear se setea aen los [] de las relaciones opuestas
-@Entity({ name: 'offerings-income' })
+// NOTE : Al momento hacer la consultas ver los indices agregar
+@Entity({ name: 'offerings_income' })
+@Index(['type', 'subType'])
 export class Income {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -26,6 +29,7 @@ export class Income {
   @Column('text')
   type: string;
 
+  @Index()
   @Column('text', { name: 'sub_type', nullable: true })
   subType: string;
 
@@ -38,7 +42,8 @@ export class Income {
   @Column('text', { nullable: true })
   comments: string;
 
-  @Column('date', { name: 'date_birth' })
+  @Index()
+  @Column('date', { name: 'date' })
   date: Date;
 
   @Column('text', { name: 'url_files', nullable: true })

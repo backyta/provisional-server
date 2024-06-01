@@ -195,46 +195,46 @@ export class PreacherService {
           createdBy: user,
         });
 
-        const savedPreacher = await this.preacherRepository.save(newPreacher);
+        return await this.preacherRepository.save(newPreacher);
 
         // Count and assign preachers in Zone
-        const preachersInZone = [...(zone.preachers || []), savedPreacher];
-        zone.preachers = preachersInZone;
-        zone.numberPreachers = preachersInZone.length;
+        // const preachersInZone = [...(zone.preachers || []), savedPreacher];
+        // zone.preachers = preachersInZone;
+        // zone.numberPreachers = preachersInZone.length;
 
-        // Count and assign preachers in Supervisor
-        const preachersInSupervisor = [
-          ...(supervisor.preachers || []),
-          savedPreacher,
-        ];
-        supervisor.preachers = preachersInSupervisor;
-        supervisor.numberPreachers = preachersInSupervisor.length;
+        // // Count and assign preachers in Supervisor
+        // const preachersInSupervisor = [
+        //   ...(supervisor.preachers || []),
+        //   savedPreacher,
+        // ];
+        // supervisor.preachers = preachersInSupervisor;
+        // supervisor.numberPreachers = preachersInSupervisor.length;
 
-        // Count and assign preachers in Copastor
-        const preachersInCopastor = [
-          ...(copastor.preachers || []),
-          savedPreacher,
-        ];
-        copastor.preachers = preachersInCopastor;
-        copastor.numberPreachers = preachersInCopastor.length;
+        // // Count and assign preachers in Copastor
+        // const preachersInCopastor = [
+        //   ...(copastor.preachers || []),
+        //   savedPreacher,
+        // ];
+        // copastor.preachers = preachersInCopastor;
+        // copastor.numberPreachers = preachersInCopastor.length;
 
-        // Count and assign preachers in Pastor
-        const preachersInPastor = [...(pastor.preachers || []), savedPreacher];
-        pastor.preachers = preachersInPastor;
-        pastor.numberPreachers = preachersInPastor.length;
+        // // Count and assign preachers in Pastor
+        // const preachersInPastor = [...(pastor.preachers || []), savedPreacher];
+        // pastor.preachers = preachersInPastor;
+        // pastor.numberPreachers = preachersInPastor.length;
 
-        // Count and assign preachers in Church
-        const preachersInChurch = [...(church.preachers || []), savedPreacher];
-        church.preachers = preachersInChurch;
-        church.numberPreachers = preachersInChurch.length;
+        // // Count and assign preachers in Church
+        // const preachersInChurch = [...(church.preachers || []), savedPreacher];
+        // church.preachers = preachersInChurch;
+        // church.numberPreachers = preachersInChurch.length;
 
-        await this.zoneRepository.save(zone);
-        await this.supervisorRepository.save(supervisor);
-        await this.copastorRepository.save(copastor);
-        await this.pastorRepository.save(pastor);
-        await this.churchRepository.save(church);
+        // await this.zoneRepository.save(zone);
+        // await this.supervisorRepository.save(supervisor);
+        // await this.copastorRepository.save(copastor);
+        // await this.pastorRepository.save(pastor);
+        // await this.churchRepository.save(church);
 
-        return newPreacher;
+        // return newPreacher;
       } catch (error) {
         this.handleDBExceptions(error);
       }
@@ -494,179 +494,179 @@ export class PreacherService {
         });
 
         // Data old Supervisor
-        const oldSupervisor = await this.supervisorRepository.findOne({
-          where: { id: preacher?.theirSupervisor?.id },
-          relations: [
-            'preachers',
-            'familyHouses',
-            'familyHouses.theirPreacher',
-            'disciples',
-            'disciples.theirPreacher',
-          ],
-        });
+        // const oldSupervisor = await this.supervisorRepository.findOne({
+        //   where: { id: preacher?.theirSupervisor?.id },
+        //   relations: [
+        //     'preachers',
+        //     'familyHouses',
+        //     'familyHouses.theirPreacher',
+        //     'disciples',
+        //     'disciples.theirPreacher',
+        //   ],
+        // });
 
-        // Data old Zone
-        const oldZone = await this.zoneRepository.findOne({
-          where: { id: preacher?.theirZone?.id },
-          relations: [
-            'preachers',
-            'familyHouses',
-            'familyHouses.theirPreacher',
-            'disciples',
-            'disciples.theirPreacher',
-          ],
-        });
+        // // Data old Zone
+        // const oldZone = await this.zoneRepository.findOne({
+        //   where: { id: preacher?.theirZone?.id },
+        //   relations: [
+        //     'preachers',
+        //     'familyHouses',
+        //     'familyHouses.theirPreacher',
+        //     'disciples',
+        //     'disciples.theirPreacher',
+        //   ],
+        // });
 
-        // Data old Copastor
-        const oldCopastor = await this.copastorRepository.findOne({
-          where: { id: preacher?.theirCopastor?.id },
-          relations: [
-            'preachers',
-            'familyHouses',
-            'familyHouses.theirPreacher',
-            'disciples',
-            'disciples.theirPreacher',
-          ],
-        });
+        // // Data old Copastor
+        // const oldCopastor = await this.copastorRepository.findOne({
+        //   where: { id: preacher?.theirCopastor?.id },
+        //   relations: [
+        //     'preachers',
+        //     'familyHouses',
+        //     'familyHouses.theirPreacher',
+        //     'disciples',
+        //     'disciples.theirPreacher',
+        //   ],
+        // });
 
-        // Data old Pastor
-        const oldPastor = await this.pastorRepository.findOne({
-          where: { id: preacher?.theirPastor?.id },
-          relations: [
-            'preachers',
-            'familyHouses',
-            'familyHouses.theirPreacher',
-            'disciples',
-            'disciples.theirPreacher',
-          ],
-        });
+        // // Data old Pastor
+        // const oldPastor = await this.pastorRepository.findOne({
+        //   where: { id: preacher?.theirPastor?.id },
+        //   relations: [
+        //     'preachers',
+        //     'familyHouses',
+        //     'familyHouses.theirPreacher',
+        //     'disciples',
+        //     'disciples.theirPreacher',
+        //   ],
+        // });
 
-        // Data old curch
-        const oldChurch = await this.churchRepository.findOne({
-          where: { id: preacher?.theirChurch?.id },
-          relations: [
-            'preachers',
-            'familyHouses',
-            'familyHouses.theirPreacher',
-            'disciples',
-            'disciples.theirPreacher',
-          ],
-        });
+        // // Data old curch
+        // const oldChurch = await this.churchRepository.findOne({
+        //   where: { id: preacher?.theirChurch?.id },
+        //   relations: [
+        //     'preachers',
+        //     'familyHouses',
+        //     'familyHouses.theirPreacher',
+        //     'disciples',
+        //     'disciples.theirPreacher',
+        //   ],
+        // });
 
         //! Delete preacher relation and subtract amount on the old supervisor
         // Delete preacher the old supervisor according preacher
-        const preachersOldSupervisor = oldSupervisor?.preachers.filter(
-          (oldPreacher) => oldPreacher?.id !== preacher?.id,
-        );
-        oldSupervisor.preachers = preachersOldSupervisor;
-        oldSupervisor.numberPreachers = preachersOldSupervisor.length;
+        // const preachersOldSupervisor = oldSupervisor?.preachers.filter(
+        //   (oldPreacher) => oldPreacher?.id !== preacher?.id,
+        // );
+        // oldSupervisor.preachers = preachersOldSupervisor;
+        // oldSupervisor.numberPreachers = preachersOldSupervisor.length;
 
-        // Delete family houses the old supervisor according preacher
-        const familyHousesOldSupervisor = oldSupervisor?.familyHouses.filter(
-          (oldFamilyHouse) =>
-            oldFamilyHouse?.theirPreacher?.id !== preacher?.id,
-        );
-        oldSupervisor.familyHouses = familyHousesOldSupervisor;
-        oldSupervisor.numberFamilyHouses = familyHousesOldSupervisor.length;
+        // // Delete family houses the old supervisor according preacher
+        // const familyHousesOldSupervisor = oldSupervisor?.familyHouses.filter(
+        //   (oldFamilyHouse) =>
+        //     oldFamilyHouse?.theirPreacher?.id !== preacher?.id,
+        // );
+        // oldSupervisor.familyHouses = familyHousesOldSupervisor;
+        // oldSupervisor.numberFamilyHouses = familyHousesOldSupervisor.length;
 
-        // Delete disciples the old supervisor according preacher
-        const disciplesOldSupervisor = oldSupervisor?.disciples.filter(
-          (oldDisciple) => oldDisciple?.theirPreacher?.id !== preacher?.id,
-        );
-        oldSupervisor.disciples = disciplesOldSupervisor;
-        oldSupervisor.numberDisciples = disciplesOldSupervisor.length;
+        // // Delete disciples the old supervisor according preacher
+        // const disciplesOldSupervisor = oldSupervisor?.disciples.filter(
+        //   (oldDisciple) => oldDisciple?.theirPreacher?.id !== preacher?.id,
+        // );
+        // oldSupervisor.disciples = disciplesOldSupervisor;
+        // oldSupervisor.numberDisciples = disciplesOldSupervisor.length;
 
-        //! Delete preacher relation and subtract amount on the old zone
-        // Delete preacher the old supervisor according preacher
-        const preachersOldZone = oldZone?.preachers.filter(
-          (oldPreacher) => oldPreacher?.id !== preacher?.id,
-        );
-        oldZone.preachers = preachersOldZone;
-        oldZone.numberPreachers = preachersOldZone.length;
+        // //! Delete preacher relation and subtract amount on the old zone
+        // // Delete preacher the old supervisor according preacher
+        // const preachersOldZone = oldZone?.preachers.filter(
+        //   (oldPreacher) => oldPreacher?.id !== preacher?.id,
+        // );
+        // oldZone.preachers = preachersOldZone;
+        // oldZone.numberPreachers = preachersOldZone.length;
 
-        // Delete family houses the old supervisor according preacher
-        const familyHousesOldZone = oldZone?.familyHouses.filter(
-          (oldFamilyHouse) =>
-            oldFamilyHouse?.theirPreacher?.id !== preacher?.id,
-        );
-        oldZone.familyHouses = familyHousesOldZone;
-        oldZone.numberFamilyHouses = familyHousesOldZone.length;
+        // // Delete family houses the old supervisor according preacher
+        // const familyHousesOldZone = oldZone?.familyHouses.filter(
+        //   (oldFamilyHouse) =>
+        //     oldFamilyHouse?.theirPreacher?.id !== preacher?.id,
+        // );
+        // oldZone.familyHouses = familyHousesOldZone;
+        // oldZone.numberFamilyHouses = familyHousesOldZone.length;
 
-        // Delete disciples the old supervisor according preacher
-        const disciplesOldZone = oldZone?.disciples.filter(
-          (oldDisciple) => oldDisciple?.theirPreacher?.id !== preacher?.id,
-        );
-        oldZone.disciples = disciplesOldZone;
-        oldZone.numberDisciples = disciplesOldZone.length;
+        // // Delete disciples the old supervisor according preacher
+        // const disciplesOldZone = oldZone?.disciples.filter(
+        //   (oldDisciple) => oldDisciple?.theirPreacher?.id !== preacher?.id,
+        // );
+        // oldZone.disciples = disciplesOldZone;
+        // oldZone.numberDisciples = disciplesOldZone.length;
 
-        //! Delete preacher relation and subtract amount on the old co-pastor
-        // Delete copastors the old copastor according preacher
-        const preachersOldCopastor = oldCopastor?.preachers.filter(
-          (oldPreacher) => oldPreacher?.id !== preacher?.id,
-        );
-        oldCopastor.preachers = preachersOldCopastor;
-        oldCopastor.numberPreachers = preachersOldCopastor.length;
+        // //! Delete preacher relation and subtract amount on the old co-pastor
+        // // Delete copastors the old copastor according preacher
+        // const preachersOldCopastor = oldCopastor?.preachers.filter(
+        //   (oldPreacher) => oldPreacher?.id !== preacher?.id,
+        // );
+        // oldCopastor.preachers = preachersOldCopastor;
+        // oldCopastor.numberPreachers = preachersOldCopastor.length;
 
-        // Delete family houses the old copastor according preacher
-        const familyHousesOldCopastor = oldCopastor?.familyHouses.filter(
-          (oldFamilyHouse) =>
-            oldFamilyHouse?.theirPreacher?.id !== preacher?.id,
-        );
-        oldCopastor.familyHouses = familyHousesOldCopastor;
-        oldCopastor.numberFamilyHouses = familyHousesOldCopastor.length;
+        // // Delete family houses the old copastor according preacher
+        // const familyHousesOldCopastor = oldCopastor?.familyHouses.filter(
+        //   (oldFamilyHouse) =>
+        //     oldFamilyHouse?.theirPreacher?.id !== preacher?.id,
+        // );
+        // oldCopastor.familyHouses = familyHousesOldCopastor;
+        // oldCopastor.numberFamilyHouses = familyHousesOldCopastor.length;
 
-        // Delete disciples the old copastor according preacher
-        const disciplesOldCopastor = oldCopastor?.disciples.filter(
-          (oldDisciple) => oldDisciple?.theirPreacher?.id !== preacher?.id,
-        );
-        oldCopastor.disciples = disciplesOldCopastor;
-        oldCopastor.numberDisciples = disciplesOldCopastor.length;
+        // // Delete disciples the old copastor according preacher
+        // const disciplesOldCopastor = oldCopastor?.disciples.filter(
+        //   (oldDisciple) => oldDisciple?.theirPreacher?.id !== preacher?.id,
+        // );
+        // oldCopastor.disciples = disciplesOldCopastor;
+        // oldCopastor.numberDisciples = disciplesOldCopastor.length;
 
-        //! Delete preacher relation and subtract amount on the old pastor
-        // Delete zones the old pastor according preacher
-        const preachersOldPastor = oldPastor?.preachers.filter(
-          (oldPreacher) => oldPreacher?.id !== preacher?.id,
-        );
-        oldPastor.preachers = preachersOldPastor;
-        oldPastor.numberPreachers = preachersOldPastor.length;
+        // //! Delete preacher relation and subtract amount on the old pastor
+        // // Delete zones the old pastor according preacher
+        // const preachersOldPastor = oldPastor?.preachers.filter(
+        //   (oldPreacher) => oldPreacher?.id !== preacher?.id,
+        // );
+        // oldPastor.preachers = preachersOldPastor;
+        // oldPastor.numberPreachers = preachersOldPastor.length;
 
-        // Delete family houses the old pastor according preacher
-        const familyHousesOldPastor = oldPastor?.familyHouses.filter(
-          (oldFamilyHouse) =>
-            oldFamilyHouse?.theirPreacher?.id !== preacher?.id,
-        );
-        oldPastor.familyHouses = familyHousesOldPastor;
-        oldPastor.numberFamilyHouses = familyHousesOldPastor.length;
+        // // Delete family houses the old pastor according preacher
+        // const familyHousesOldPastor = oldPastor?.familyHouses.filter(
+        //   (oldFamilyHouse) =>
+        //     oldFamilyHouse?.theirPreacher?.id !== preacher?.id,
+        // );
+        // oldPastor.familyHouses = familyHousesOldPastor;
+        // oldPastor.numberFamilyHouses = familyHousesOldPastor.length;
 
-        // Delete disciples the old pastor according preacher
-        const disciplesOldPastor = oldPastor?.disciples.filter(
-          (oldDisciple) => oldDisciple?.theirPreacher?.id !== preacher?.id,
-        );
-        oldPastor.disciples = disciplesOldPastor;
-        oldPastor.numberDisciples = disciplesOldPastor.length;
+        // // Delete disciples the old pastor according preacher
+        // const disciplesOldPastor = oldPastor?.disciples.filter(
+        //   (oldDisciple) => oldDisciple?.theirPreacher?.id !== preacher?.id,
+        // );
+        // oldPastor.disciples = disciplesOldPastor;
+        // oldPastor.numberDisciples = disciplesOldPastor.length;
 
-        //! Delete preacher relation and subtract amount on the old church
-        // Delete zones the old church according pastor
-        const preachersOldChurch = oldChurch?.preachers.filter(
-          (oldPreacher) => oldPreacher?.id !== preacher?.id,
-        );
-        oldChurch.preachers = preachersOldChurch;
-        oldChurch.numberPreachers = preachersOldChurch.length;
+        // //! Delete preacher relation and subtract amount on the old church
+        // // Delete zones the old church according pastor
+        // const preachersOldChurch = oldChurch?.preachers.filter(
+        //   (oldPreacher) => oldPreacher?.id !== preacher?.id,
+        // );
+        // oldChurch.preachers = preachersOldChurch;
+        // oldChurch.numberPreachers = preachersOldChurch.length;
 
-        // Delete family houses the old church according pastor
-        const familyHousesOldChurch = oldChurch?.familyHouses.filter(
-          (oldFamilyHouse) =>
-            oldFamilyHouse?.theirPreacher?.id !== preacher?.id,
-        );
-        oldChurch.familyHouses = familyHousesOldChurch;
-        oldChurch.numberFamilyHouses = familyHousesOldChurch.length;
+        // // Delete family houses the old church according pastor
+        // const familyHousesOldChurch = oldChurch?.familyHouses.filter(
+        //   (oldFamilyHouse) =>
+        //     oldFamilyHouse?.theirPreacher?.id !== preacher?.id,
+        // );
+        // oldChurch.familyHouses = familyHousesOldChurch;
+        // oldChurch.numberFamilyHouses = familyHousesOldChurch.length;
 
-        // Delete disciples the old church according pastor
-        const disciplesOldChurch = oldChurch?.disciples.filter(
-          (oldDisciple) => oldDisciple?.theirPreacher?.id !== preacher?.id,
-        );
-        oldChurch.disciples = disciplesOldChurch;
-        oldChurch.numberDisciples = disciplesOldChurch.length;
+        // // Delete disciples the old church according pastor
+        // const disciplesOldChurch = oldChurch?.disciples.filter(
+        //   (oldDisciple) => oldDisciple?.theirPreacher?.id !== preacher?.id,
+        // );
+        // oldChurch.disciples = disciplesOldChurch;
+        // oldChurch.numberDisciples = disciplesOldChurch.length;
 
         // Update and save
         const updatedPreacher = await this.preacherRepository.preload({
@@ -682,66 +682,59 @@ export class PreacherService {
         });
 
         try {
-          const savedPreacher =
-            await this.preacherRepository.save(updatedPreacher);
-
           await Promise.all(updateFamilyHouses);
           await Promise.all(updateDisciples);
 
-          // TODO : supuestamente se debería calcular sus casas familiares, y disciples (subordinados y setear en )
-          // TODO : zone, supervisors, y mayores, osea todo lo que se quito pasarlo aquí pero con nuevas relaciones
-          // TODO : osea si se saca una casa familiar de la zona anterior se debe poner a esta pero con su nueva relación
-          // TODO : osea la casa no debe tener el super anterior si no el nuevo asi como el copastor y pastor y church
-          // NOTE : ver esto después de hacer la semilla
+          return await this.preacherRepository.save(updatedPreacher);
 
           //* Assign relations to the new supervisor, zone, copastor, pastor and new church
-          const preachersInNewZone = (newZone.preachers = [
-            ...(newZone.preachers || []),
-            savedPreacher,
-          ]);
-          newZone.preachers = preachersInNewZone;
-          newZone.numberPreachers = preachersInNewZone.length;
+          // const preachersInNewZone = (newZone.preachers = [
+          //   ...(newZone.preachers || []),
+          //   savedPreacher,
+          // ]);
+          // newZone.preachers = preachersInNewZone;
+          // newZone.numberPreachers = preachersInNewZone.length;
 
-          const preachersInNewSupervisor = (newSupervisor.preachers = [
-            ...(newSupervisor.preachers || []),
-            savedPreacher,
-          ]);
-          newSupervisor.preachers = preachersInNewSupervisor;
-          newSupervisor.numberPreachers = preachersInNewSupervisor.length;
+          // const preachersInNewSupervisor = (newSupervisor.preachers = [
+          //   ...(newSupervisor.preachers || []),
+          //   savedPreacher,
+          // ]);
+          // newSupervisor.preachers = preachersInNewSupervisor;
+          // newSupervisor.numberPreachers = preachersInNewSupervisor.length;
 
-          const preachersInNewCopastor = (newSupervisor.preachers = [
-            ...(newSupervisor.preachers || []),
-            savedPreacher,
-          ]);
-          newCopastor.preachers = preachersInNewCopastor;
-          newCopastor.numberPreachers = preachersInNewCopastor.length;
+          // const preachersInNewCopastor = (newSupervisor.preachers = [
+          //   ...(newSupervisor.preachers || []),
+          //   savedPreacher,
+          // ]);
+          // newCopastor.preachers = preachersInNewCopastor;
+          // newCopastor.numberPreachers = preachersInNewCopastor.length;
 
-          const preachersInNewPastor = (newPastor.preachers = [
-            ...(newPastor.preachers || []),
-            savedPreacher,
-          ]);
-          newPastor.preachers = preachersInNewPastor;
-          newPastor.numberPreachers = preachersInNewPastor.length;
+          // const preachersInNewPastor = (newPastor.preachers = [
+          //   ...(newPastor.preachers || []),
+          //   savedPreacher,
+          // ]);
+          // newPastor.preachers = preachersInNewPastor;
+          // newPastor.numberPreachers = preachersInNewPastor.length;
 
-          const supervisorsInNewChurch = (newChurch.preachers = [
-            ...(newChurch.preachers || []),
-            savedPreacher,
-          ]);
-          newChurch.preachers = supervisorsInNewChurch;
-          newChurch.numberPreachers = supervisorsInNewChurch.length;
+          // const supervisorsInNewChurch = (newChurch.preachers = [
+          //   ...(newChurch.preachers || []),
+          //   savedPreacher,
+          // ]);
+          // newChurch.preachers = supervisorsInNewChurch;
+          // newChurch.numberPreachers = supervisorsInNewChurch.length;
 
-          await this.supervisorRepository.save(oldSupervisor);
-          await this.supervisorRepository.save(newSupervisor);
-          await this.zoneRepository.save(oldZone);
-          await this.zoneRepository.save(newZone);
-          await this.copastorRepository.save(oldCopastor);
-          await this.copastorRepository.save(newCopastor);
-          await this.pastorRepository.save(oldPastor);
-          await this.pastorRepository.save(newPastor);
-          await this.churchRepository.save(oldChurch);
-          await this.churchRepository.save(newChurch);
+          // await this.supervisorRepository.save(oldSupervisor);
+          // await this.supervisorRepository.save(newSupervisor);
+          // await this.zoneRepository.save(oldZone);
+          // await this.zoneRepository.save(newZone);
+          // await this.copastorRepository.save(oldCopastor);
+          // await this.copastorRepository.save(newCopastor);
+          // await this.pastorRepository.save(oldPastor);
+          // await this.pastorRepository.save(newPastor);
+          // await this.churchRepository.save(oldChurch);
+          // await this.churchRepository.save(newChurch);
 
-          return savedPreacher;
+          // return savedPreacher;
         } catch (error) {
           this.handleDBExceptions(error);
         }
@@ -754,6 +747,7 @@ export class PreacherService {
         theirChurch: preacher.theirChurch,
         theirPastor: preacher.theirPastor,
         theirCopastor: preacher.theirCopastor,
+        theirZone: preacher.theirZone,
         theirSupervisor: preacher.theirSupervisor,
         updatedAt: new Date(),
         updatedBy: user,
@@ -784,143 +778,143 @@ export class PreacherService {
       status === Status.Active
     ) {
       // Validation new copastor
-      const copastor = await this.copastorRepository.findOne({
+      const newCopastor = await this.copastorRepository.findOne({
         where: { id: theirCopastor },
         relations: ['theirPastor', 'theirChurch'],
       });
 
-      if (!copastor) {
+      if (!newCopastor) {
         throw new NotFoundException(`Copastor not found with id: ${id}`);
       }
 
-      if (copastor.status === Status.Active) {
+      if (newCopastor.status === Status.Active) {
         throw new NotFoundException(
           `The property status in Pastor must be a "Active"`,
         );
       }
 
       // Validation new pastor according copastor
-      if (!copastor?.theirPastor) {
+      if (!newCopastor?.theirPastor) {
         throw new BadRequestException(
           `Pastor was not found, verify that Copastor has a Pastor assigned`,
         );
       }
 
-      const pastor = await this.pastorRepository.findOne({
-        where: { id: copastor?.theirPastor?.id },
+      const newPastor = await this.pastorRepository.findOne({
+        where: { id: newCopastor?.theirPastor?.id },
         relations: ['theirChurch'],
       });
 
-      if (pastor.status === Status.Active) {
+      if (newPastor.status === Status.Active) {
         throw new NotFoundException(
           `The property status in Pastor must be a "Active"`,
         );
       }
 
       // Validation new church according copastor
-      if (!copastor?.theirChurch) {
+      if (!newCopastor?.theirChurch) {
         throw new BadRequestException(
           `Church was not found, verify that Copastor has a Church assigned`,
         );
       }
 
-      const church = await this.churchRepository.findOne({
-        where: { id: copastor?.theirChurch?.id },
+      const newChurch = await this.churchRepository.findOne({
+        where: { id: newCopastor?.theirChurch?.id },
         relations: ['theirMainChurch'],
       });
 
-      if (church.status === Status.Active) {
+      if (newChurch.status === Status.Active) {
         throw new NotFoundException(
           `The property status in Church must be a "Active"`,
         );
       }
 
       // Data old Copastor
-      const oldSupervisor = await this.supervisorRepository.findOne({
-        where: { id: preacher?.theirSupervisor?.id },
-        relations: ['preachers'],
-      });
+      // const oldSupervisor = await this.supervisorRepository.findOne({
+      //   where: { id: preacher?.theirSupervisor?.id },
+      //   relations: ['preachers'],
+      // });
 
-      // Data old Zone
-      const oldZone = await this.zoneRepository.findOne({
-        where: { id: preacher?.theirZone?.id },
-        relations: ['preachers'],
-      });
+      // // Data old Zone
+      // const oldZone = await this.zoneRepository.findOne({
+      //   where: { id: preacher?.theirZone?.id },
+      //   relations: ['preachers'],
+      // });
 
-      // Data old Pastor
-      const oldCopastor = await this.copastorRepository.findOne({
-        where: { id: preacher?.theirCopastor?.id },
-        relations: ['preachers'],
-      });
+      // // Data old Pastor
+      // const oldCopastor = await this.copastorRepository.findOne({
+      //   where: { id: preacher?.theirCopastor?.id },
+      //   relations: ['preachers'],
+      // });
 
-      // Data old Copastor
-      const oldPastor = await this.pastorRepository.findOne({
-        where: { id: preacher?.theirPastor?.id },
-        relations: ['preachers'],
-      });
+      // // Data old Copastor
+      // const oldPastor = await this.pastorRepository.findOne({
+      //   where: { id: preacher?.theirPastor?.id },
+      //   relations: ['preachers'],
+      // });
 
-      // Data old Church
-      const oldChurch = await this.churchRepository.findOne({
-        where: { id: preacher?.theirChurch?.id },
-        relations: ['preachers'],
-      });
+      // // Data old Church
+      // const oldChurch = await this.churchRepository.findOne({
+      //   where: { id: preacher?.theirChurch?.id },
+      //   relations: ['preachers'],
+      // });
 
-      //! Delete preacher relation and subtract amount on the old supervisor
-      const preachersOldSupervisor = oldPastor?.preachers.filter(
-        (oldPreacher) => oldPreacher?.id !== preacher?.id,
-      );
-      oldSupervisor.preachers = preachersOldSupervisor;
-      oldSupervisor.numberPreachers = preachersOldSupervisor.length;
+      // //! Delete preacher relation and subtract amount on the old supervisor
+      // const preachersOldSupervisor = oldPastor?.preachers.filter(
+      //   (oldPreacher) => oldPreacher?.id !== preacher?.id,
+      // );
+      // oldSupervisor.preachers = preachersOldSupervisor;
+      // oldSupervisor.numberPreachers = preachersOldSupervisor.length;
 
-      //! Delete preacher relation and subtract amount on the old zone
-      const preachersOldZone = oldZone.preachers.filter(
-        (oldPreacher) => oldPreacher?.id !== preacher?.id,
-      );
-      oldZone.preachers = preachersOldZone;
-      oldZone.numberPreachers = preachersOldZone.length;
+      // //! Delete preacher relation and subtract amount on the old zone
+      // const preachersOldZone = oldZone.preachers.filter(
+      //   (oldPreacher) => oldPreacher?.id !== preacher?.id,
+      // );
+      // oldZone.preachers = preachersOldZone;
+      // oldZone.numberPreachers = preachersOldZone.length;
 
-      //! Delete preacher relation and subtract amount on the old copastor
-      const preachersOldCopastor = oldPastor?.preachers.filter(
-        (oldPreacher) => oldPreacher?.id !== preacher?.id,
-      );
-      oldCopastor.preachers = preachersOldCopastor;
-      oldCopastor.numberPreachers = preachersOldCopastor.length;
+      // //! Delete preacher relation and subtract amount on the old copastor
+      // const preachersOldCopastor = oldPastor?.preachers.filter(
+      //   (oldPreacher) => oldPreacher?.id !== preacher?.id,
+      // );
+      // oldCopastor.preachers = preachersOldCopastor;
+      // oldCopastor.numberPreachers = preachersOldCopastor.length;
 
-      //! Delete preacher relation and subtract amount on the old pastor
-      const preachersOldPastor = oldPastor?.preachers.filter(
-        (oldPreacher) => oldPreacher?.id !== preacher?.id,
-      );
-      oldPastor.preachers = preachersOldPastor;
-      oldPastor.numberPreachers = preachersOldPastor.length;
+      // //! Delete preacher relation and subtract amount on the old pastor
+      // const preachersOldPastor = oldPastor?.preachers.filter(
+      //   (oldPreacher) => oldPreacher?.id !== preacher?.id,
+      // );
+      // oldPastor.preachers = preachersOldPastor;
+      // oldPastor.numberPreachers = preachersOldPastor.length;
 
-      //! Delete preacher relation and subtract amount on the old church
-      const preachersOldChurch = oldChurch?.preachers.filter(
-        (oldPreacher) => oldPreacher?.id !== preacher?.id,
-      );
+      // //! Delete preacher relation and subtract amount on the old church
+      // const preachersOldChurch = oldChurch?.preachers.filter(
+      //   (oldPreacher) => oldPreacher?.id !== preacher?.id,
+      // );
 
-      oldChurch.preachers = preachersOldChurch;
-      oldChurch.numberPreachers = preachersOldChurch.length;
+      // oldChurch.preachers = preachersOldChurch;
+      // oldChurch.numberPreachers = preachersOldChurch.length;
 
       // Create new instance Copastor and delete old supervisor
       try {
         const newSupervisor = this.supervisorRepository.create({
           ...updatePreacherDto,
-          theirChurch: church,
-          theirPastor: pastor,
-          theirCopastor: copastor,
+          theirChurch: newChurch,
+          theirPastor: newPastor,
+          theirCopastor: newCopastor,
           createdAt: new Date(),
           createdBy: user,
         });
 
-        await this.preacherRepository.remove(preacher); // onDelete subordinate entities
+        await this.preacherRepository.remove(preacher); // onDelete subordinate entities (null)
 
-        await this.zoneRepository.save(oldZone);
-        await this.copastorRepository.save(oldCopastor);
-        await this.pastorRepository.save(oldPastor);
-        await this.churchRepository.save(oldChurch);
+        // await this.zoneRepository.save(oldZone);
+        // await this.copastorRepository.save(oldCopastor);
+        // await this.pastorRepository.save(oldPastor);
+        // await this.churchRepository.save(oldChurch);
 
-        await this.supervisorRepository.save(newSupervisor);
-        return newSupervisor;
+        return await this.supervisorRepository.save(newSupervisor);
+        // return newSupervisor;
       } catch (error) {
         this.handleDBExceptions(error);
       }
@@ -951,10 +945,6 @@ export class PreacherService {
       theirPastor: null,
       theirCopastor: null,
       theirSupervisor: null,
-      familyHouses: [],
-      disciples: [],
-      numberFamilyHouses: 0,
-      numberDisciples: 0,
       updatedAt: new Date(),
       updatedBy: user,
       status: Status.Inactive,
@@ -999,82 +989,82 @@ export class PreacherService {
 
     //! Eliminate preacher relation (id and amount) on their supervisor, copastor, pastor and church
     // Supervisor
-    const theirSupervisor = await this.supervisorRepository.findOne({
-      where: { id: preacher?.theirSupervisor?.id },
-      relations: ['preachers'],
-    });
+    // const theirSupervisor = await this.supervisorRepository.findOne({
+    //   where: { id: preacher?.theirSupervisor?.id },
+    //   relations: ['preachers'],
+    // });
 
-    const preachersInSupervisor = theirSupervisor.preachers.filter(
-      (currentPreacher) => currentPreacher?.id !== preacher?.id,
-    );
+    // const preachersInSupervisor = theirSupervisor.preachers.filter(
+    //   (currentPreacher) => currentPreacher?.id !== preacher?.id,
+    // );
 
-    theirSupervisor.preachers = preachersInSupervisor;
-    theirSupervisor.numberPreachers = preachersInSupervisor.length;
+    // theirSupervisor.preachers = preachersInSupervisor;
+    // theirSupervisor.numberPreachers = preachersInSupervisor.length;
 
-    // Zone
-    const theirZone = await this.zoneRepository.findOne({
-      where: { id: preacher?.theirZone?.id },
-      relations: ['preachers'],
-    });
+    // // Zone
+    // const theirZone = await this.zoneRepository.findOne({
+    //   where: { id: preacher?.theirZone?.id },
+    //   relations: ['preachers'],
+    // });
 
-    const preachersInZone = theirZone.preachers.filter(
-      (currentPreacher) => currentPreacher?.id !== preacher?.id,
-    );
+    // const preachersInZone = theirZone.preachers.filter(
+    //   (currentPreacher) => currentPreacher?.id !== preacher?.id,
+    // );
 
-    theirZone.preachers = preachersInZone;
-    theirZone.numberPreachers = preachersInZone.length;
+    // theirZone.preachers = preachersInZone;
+    // theirZone.numberPreachers = preachersInZone.length;
 
-    // Copastor
-    const theirCopastor = await this.copastorRepository.findOne({
-      where: { id: preacher?.theirCopastor?.id },
-      relations: ['preachers'],
-    });
+    // // Copastor
+    // const theirCopastor = await this.copastorRepository.findOne({
+    //   where: { id: preacher?.theirCopastor?.id },
+    //   relations: ['preachers'],
+    // });
 
-    const preachersInCopastor = theirCopastor.preachers.filter(
-      (currentPreacher) => currentPreacher?.id !== preacher?.id,
-    );
+    // const preachersInCopastor = theirCopastor.preachers.filter(
+    //   (currentPreacher) => currentPreacher?.id !== preacher?.id,
+    // );
 
-    theirCopastor.preachers = preachersInCopastor;
-    theirCopastor.numberPreachers = preachersInCopastor.length;
+    // theirCopastor.preachers = preachersInCopastor;
+    // theirCopastor.numberPreachers = preachersInCopastor.length;
 
-    // Pastor
-    const theirPastor = await this.pastorRepository.findOne({
-      where: { id: preacher?.theirPastor?.id },
-      relations: ['preachers'],
-    });
+    // // Pastor
+    // const theirPastor = await this.pastorRepository.findOne({
+    //   where: { id: preacher?.theirPastor?.id },
+    //   relations: ['preachers'],
+    // });
 
-    const preachersInPastor = theirPastor.preachers.filter(
-      (currentPreacher) => currentPreacher?.id !== preacher?.id,
-    );
+    // const preachersInPastor = theirPastor.preachers.filter(
+    //   (currentPreacher) => currentPreacher?.id !== preacher?.id,
+    // );
 
-    theirPastor.preachers = preachersInPastor;
-    theirPastor.numberPreachers = preachersInPastor.length;
+    // theirPastor.preachers = preachersInPastor;
+    // theirPastor.numberPreachers = preachersInPastor.length;
 
-    // Church
-    const theirChurch = await this.churchRepository.findOne({
-      where: { id: preacher?.theirChurch?.id },
-      relations: ['preachers'],
-    });
+    // // Church
+    // const theirChurch = await this.churchRepository.findOne({
+    //   where: { id: preacher?.theirChurch?.id },
+    //   relations: ['preachers'],
+    // });
 
-    const preachersInChurch = theirChurch.preachers.filter(
-      (currentPreacher) => currentPreacher?.id !== preacher?.id,
-    );
+    // const preachersInChurch = theirChurch.preachers.filter(
+    //   (currentPreacher) => currentPreacher?.id !== preacher?.id,
+    // );
 
-    theirChurch.preachers = preachersInChurch;
-    theirChurch.numberPreachers = preachersInChurch.length;
+    // theirChurch.preachers = preachersInChurch;
+    // theirChurch.numberPreachers = preachersInChurch.length;
 
     // Update and save
     try {
-      await this.preacherRepository.save(updatedPreacher);
-
       await Promise.all(deleteSupervisorInFamilyHouses);
       await Promise.all(deleteSupervisorInDisciples);
 
-      await this.supervisorRepository.save(theirSupervisor);
-      await this.zoneRepository.save(theirZone);
-      await this.copastorRepository.save(theirCopastor);
-      await this.pastorRepository.save(theirPastor);
-      await this.churchRepository.save(theirChurch);
+      await this.preacherRepository.save(updatedPreacher);
+
+      // await this.supervisorRepository.save(theirSupervisor);
+      // await this.zoneRepository.save(theirZone);
+      // await this.copastorRepository.save(theirCopastor);
+      // await this.pastorRepository.save(theirPastor);
+      // await this.churchRepository.save(theirChurch);
     } catch (error) {
       this.handleDBExceptions(error);
     }

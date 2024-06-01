@@ -9,7 +9,7 @@ import {
 import { User } from '@/modules/user/entities';
 import { Status } from '@/common/enums';
 
-@Entity({ name: 'offerings-expense' })
+@Entity({ name: 'offerings_expense' })
 export class Expense {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -30,8 +30,8 @@ export class Expense {
   @Column('text', { nullable: true })
   comments: string;
 
-  @Column('date', { name: 'date_birth' })
-  dateBirth: Date;
+  @Column('date', { name: 'date' })
+  date: Date;
 
   @Column('text', { name: 'url_files', nullable: true })
   urlFiles: string;

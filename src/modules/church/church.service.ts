@@ -58,44 +58,51 @@ export class ChurchService {
     const { theirMainChurch } = createChurchDto;
 
     //? Validate and assign main church to anexe church
-    const mainChurch = await this.churchRepository.findOne({
-      where: { id: theirMainChurch },
-      relations: ['anexes'],
-    });
+    if (theirMainChurch) {
+      const mainChurch = await this.churchRepository.findOne({
+        where: { id: theirMainChurch },
+        relations: ['anexes'],
+      });
 
-    if (theirMainChurch && !mainChurch) {
-      throw new NotFoundException(
-        `Not found church with id ${theirMainChurch}`,
-      );
+      if (!mainChurch) {
+        throw new NotFoundException(
+          `Not found church with id ${theirMainChurch}`,
+        );
+      }
+
+      if (mainChurch.status === Status.Inactive) {
+        throw new BadRequestException(
+          `The property status in Church must be a "Active"`,
+        );
+      }
+
+      // Create new instance
+      try {
+        const newChurch = this.churchRepository.create({
+          ...createChurchDto,
+          isAnexe: mainChurch ? true : false,
+          theirMainChurch: mainChurch,
+          createdAt: new Date(),
+          createdBy: user,
+        });
+
+        return await this.churchRepository.save(newChurch);
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
     }
 
-    if (theirMainChurch && mainChurch.status === Status.Inactive) {
-      throw new BadRequestException(
-        `The property status in Church must be a "Active"`,
-      );
-    }
-
-    // Create new instance
+    // Create new instance (if their main church not exists)
     try {
       const newChurch = this.churchRepository.create({
         ...createChurchDto,
-        isAnexe: mainChurch ? true : false,
-        theirMainChurch: mainChurch,
+        isAnexe: false,
+        theirMainChurch: null,
         createdAt: new Date(),
         createdBy: user,
       });
 
-      const savedChurch = await this.churchRepository.save(newChurch);
-
-      if (mainChurch) {
-        const anexesInMainChurch = [...(mainChurch.anexes || []), savedChurch];
-        mainChurch.anexes = anexesInMainChurch;
-        mainChurch.numberAnexes = anexesInMainChurch.length;
-
-        await this.churchRepository.save(mainChurch);
-      }
-
-      return newChurch;
+      return await this.churchRepository.save(newChurch);
     } catch (error) {
       this.handleDBExceptions(error);
     }
@@ -159,9 +166,13 @@ export class ChurchService {
     }
 
     //? Update if their main Church is different or update to active
-    if (church.isAnexe && church?.theirMainChurch?.id !== theirMainChurch) {
+    if (
+      church.isAnexe &&
+      theirMainChurch &&
+      church?.theirMainChurch?.id !== theirMainChurch
+    ) {
       //* Validate church
-      const church = await this.churchRepository.findOne({
+      const newMainChurch = await this.churchRepository.findOne({
         where: { id: theirMainChurch },
         relations: [
           'anexes',
@@ -175,13 +186,13 @@ export class ChurchService {
         ],
       });
 
-      if (!church) {
+      if (!newMainChurch) {
         throw new NotFoundException(
           `Church not found with id ${theirMainChurch}`,
         );
       }
 
-      if (!church.status) {
+      if (!newMainChurch.status) {
         throw new BadRequestException(
           `The property status in copastor must be "Active"`,
         );
@@ -191,43 +202,31 @@ export class ChurchService {
       const updatedChurch = await this.churchRepository.preload({
         id: church.id,
         ...updateChurchDto,
-        theirMainChurch: church,
+        theirMainChurch: newMainChurch,
         updatedAt: new Date(),
         updatedBy: user,
         status: status,
       });
 
       try {
-        const savedChurch = await this.churchRepository.save(updatedChurch);
-
-        //* Assign relations to the new church according pastor
-        const anexesNewMainChurch = (church.anexes = [
-          ...(church.anexes || []),
-          savedChurch,
-        ]);
-        church.anexes = anexesNewMainChurch;
-        church.numberAnexes = anexesNewMainChurch.length;
-
-        await this.churchRepository.save(church);
-
-        return savedChurch;
+        return await this.churchRepository.save(updatedChurch);
       } catch (error) {
         this.handleDBExceptions(error);
       }
     }
 
     //? Update and save if is same Church
-    const updatedPastor = await this.churchRepository.preload({
+    const updatedChurch = await this.churchRepository.preload({
       id: church.id,
       ...updateChurchDto,
-      theirMainChurch: null,
+      theirMainChurch: church.theirMainChurch,
       updatedAt: new Date(),
       updatedBy: user,
       status: status,
     });
 
     try {
-      return await this.churchRepository.save(updatedPastor);
+      return await this.churchRepository.save(updatedChurch);
     } catch (error) {
       this.handleDBExceptions(error);
     }
@@ -256,21 +255,7 @@ export class ChurchService {
     //* Update and set in Inactive on Church (anexe)
     const updatedChurch = await this.churchRepository.preload({
       id: church.id,
-      theirMainChurch: null,
-      pastors: [],
-      copastors: [],
-      supervisors: [],
-      zones: [],
-      preachers: [],
-      familyHouses: [],
-      disciples: [],
-      numberPastors: 0,
-      numberCopastors: 0,
-      numberSupervisors: 0,
-      numberZones: 0,
-      numberPreachers: 0,
-      numberFamilyHouses: 0,
-      numberDisciples: 0,
+      theirMainChurch: null, // no seria necesario borrar los [] porque al borrar las relaciones del their church tmb se elimina de cada uno de los []
       updatedAt: new Date(),
       updatedBy: user,
       status: Status.Inactive,
@@ -393,22 +378,8 @@ export class ChurchService {
       });
     });
 
-    //! Eliminate church relation (id and amount) on their main church
-    const theirMainChurch = await this.churchRepository.findOne({
-      where: { id: church?.theirMainChurch?.id },
-      relations: ['anexes', 'anexes.theirMainChurch'],
-    });
-
-    const anexesChurch = theirMainChurch.anexes.filter(
-      (currentAnexe) => currentAnexe?.theirMainChurch?.id !== church?.id,
-    );
-
-    theirMainChurch.anexes = anexesChurch;
-    theirMainChurch.numberAnexes = anexesChurch.length;
-
     // Update and save
     try {
-      await this.churchRepository.save(updatedChurch);
       await Promise.all(deleteChurchInPastors);
       await Promise.all(deleteChurchInCopastors);
       await Promise.all(deleteChurchInSupervisors);
@@ -417,7 +388,7 @@ export class ChurchService {
       await Promise.all(deleteChurchInFamilyHouses);
       await Promise.all(deleteChurchInDisciples);
 
-      await this.churchRepository.save(theirMainChurch);
+      await this.churchRepository.save(updatedChurch);
     } catch (error) {
       this.handleDBExceptions(error);
     }

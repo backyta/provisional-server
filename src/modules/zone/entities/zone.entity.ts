@@ -61,16 +61,6 @@ export class Zone {
   @Column('text', { default: Status.Active })
   status: string;
 
-  // Roles amount under their charge
-  @Column('int', { name: 'number_preachers', default: 0 })
-  numberPreachers: number;
-
-  @Column('int', { name: 'number_family_houses', default: 0 })
-  numberFamilyHouses: number;
-
-  @Column('int', { name: 'number_disciples', default: 0 })
-  numberDisciples: number;
-
   //* Relations (Array)
   @OneToMany(() => Preacher, (preacher) => preacher.theirZone)
   preachers: Preacher[];
@@ -83,27 +73,27 @@ export class Zone {
 
   //* Relation (FK)
   @ManyToOne(() => Pastor, (pastor) => pastor.zones, {
-    onUpdate: 'CASCADE',
+    eager: true,
   })
   @JoinColumn({ name: 'their_pastor_id' })
   theirPastor: Pastor;
 
   @ManyToOne(() => Copastor, (copastor) => copastor.zones, {
     onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
+    eager: true,
   })
   @JoinColumn({ name: 'their_copastor_id' })
   theirCopastor: Copastor;
 
   @ManyToOne(() => Church, (church) => church.zones, {
-    onUpdate: 'CASCADE',
+    eager: true,
   })
   @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 
   @OneToOne(() => Supervisor, {
     onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
+    eager: true,
   })
   @JoinColumn({ name: 'their_supervisor_id' })
   theirSupervisor: Supervisor;

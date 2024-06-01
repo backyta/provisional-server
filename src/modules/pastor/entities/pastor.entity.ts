@@ -94,25 +94,6 @@ export class Pastor {
   @Column({ name: 'roles', type: 'text', array: true })
   roles: string[];
 
-  // Roles amount under their charge
-  @Column('int', { name: 'number_copastors', default: 0 })
-  numberCopastors: number;
-
-  @Column('int', { name: 'number_supervisors', default: 0 })
-  numberSupervisors: number;
-
-  @Column('int', { name: 'number_preachers', default: 0 })
-  numberPreachers: number;
-
-  @Column('int', { name: 'number_zones', default: 0 })
-  numberZones: number;
-
-  @Column('int', { name: 'number_family_houses', default: 0 })
-  numberFamilyHouses: number;
-
-  @Column('int', { name: 'number_disciples', default: 0 })
-  numberDisciples: number;
-
   // Info register and update date
   @Column('timestamp', { name: 'created_at', nullable: true })
   createdAt: string | Date;
@@ -151,9 +132,7 @@ export class Pastor {
   disciples: Disciple[];
 
   //* Relations(FK);
-  @ManyToOne(() => Church, (church) => church.pastors, {
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(() => Church, (church) => church.pastors, { eager: true })
   @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 

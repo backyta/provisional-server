@@ -124,19 +124,6 @@ export class Supervisor {
   })
   isDirectRelationToPastor: boolean;
 
-  // Roles amount under their charge
-  @Column('int', { name: 'number_zones', default: 0 })
-  numberZones: number;
-
-  @Column('int', { name: 'number_preachers', default: 0 })
-  numberPreachers: number;
-
-  @Column('int', { name: 'number_family_houses', default: 0 })
-  numberFamilyHouses: number;
-
-  @Column('int', { name: 'number_disciples', default: 0 })
-  numberDisciples: number;
-
   //* Relations (Array)
   @OneToMany(() => Preacher, (preacher) => preacher.theirSupervisor)
   preachers: Preacher[];
@@ -149,26 +136,26 @@ export class Supervisor {
 
   //* Relations (FK)
   @ManyToOne(() => Church, (church) => church.supervisors, {
-    onUpdate: 'CASCADE',
+    eager: true,
   })
   @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 
   @ManyToOne(() => Pastor, (pastor) => pastor.supervisors, {
-    onUpdate: 'CASCADE',
+    eager: true,
   })
   @JoinColumn({ name: 'their_pastor_id' })
   theirPastor: Pastor;
 
   @ManyToOne(() => Copastor, (copastor) => copastor.supervisors, {
     onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
+    eager: true,
   })
   @JoinColumn({ name: 'their_copastor_id' })
   theirCopastor: Copastor;
 
   @OneToOne(() => Zone, {
-    onUpdate: 'CASCADE',
+    eager: true,
   })
   @JoinColumn({ name: 'their_zone_id' })
   theirZone: Zone;

@@ -112,22 +112,6 @@ export class Copastor {
   @Column('text', { name: 'status', default: Status.Active })
   status: string;
 
-  // Roles amount under their charge
-  @Column('int', { name: 'number_supervisors', default: 0 })
-  numberSupervisors: number;
-
-  @Column('int', { name: 'number_preachers', default: 0 })
-  numberPreachers: number;
-
-  @Column('int', { name: 'number_zones', default: 0 })
-  numberZones: number;
-
-  @Column('int', { name: 'number_family_houses', default: 0 })
-  numberFamilyHouses: number;
-
-  @Column('int', { name: 'number_disciples', default: 0 })
-  numberDisciples: number;
-
   //* Relations (Array)
   @OneToMany(() => Supervisor, (supervisor) => supervisor.theirCopastor)
   supervisors: Supervisor[];
@@ -145,15 +129,11 @@ export class Copastor {
   disciples: Disciple[];
 
   //* Relations(FK);
-  @ManyToOne(() => Pastor, (pastor) => pastor.copastors, {
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(() => Pastor, (pastor) => pastor.copastors, { eager: true })
   @JoinColumn({ name: 'their_pastor_id' })
   theirPastor: Pastor;
 
-  @ManyToOne(() => Church, (church) => church.copastors, {
-    onUpdate: 'CASCADE',
-  })
+  @ManyToOne(() => Church, (church) => church.copastors, { eager: true })
   @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 
