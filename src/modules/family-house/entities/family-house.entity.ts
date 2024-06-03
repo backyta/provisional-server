@@ -29,6 +29,9 @@ export class FamilyHouse {
   @Column('text', { name: 'house_name', unique: true })
   houseName: string;
 
+  @Column('text', { name: 'zone_name', unique: true })
+  zoneName: string;
+
   @Column('text', { name: 'house_number' })
   houseNumber: string;
 

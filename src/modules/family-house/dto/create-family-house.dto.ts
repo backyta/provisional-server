@@ -95,4 +95,12 @@ export class CreateFamilyHouseDto {
   @IsNotEmpty()
   @IsUUID()
   theirPreacher: string;
+
+  @ApiProperty({
+    example: '38137648-cf88-4010-a0fd-10e3648440d3',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @IsUUID()
+  theirZone: string;
 }

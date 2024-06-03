@@ -22,6 +22,7 @@ export class CreateUserDto {
   @IsEmail()
   email: string;
 
+  // TODO : validar el regex del front con el del back
   @ApiProperty({
     example: 'Abcd12345',
   })

@@ -382,10 +382,8 @@ export class CopastorService {
           await Promise.all(updatePreachers);
           await Promise.all(updateFamilyHouses);
           await Promise.all(updateDisciples);
-          const savedCopastor =
-            await this.copastorRepository.save(updatedCopastor);
 
-          return savedCopastor;
+          return await this.copastorRepository.save(updatedCopastor);
         } catch (error) {
           this.handleDBExceptions(error);
         }

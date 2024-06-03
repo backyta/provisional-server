@@ -56,6 +56,11 @@ export class ZoneService {
     const { theirSupervisor } = createZoneDto;
 
     //? Validate and assign supervisor
+    if (!theirSupervisor) {
+      throw new NotFoundException(
+        `Para crear una nueva zona coloque un supervisor id existente`,
+      );
+    }
     const supervisor = await this.supervisorRepository.findOne({
       where: { id: theirSupervisor },
       relations: ['theirZone', 'theirCopastor', 'theirPastor', 'theirChurch'],
@@ -140,29 +145,9 @@ export class ZoneService {
 
       const savedZone = await this.zoneRepository.save(newZone);
 
-      // Count and assign zone in Supervisor
       supervisor.theirZone = savedZone;
 
-      // // Count and assign zones in Copastor
-      // const zonesInCopastor = [...(copastor.zones || []), savedZone];
-      // copastor.zones = zonesInCopastor;
-      // copastor.numberZones = zonesInCopastor.length;
-
-      // // Count and assign zones in Pastor
-      // const zonesInPastor = [...(pastor.zones || []), savedZone];
-      // pastor.zones = zonesInPastor;
-      // pastor.numberZones += 1;
-
-      // // Count and assign zones in Church
-      // const zonesInChurch = [...(church.zones || []), savedZone];
-      // church.zones = zonesInChurch;
-      // church.numberZones += 1;
-
       await this.supervisorRepository.save(supervisor);
-      // await this.copastorRepository.save(copastor);
-      // await this.pastorRepository.save(pastor);
-      // await this.churchRepository.save(church);
-
       return savedZone;
     } catch (error) {
       this.handleDBExceptions(error);
@@ -231,6 +216,12 @@ export class ZoneService {
     //? Update if their Supervisor is different
     if (zone.theirSupervisor?.id !== theirSupervisor) {
       // Validate supervisor
+      if (!theirSupervisor) {
+        throw new NotFoundException(
+          `Para actualizar o cambiar de supervisor coloque un supervisor id existente`,
+        );
+      }
+
       const newSupervisor = await this.supervisorRepository.findOne({
         where: { id: theirSupervisor },
         relations: [
@@ -400,175 +391,6 @@ export class ZoneService {
         });
       });
 
-      // Data old Supervisor
-      // const oldSupervisor = await this.supervisorRepository.findOne({
-      //   where: { id: zone?.theirSupervisor?.id },
-      //   relations: [
-      //     'theirZone',
-      //     'preachers',
-      //     'preachers.theirZone',
-      //     'familyHouses',
-      //     'familyHouses.theirZone',
-      //     'disciples',
-      //     'disciples.theirZone',
-      //   ],
-      // });
-
-      // // Data old Copastor
-      // const oldCopastor = await this.copastorRepository.findOne({
-      //   where: { id: zone?.theirCopastor?.id },
-      //   relations: [
-      //     'zones',
-      //     'preachers',
-      //     'preachers.theirZone',
-      //     'familyHouses',
-      //     'familyHouses.theirZone',
-      //     'disciples',
-      //     'disciples.theirZone',
-      //   ],
-      // });
-
-      // // Data old Pastor
-      // const oldPastor = await this.pastorRepository.findOne({
-      //   where: { id: zone?.theirPastor?.id },
-      //   relations: [
-      //     'zones',
-      //     'preachers',
-      //     'preachers.theirZone',
-      //     'familyHouses',
-      //     'familyHouses.theirZone',
-      //     'disciples',
-      //     'disciples.theirZone',
-      //   ],
-      // });
-
-      // // Data old curch
-      // const oldChurch = await this.churchRepository.findOne({
-      //   where: { id: zone?.theirChurch?.id },
-      //   relations: [
-      //     'zones',
-      //     'preachers',
-      //     'preachers.theirZone',
-      //     'familyHouses',
-      //     'familyHouses.theirZone',
-      //     'disciples',
-      //     'disciples.theirZone',
-      //   ],
-      // });
-
-      // //! Delete zone relation and subtract amount on the old supervisor
-      // // Delete copastors the old pastor according copastor
-      // oldSupervisor.theirZone = null;
-      // oldSupervisor.numberZones = 0;
-
-      // // Delete zones the old church according pastor
-      // const preachersOldSupervisor = oldSupervisor?.preachers.filter(
-      //   (oldPreacher) => oldPreacher?.theirZone?.id !== zone?.id,
-      // );
-      // oldSupervisor.preachers = preachersOldSupervisor;
-      // oldSupervisor.numberPreachers = preachersOldSupervisor.length;
-
-      // // Delete family houses the old church according pastor
-      // const familyHousesOldSupervisor = oldSupervisor?.familyHouses.filter(
-      //   (oldFamilyHouse) => oldFamilyHouse?.theirZone?.id !== zone?.id,
-      // );
-      // oldSupervisor.familyHouses = familyHousesOldSupervisor;
-      // oldSupervisor.numberFamilyHouses = familyHousesOldSupervisor.length;
-
-      // // Delete disciples the old church according pastor
-      // const disciplesOldSupervisor = oldSupervisor?.disciples.filter(
-      //   (oldDisciple) => oldDisciple?.theirZone?.id !== zone?.id,
-      // );
-      // oldSupervisor.disciples = disciplesOldSupervisor;
-      // oldSupervisor.numberDisciples = disciplesOldSupervisor.length;
-
-      // //! Delete zone relation and subtract amount on the old co-pastor
-      // // Delete copastors the old pastor according copastor
-      // const zonesOldCopastor = oldCopastor?.zones.filter(
-      //   (oldZone) => oldZone?.id !== zone?.id,
-      // );
-      // oldCopastor.zones = zonesOldCopastor;
-      // oldCopastor.numberZones = zonesOldCopastor.length;
-
-      // // Delete zones the old church according pastor
-      // const preachersOldCopastor = oldCopastor?.preachers.filter(
-      //   (oldPreacher) => oldPreacher?.theirZone?.id !== zone?.id,
-      // );
-      // oldCopastor.preachers = preachersOldCopastor;
-      // oldCopastor.numberPreachers = preachersOldCopastor.length;
-
-      // // Delete family houses the old church according pastor
-      // const familyHousesOldCopastor = oldCopastor?.familyHouses.filter(
-      //   (oldFamilyHouse) => oldFamilyHouse?.theirZone?.id !== zone?.id,
-      // );
-      // oldCopastor.familyHouses = familyHousesOldCopastor;
-      // oldCopastor.numberFamilyHouses = familyHousesOldCopastor.length;
-
-      // // Delete disciples the old church according pastor
-      // const disciplesOldCopastor = oldCopastor?.disciples.filter(
-      //   (oldDisciple) => oldDisciple?.theirZone?.id !== zone?.id,
-      // );
-      // oldCopastor.disciples = disciplesOldCopastor;
-      // oldCopastor.numberDisciples = disciplesOldCopastor.length;
-
-      // //! Delete supervisor relation and subtract amount on the old pastor
-      // // Delete zones the old church according pastor
-      // const zonesOldPastor = oldPastor?.zones.filter(
-      //   (oldZone) => oldZone?.id !== zone?.id,
-      // );
-      // oldCopastor.zones = zonesOldPastor;
-      // oldCopastor.numberZones = zonesOldPastor.length;
-
-      // // Delete zones the old church according pastor
-      // const preachersOldPastor = oldPastor?.preachers.filter(
-      //   (oldPreacher) => oldPreacher?.theirZone?.id !== zone?.id,
-      // );
-      // oldPastor.preachers = preachersOldPastor;
-      // oldPastor.numberPreachers = preachersOldPastor.length;
-
-      // // Delete family houses the old church according pastor
-      // const familyHousesOldPastor = oldPastor?.familyHouses.filter(
-      //   (oldFamilyHouse) => oldFamilyHouse?.theirZone?.id !== zone?.id,
-      // );
-      // oldPastor.familyHouses = familyHousesOldPastor;
-      // oldPastor.numberFamilyHouses = familyHousesOldPastor.length;
-
-      // // Delete disciples the old church according pastor
-      // const disciplesOldPastor = oldPastor?.disciples.filter(
-      //   (oldDisciple) => oldDisciple?.theirZone?.id !== zone?.id,
-      // );
-      // oldPastor.disciples = disciplesOldPastor;
-      // oldPastor.numberDisciples = disciplesOldPastor.length;
-
-      // //! Delete supervisor relation and subtract amount on the old church
-      // // Delete supervisors the old church according pastor
-      // const zonesOldChurch = oldPastor?.zones.filter(
-      //   (oldZone) => oldZone?.id !== zone?.id,
-      // );
-      // oldCopastor.zones = zonesOldChurch;
-      // oldCopastor.numberZones = zonesOldChurch.length;
-
-      // // Delete zones the old church according pastor
-      // const preachersOldChurch = oldChurch?.preachers.filter(
-      //   (oldPreacher) => oldPreacher?.theirZone?.id !== zone?.id,
-      // );
-      // oldChurch.preachers = preachersOldChurch;
-      // oldChurch.numberPreachers = preachersOldChurch.length;
-
-      // // Delete family houses the old church according pastor
-      // const familyHousesOldChurch = oldChurch?.familyHouses.filter(
-      //   (oldFamilyHouse) => oldFamilyHouse?.theirZone?.id !== zone?.id,
-      // );
-      // oldChurch.familyHouses = familyHousesOldChurch;
-      // oldChurch.numberFamilyHouses = familyHousesOldChurch.length;
-
-      // // Delete disciples the old church according pastor
-      // const disciplesOldChurch = oldChurch?.disciples.filter(
-      //   (oldDisciple) => oldDisciple?.theirZone?.id !== zone?.id,
-      // );
-      // oldChurch.disciples = disciplesOldChurch;
-      // oldChurch.numberDisciples = disciplesOldChurch.length;
-
       // Update and save
       const updatedZone = await this.zoneRepository.preload({
         id: zone.id,
@@ -598,45 +420,9 @@ export class ZoneService {
         const savedZone = await this.zoneRepository.save(updatedZone);
 
         newSupervisor.theirZone = savedZone;
+        await this.supervisorRepository.save(newSupervisor);
 
         return savedZone;
-
-        //NOTE : Faltaria calcular los id que se sacaron y colocarles su nueva relacion para que se seteen en las nuevas
-        //* Assign relations to the new supervisor, copastor, pastor and new church
-        // newSupervisor.theirZone = savedZone;
-        // newSupervisor.numberZones = 1;
-
-        // const zonesInNewCopastor = (newCopastor.zones = [
-        //   ...(newCopastor.zones || []),
-        //   savedZone,
-        // ]);
-        // newCopastor.zones = zonesInNewCopastor;
-        // newCopastor.numberZones = zonesInNewCopastor.length;
-
-        // const zonesInNewPastor = (newPastor.zones = [
-        //   ...(newPastor.zones || []),
-        //   savedZone,
-        // ]);
-        // newPastor.zones = zonesInNewPastor;
-        // newPastor.numberZones = zonesInNewPastor.length;
-
-        // const zonesInNewChurch = (newChurch.zones = [
-        //   ...(newChurch.zones || []),
-        //   savedZone,
-        // ]);
-        // newChurch.zones = zonesInNewChurch;
-        // newChurch.numberZones = zonesInNewChurch.length;
-
-        // await this.supervisorRepository.save(oldSupervisor);
-        // await this.supervisorRepository.save(newSupervisor);
-        // await this.copastorRepository.save(oldCopastor);
-        // await this.copastorRepository.save(newCopastor);
-        // await this.pastorRepository.save(oldPastor);
-        // await this.pastorRepository.save(newPastor);
-        // await this.churchRepository.save(oldChurch);
-        // await this.churchRepository.save(newChurch);
-
-        // return savedZone;
       } catch (error) {
         this.handleDBExceptions(error);
       }
@@ -664,6 +450,7 @@ export class ZoneService {
 
   // NOTE : la zona no debería eliminarse  ni desactivarse, solo actualizarse, porque afectaría a sus relaciones con ofrenda
   // NOTE : si la zona se actualiza de super es indiferente porque la relacione s solo con zona.
+  // NOTE : no debería eliminarse
   //! DELETE ZONE
   async remove(id: string, user: User): Promise<void> {
     // Validations
@@ -740,55 +527,6 @@ export class ZoneService {
       });
     });
 
-    //! Eliminate zone relation (id and amount) on their supervisor, copastor, pastor and church
-    // Supervisor
-    // const theirSupervisor = await this.supervisorRepository.findOne({
-    //   where: { id: zone?.theirSupervisor?.id },
-    //   relations: ['theirZone'],
-    // });
-
-    // theirSupervisor.theirZone = null;
-    // theirSupervisor.numberZones = 0;
-
-    // // Copastor
-    // const theirCopastor = await this.copastorRepository.findOne({
-    //   where: { id: zone?.theirCopastor?.id },
-    //   relations: ['zones'],
-    // });
-
-    // const zonesInCopastor = theirCopastor.zones.filter(
-    //   (currentZone) => currentZone?.id !== zone?.id,
-    // );
-
-    // theirCopastor.zones = zonesInCopastor;
-    // theirCopastor.numberZones = zonesInCopastor.length;
-
-    // //Pastor
-    // const theirPastor = await this.pastorRepository.findOne({
-    //   where: { id: zone?.theirPastor?.id },
-    //   relations: ['zones'],
-    // });
-
-    // const zonesInPastor = theirPastor.zones.filter(
-    //   (currentZone) => currentZone?.id !== zone?.id,
-    // );
-
-    // theirPastor.zones = zonesInPastor;
-    // theirPastor.numberZones = zonesInPastor.length;
-
-    // // Church
-    // const theirChurch = await this.churchRepository.findOne({
-    //   where: { id: zone?.theirChurch?.id },
-    //   relations: ['zones'],
-    // });
-
-    // const zonesInChurch = theirChurch.zones.filter(
-    //   (currentZone) => currentZone?.id !== zone?.id,
-    // );
-
-    // theirChurch.zones = zonesInChurch;
-    // theirChurch.numberZones = zonesInChurch.length;
-
     // Update and save
     try {
       await Promise.all(deleteZoneInPreachers);
@@ -796,12 +534,6 @@ export class ZoneService {
       await Promise.all(deleteZoneInDisciple);
 
       await this.zoneRepository.save(updatedZone);
-      // NOTE : no deberia eliminarse
-
-      // await this.supervisorRepository.save(theirSupervisor);
-      // await this.copastorRepository.save(theirCopastor);
-      // await this.pastorRepository.save(theirPastor);
-      // await this.churchRepository.save(theirChurch);
     } catch (error) {
       this.handleDBExceptions(error);
     }
