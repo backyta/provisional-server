@@ -1,15 +1,4 @@
 import {
-  ApiBadRequestResponse,
-  ApiBearerAuth,
-  ApiCreatedResponse,
-  ApiForbiddenResponse,
-  ApiInternalServerErrorResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiTags,
-  ApiUnauthorizedResponse,
-} from '@nestjs/swagger';
-import {
   Controller,
   Get,
   Post,
@@ -20,17 +9,29 @@ import {
   ParseUUIDPipe,
   Query,
 } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+
+import { PaginationDto } from '@/common/dtos';
+
+import { CopastorService } from '@/modules/copastor/copastor.service';
+import { CreateCopastorDto, UpdateCopastorDto } from '@/modules/copastor/dto';
 
 import { UserRoles } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
 
-import { User } from '@/modules/user/entities';
-
-import { Copastor } from '@/modules/copastor/entities';
-import { CopastorService } from '@/modules/copastor/copastor.service';
-import { CreateCopastorDto, UpdateCopastorDto } from '@/modules/copastor/dto';
 import { Pastor } from '@/modules/pastor/entities';
-import { PaginationDto } from '@/common/dtos';
+import { Copastor } from '@/modules/copastor/entities';
+import { User } from '@/modules/user/entities';
 
 @ApiTags('Copastors')
 @ApiBearerAuth()

@@ -136,26 +136,26 @@ export class Supervisor {
 
   //* Relations (FK)
   @ManyToOne(() => Church, (church) => church.supervisors, {
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 
   @ManyToOne(() => Pastor, (pastor) => pastor.supervisors, {
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_pastor_id' })
   theirPastor: Pastor;
 
   @ManyToOne(() => Copastor, (copastor) => copastor.supervisors, {
     onDelete: 'SET NULL',
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_copastor_id' })
   theirCopastor: Copastor;
 
   @OneToOne(() => Zone, {
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_zone_id' })
   theirZone: Zone;

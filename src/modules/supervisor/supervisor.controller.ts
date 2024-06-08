@@ -1,4 +1,15 @@
 import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseUUIDPipe,
+  Query,
+} from '@nestjs/common';
+import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -10,31 +21,20 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  ParseUUIDPipe,
-  Query,
-} from '@nestjs/common';
+import { PaginationDto } from '@/common/dtos';
 
 import { UserRoles } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
-
-import { User } from '@/modules/user/entities';
 
 import {
   CreateSupervisorDto,
   UpdateSupervisorDto,
 } from '@/modules/supervisor/dto';
-import { Supervisor } from '@/modules/supervisor/entities';
 import { SupervisorService } from '@/modules/supervisor/supervisor.service';
+
+import { User } from '@/modules/user/entities';
 import { Copastor } from '@/modules/copastor/entities';
-import { PaginationDto } from '@/common/dtos';
+import { Supervisor } from '@/modules/supervisor/entities';
 
 @ApiTags('Supervisors')
 @ApiBearerAuth()

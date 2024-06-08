@@ -1,5 +1,7 @@
+import { Status } from '@/common/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -52,9 +54,10 @@ export class CreateZoneDto {
   district: string;
 
   @ApiProperty({
-    example: true,
+    example: 'active',
   })
   @IsString()
+  @IsEnum(Status)
   @IsOptional()
   status?: string;
 
@@ -63,7 +66,8 @@ export class CreateZoneDto {
     example: '38137648-cf88-4010-a0fd-10e3648440d3',
   })
   @IsString()
+  @IsOptional()
   @IsNotEmpty()
   @IsUUID()
-  theirSupervisor: string;
+  theirSupervisor?: string;
 }

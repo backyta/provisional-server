@@ -114,7 +114,7 @@ export class DiscipleService {
     }
 
     const preacher = await this.preacherRepository.findOne({
-      where: { id: familyHouse.theirPreacher.id },
+      where: { id: familyHouse?.theirPreacher?.id },
       relations: ['disciples'],
     });
 
@@ -132,7 +132,7 @@ export class DiscipleService {
     }
 
     const zone = await this.zoneRepository.findOne({
-      where: { id: familyHouse.theirZone.id },
+      where: { id: familyHouse?.theirZone?.id },
       relations: ['disciples'],
     });
 
@@ -150,7 +150,7 @@ export class DiscipleService {
     }
 
     const supervisor = await this.supervisorRepository.findOne({
-      where: { id: familyHouse.theirSupervisor.id },
+      where: { id: familyHouse?.theirSupervisor?.id },
       relations: ['disciples'],
     });
 
@@ -168,7 +168,7 @@ export class DiscipleService {
     }
 
     const copastor = await this.copastorRepository.findOne({
-      where: { id: familyHouse.theirCopastor.id },
+      where: { id: familyHouse?.theirCopastor?.id },
       relations: ['disciples'],
     });
 
@@ -186,7 +186,7 @@ export class DiscipleService {
     }
 
     const pastor = await this.pastorRepository.findOne({
-      where: { id: familyHouse.theirPastor.id },
+      where: { id: familyHouse?.theirPastor?.id },
       relations: ['disciples'],
     });
 
@@ -204,7 +204,7 @@ export class DiscipleService {
     }
 
     const church = await this.churchRepository.findOne({
-      where: { id: familyHouse.theirChurch.id },
+      where: { id: familyHouse?.theirChurch?.id },
       relations: ['disciples'],
     });
 
@@ -238,10 +238,10 @@ export class DiscipleService {
   }
 
   //* FIND ALL (PAGINATED)
-  async findAll(paginationDto: PaginationDto): Promise<Disciple[]> {
+  async findAll(paginationDto: PaginationDto): Promise<any[]> {
     const { limit = 10, offset = 0 } = paginationDto;
 
-    return this.discipleRepository.find({
+    const data = await this.discipleRepository.find({
       where: { status: Status.Active },
       take: limit,
       skip: offset,
@@ -256,6 +256,52 @@ export class DiscipleService {
       ],
       order: { createdAt: 'ASC' },
     });
+
+    const result = data.map((data) => ({
+      ...data,
+      theirChurch: {
+        id: data.theirChurch.id,
+        churchName: data.theirChurch.churchName,
+      },
+      theirPastor: {
+        id: data.theirPastor.id,
+        firstName: data.theirPastor.firstName,
+        lastName: data.theirPastor.lastName,
+        roles: data.theirPastor.roles,
+      },
+      theirCopastor: {
+        id: data.theirCopastor.id,
+        firstName: data.theirCopastor.firstName,
+        lastName: data.theirCopastor.lastName,
+        roles: data.theirCopastor.roles,
+      },
+      theirSupervisor: {
+        id: data.theirSupervisor.id,
+        firstName: data.theirSupervisor.firstName,
+        lastName: data.theirSupervisor.lastName,
+        roles: data.theirSupervisor.roles,
+      },
+      theirZone: {
+        id: data.theirZone.id,
+        zoneName: data.theirZone.zoneName,
+        district: data.theirZone.district,
+      },
+      theirPreacher: {
+        id: data.theirPreacher.id,
+        firstName: data.theirPreacher.firstName,
+        lastName: data.theirPreacher.lastName,
+        roles: data.theirPreacher.roles,
+      },
+      theirFamilyHouse: {
+        id: data.theirFamilyHouse.id,
+        houseName: data.theirFamilyHouse.houseName,
+        codeHouse: data.theirFamilyHouse.codeHouse,
+        district: data.theirFamilyHouse.district,
+        urbanSector: data.theirFamilyHouse.urbanSector,
+      },
+    }));
+
+    return result;
   }
 
   findOne(id: number) {
@@ -554,7 +600,7 @@ export class DiscipleService {
         throw new NotFoundException(`Supervisor not found with id: ${id}`);
       }
 
-      if (newSupervisor.status === Status.Active) {
+      if (newSupervisor.status === Status.Inactive) {
         throw new NotFoundException(
           `The property status in Pastor must be a "Active"`,
         );
@@ -577,7 +623,7 @@ export class DiscipleService {
         ],
       });
 
-      if (newZone.status === Status.Active) {
+      if (newZone.status === Status.Inactive) {
         throw new NotFoundException(
           `The property status in Zone must be a "Active"`,
         );
@@ -595,7 +641,7 @@ export class DiscipleService {
         relations: ['theirPastor', 'theirChurch'],
       });
 
-      if (newCopastor.status === Status.Active) {
+      if (newCopastor.status === Status.Inactive) {
         throw new NotFoundException(
           `The property status in Copastor must be a "Active"`,
         );
@@ -613,7 +659,7 @@ export class DiscipleService {
         relations: ['theirChurch'],
       });
 
-      if (newPastor.status === Status.Active) {
+      if (newPastor.status === Status.Inactive) {
         throw new NotFoundException(
           `The property status in Pastor must be a "Active"`,
         );
@@ -631,7 +677,7 @@ export class DiscipleService {
         relations: ['theirMainChurch'],
       });
 
-      if (newChurch.status === Status.Active) {
+      if (newChurch.status === Status.Inactive) {
         throw new NotFoundException(
           `The property status in Church must be a "Active"`,
         );
@@ -645,6 +691,7 @@ export class DiscipleService {
           theirPastor: newPastor,
           theirCopastor: newCopastor,
           theirSupervisor: newSupervisor,
+          theirFamilyHouse: null,
           theirZone: newZone,
           createdAt: new Date(),
           createdBy: user,

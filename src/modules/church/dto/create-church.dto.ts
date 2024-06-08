@@ -1,8 +1,10 @@
+import { Status } from '@/common/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -123,9 +125,10 @@ export class CreateChurchDto {
 
   // Roles and Status
   @ApiProperty({
-    example: 'Active',
+    example: 'active',
   })
   @IsString()
+  @IsEnum(Status)
   @IsOptional()
   status?: string;
 

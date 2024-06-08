@@ -88,7 +88,7 @@ export class Church {
   @Column('text', { name: 'status', default: Status.Active })
   status: string;
 
-  // Relations (Array)
+  //* Relations (Array)
   @OneToMany(() => Church, (church) => church.theirMainChurch)
   anexes: Church[];
 
@@ -113,9 +113,8 @@ export class Church {
   @OneToMany(() => Disciple, (disciple) => disciple.theirChurch)
   disciples: Disciple[];
 
-  // Relations(FK)
+  //* Relations(FK)
   @ManyToOne(() => Church, (church) => church.anexes, {
-    eager: true,
     nullable: true,
   })
   @JoinColumn({ name: 'their_main_church_id' })

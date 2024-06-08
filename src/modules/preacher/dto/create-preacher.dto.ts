@@ -1,4 +1,4 @@
-import { MaritalStatus, MemberRoles, Gender } from '@/common/enums';
+import { MaritalStatus, MemberRoles, Gender, Status } from '@/common/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
@@ -162,9 +162,10 @@ export class CreatePreacherDto {
   roles: string[];
 
   @ApiProperty({
-    example: 'Active',
+    example: 'active',
   })
   @IsString()
+  @IsEnum(Status)
   @IsOptional()
   status?: string;
 
@@ -182,5 +183,6 @@ export class CreatePreacherDto {
   })
   @IsString()
   @IsUUID()
-  theirSupervisor: string;
+  @IsOptional()
+  theirSupervisor?: string;
 }

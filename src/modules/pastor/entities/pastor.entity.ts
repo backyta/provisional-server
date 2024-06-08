@@ -98,14 +98,14 @@ export class Pastor {
   @Column('timestamp', { name: 'created_at', nullable: true })
   createdAt: string | Date;
 
-  @ManyToOne(() => User, { eager: true, nullable: true })
+  @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'created_by' })
   createdBy: User;
 
   @Column('timestamp', { name: 'updated_at', nullable: true })
   updatedAt: string | Date;
 
-  @ManyToOne(() => User, { eager: true, nullable: true })
+  @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'updated_by' })
   updatedBy: User;
 
@@ -132,7 +132,7 @@ export class Pastor {
   disciples: Disciple[];
 
   //* Relations(FK);
-  @ManyToOne(() => Church, (church) => church.pastors, { eager: true })
+  @ManyToOne(() => Church, (church) => church.pastors)
   @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 

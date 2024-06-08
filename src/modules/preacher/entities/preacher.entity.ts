@@ -7,6 +7,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -113,44 +114,51 @@ export class Preacher {
   status: string;
 
   //* Relations (Array)
-  @OneToMany(() => FamilyHouse, (familyHouse) => familyHouse.theirPreacher)
-  familyHouses: FamilyHouse[];
+  // @OneToMany(() => FamilyHouse, (familyHouse) => familyHouse.theirPreacher)
+  // familyHouses: FamilyHouse[];
 
   @OneToMany(() => Disciple, (disciple) => disciple.theirPreacher)
   disciples: Disciple[];
 
   //* Relations(FK)
   @ManyToOne(() => Church, (church) => church.preachers, {
-    eager: true,
+    // eager: true,
   })
-  @JoinColumn({ name: 'their_church' })
+  @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 
   @ManyToOne(() => Pastor, (pastor) => pastor.preachers, {
-    eager: true,
+    // eager: true,
   })
-  @JoinColumn({ name: 'their_pastor' })
+  @JoinColumn({ name: 'their_pastor_id' })
   theirPastor: Pastor;
 
   @ManyToOne(() => Copastor, (copastor) => copastor.preachers, {
     onDelete: 'SET NULL',
-    eager: true,
+    // eager: true,
   })
-  @JoinColumn({ name: 'their_copastor' })
+  @JoinColumn({ name: 'their_copastor_id' })
   theirCopastor: Copastor;
 
   @ManyToOne(() => Supervisor, (supervisor) => supervisor.preachers, {
     onDelete: 'SET NULL',
-    eager: true,
+    // eager: true,
   })
-  @JoinColumn({ name: 'their_supervisor' })
+  @JoinColumn({ name: 'their_supervisor_id' })
   theirSupervisor: Supervisor;
 
   @ManyToOne(() => Zone, (zone) => zone.preachers, {
-    eager: true,
+    // eager: true,
   })
-  @JoinColumn({ name: 'their_zone' })
+  @JoinColumn({ name: 'their_zone_id' })
   theirZone: Zone;
+
+  @OneToOne(() => FamilyHouse, {
+    onDelete: 'SET NULL',
+    // eager: true,
+  })
+  @JoinColumn({ name: 'their_family_house_id' })
+  theirFamilyHouse: FamilyHouse;
 
   // Internal Functions
   @BeforeInsert()

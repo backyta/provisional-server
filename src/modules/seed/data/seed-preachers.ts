@@ -4,7 +4,7 @@ interface SeedPreacher {
   lastName: string;
   gender: string;
   originCountry: string;
-  birthDate: string | Date;
+  dateBirth: string | Date;
   age?: number;
   maritalStatus: string;
   numberChildren?: number;
@@ -38,7 +38,7 @@ export const dataPreachers: SeedDataPreachers = {
       lastName: 'Quispe Ramos',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1980-07-08',
+      dateBirth: '1980-07-08',
       maritalStatus: 'divorced',
       numberChildren: 2,
       conversionDate: '2001-09-15',
@@ -55,7 +55,7 @@ export const dataPreachers: SeedDataPreachers = {
       lastName: 'Flores Diaz',
       gender: 'female',
       originCountry: 'Peru',
-      birthDate: '1995-11-30',
+      dateBirth: '1995-11-30',
       maritalStatus: 'single',
       numberChildren: 0,
       conversionDate: '2013-04-20',
@@ -72,7 +72,7 @@ export const dataPreachers: SeedDataPreachers = {
       lastName: 'Gutierrez Torres',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1976-04-18',
+      dateBirth: '1976-04-18',
       maritalStatus: 'widower',
       numberChildren: 3,
       conversionDate: '1998-12-10',
@@ -89,7 +89,7 @@ export const dataPreachers: SeedDataPreachers = {
       lastName: 'Mendoza Lopez',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1983-09-25',
+      dateBirth: '1983-09-25',
       maritalStatus: 'married',
       numberChildren: 1,
       conversionDate: '2004-08-05',
@@ -106,7 +106,7 @@ export const dataPreachers: SeedDataPreachers = {
       lastName: 'Sanchez Silva',
       gender: 'female',
       originCountry: 'Peru',
-      birthDate: '1991-12-12',
+      dateBirth: '1991-12-12',
       maritalStatus: 'single',
       numberChildren: 0,
       conversionDate: '2010-10-20',
@@ -123,7 +123,7 @@ export const dataPreachers: SeedDataPreachers = {
       lastName: 'Diaz Medina',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1987-05-03',
+      dateBirth: '1987-05-03',
       maritalStatus: 'married',
       numberChildren: 4,
       conversionDate: '2009-07-15',
@@ -140,7 +140,7 @@ export const dataPreachers: SeedDataPreachers = {
       lastName: 'Chavez Castillo',
       gender: 'female',
       originCountry: 'Peru',
-      birthDate: '1986-08-19',
+      dateBirth: '1986-08-19',
       maritalStatus: 'married',
       numberChildren: 2,
       conversionDate: '2007-06-25',
@@ -157,7 +157,7 @@ export const dataPreachers: SeedDataPreachers = {
       lastName: 'Hernandez Perez',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1979-01-14',
+      dateBirth: '1979-01-14',
       maritalStatus: 'single',
       numberChildren: 0,
       conversionDate: '2000-11-30',
@@ -174,7 +174,7 @@ export const dataPreachers: SeedDataPreachers = {
       lastName: 'Alvarez Ramirez',
       gender: 'female',
       originCountry: 'Peru',
-      birthDate: '1984-06-28',
+      dateBirth: '1984-06-28',
       maritalStatus: 'divorced',
       numberChildren: 1,
       conversionDate: '2003-04-15',
@@ -191,7 +191,7 @@ export const dataPreachers: SeedDataPreachers = {
       lastName: 'Garcia Gonzales',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1977-03-05',
+      dateBirth: '1977-03-05',
       maritalStatus: 'widower',
       numberChildren: 5,
       conversionDate: '1999-10-10',

@@ -129,11 +129,11 @@ export class Copastor {
   disciples: Disciple[];
 
   //* Relations(FK);
-  @ManyToOne(() => Pastor, (pastor) => pastor.copastors, { eager: true })
+  @ManyToOne(() => Pastor, (pastor) => pastor.copastors)
   @JoinColumn({ name: 'their_pastor_id' })
   theirPastor: Pastor;
 
-  @ManyToOne(() => Church, (church) => church.copastors, { eager: true })
+  @ManyToOne(() => Church, (church) => church.copastors)
   @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 

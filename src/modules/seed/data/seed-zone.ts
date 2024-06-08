@@ -41,29 +41,5 @@ export const dataZones: SeedDataZones = {
       zoneName: 'Zabulón',
       district: 'Independencia',
     },
-    {
-      zoneName: 'Dan',
-      district: 'Independencia',
-    },
-    {
-      zoneName: 'Gad',
-      district: 'Independencia',
-    },
-    {
-      zoneName: 'Aser',
-      district: 'Independencia',
-    },
-    {
-      zoneName: 'Neftalí',
-      district: 'Independencia',
-    },
-    {
-      zoneName: 'Efraín',
-      district: 'Independencia',
-    },
-    {
-      zoneName: 'Manasés',
-      district: 'Independencia',
-    },
   ],
 };

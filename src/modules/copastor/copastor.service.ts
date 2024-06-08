@@ -1,4 +1,3 @@
-import { InjectRepository } from '@nestjs/typeorm';
 import {
   BadRequestException,
   Injectable,
@@ -7,22 +6,23 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { isUUID } from 'class-validator';
 
+import { PaginationDto } from '@/common/dtos';
 import { MemberRoles, Status } from '@/common/enums';
 
+import { CreateCopastorDto, UpdateCopastorDto } from '@/modules/copastor/dto';
+
+import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
 import { Pastor } from '@/modules/pastor/entities';
 import { Church } from '@/modules/church/entities';
-
-import { CreateCopastorDto, UpdateCopastorDto } from '@/modules/copastor/dto';
 import { Copastor } from '@/modules/copastor/entities';
-import { isUUID } from 'class-validator';
-import { Supervisor } from '@/modules/supervisor/entities';
-import { Zone } from '@/modules/zone/entities';
+import { Disciple } from '@/modules/disciple/entities';
 import { Preacher } from '@/modules/preacher/entities';
+import { Supervisor } from '@/modules/supervisor/entities';
 import { FamilyHouse } from '@/modules/family-house/entities';
-import { Disciple } from '@/modules/disciple/entities/';
-import { PaginationDto } from '@/common/dtos';
 
 @Injectable()
 export class CopastorService {
@@ -66,7 +66,7 @@ export class CopastorService {
       !roles.includes(MemberRoles.Copastor)
     ) {
       throw new BadRequestException(
-        `El rol "disciple" y "co-pastor" debe ser incluido`,
+        `The role "disciple" and "co-pastor" must be included`,
       );
     }
 
@@ -77,90 +77,120 @@ export class CopastorService {
       roles.includes(MemberRoles.Treasurer)
     ) {
       throw new BadRequestException(
-        `Para crear un Copastor solo se debe tener los roles "discípulo" y "co-pastor"`,
+        `To create a Copastor you only need to have the "disciple" and "co-pastor" roles.`,
       );
     }
 
     if (!theirPastor) {
       throw new NotFoundException(
-        `Para crear un nuevo copastor coloque un pastor-id existente`,
+        `To create a co-pastor you must enter an existing pastor id`,
       );
     }
 
-    //? Validate and assign pastor
+    //* Validate and assign pastor
     const pastor = await this.pastorRepository.findOne({
       where: { id: theirPastor },
-      relations: ['theirChurch', 'copastors'],
+      relations: ['theirChurch'],
     });
 
     if (!pastor) {
       throw new NotFoundException(`Not found pastor with id ${theirPastor}`);
     }
 
-    if (!pastor.status) {
+    if (pastor.status === Status.Inactive) {
       throw new BadRequestException(
-        `The property status in Pastor must be a "Active"`,
+        `The property status in Pastor must be a "active"`,
       );
     }
 
     //* Validate church according pastor
-    if (!pastor.theirChurch) {
+    if (!pastor?.theirChurch) {
       throw new NotFoundException(
-        `Church was not found, verify that Pastor has a church assigned`,
+        `Church was not found, verify that pastor has a church assigned`,
       );
     }
 
     const church = await this.churchRepository.findOne({
-      where: { id: pastor.theirChurch.id },
+      where: { id: pastor?.theirChurch?.id },
       relations: ['copastors'],
     });
 
-    if (!church.status) {
+    if (church.status === Status.Inactive) {
       throw new BadRequestException(
-        `The property status in Church must be "Active"`,
+        `The property status in Church must be "active"`,
       );
     }
 
     // Create new instance
-    if (
-      roles.includes(MemberRoles.Copastor) &&
-      roles.includes(MemberRoles.Disciple)
-    ) {
-      try {
-        const newCopastor = this.copastorRepository.create({
-          ...createCopastorDto,
-          theirPastor: pastor,
-          theirChurch: church,
-          createdAt: new Date(),
-          createdBy: user,
-        });
+    try {
+      const newCopastor = this.copastorRepository.create({
+        ...createCopastorDto,
+        theirPastor: pastor,
+        theirChurch: church,
+        createdAt: new Date(),
+        createdBy: user,
+      });
 
-        return await this.copastorRepository.save(newCopastor);
-      } catch (error) {
-        this.handleDBExceptions(error);
-      }
+      return await this.copastorRepository.save(newCopastor);
+    } catch (error) {
+      this.handleDBExceptions(error);
     }
   }
 
   //* FIND ALL (PAGINATED)
-  async findAll(paginationDto: PaginationDto): Promise<Copastor[]> {
+  async findAll(paginationDto: PaginationDto): Promise<any[]> {
     const { limit = 10, offset = 0 } = paginationDto;
 
-    return this.copastorRepository.find({
+    const data = await this.copastorRepository.find({
       where: { status: Status.Active },
       take: limit,
       skip: offset,
       relations: [
         'theirPastor',
         'theirChurch',
-        'disciples',
-        'preachers',
-        'familyHouses',
         'supervisors',
         'zones',
+        'preachers',
+        'familyHouses',
+        'disciples',
       ],
+      relationLoadStrategy: 'query',
       order: { createdAt: 'ASC' },
     });
+
+    const result = data.map((data) => ({
+      ...data,
+      supervisors: data.supervisors.map((supervisor) => ({
+        id: supervisor.id,
+        firstName: supervisor.firstName,
+        lastName: supervisor.lastName,
+      })),
+      zones: data.zones.map((zone) => ({
+        id: zone.id,
+        zoneName: zone.zoneName,
+        district: zone.district,
+      })),
+      preachers: data.preachers.map((preacher) => ({
+        id: preacher.id,
+        firstName: preacher.firstName,
+        lastName: preacher.lastName,
+      })),
+      familyHouses: data.familyHouses.map((familyHouse) => ({
+        id: familyHouse.id,
+        houseName: familyHouse.houseName,
+        zoneName: familyHouse.zoneName,
+        codeHouse: familyHouse.codeHouse,
+        district: familyHouse.district,
+        urbanSector: familyHouse.urbanSector,
+      })),
+      disciples: data.disciples.map((disciple) => ({
+        id: disciple.id,
+        firstName: disciple.firstName,
+        lastName: disciple.lastName,
+      })),
+    }));
+
+    return result;
   }
 
   findOne(id: number) {
@@ -214,7 +244,7 @@ export class CopastorService {
         roles.includes(MemberRoles.Treasurer))
     ) {
       throw new BadRequestException(
-        `A lower role cannot be assigned without going through the hierarchy: [preacher, supervisor, co-pastor, pastor]`,
+        `A lower role cannot be assigned without going through the hierarchy: [disciple, preacher, supervisor, co-pastor, pastor]`,
       );
     }
 
@@ -233,7 +263,6 @@ export class CopastorService {
       !roles.includes(MemberRoles.Preacher) &&
       !roles.includes(MemberRoles.Treasurer)
     ) {
-      // Validations
       if (copastor.status === Status.Active && status === Status.Inactive) {
         throw new BadRequestException(
           `You cannot update it to "inactive", you must delete the record`,
@@ -260,14 +289,14 @@ export class CopastorService {
           );
         }
 
-        if (!newPastor.status) {
+        if (newPastor.status === Status.Inactive) {
           throw new BadRequestException(
             `The property status in Pastor must be "Active"`,
           );
         }
 
-        // Validate Church according pastor
-        if (!newPastor.theirChurch) {
+        //* Validate Church according pastor
+        if (!newPastor?.theirChurch) {
           throw new BadRequestException(
             `Church was not found, verify that Copastor has a church assigned`,
           );
@@ -278,92 +307,11 @@ export class CopastorService {
           relations: ['theirMainChurch'],
         });
 
-        if (!newChurch.status) {
+        if (newChurch.status === Status.Inactive) {
           throw new BadRequestException(
             `The property status in Church must be "Active"`,
           );
         }
-
-        //? All members by module
-        const allSupervisors = await this.supervisorRepository.find({
-          relations: ['theirPastor', 'theirChurch'],
-        });
-        const allZones = await this.zoneRepository.find({
-          relations: ['theirPastor', 'theirChurch'],
-        });
-        const allPreachers = await this.preacherRepository.find({
-          relations: ['theirPastor', 'theirChurch'],
-        });
-        const allFamilyHouses = await this.familyHouseRepository.find({
-          relations: ['theirPastor', 'theirChurch'],
-        });
-        const allDisciples = await this.discipleRepository.find({
-          relations: ['theirPastor', 'theirChurch'],
-        });
-
-        //* Update in all supervisors the new relations of the copastor that is updated.
-        const supervisorsByCopastor = allSupervisors.filter(
-          (supervisor) => supervisor.theirCopastor?.id === copastor.id,
-        );
-
-        const updateSupervisors = supervisorsByCopastor.map(
-          async (supervisor) => {
-            await this.supervisorRepository.update(supervisor.id, {
-              theirChurch: newChurch,
-              theirPastor: newPastor,
-            });
-          },
-        );
-
-        //* Update in all zones the new relations of the copastor that is updated.
-        const zonesByCopastor = allZones.filter(
-          (zone) => zone.theirCopastor?.id === copastor.id,
-        );
-
-        const updateZones = zonesByCopastor.map(async (zone) => {
-          await this.zoneRepository.update(zone.id, {
-            theirChurch: newChurch,
-            theirPastor: newPastor,
-          });
-        });
-
-        //* Update in all preachers the new relations of the copastor that is updated.
-        const preachersByCopastor = allPreachers.filter(
-          (preacher) => preacher.theirCopastor?.id === copastor.id,
-        );
-
-        const updatePreachers = preachersByCopastor.map(async (preacher) => {
-          await this.preacherRepository.update(preacher.id, {
-            theirChurch: newChurch,
-            theirPastor: newPastor,
-          });
-        });
-
-        //* Update in all family houses the new relations of the copastor that is updated.
-        const familyHousesByCopastor = allFamilyHouses.filter(
-          (familyHouse) => familyHouse.theirCopastor?.id === copastor.id,
-        );
-
-        const updateFamilyHouses = familyHousesByCopastor.map(
-          async (familyHouse) => {
-            await this.familyHouseRepository.update(familyHouse.id, {
-              theirChurch: newChurch,
-              theirPastor: newPastor,
-            });
-          },
-        );
-
-        //* Update in all disciples the new relations of the copastor that is updated.
-        const disciplesByCopastor = allDisciples.filter(
-          (disciple) => disciple.theirCopastor?.id === copastor.id,
-        );
-
-        const updateDisciples = disciplesByCopastor.map(async (disciple) => {
-          await this.discipleRepository.update(disciple.id, {
-            theirChurch: newChurch,
-            theirPastor: newPastor,
-          });
-        });
 
         // Update and save
         const updatedCopastor = await this.copastorRepository.preload({
@@ -376,34 +324,124 @@ export class CopastorService {
           status: status,
         });
 
+        let savedCopastor: Copastor;
         try {
-          await Promise.all(updateSupervisors);
-          await Promise.all(updateZones);
-          await Promise.all(updatePreachers);
-          await Promise.all(updateFamilyHouses);
-          await Promise.all(updateDisciples);
+          savedCopastor = await this.copastorRepository.save(updatedCopastor);
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
 
+        //? Update in subordinate relations
+        const allSupervisors = await this.supervisorRepository.find({
+          relations: ['theirCopastor'],
+        });
+        const allZones = await this.zoneRepository.find({
+          relations: ['theirCopastor'],
+        });
+        const allPreachers = await this.preacherRepository.find({
+          relations: ['theirCopastor'],
+        });
+        const allFamilyHouses = await this.familyHouseRepository.find({
+          relations: ['theirCopastor'],
+        });
+        const allDisciples = await this.discipleRepository.find({
+          relations: ['theirCopastor'],
+        });
+
+        try {
+          //* Update and set to null relationships in Supervisor
+          const supervisorsByCopastor = allSupervisors.filter(
+            (supervisor) => supervisor.theirCopastor?.id === copastor.id,
+          );
+
+          await Promise.all(
+            supervisorsByCopastor.map(async (supervisor) => {
+              await this.supervisorRepository.update(supervisor.id, {
+                theirChurch: newChurch,
+                theirPastor: newPastor,
+              });
+            }),
+          );
+
+          //* Update and set to null relationships in Zone
+          const zonesByCopastor = allZones.filter(
+            (zone) => zone.theirCopastor?.id === copastor.id,
+          );
+
+          await Promise.all(
+            zonesByCopastor.map(async (zone) => {
+              await this.zoneRepository.update(zone.id, {
+                theirChurch: newChurch,
+                theirPastor: newPastor,
+              });
+            }),
+          );
+
+          //* Update and set to null relationships in Preacher
+          const preachersByCopastor = allPreachers.filter(
+            (preacher) => preacher.theirCopastor?.id === copastor.id,
+          );
+
+          await Promise.all(
+            preachersByCopastor.map(async (preacher) => {
+              await this.preacherRepository.update(preacher.id, {
+                theirChurch: newChurch,
+                theirPastor: newPastor,
+              });
+            }),
+          );
+
+          //* Update and set to null relationships in Family House
+          const familyHousesByCopastor = allFamilyHouses.filter(
+            (familyHouse) => familyHouse.theirCopastor?.id === copastor.id,
+          );
+
+          await Promise.all(
+            familyHousesByCopastor.map(async (familyHouse) => {
+              await this.familyHouseRepository.update(familyHouse.id, {
+                theirChurch: newChurch,
+                theirPastor: newPastor,
+              });
+            }),
+          );
+
+          //* Update and set to null relationships in Disciple
+          const disciplesByCopastor = allDisciples.filter(
+            (disciple) => disciple.theirCopastor?.id === copastor.id,
+          );
+
+          await Promise.all(
+            disciplesByCopastor.map(async (disciple) => {
+              await this.discipleRepository.update(disciple.id, {
+                theirChurch: newChurch,
+                theirPastor: newPastor,
+              });
+            }),
+          );
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+
+        return savedCopastor;
+      }
+
+      if (copastor.theirPastor?.id === theirPastor) {
+        //? Update and save if is same Pastor
+        const updatedCopastor = await this.copastorRepository.preload({
+          id: copastor.id,
+          ...updateCopastorDto,
+          theirChurch: copastor.theirChurch,
+          theirPastor: copastor.theirPastor,
+          updatedAt: new Date(),
+          updatedBy: user,
+          status: status,
+        });
+
+        try {
           return await this.copastorRepository.save(updatedCopastor);
         } catch (error) {
           this.handleDBExceptions(error);
         }
-      }
-
-      //? Update and save if is same Pastor
-      const updatedCopastor = await this.copastorRepository.preload({
-        id: copastor.id,
-        ...updateCopastorDto,
-        theirChurch: copastor.theirChurch,
-        theirPastor: copastor.theirPastor,
-        updatedAt: new Date(),
-        updatedBy: user,
-        status: status,
-      });
-
-      try {
-        return await this.copastorRepository.save(updatedCopastor);
-      } catch (error) {
-        this.handleDBExceptions(error);
       }
     }
 
@@ -421,12 +459,12 @@ export class CopastorService {
       !roles.includes(MemberRoles.Supervisor) &&
       !roles.includes(MemberRoles.Copastor) &&
       !roles.includes(MemberRoles.Preacher) &&
-      status === Status.Active
+      copastor.status === Status.Active
     ) {
-      // Validation new church
+      //* Validation new church
       if (!theirChurch) {
         throw new NotFoundException(
-          `Para subir de nivel de copastor a pastor coloque un church id existente`,
+          `To upgrade from co-pastor to pastor enter an existing church id`,
         );
       }
 
@@ -439,12 +477,12 @@ export class CopastorService {
         throw new NotFoundException(`Church not found with id: ${id}`);
       }
 
-      if (newChurch.status === Status.Inactive) {
+      if (newChurch.status == Status.Inactive) {
         throw new NotFoundException(
-          `The property status in Church must be a "Active"`,
+          `The property status in Church must be a "active"`,
         );
       }
-      // TODO : seguir en las entidades menores e ir validando
+
       // NOTE : Se tiene que mandar todos los campos para crear a un nuevo pastor (front)
       try {
         const newPastor = this.pastorRepository.create({
@@ -463,7 +501,7 @@ export class CopastorService {
       }
     } else {
       throw new BadRequestException(
-        `You cannot level up, you must have the "Active"`,
+        `You cannot level up, you must have the registry in "active" mode and the appropriate roles, review and update the registry.`,
       );
     }
   }
@@ -481,7 +519,7 @@ export class CopastorService {
       throw new NotFoundException(`Copastor with id: ${id} not exits`);
     }
 
-    //* Update and set in Inactive on Pastor
+    //* Update and set in Inactive on Copastor
     const updatedCopastor = await this.copastorRepository.preload({
       id: copastor.id,
       theirPastor: null,
@@ -491,103 +529,108 @@ export class CopastorService {
       status: Status.Inactive,
     });
 
-    // Update and set to null relationships in Supervisor (who have same Copastor)
+    try {
+      await this.copastorRepository.save(updatedCopastor);
+    } catch (error) {
+      this.handleDBExceptions(error);
+    }
+
+    //? Update in subordinate relations
     const allSupervisors = await this.supervisorRepository.find({
       relations: ['theirCopastor'],
     });
-    const supervisorsByCopastor = allSupervisors.filter(
-      (supervisor) => supervisor.theirCopastor?.id === copastor?.id,
-    );
 
-    const deleteCopastorInSupervisors = supervisorsByCopastor.map(
-      async (supervisor) => {
-        await this.supervisorRepository.update(supervisor?.id, {
-          theirCopastor: null,
-          updatedAt: new Date(),
-          updatedBy: user,
-        });
-      },
-    );
-
-    // Update and set to null relationships in Zones (who have same Copastor)
     const allZones = await this.zoneRepository.find({
       relations: ['theirCopastor'],
     });
-    const zonesByCopastor = allZones.filter(
-      (zone) => zone.theirCopastor?.id === copastor?.id,
-    );
 
-    const deleteCopastorInZones = zonesByCopastor.map(async (zone) => {
-      await this.zoneRepository.update(zone?.id, {
-        theirCopastor: null,
-        updatedAt: new Date(),
-        updatedBy: user,
-      });
-    });
-
-    // Update and set to null relationships in Preacher (who have same Copastor)
     const allPreachers = await this.preacherRepository.find({
       relations: ['theirCopastor'],
     });
-    const preachersByCopastor = allPreachers.filter(
-      (preacher) => preacher.theirCopastor?.id === copastor?.id,
-    );
 
-    const deleteCopastorInPreachers = preachersByCopastor.map(
-      async (preacher) => {
-        await this.preacherRepository.update(preacher?.id, {
-          theirCopastor: null,
-          updatedAt: new Date(),
-          updatedBy: user,
-        });
-      },
-    );
-
-    // Update and set to null relationships in Family House (who have same Copastor)
     const allFamilyHouses = await this.familyHouseRepository.find({
       relations: ['theirCopastor'],
     });
-    const familyHousesByCopastor = allFamilyHouses.filter(
-      (familyHome) => familyHome.theirCopastor?.id === copastor.id,
-    );
 
-    const deleteCopastorInFamilyHouses = familyHousesByCopastor.map(
-      async (familyHome) => {
-        await this.familyHouseRepository.update(familyHome.id, {
-          theirCopastor: null,
-          updatedAt: new Date(),
-          updatedBy: user,
-        });
-      },
-    );
-
-    // Update and set to null relationships in Disciple, all those (who have the same Copastor).
     const allDisciples = await this.discipleRepository.find({
       relations: ['theirCopastor'],
     });
 
-    const disciplesByCopastor = allDisciples.filter(
-      (disciple) => disciple.theirCopastor?.id === copastor.id,
-    );
-
-    const deleteCopastorInDisciples = disciplesByCopastor.map(
-      async (disciple) => {
-        await this.discipleRepository.update(disciple?.id, {
-          theirCopastor: null,
-          updatedAt: new Date(),
-          updatedBy: user,
-        });
-      },
-    );
-
-    // Update and save
     try {
-      await Promise.all(deleteCopastorInSupervisors);
-      await Promise.all(deleteCopastorInZones);
-      await Promise.all(deleteCopastorInPreachers);
-      await Promise.all(deleteCopastorInFamilyHouses);
-      await Promise.all(deleteCopastorInDisciples);
-      await this.copastorRepository.save(updatedCopastor);
+      //* Update and set to null relationships in Supervisor
+      const supervisorsByCopastor = allSupervisors.filter(
+        (supervisor) => supervisor.theirCopastor?.id === copastor?.id,
+      );
+
+      await Promise.all(
+        supervisorsByCopastor.map(async (supervisor) => {
+          await this.supervisorRepository.update(supervisor?.id, {
+            theirCopastor: null,
+            updatedAt: new Date(),
+            updatedBy: user,
+          });
+        }),
+      );
+
+      //* Update and set to null relationships in Zone
+      const zonesByCopastor = allZones.filter(
+        (zone) => zone.theirCopastor?.id === copastor?.id,
+      );
+
+      await Promise.all(
+        zonesByCopastor.map(async (zone) => {
+          await this.zoneRepository.update(zone?.id, {
+            theirCopastor: null,
+            updatedAt: new Date(),
+            updatedBy: user,
+          });
+        }),
+      );
+
+      //* Update and set to null relationships in Preacher
+      const preachersByCopastor = allPreachers.filter(
+        (preacher) => preacher.theirCopastor?.id === copastor?.id,
+      );
+
+      await Promise.all(
+        preachersByCopastor.map(async (preacher) => {
+          await this.preacherRepository.update(preacher?.id, {
+            theirCopastor: null,
+            updatedAt: new Date(),
+            updatedBy: user,
+          });
+        }),
+      );
+
+      //* Update and set to null relationships in Family House
+      const familyHousesByCopastor = allFamilyHouses.filter(
+        (familyHome) => familyHome.theirCopastor?.id === copastor.id,
+      );
+
+      await Promise.all(
+        familyHousesByCopastor.map(async (familyHome) => {
+          await this.familyHouseRepository.update(familyHome.id, {
+            theirCopastor: null,
+            updatedAt: new Date(),
+            updatedBy: user,
+          });
+        }),
+      );
+
+      //* Update and set to null relationships in Disciple
+      const disciplesByCopastor = allDisciples.filter(
+        (disciple) => disciple.theirCopastor?.id === copastor.id,
+      );
+
+      await Promise.all(
+        disciplesByCopastor.map(async (disciple) => {
+          await this.discipleRepository.update(disciple?.id, {
+            theirCopastor: null,
+            updatedAt: new Date(),
+            updatedBy: user,
+          });
+        }),
+      );
     } catch (error) {
       this.handleDBExceptions(error);
     }
@@ -598,7 +641,6 @@ export class CopastorService {
   private handleDBExceptions(error: any): never {
     if (error.code === '23505') throw new BadRequestException(error.detail);
     this.logger.error(error);
-    console.log(error);
 
     throw new InternalServerErrorException(
       'Unexpected errors, check server logs',

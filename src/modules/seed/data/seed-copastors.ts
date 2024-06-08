@@ -4,7 +4,7 @@ interface SeedCopastor {
   lastName: string;
   gender: string;
   originCountry: string;
-  birthDate: string | Date;
+  dateBirth: string | Date;
   age?: number;
   maritalStatus: string;
   numberChildren?: number;
@@ -28,18 +28,18 @@ interface SeedCopastor {
 }
 
 interface SeedDataCopastors {
-  members: SeedCopastor[];
+  copastors: SeedCopastor[];
 }
 
 //! Data Copastors
 export const dataCopastors: SeedDataCopastors = {
-  members: [
+  copastors: [
     {
       firstName: 'Luz Mariella',
       lastName: 'Salgado Huaman',
       gender: 'female',
       originCountry: 'Peru',
-      birthDate: '1987-03-15',
+      dateBirth: '1987-03-15',
       maritalStatus: 'married',
       numberChildren: 2,
       conversionDate: '2007-03-15',
@@ -56,7 +56,7 @@ export const dataCopastors: SeedDataCopastors = {
       lastName: 'Cordova Flores',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1992-08-21',
+      dateBirth: '1992-08-21',
       maritalStatus: 'single',
       numberChildren: 0,
       conversionDate: '2010-05-12',
@@ -73,7 +73,7 @@ export const dataCopastors: SeedDataCopastors = {
       lastName: 'Gomez Rodriguez',
       gender: 'female',
       originCountry: 'Peru',
-      birthDate: '1985-12-10',
+      dateBirth: '1985-12-10',
       maritalStatus: 'married',
       numberChildren: 3,
       conversionDate: '2005-06-30',
@@ -90,7 +90,7 @@ export const dataCopastors: SeedDataCopastors = {
       lastName: 'Vargas Medina',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1978-04-03',
+      dateBirth: '1978-04-03',
       maritalStatus: 'widower',
       numberChildren: 2,
       conversionDate: '2000-11-17',
@@ -107,7 +107,7 @@ export const dataCopastors: SeedDataCopastors = {
       lastName: 'Torres Gutierrez',
       gender: 'female',
       originCountry: 'Peru',
-      birthDate: '1990-02-28',
+      dateBirth: '1990-02-28',
       maritalStatus: 'married',
       numberChildren: 1,
       conversionDate: '2009-09-05',
@@ -124,7 +124,7 @@ export const dataCopastors: SeedDataCopastors = {
       lastName: 'Soto Chavez',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1982-11-17',
+      dateBirth: '1982-11-17',
       maritalStatus: 'married',
       numberChildren: 4,
       conversionDate: '2003-08-12',
@@ -134,23 +134,6 @@ export const dataCopastors: SeedDataCopastors = {
       urbanSectorResidence: 'Tahuantinsuyo',
       addressResidence: 'Av. Los Laureles 123',
       addressResidenceReference: 'Al lado del colegio San Miguel',
-      roles: ['copastor', 'disciple'],
-    },
-    {
-      firstName: 'Luisa',
-      lastName: 'Castillo Ramirez',
-      gender: 'female',
-      originCountry: 'Peru',
-      birthDate: '1989-05-20',
-      maritalStatus: 'single',
-      numberChildren: 5,
-      conversionDate: '2008-12-25',
-      email: 'luisa.castillo@google.com',
-      phoneNumber: '+1-321-0987',
-      districtResidence: 'Independencia',
-      urbanSectorResidence: 'Ermitaño',
-      addressResidence: 'Jr. Los Sauces 345',
-      addressResidenceReference: 'Frente a la estación de policía',
       roles: ['copastor', 'disciple'],
     },
   ],

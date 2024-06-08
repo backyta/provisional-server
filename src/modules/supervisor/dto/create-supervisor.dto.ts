@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { MaritalStatus, MemberRoles, Gender } from '@/common/enums';
+import { MaritalStatus, MemberRoles, Gender, Status } from '@/common/enums';
 import {
   IsArray,
   IsBoolean,
@@ -12,7 +12,6 @@ import {
   IsUUID,
   MaxLength,
   MinLength,
-  ValidateIf,
 } from 'class-validator';
 
 export class CreateSupervisorDto {
@@ -167,6 +166,7 @@ export class CreateSupervisorDto {
     example: 'Active',
   })
   @IsString()
+  @IsEnum(Status)
   @IsOptional()
   status?: string;
 
@@ -181,7 +181,6 @@ export class CreateSupervisorDto {
   @ApiProperty({
     example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
   })
-  @ValidateIf((o) => !o.assignToPastorOnly)
   @IsString()
   @IsOptional()
   @IsUUID()
@@ -190,7 +189,6 @@ export class CreateSupervisorDto {
   @ApiProperty({
     example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
   })
-  @ValidateIf((o) => o.isDirectRelationToPastor)
   @IsString()
   @IsOptional()
   @IsUUID()

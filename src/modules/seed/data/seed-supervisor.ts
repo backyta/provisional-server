@@ -4,12 +4,12 @@ interface SeedSupervisor {
   lastName: string;
   gender: string;
   originCountry: string;
-  birthDate: string | Date;
+  dateBirth: string | Date;
   age?: number;
   maritalStatus: string;
   numberChildren?: number;
   conversionDate?: string | Date;
-  isDirectRelationToPastor?: boolean;
+  isDirectRelationToPastor: boolean;
 
   //* Contact Info
   email: string;
@@ -30,18 +30,18 @@ interface SeedSupervisor {
 }
 
 interface SeedDataSupervisors {
-  members: SeedSupervisor[];
+  supervisors: SeedSupervisor[];
 }
 
 //! Data Supervisors
 export const dataSupervisors: SeedDataSupervisors = {
-  members: [
+  supervisors: [
     {
       firstName: 'Gabriela',
       lastName: 'Fernandez Torres',
       gender: 'female',
       originCountry: 'Peru',
-      birthDate: '1989-09-03',
+      dateBirth: '1989-09-03',
       maritalStatus: 'married',
       numberChildren: 3,
       conversionDate: '2007-11-20',
@@ -52,13 +52,14 @@ export const dataSupervisors: SeedDataSupervisors = {
       addressResidence: 'Av. Los Nogales 890',
       addressResidenceReference: 'Frente al parque zonal',
       roles: ['supervisor', 'disciple'],
+      isDirectRelationToPastor: false,
     },
     {
       firstName: 'Juan',
       lastName: 'Lopez Martinez',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1984-05-16',
+      dateBirth: '1984-05-16',
       maritalStatus: 'single',
       numberChildren: 0,
       conversionDate: '2005-08-30',
@@ -69,13 +70,14 @@ export const dataSupervisors: SeedDataSupervisors = {
       addressResidence: 'Jr. Las Acacias 567',
       addressResidenceReference: 'Cerca del mercado municipal',
       roles: ['supervisor', 'disciple'],
+      isDirectRelationToPastor: false,
     },
     {
       firstName: 'Sandra',
       lastName: 'Ramirez Silva',
       gender: 'female',
       originCountry: 'Peru',
-      birthDate: '1993-02-12',
+      dateBirth: '1993-02-12',
       maritalStatus: 'divorced',
       numberChildren: 1,
       conversionDate: '2011-03-25',
@@ -86,13 +88,14 @@ export const dataSupervisors: SeedDataSupervisors = {
       addressResidence: 'Av. Las Hortensias 234',
       addressResidenceReference: 'Cerca del parque industrial',
       roles: ['supervisor', 'disciple'],
+      isDirectRelationToPastor: false,
     },
     {
       firstName: 'Ricardo',
       lastName: 'Gomez Diaz',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1981-07-30',
+      dateBirth: '1981-07-30',
       maritalStatus: 'married',
       numberChildren: 2,
       conversionDate: '2002-12-15',
@@ -103,13 +106,14 @@ export const dataSupervisors: SeedDataSupervisors = {
       addressResidence: 'Jr. Los Laureles 890',
       addressResidenceReference: 'Al lado del centro educativo',
       roles: ['supervisor', 'disciple'],
+      isDirectRelationToPastor: false,
     },
     {
       firstName: 'Maria',
       lastName: 'Perez Rodriguez',
       gender: 'female',
       originCountry: 'Peru',
-      birthDate: '1990-11-25',
+      dateBirth: '1990-11-25',
       maritalStatus: 'widower',
       numberChildren: 4,
       conversionDate: '2008-06-20',
@@ -120,13 +124,14 @@ export const dataSupervisors: SeedDataSupervisors = {
       addressResidence: 'Av. Los Cipreses 567',
       addressResidenceReference: 'Frente a la fábrica textil',
       roles: ['supervisor', 'disciple'],
+      isDirectRelationToPastor: false,
     },
     {
       firstName: 'Diego',
       lastName: 'Castro Alvarez',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1987-04-20',
+      dateBirth: '1987-04-20',
       maritalStatus: 'single',
       numberChildren: 0,
       conversionDate: '2006-10-10',
@@ -137,6 +142,7 @@ export const dataSupervisors: SeedDataSupervisors = {
       addressResidence: 'Jr. Las Orquídeas 123',
       addressResidenceReference: 'Cerca del parque zonal',
       roles: ['supervisor', 'disciple'],
+      isDirectRelationToPastor: false,
     },
   ],
 };

@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -29,14 +30,14 @@ export class FamilyHouse {
   @Column('text', { name: 'house_name', unique: true })
   houseName: string;
 
-  @Column('text', { name: 'zone_name', unique: true })
+  @Column('text', { name: 'zone_name' })
   zoneName: string;
 
-  @Column('text', { name: 'house_number' })
-  houseNumber: string;
+  @Column('int', { name: 'house_number' })
+  houseNumber: number;
 
   @Index()
-  @Column('text', { name: 'code_house', unique: true })
+  @Column('text', { name: 'code_house' })
   codeHouse: string;
 
   @Column('text', { name: 'worship_time' })
@@ -91,41 +92,41 @@ export class FamilyHouse {
 
   //* Relations(FK)
   @ManyToOne(() => Church, (church) => church.familyHouses, {
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 
   @ManyToOne(() => Pastor, (pastor) => pastor.familyHouses, {
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_pastor_id' })
   theirPastor: Pastor;
 
   @ManyToOne(() => Copastor, (copastor) => copastor.familyHouses, {
     onDelete: 'SET NULL',
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_copastor_id' })
   theirCopastor: Copastor;
 
   @ManyToOne(() => Supervisor, (supervisor) => supervisor.familyHouses, {
     onDelete: 'SET NULL',
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_supervisor_id' })
   theirSupervisor: Supervisor;
 
-  @ManyToOne(() => Preacher, (preacher) => preacher.familyHouses, {
-    onDelete: 'SET NULL',
-    eager: true,
-  })
-  @JoinColumn({ name: 'their_preacher_id' })
-  theirPreacher: Preacher;
-
   @ManyToOne(() => Zone, (zone) => zone.familyHouses, {
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_zone_id' })
   theirZone: Zone;
+
+  @OneToOne(() => Preacher, {
+    onDelete: 'SET NULL',
+    // eager: true,
+  })
+  @JoinColumn({ name: 'their_preacher_id' })
+  theirPreacher: Preacher;
 }

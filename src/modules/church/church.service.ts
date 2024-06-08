@@ -7,21 +7,23 @@ import {
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { isUUID } from 'class-validator';
 
 import { User } from '@/modules/user/entities/';
 
 import { CreateChurchDto, UpdateChurchDto } from '@/modules/church/dto';
 import { Church } from '@/modules/church/entities';
-import { isUUID } from 'class-validator';
+
 import { Status } from '@/common/enums';
-import { Pastor } from '@/modules/pastor/entities';
-import { Copastor } from '@/modules/copastor/entities';
-import { Supervisor } from '@/modules/supervisor/entities';
-import { Zone } from '@/modules/zone/entities';
-import { Preacher } from '@/modules/preacher/entities';
-import { FamilyHouse } from '@/modules/family-house/entities';
-import { Disciple } from '@/modules/disciple/entities';
 import { PaginationDto } from '@/common/dtos';
+
+import { Zone } from '@/modules/zone/entities';
+import { Pastor } from '@/modules/pastor/entities';
+import { Preacher } from '@/modules/preacher/entities';
+import { Copastor } from '@/modules/copastor/entities';
+import { Disciple } from '@/modules/disciple/entities';
+import { Supervisor } from '@/modules/supervisor/entities';
+import { FamilyHouse } from '@/modules/family-house/entities';
 
 @Injectable()
 export class ChurchService {
@@ -57,6 +59,16 @@ export class ChurchService {
   async create(createChurchDto: CreateChurchDto, user: User): Promise<Church> {
     const { theirMainChurch } = createChurchDto;
 
+    const mainChurch = await this.churchRepository.findOne({
+      where: { isAnexe: false },
+    });
+
+    if (mainChurch && !theirMainChurch) {
+      throw new BadRequestException(
+        `A main church already exists, you can only create annex churches, assign a main church to the annex`,
+      );
+    }
+
     //? Validate and assign main church to anexe church
     if (theirMainChurch) {
       const mainChurch = await this.churchRepository.findOne({
@@ -70,9 +82,15 @@ export class ChurchService {
         );
       }
 
+      if (mainChurch.isAnexe) {
+        throw new NotFoundException(
+          `You cannot assign an annex church as the main church of another annex`,
+        );
+      }
+
       if (mainChurch.status === Status.Inactive) {
         throw new BadRequestException(
-          `The property status in Church must be a "Active"`,
+          `The property status in Church must be a "active"`,
         );
       }
 
@@ -80,7 +98,7 @@ export class ChurchService {
       try {
         const newChurch = this.churchRepository.create({
           ...createChurchDto,
-          isAnexe: mainChurch ? true : false,
+          isAnexe: true,
           theirMainChurch: mainChurch,
           createdAt: new Date(),
           createdBy: user,
@@ -109,26 +127,81 @@ export class ChurchService {
   }
 
   //* FIND ALL (PAGINATED)
-  async findAll(paginationDto: PaginationDto): Promise<Church[]> {
+  async findAll(paginationDto: PaginationDto): Promise<any[]> {
     const { limit = 10, offset = 0 } = paginationDto;
 
-    return this.churchRepository.find({
+    const data = await this.churchRepository.find({
       where: { status: Status.Active },
       take: limit,
       skip: offset,
       relations: [
-        'theirMainChurch',
-        'disciples',
+        'anexes',
+        'pastors',
+        'copastors',
+        'supervisors',
+        'zones',
         'preachers',
         'familyHouses',
-        'supervisors',
-        'copastors',
-        'pastors',
-        'anexes',
-        'zones',
+        'disciples',
       ],
+      relationLoadStrategy: 'query',
       order: { createdAt: 'ASC' },
     });
+
+    const theirMainChurch = await this.churchRepository.findOne({
+      where: { status: Status.Active, isAnexe: false },
+    });
+
+    const result = data.map((data) => ({
+      ...data,
+      theirMainChurch: data.isAnexe ? theirMainChurch : null,
+      anexes: data.anexes.map((anexe) => ({
+        id: anexe.id,
+        churchName: anexe.churchName,
+        district: anexe.district,
+        urbanSector: anexe.urbanSector,
+      })),
+      pastors: data.pastors.map((pastor) => ({
+        id: pastor.id,
+        firstName: pastor.firstName,
+        lastName: pastor.lastName,
+      })),
+      copastors: data.copastors.map((copastor) => ({
+        id: copastor.id,
+        firstName: copastor.firstName,
+        lastName: copastor.lastName,
+      })),
+      supervisors: data.supervisors.map((supervisor) => ({
+        id: supervisor.id,
+        firstName: supervisor.firstName,
+        lastName: supervisor.lastName,
+      })),
+      zones: data.zones.map((zone) => ({
+        id: zone.id,
+        zoneName: zone.zoneName,
+        district: zone.district,
+      })),
+      preachers: data.preachers.map((preacher) => ({
+        id: preacher.id,
+        firstName: preacher.firstName,
+        lastName: preacher.lastName,
+      })),
+      familyHouses: data.familyHouses.map((familyHouse) => ({
+        id: familyHouse.id,
+        houseName: familyHouse.houseName,
+        zoneName: familyHouse.zoneName,
+        codeHouse: familyHouse.codeHouse,
+        district: familyHouse.disciples,
+        urbanSector: familyHouse.urbanSector,
+      })),
+      disciples: data.disciples.map((disciple) => ({
+        id: disciple.id,
+        firstName: disciple.firstName,
+        lastName: disciple.lastName,
+      })),
+    }));
+
+    return result;
   }
 
   findOne(id: number) {
@@ -154,24 +227,34 @@ export class ChurchService {
     });
 
     if (!church) {
-      throw new NotFoundException(`Pastor not found with id: ${id}`);
+      throw new NotFoundException(`Church not found with id: ${id}`);
     }
 
-    //* Update info about Church
-    // Validations
+    if (!church.isAnexe && theirMainChurch) {
+      throw new BadRequestException(
+        `Cannot assign a home church to the home church`,
+      );
+    }
+
+    if (!church.isAnexe && church.isAnexe) {
+      throw new BadRequestException(
+        `You cannot change the main church to an annex`,
+      );
+    }
+
     if (church.status === Status.Active && status === Status.Inactive) {
       throw new BadRequestException(
         `You cannot update it to "inactive", you must delete the record`,
       );
     }
 
-    //? Update if their main Church is different or update to active
+    //? Update if their main Church is different
     if (
       church.isAnexe &&
       theirMainChurch &&
       church?.theirMainChurch?.id !== theirMainChurch
     ) {
-      //* Validate church
+      // Validate new main church
       const newMainChurch = await this.churchRepository.findOne({
         where: { id: theirMainChurch },
         relations: [
@@ -188,13 +271,19 @@ export class ChurchService {
 
       if (!newMainChurch) {
         throw new NotFoundException(
-          `Church not found with id ${theirMainChurch}`,
+          `Main church not found with id ${theirMainChurch}`,
         );
       }
 
-      if (!newMainChurch.status) {
+      if (newMainChurch.isAnexe) {
+        throw new NotFoundException(
+          `You cannot assign an annex church as the main church`,
+        );
+      }
+
+      if (newMainChurch.status === Status.Inactive) {
         throw new BadRequestException(
-          `The property status in copastor must be "Active"`,
+          `The property status in main church must be "active"`,
         );
       }
 
@@ -249,146 +338,158 @@ export class ChurchService {
     }
 
     if (!church.isAnexe) {
-      throw new NotFoundException(`Church Central no puede ser eliminado`);
+      throw new NotFoundException(`Main Church cannot be removed`);
     }
 
     //* Update and set in Inactive on Church (anexe)
     const updatedChurch = await this.churchRepository.preload({
       id: church.id,
-      theirMainChurch: null, // no seria necesario borrar los [] porque al borrar las relaciones del their church tmb se elimina de cada uno de los []
+      theirMainChurch: null,
       updatedAt: new Date(),
       updatedBy: user,
       status: Status.Inactive,
     });
 
-    // Update and set to null relationships in Copastor (who have same Pastor)
+    try {
+      await this.churchRepository.save(updatedChurch);
+    } catch (error) {
+      this.handleDBExceptions(error);
+    }
+
+    //? Update in subordinate relations
     const allPastors = await this.pastorRepository.find({
       relations: ['theirChurch'],
     });
-    const pastorsByChurch = allPastors.filter(
-      (pastor) => pastor.theirChurch?.id === church?.id,
-    );
 
-    const deleteChurchInPastors = pastorsByChurch.map(async (pastor) => {
-      await this.pastorRepository.update(pastor?.id, {
-        theirChurch: null,
-        updatedAt: new Date(),
-        updatedBy: user,
-      });
-    });
-
-    // Update and set to null relationships in Copastor (who have same Pastor)
     const allCopastors = await this.copastorRepository.find({
       relations: ['theirChurch'],
     });
-    const copastorsByChurch = allCopastors.filter(
-      (copastor) => copastor.theirChurch?.id === church?.id,
-    );
 
-    const deleteChurchInCopastors = copastorsByChurch.map(async (copastor) => {
-      await this.copastorRepository.update(copastor?.id, {
-        theirChurch: null,
-        updatedAt: new Date(),
-        updatedBy: user,
-      });
-    });
-
-    // Update and set to null relationships in Supervisor (who have same Pastor)
     const allSupervisors = await this.supervisorRepository.find({
       relations: ['theirChurch'],
     });
-    const supervisorsByPastor = allSupervisors.filter(
-      (supervisor) => supervisor.theirChurch?.id === church?.id,
-    );
 
-    const deleteChurchInSupervisors = supervisorsByPastor.map(
-      async (supervisor) => {
-        await this.supervisorRepository.update(supervisor?.id, {
-          theirChurch: null,
-          updatedAt: new Date(),
-          updatedBy: user,
-        });
-      },
-    );
-
-    // Update and set to null relationships in Zones (who have same Pastor)
     const allZones = await this.zoneRepository.find({
       relations: ['theirChurch'],
     });
-    const zonesByPastor = allZones.filter(
-      (zone) => zone.theirChurch?.id === church?.id,
-    );
 
-    const deleteChurchInZones = zonesByPastor.map(async (zone) => {
-      await this.zoneRepository.update(zone?.id, {
-        theirChurch: null,
-        updatedAt: new Date(),
-        updatedBy: user,
-      });
-    });
-
-    // Update and set to null relationships in Preacher (who have same Pastor)
     const allPreachers = await this.preacherRepository.find({
       relations: ['theirChurch'],
     });
-    const preachersByPastor = allPreachers.filter(
-      (preacher) => preacher.theirChurch?.id === church?.id,
-    );
 
-    const deleteChurchInPreachers = preachersByPastor.map(async (preacher) => {
-      await this.preacherRepository.update(preacher?.id, {
-        theirChurch: null,
-        updatedAt: new Date(),
-        updatedBy: user,
-      });
-    });
-
-    // Update and set to null relationships in Family House (who have same Pastor)
     const allFamilyHouses = await this.familyHouseRepository.find({
       relations: ['theirChurch'],
     });
-    const familyHousesByPastor = allFamilyHouses.filter(
-      (familyHome) => familyHome.theirChurch?.id === church?.id,
-    );
 
-    const deleteChurchInFamilyHouses = familyHousesByPastor.map(
-      async (familyHome) => {
-        await this.familyHouseRepository.update(familyHome.id, {
-          theirChurch: null,
-          updatedAt: new Date(),
-          updatedBy: user,
-        });
-      },
-    );
-
-    // Update and set to null relationships in Disciple, all those (who have the same Pastor).
     const allDisciples = await this.discipleRepository.find({
       relations: ['theirChurch'],
     });
 
-    const disciplesByPastor = allDisciples.filter(
-      (disciple) => disciple.theirChurch?.id === church?.id,
-    );
-
-    const deleteChurchInDisciples = disciplesByPastor.map(async (disciple) => {
-      await this.discipleRepository.update(disciple?.id, {
-        theirChurch: null,
-        updatedAt: new Date(),
-        updatedBy: user,
-      });
-    });
-
-    // Update and save
     try {
-      await Promise.all(deleteChurchInPastors);
-      await Promise.all(deleteChurchInCopastors);
-      await Promise.all(deleteChurchInSupervisors);
-      await Promise.all(deleteChurchInZones);
-      await Promise.all(deleteChurchInPreachers);
-      await Promise.all(deleteChurchInFamilyHouses);
-      await Promise.all(deleteChurchInDisciples);
+      //* Update and set to null relationships in Pastor
+      const pastorsByChurch = allPastors.filter(
+        (pastor) => pastor.theirChurch?.id === church?.id,
+      );
 
-      await this.churchRepository.save(updatedChurch);
+      await Promise.all(
+        pastorsByChurch.map(async (pastor) => {
+          await this.pastorRepository.update(pastor?.id, {
+            theirChurch: null,
+            updatedAt: new Date(),
+            updatedBy: user,
+          });
+        }),
+      );
+
+      //* Update and set to null relationships in Copastor
+      const copastorsByChurch = allCopastors.filter(
+        (copastor) => copastor.theirChurch?.id === church?.id,
+      );
+
+      await Promise.all(
+        copastorsByChurch.map(async (copastor) => {
+          await this.copastorRepository.update(copastor?.id, {
+            theirChurch: null,
+            updatedAt: new Date(),
+            updatedBy: user,
+          });
+        }),
+      );
+
+      //* Update and set to null relationships in Supervisor
+      const supervisorsByPastor = allSupervisors.filter(
+        (supervisor) => supervisor.theirChurch?.id === church?.id,
+      );
+
+      await Promise.all(
+        supervisorsByPastor.map(async (supervisor) => {
+          await this.supervisorRepository.update(supervisor?.id, {
+            theirChurch: null,
+            updatedAt: new Date(),
+            updatedBy: user,
+          });
+        }),
+      );
+
+      //* Update and set to null relationships in Zone
+      const zonesByPastor = allZones.filter(
+        (zone) => zone.theirChurch?.id === church?.id,
+      );
+
+      await Promise.all(
+        zonesByPastor.map(async (zone) => {
+          await this.zoneRepository.update(zone?.id, {
+            theirChurch: null,
+            updatedAt: new Date(),
+            updatedBy: user,
+          });
+        }),
+      );
+
+      //* Update and set to null relationships in Preacher
+      const preachersByPastor = allPreachers.filter(
+        (preacher) => preacher.theirChurch?.id === church?.id,
+      );
+
+      await Promise.all(
+        preachersByPastor.map(async (preacher) => {
+          await this.preacherRepository.update(preacher?.id, {
+            theirChurch: null,
+            updatedAt: new Date(),
+            updatedBy: user,
+          });
+        }),
+      );
+
+      //* Update and set to null relationships in Family house
+      const familyHousesByPastor = allFamilyHouses.filter(
+        (familyHome) => familyHome.theirChurch?.id === church?.id,
+      );
+
+      await Promise.all(
+        familyHousesByPastor.map(async (familyHome) => {
+          await this.familyHouseRepository.update(familyHome.id, {
+            theirChurch: null,
+            updatedAt: new Date(),
+            updatedBy: user,
+          });
+        }),
+      );
+
+      //* Update and set to null relationships in Disciple
+      const disciplesByPastor = allDisciples.filter(
+        (disciple) => disciple.theirChurch?.id === church?.id,
+      );
+
+      await Promise.all(
+        disciplesByPastor.map(async (disciple) => {
+          await this.discipleRepository.update(disciple?.id, {
+            theirChurch: null,
+            updatedAt: new Date(),
+            updatedBy: user,
+          });
+        }),
+      );
     } catch (error) {
       this.handleDBExceptions(error);
     }
@@ -399,7 +500,6 @@ export class ChurchService {
   private handleDBExceptions(error: any): never {
     if (error.code === '23505') throw new BadRequestException(error.detail);
     this.logger.error(error);
-    console.log(error);
 
     throw new InternalServerErrorException(
       'Unexpected errors, check server logs',

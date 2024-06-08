@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Status } from '@/common/enums';
 import {
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -81,9 +82,10 @@ export class CreateFamilyHouseDto {
   referenceAddress: string;
 
   @ApiProperty({
-    example: Status.Active,
+    example: 'active',
   })
   @IsString()
+  @IsEnum(Status)
   @IsOptional()
   status?: string;
 
@@ -93,14 +95,16 @@ export class CreateFamilyHouseDto {
   })
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   @IsUUID()
-  theirPreacher: string;
+  theirPreacher?: string;
 
   @ApiProperty({
     example: '38137648-cf88-4010-a0fd-10e3648440d3',
   })
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   @IsUUID()
-  theirZone: string;
+  theirZone?: string;
 }

@@ -23,17 +23,39 @@ import { PreacherService } from '@/modules/preacher/preacher.service';
 import { AuthService } from '@/modules/auth/auth.service';
 import { UserService } from '@/modules/user/user.service';
 import { dataUsers } from './data/seed-users';
+import { Church } from '@/modules/church/entities';
+import { Supervisor } from '@/modules/supervisor/entities';
+import { Zone } from '@/modules/zone/entities';
+import {
+  dataChurches,
+  dataCopastors,
+  dataDisciples,
+  dataFamilyHouses,
+  dataPastors,
+  dataPreachers,
+  dataSupervisors,
+  dataZones,
+} from './data';
 
 @Injectable()
 export class SeedService {
   private readonly logger = new Logger('SeedService');
 
   constructor(
+    @InjectRepository(Church)
+    private readonly churchRepository: Repository<Church>,
+
     @InjectRepository(Pastor)
     private readonly pastorRepository: Repository<Pastor>,
 
     @InjectRepository(Copastor)
-    private readonly coPastorRepository: Repository<Copastor>,
+    private readonly copastorRepository: Repository<Copastor>,
+
+    @InjectRepository(Supervisor)
+    private readonly supervisorRepository: Repository<Supervisor>,
+
+    @InjectRepository(Zone)
+    private readonly zoneRepository: Repository<Zone>,
 
     @InjectRepository(Preacher)
     private readonly preacherRepository: Repository<Preacher>,
@@ -53,7 +75,7 @@ export class SeedService {
     private readonly supervisorService: SupervisorService,
     private readonly zoneService: ZoneService,
     private readonly preacherService: PreacherService,
-    private readonly familyHousesService: FamilyHouseService,
+    private readonly familyHouseService: FamilyHouseService,
     private readonly discipleService: DiscipleService,
 
     private readonly userService: UserService,
@@ -61,23 +83,22 @@ export class SeedService {
   ) {}
 
   async runSeed(): Promise<string> {
-    const queryChurches =
-      this.discipleRepository.createQueryBuilder('churches');
-    const queryPastors = this.discipleRepository.createQueryBuilder('pastors');
+    const queryChurches = this.churchRepository.createQueryBuilder('churches');
+    const queryPastors = this.pastorRepository.createQueryBuilder('pastors');
 
     const queryCopastor =
-      this.discipleRepository.createQueryBuilder('copastors');
+      this.copastorRepository.createQueryBuilder('copastors');
 
     const querySupervisors =
-      this.discipleRepository.createQueryBuilder('preachers');
+      this.supervisorRepository.createQueryBuilder('supervisors');
 
-    const queryZones = this.discipleRepository.createQueryBuilder('zones');
+    const queryZones = this.zoneRepository.createQueryBuilder('zones');
 
     const queryPreachers =
-      this.discipleRepository.createQueryBuilder('preachers');
+      this.preacherRepository.createQueryBuilder('preachers');
 
     const queryFamilyHouses =
-      this.discipleRepository.createQueryBuilder('family-houses');
+      this.familyHouseRepository.createQueryBuilder('family-houses');
 
     const queryDisciples =
       this.discipleRepository.createQueryBuilder('disciples');
@@ -88,8 +109,8 @@ export class SeedService {
       await queryDisciples.delete().where({}).execute();
       await queryFamilyHouses.delete().where({}).execute();
       await queryPreachers.delete().where({}).execute();
-      await queryZones.delete().where({}).execute();
       await querySupervisors.delete().where({}).execute();
+      await queryZones.delete().where({}).execute();
       await queryCopastor.delete().where({}).execute();
       await queryPastors.delete().where({}).execute();
       await queryChurches.delete().where({}).execute();
@@ -101,9 +122,9 @@ export class SeedService {
       this.handleDBExceptions(error);
     }
 
-    await this.insertUsers();
+    const superUser = await this.insertUsers();
 
-    // await this.insertNewMembers(superUser);
+    await this.insertNewMembers(superUser);
 
     return 'SEED EXECUTED';
   }
@@ -127,6 +148,212 @@ export class SeedService {
   }
 
   //* Insertar Churches
+  private async insertNewMembers(user: User) {
+    const church = dataChurches.mainChurch;
+    const anexes = dataChurches.anexes;
+    const pastors = dataPastors.pastors;
+    const copastors = dataCopastors.copastors;
+    const supervisors = dataSupervisors.supervisors;
+    const zones = dataZones.zones;
+    const preachers = dataPreachers.preachers;
+    const familyHouses = dataFamilyHouses.houses;
+    const disciples = dataDisciples.disciples;
+
+    const promisesAnexes = [];
+    const promisesPastor = [];
+    const promisesCopastor = [];
+    const promisesSupervisor = [];
+    const promisesZone = [];
+    const promisesPreacher = [];
+
+    // const promisesMembers = [];
+    // const promisesOfferings = [];
+
+    //* Create Main Church
+    await this.churchService.create(church[0], user);
+
+    const mainChurch = await this.churchRepository.findOne({
+      where: { isAnexe: false },
+      relations: ['anexes', 'theirMainChurch'],
+    });
+
+    //* Create Anexes
+    anexes.forEach((anexe) => {
+      anexe.theirMainChurch = mainChurch.id;
+
+      promisesAnexes.push(this.churchService.create(anexe, user));
+    });
+
+    await Promise.all(promisesAnexes);
+
+    //* Create Pastor
+    pastors.forEach((pastor) => {
+      pastor.theirChurch = mainChurch.id;
+
+      promisesPastor.push(this.pastorService.create(pastor, user));
+    });
+
+    await Promise.all(promisesPastor);
+
+    //* Create Copastor
+    const pastor = await this.pastorRepository.findOne({
+      where: { age: 55 },
+    });
+
+    copastors.forEach((copastor) => {
+      copastor.theirPastor = pastor.id;
+
+      promisesCopastor.push(this.copastorService.create(copastor, user));
+    });
+
+    await Promise.all(promisesCopastor);
+
+    //* Create Supervisor
+    const copastor = await this.copastorRepository.findOne({
+      where: { firstName: 'Luz Mariella' },
+    });
+
+    supervisors.forEach((supervisor) => {
+      supervisor.theirCopastor = copastor.id;
+
+      promisesSupervisor.push(this.supervisorService.create(supervisor, user));
+    });
+
+    await Promise.all(promisesSupervisor);
+
+    //* Create Zones
+    const allSupervisors = await this.supervisorRepository.find();
+
+    let i = 0;
+    zones.forEach((zone) => {
+      zone.theirSupervisor = allSupervisors[i].id;
+      promisesZone.push(this.zoneService.create(zone, user));
+      i++;
+    });
+
+    await Promise.all(promisesZone);
+
+    //* Create Preachers
+    const supervisor = await this.supervisorRepository.findOne({
+      where: { lastName: 'Lopez Martinez' },
+    });
+
+    preachers.forEach((preacher) => {
+      preacher.theirSupervisor = supervisor.id;
+
+      promisesPreacher.push(this.preacherService.create(preacher, user));
+    });
+
+    await Promise.all(promisesPreacher);
+
+    //* Create Family Houses
+    const allPreachers = await this.preacherRepository.find({
+      relations: ['theirZone'],
+    });
+
+    async function crearCasasEnOrden(
+      familyHouses,
+      allPreachers,
+      user,
+      familyHouseService,
+    ) {
+      const promisesCreation = [];
+
+      for (const [index, familyHouse] of familyHouses.entries()) {
+        familyHouse.theirZone = allPreachers[0]?.theirZone?.id;
+        familyHouse.theirPreacher = allPreachers[index]?.id;
+
+        try {
+          const createdHouse = await familyHouseService.create(
+            familyHouse,
+            user,
+          );
+          promisesCreation.push(createdHouse);
+        } catch (error) {
+          console.error('Error al crear la casa:', error);
+        }
+      }
+
+      return promisesCreation;
+    }
+
+    await crearCasasEnOrden(
+      familyHouses,
+      allPreachers,
+      user,
+      this.familyHouseService,
+    );
+
+    //* Create Disciples
+    const allFamilyHouses = await this.familyHouseRepository.find({
+      relations: ['theirPreacher'],
+    });
+
+    //? First House
+    disciples[0].theirFamilyHouse = allFamilyHouses[0]?.id;
+    await this.discipleService.create(disciples[0], user);
+
+    disciples[1].theirFamilyHouse = allFamilyHouses[0]?.id;
+    await this.discipleService.create(disciples[1], user);
+
+    disciples[2].theirFamilyHouse = allFamilyHouses[0]?.id;
+    await this.discipleService.create(disciples[2], user);
+
+    disciples[3].theirFamilyHouse = allFamilyHouses[0]?.id;
+    await this.discipleService.create(disciples[3], user);
+
+    //? Second House
+    disciples[4].theirFamilyHouse = allFamilyHouses[1]?.id;
+    await this.discipleService.create(disciples[4], user);
+
+    disciples[5].theirFamilyHouse = allFamilyHouses[1]?.id;
+    await this.discipleService.create(disciples[5], user);
+
+    disciples[6].theirFamilyHouse = allFamilyHouses[1]?.id;
+    await this.discipleService.create(disciples[6], user);
+
+    disciples[7].theirFamilyHouse = allFamilyHouses[1]?.id;
+    await this.discipleService.create(disciples[7], user);
+
+    //? Third House
+    disciples[8].theirFamilyHouse = allFamilyHouses[2]?.id;
+    await this.discipleService.create(disciples[8], user);
+
+    disciples[9].theirFamilyHouse = allFamilyHouses[2]?.id;
+    await this.discipleService.create(disciples[9], user);
+
+    disciples[10].theirFamilyHouse = allFamilyHouses[2]?.id;
+    await this.discipleService.create(disciples[10], user);
+
+    disciples[11].theirFamilyHouse = allFamilyHouses[2]?.id;
+    await this.discipleService.create(disciples[11], user);
+
+    //? Fourth House
+    disciples[12].theirFamilyHouse = allFamilyHouses[3]?.id;
+    await this.discipleService.create(disciples[12], user);
+
+    disciples[13].theirFamilyHouse = allFamilyHouses[3]?.id;
+    await this.discipleService.create(disciples[13], user);
+
+    disciples[14].theirFamilyHouse = allFamilyHouses[3]?.id;
+    await this.discipleService.create(disciples[14], user);
+
+    disciples[15].theirFamilyHouse = allFamilyHouses[3]?.id;
+    await this.discipleService.create(disciples[15], user);
+
+    //? Fifth House
+    disciples[16].theirFamilyHouse = allFamilyHouses[4]?.id;
+    await this.discipleService.create(disciples[16], user);
+
+    disciples[17].theirFamilyHouse = allFamilyHouses[4]?.id;
+    await this.discipleService.create(disciples[17], user);
+
+    disciples[18].theirFamilyHouse = allFamilyHouses[4]?.id;
+    await this.discipleService.create(disciples[18], user);
+
+    disciples[19].theirFamilyHouse = allFamilyHouses[4]?.id;
+    await this.discipleService.create(disciples[19], user);
+  }
 
   //? PRIVATE METHODS
   // For future index errors or constrains with code.

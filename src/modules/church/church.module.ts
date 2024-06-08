@@ -6,13 +6,14 @@ import { AuthModule } from '@/modules/auth/auth.module';
 import { Church } from '@/modules/church/entities';
 import { ChurchService } from '@/modules/church/church.service';
 import { ChurchController } from '@/modules/church/church.controller';
-import { PastorModule } from '@/modules/pastor/pastor.module';
-import { CopastorModule } from '@/modules/copastor/copastor.module';
-import { SupervisorModule } from '@/modules/supervisor/supervisor.module';
-import { PreacherModule } from '@/modules/preacher/preacher.module';
-import { FamilyHouseModule } from '@/modules/family-house/family-house.module';
+
 import { ZoneModule } from '@/modules/zone/zone.module';
+import { PastorModule } from '@/modules/pastor/pastor.module';
+import { PreacherModule } from '@/modules/preacher/preacher.module';
+import { CopastorModule } from '@/modules/copastor/copastor.module';
 import { DiscipleModule } from '@/modules/disciple/disciple.module';
+import { SupervisorModule } from '@/modules/supervisor/supervisor.module';
+import { FamilyHouseModule } from '@/modules/family-house/family-house.module';
 
 @Module({
   controllers: [ChurchController],

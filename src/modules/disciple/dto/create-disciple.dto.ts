@@ -174,7 +174,8 @@ export class CreateDiscipleDto {
   })
   @IsString()
   @IsUUID()
-  theirFamilyHouse: string;
+  @IsOptional()
+  theirFamilyHouse?: string;
 
   @ApiProperty({
     example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',

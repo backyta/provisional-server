@@ -4,7 +4,7 @@ interface SeedPastor {
   lastName: string;
   gender: string;
   originCountry: string;
-  birthDate: string | Date;
+  dateBirth: string | Date;
   age?: number;
   maritalStatus: string;
   numberChildren?: number;
@@ -38,7 +38,7 @@ export const dataPastors: SeedDataPastors = {
       lastName: 'Vega Rosales',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1968-08-25',
+      dateBirth: '1968-08-25',
       maritalStatus: 'married',
       numberChildren: 3,
       conversionDate: '2005-06-05',
@@ -55,7 +55,7 @@ export const dataPastors: SeedDataPastors = {
       lastName: 'Perez Torres',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1970-12-08',
+      dateBirth: '1970-12-08',
       maritalStatus: 'married',
       numberChildren: 4,
       conversionDate: '2006-03-10',
@@ -73,7 +73,7 @@ export const dataPastors: SeedDataPastors = {
       lastName: 'Prado Torrealva',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1978-05-20',
+      dateBirth: '1978-05-20',
       maritalStatus: 'married',
       numberChildren: 2,
       conversionDate: '2010-07-15',

@@ -1,4 +1,4 @@
-import { MaritalStatus, MemberRoles, Gender } from '@/common/enums';
+import { MaritalStatus, MemberRoles, Gender, Status } from '@/common/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
@@ -162,9 +162,10 @@ export class CreateCopastorDto {
   roles: string[];
 
   @ApiProperty({
-    example: 'Active',
+    example: 'active',
   })
   @IsString()
+  @IsEnum(Status)
   @IsOptional()
   status?: string;
 
@@ -173,8 +174,9 @@ export class CreateCopastorDto {
     example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
   })
   @IsString()
+  @IsOptional()
   @IsUUID()
-  theirPastor: string;
+  theirPastor?: string;
 
   @ApiProperty({
     example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',

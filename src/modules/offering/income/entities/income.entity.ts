@@ -80,7 +80,7 @@ export class Income {
     nullable: true,
     eager: true,
     onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
+    // onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'their_family_house_id' })
   theirFamilyHouse: FamilyHouse;
@@ -91,7 +91,7 @@ export class Income {
     nullable: true,
     eager: true,
     onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
+    // onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'their_contributor_id' })
   theirContributor: Disciple | Preacher | Supervisor | Copastor | Pastor;
@@ -102,7 +102,7 @@ export class Income {
     nullable: true,
     eager: true,
     onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
+    // onUpdate: 'CASCADE',
   })
   @JoinColumn({ name: 'their_zone_id' })
   theirZone: Zone;

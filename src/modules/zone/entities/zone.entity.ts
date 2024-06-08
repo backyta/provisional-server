@@ -27,7 +27,7 @@ export class Zone {
 
   //General info
   @Index()
-  @Column('text', { name: 'zone_name', unique: true })
+  @Column('text', { name: 'zone_name' })
   zoneName: string;
 
   @Column('text', { name: 'country', default: 'Peru' })
@@ -73,27 +73,27 @@ export class Zone {
 
   //* Relation (FK)
   @ManyToOne(() => Pastor, (pastor) => pastor.zones, {
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_pastor_id' })
   theirPastor: Pastor;
 
   @ManyToOne(() => Copastor, (copastor) => copastor.zones, {
     onDelete: 'SET NULL',
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_copastor_id' })
   theirCopastor: Copastor;
 
   @ManyToOne(() => Church, (church) => church.zones, {
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 
   @OneToOne(() => Supervisor, {
     onDelete: 'SET NULL',
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_supervisor_id' })
   theirSupervisor: Supervisor;

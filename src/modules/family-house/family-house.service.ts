@@ -73,10 +73,10 @@ export class FamilyHouseService {
     const zone = await this.zoneRepository.findOne({
       where: { id: theirZone },
       relations: [
-        'theirSupervisor',
-        'theirCopastor',
-        'theirPastor',
         'theirChurch',
+        'theirPastor',
+        'theirCopastor',
+        'theirSupervisor',
       ],
     });
 
@@ -84,9 +84,9 @@ export class FamilyHouseService {
       throw new NotFoundException(`Not found zone with id ${theirZone}`);
     }
 
-    if (!zone.status) {
+    if (zone.status === Status.Inactive) {
       throw new BadRequestException(
-        `The property status in Supervisor must be a "Active"`,
+        `The property status in Zone must be a "Active"`,
       );
     }
 
@@ -100,12 +100,11 @@ export class FamilyHouseService {
     const preacher = await this.preacherRepository.findOne({
       where: { id: theirPreacher },
       relations: [
+        'theirChurch',
+        'theirPastor',
+        'theirCopastor',
         'theirSupervisor',
         'theirZone',
-        'theirCopastor',
-        'theirPastor',
-        'theirChurch',
-        'familyHouses',
       ],
     });
 
@@ -115,18 +114,12 @@ export class FamilyHouseService {
       );
     }
 
-    if (!preacher.status) {
+    if (preacher.status === Status.Inactive) {
       throw new BadRequestException(
-        `The property status in Supervisor must be a "Active"`,
+        `The property status in Preacher must be a "Active"`,
       );
     }
 
-    // NOTE : cuando se cambie de supervisor en zona, afecta al preacher según la zona, a las casas y los miembros, pasara
-    // NOTE : a tener un nuevo supervisor y roles superiores pero la misma zona
-
-    // NOTE : si cambio de super en preacher, cambia en todos sus subordinados, su super, zona, copastor etc
-    // NOTE : tmb se cambia a sus casas y sus miembros su super zona, super, copastor etc, osea se cambia todo, todo pasa al nuevo supervisor.
-    // NOTE : el problema esta que al pasar de zona se debe cambiar su numero. (ver)
     //! Relations between preacher and zone must be same
     if (zone.theirSupervisor.id !== preacher.theirSupervisor.id) {
       throw new BadRequestException(
@@ -155,11 +148,11 @@ export class FamilyHouseService {
     }
 
     const supervisor = await this.supervisorRepository.findOne({
-      where: { id: preacher.theirSupervisor.id },
+      where: { id: preacher?.theirSupervisor?.id },
       relations: ['familyHouses'],
     });
 
-    if (!supervisor.status) {
+    if (supervisor.status === Status.Inactive) {
       throw new BadRequestException(
         `The property status in Supervisor must be a "Active"`,
       );
@@ -173,11 +166,11 @@ export class FamilyHouseService {
     }
 
     const copastor = await this.copastorRepository.findOne({
-      where: { id: preacher.theirCopastor.id },
+      where: { id: preacher?.theirCopastor?.id },
       relations: ['familyHouses'],
     });
 
-    if (!copastor.status) {
+    if (copastor.status === Status.Inactive) {
       throw new BadRequestException(
         `The property status in Copastor must be a "Active"`,
       );
@@ -191,11 +184,11 @@ export class FamilyHouseService {
     }
 
     const pastor = await this.pastorRepository.findOne({
-      where: { id: preacher.theirPastor.id },
+      where: { id: preacher?.theirPastor?.id },
       relations: ['familyHouses'],
     });
 
-    if (!pastor.status) {
+    if (pastor.status === Status.Inactive) {
       throw new BadRequestException(
         `The property status in Pastor must be a "Active"`,
       );
@@ -209,11 +202,11 @@ export class FamilyHouseService {
     }
 
     const church = await this.churchRepository.findOne({
-      where: { id: preacher.theirChurch.id },
+      where: { id: preacher?.theirChurch?.id },
       relations: ['familyHouses'],
     });
 
-    if (!church.status) {
+    if (church.status === Status.Inactive) {
       throw new BadRequestException(
         `The property status in Church must be a "Active"`,
       );
@@ -243,12 +236,11 @@ export class FamilyHouseService {
       zoneName = zone.zoneName;
     }
 
-    // TODO : se debe colocar la zone Name sacar del zone en update
     // Create new instance
     try {
       const newFamilyHouse = this.familyHouseRepository.create({
         ...createFamilyHouseDto,
-        houseNumber: houseNumber.toString(),
+        houseNumber: houseNumber,
         zoneName: zoneName,
         codeHouse: codeHouse,
         theirChurch: church,
@@ -261,17 +253,24 @@ export class FamilyHouseService {
         createdBy: user,
       });
 
-      return await this.familyHouseRepository.save(newFamilyHouse);
+      const savedFamilyHouse =
+        await this.familyHouseRepository.save(newFamilyHouse);
+
+      preacher.theirFamilyHouse = savedFamilyHouse;
+
+      await this.preacherRepository.save(preacher);
+
+      return savedFamilyHouse;
     } catch (error) {
       this.handleDBExceptions(error);
     }
   }
 
   //* FIND ALL (PAGINATED)
-  async findAll(paginationDto: PaginationDto): Promise<FamilyHouse[]> {
+  async findAll(paginationDto: PaginationDto): Promise<any[]> {
     const { limit = 10, offset = 0 } = paginationDto;
 
-    return this.familyHouseRepository.find({
+    const data = await this.familyHouseRepository.find({
       where: { status: Status.Active },
       take: limit,
       skip: offset,
@@ -286,6 +285,50 @@ export class FamilyHouseService {
       ],
       order: { createdAt: 'ASC' },
     });
+
+    const result = data.map((data) => ({
+      ...data,
+      theirChurch: {
+        id: data.theirChurch.id,
+        churchName: data.theirChurch.churchName,
+      },
+      theirPastor: {
+        id: data.theirPastor.id,
+        firstName: data.theirPastor.firstName,
+        lastName: data.theirPastor.lastName,
+        roles: data.theirPastor.roles,
+      },
+      theirCopastor: {
+        id: data.theirCopastor.id,
+        firstName: data.theirCopastor.firstName,
+        lastName: data.theirCopastor.lastName,
+        roles: data.theirCopastor.roles,
+      },
+      theirSupervisor: {
+        id: data.theirSupervisor.id,
+        firstName: data.theirSupervisor.firstName,
+        lastName: data.theirSupervisor.lastName,
+        roles: data.theirSupervisor.roles,
+      },
+      theirZone: {
+        id: data.theirZone.id,
+        zoneName: data.theirZone.zoneName,
+        district: data.theirZone.district,
+      },
+      theirPreacher: {
+        id: data.theirPreacher.id,
+        firstName: data.theirPreacher.firstName,
+        lastName: data.theirPreacher.lastName,
+        roles: data.theirPreacher.roles,
+      },
+      disciples: data.disciples.map((disciple) => ({
+        id: disciple.id,
+        firstName: disciple.firstName,
+        lastName: disciple.lastName,
+      })),
+    }));
+
+    return result;
   }
 
   findOne(id: number) {
@@ -534,7 +577,7 @@ export class FamilyHouseService {
       const updatedFamilyHouse = await this.familyHouseRepository.preload({
         id: familyHouse.id,
         ...updateFamilyHouseDto,
-        houseNumber: houseNumber.toString(),
+        houseNumber: houseNumber,
         codeHouse: codeHouse,
         theirChurch: newChurch,
         theirPastor: newPastor,

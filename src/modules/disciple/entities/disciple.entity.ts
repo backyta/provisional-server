@@ -99,14 +99,14 @@ export class Disciple {
   @Column('timestamp', { name: 'created_at', nullable: true })
   createdAt: string | Date;
 
-  @ManyToOne(() => User, { eager: true, nullable: true })
+  @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'created_by' })
   createdBy: User;
 
   @Column('timestamp', { name: 'updated_at', nullable: true })
   updatedAt: string | Date;
 
-  @ManyToOne(() => User, { eager: true, nullable: true })
+  @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'updated_by' })
   updatedBy: User;
 
@@ -115,46 +115,46 @@ export class Disciple {
 
   //* Relations (FK)
   @ManyToOne(() => Church, (church) => church.disciples, {
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 
   @ManyToOne(() => Pastor, (pastor) => pastor.disciples, {
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_pastor_id' })
   theirPastor: Pastor;
 
   @ManyToOne(() => Copastor, (copastor) => copastor.disciples, {
     onDelete: 'SET NULL',
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_copastor_id' })
   theirCopastor: Copastor;
 
   @ManyToOne(() => Supervisor, (supervisor) => supervisor.disciples, {
     onDelete: 'SET NULL',
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_supervisor_id' })
   theirSupervisor: Supervisor;
 
   @ManyToOne(() => Zone, (zone) => zone.disciples, {
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_zone_id' })
   theirZone: Zone;
 
   @ManyToOne(() => Preacher, (preacher) => preacher.disciples, {
     onDelete: 'SET NULL',
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_preacher_id' })
   theirPreacher: Preacher;
 
   @ManyToOne(() => FamilyHouse, (familyHouse) => familyHouse.disciples, {
-    eager: true,
+    // eager: true,
   })
   @JoinColumn({ name: 'their_family_house_id' })
   theirFamilyHouse: FamilyHouse;
