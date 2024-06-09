@@ -216,31 +216,31 @@ export class PreacherService {
     const result = data.map((data) => ({
       ...data,
       theirChurch: {
-        id: data.theirChurch.id,
-        churchName: data.theirChurch.churchName,
+        id: data.theirChurch?.id,
+        churchName: data.theirChurch?.churchName,
       },
       theirPastor: {
-        id: data.theirPastor.id,
-        firstName: data.theirPastor.firstName,
-        lastName: data.theirPastor.lastName,
-        roles: data.theirPastor.roles,
+        id: data.theirPastor?.id,
+        firstName: data.theirPastor?.firstName,
+        lastName: data.theirPastor?.lastName,
+        roles: data.theirPastor?.roles,
       },
       theirCopastor: {
-        id: data.theirCopastor.id,
-        firstName: data.theirCopastor.firstName,
-        lastName: data.theirCopastor.lastName,
-        roles: data.theirCopastor.roles,
+        id: data.theirCopastor?.id,
+        firstName: data.theirCopastor?.firstName,
+        lastName: data.theirCopastor?.lastName,
+        roles: data.theirCopastor?.roles,
       },
       theirSupervisor: {
-        id: data.theirSupervisor.id,
-        firstName: data.theirSupervisor.firstName,
-        lastName: data.theirSupervisor.lastName,
-        roles: data.theirSupervisor.roles,
+        id: data.theirSupervisor?.id,
+        firstName: data.theirSupervisor?.firstName,
+        lastName: data.theirSupervisor?.lastName,
+        roles: data.theirSupervisor?.roles,
       },
       theirZone: {
-        id: data.theirZone.id,
-        zoneName: data.theirZone.zoneName,
-        district: data.theirZone.district,
+        id: data.theirZone?.id,
+        zoneName: data.theirZone?.zoneName,
+        district: data.theirZone?.district,
       },
       theirFamilyHouse: {
         id: data.theirFamilyHouse?.id,
@@ -251,9 +251,9 @@ export class PreacherService {
       },
 
       disciples: data.disciples.map((disciple) => ({
-        id: disciple.id,
-        firstName: disciple.firstName,
-        lastName: disciple.lastName,
+        id: disciple?.id,
+        firstName: disciple?.firstName,
+        lastName: disciple?.lastName,
       })),
     }));
 
@@ -550,14 +550,14 @@ export class PreacherService {
             }),
           );
 
-          //* Reordenar números de casas del antiguo zona
+          //* Reorder family house numbers and code in the old zone
           const allFamilyHousesByOrder = await this.familyHouseRepository.find({
-            relations: ['theirPreacher', 'theirZone'],
+            relations: ['theirZone'],
             order: { houseNumber: 'ASC' },
           });
 
           const allResult = allFamilyHousesByOrder.filter(
-            (house) => house.theirZone?.id !== newZone?.id,
+            (house) => house.theirZone?.id === preacher.theirZone?.id,
           );
 
           await Promise.all(
@@ -630,7 +630,7 @@ export class PreacherService {
       //* Validation new copastor
       if (!theirCopastor) {
         throw new NotFoundException(
-          `To upgrade from preacher to supervisor place an existing co-pastor id`,
+          `To upgrade from preacher to supervisor assign an existing co-pastor id`,
         );
       }
 
@@ -734,6 +734,7 @@ export class PreacherService {
       theirPastor: null,
       theirCopastor: null,
       theirSupervisor: null,
+      theirFamilyHouse: null,
       theirZone: null,
       updatedAt: new Date(),
       updatedBy: user,

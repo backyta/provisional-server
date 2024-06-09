@@ -156,48 +156,48 @@ export class ChurchService {
       ...data,
       theirMainChurch: data.isAnexe ? theirMainChurch : null,
       anexes: data.anexes.map((anexe) => ({
-        id: anexe.id,
-        churchName: anexe.churchName,
-        district: anexe.district,
-        urbanSector: anexe.urbanSector,
+        id: anexe?.id,
+        churchName: anexe?.churchName,
+        district: anexe?.district,
+        urbanSector: anexe?.urbanSector,
       })),
-      pastors: data.pastors.map((pastor) => ({
-        id: pastor.id,
-        firstName: pastor.firstName,
-        lastName: pastor.lastName,
+      pastors: data?.pastors.map((pastor) => ({
+        id: pastor?.id,
+        firstName: pastor?.firstName,
+        lastName: pastor?.lastName,
       })),
-      copastors: data.copastors.map((copastor) => ({
-        id: copastor.id,
-        firstName: copastor.firstName,
-        lastName: copastor.lastName,
+      copastors: data?.copastors.map((copastor) => ({
+        id: copastor?.id,
+        firstName: copastor?.firstName,
+        lastName: copastor?.lastName,
       })),
-      supervisors: data.supervisors.map((supervisor) => ({
-        id: supervisor.id,
-        firstName: supervisor.firstName,
-        lastName: supervisor.lastName,
+      supervisors: data?.supervisors.map((supervisor) => ({
+        id: supervisor?.id,
+        firstName: supervisor?.firstName,
+        lastName: supervisor?.lastName,
       })),
-      zones: data.zones.map((zone) => ({
-        id: zone.id,
-        zoneName: zone.zoneName,
-        district: zone.district,
+      zones: data?.zones.map((zone) => ({
+        id: zone?.id,
+        zoneName: zone?.zoneName,
+        district: zone?.district,
       })),
-      preachers: data.preachers.map((preacher) => ({
-        id: preacher.id,
-        firstName: preacher.firstName,
-        lastName: preacher.lastName,
+      preachers: data?.preachers.map((preacher) => ({
+        id: preacher?.id,
+        firstName: preacher?.firstName,
+        lastName: preacher?.lastName,
       })),
-      familyHouses: data.familyHouses.map((familyHouse) => ({
-        id: familyHouse.id,
-        houseName: familyHouse.houseName,
-        zoneName: familyHouse.zoneName,
-        codeHouse: familyHouse.codeHouse,
-        district: familyHouse.disciples,
-        urbanSector: familyHouse.urbanSector,
+      familyHouses: data?.familyHouses.map((familyHouse) => ({
+        id: familyHouse?.id,
+        houseName: familyHouse?.houseName,
+        zoneName: familyHouse?.zoneName,
+        codeHouse: familyHouse?.codeHouse,
+        district: familyHouse?.disciples,
+        urbanSector: familyHouse?.urbanSector,
       })),
       disciples: data.disciples.map((disciple) => ({
-        id: disciple.id,
-        firstName: disciple.firstName,
-        lastName: disciple.lastName,
+        id: disciple?.id,
+        firstName: disciple?.firstName,
+        lastName: disciple?.lastName,
       })),
     }));
 

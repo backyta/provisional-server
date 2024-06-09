@@ -5,7 +5,6 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   ParseUUIDPipe,
   Query,
 } from '@nestjs/common';
@@ -96,7 +95,7 @@ export class ZoneController {
   }
 
   //* Delete
-  @Delete(':id')
+  /*  @Delete(':id')
   @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
   @ApiOkResponse({
     description: 'Successful operation.',
@@ -109,5 +108,5 @@ export class ZoneController {
     @GetUser() user: User,
   ): Promise<void> {
     return this.zoneService.remove(id, user);
-  }
+  } */
 }

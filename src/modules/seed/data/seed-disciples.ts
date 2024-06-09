@@ -220,7 +220,7 @@ export const dataDisciples: SeedDataMembers = {
       urbanSectorResidence: 'Ermitaño',
       addressResidence: 'Jr. Las Margaritas 678',
       addressResidenceReference: 'Frente al centro comercial',
-      roles: ['disciple', 'member'],
+      roles: ['disciple'],
     },
     {
       firstName: 'Camila',
@@ -237,7 +237,7 @@ export const dataDisciples: SeedDataMembers = {
       urbanSectorResidence: 'Tahuantinsuyo',
       addressResidence: 'Av. Los Laureles 234',
       addressResidenceReference: 'Cerca del parque zonal',
-      roles: ['disciple', 'member'],
+      roles: ['disciple'],
     },
     {
       firstName: 'Juanito',
@@ -254,7 +254,7 @@ export const dataDisciples: SeedDataMembers = {
       urbanSectorResidence: 'Payet',
       addressResidence: 'Jr. Los Pinos 345',
       addressResidenceReference: 'Cerca del parque industrial',
-      roles: ['disciple', 'member'],
+      roles: ['disciple'],
     },
     {
       firstName: 'Valeria',
@@ -271,7 +271,7 @@ export const dataDisciples: SeedDataMembers = {
       urbanSectorResidence: 'Ermitaño',
       addressResidence: 'Av. Las Orquídeas 456',
       addressResidenceReference: 'Frente al centro de salud',
-      roles: ['disciple', 'member'],
+      roles: ['disciple'],
     },
     {
       firstName: 'Dieguito',
@@ -288,7 +288,7 @@ export const dataDisciples: SeedDataMembers = {
       urbanSectorResidence: 'Tahuantinsuyo',
       addressResidence: 'Jr. Las Rosas 567',
       addressResidenceReference: 'Cerca del mercado municipal',
-      roles: ['disciple', 'member'],
+      roles: ['disciple'],
     },
     {
       firstName: 'Laura',
@@ -305,7 +305,7 @@ export const dataDisciples: SeedDataMembers = {
       urbanSectorResidence: 'Payet',
       addressResidence: 'Av. Las Acacias 678',
       addressResidenceReference: 'Frente al parque zonal',
-      roles: ['disciple', 'member'],
+      roles: ['disciple'],
     },
     {
       firstName: 'Pedrito',
@@ -322,7 +322,7 @@ export const dataDisciples: SeedDataMembers = {
       urbanSectorResidence: 'Ermitaño',
       addressResidence: 'Jr. Los Nogales 789',
       addressResidenceReference: 'Frente al mercado municipal',
-      roles: ['disciple', 'member'],
+      roles: ['disciple'],
     },
     {
       firstName: 'Abril',
@@ -339,7 +339,7 @@ export const dataDisciples: SeedDataMembers = {
       urbanSectorResidence: 'Tahuantinsuyo',
       addressResidence: 'Av. Los Cedros 890',
       addressResidenceReference: 'Cerca del parque industrial',
-      roles: ['disciple', 'member'],
+      roles: ['disciple'],
     },
     {
       firstName: 'Marcos',
@@ -356,7 +356,7 @@ export const dataDisciples: SeedDataMembers = {
       urbanSectorResidence: 'Payet',
       addressResidence: 'Jr. Las Margaritas 123',
       addressResidenceReference: 'Al lado del parque zonal',
-      roles: ['disciple', 'member'],
+      roles: ['disciple'],
     },
     {
       firstName: 'Alejandra',
@@ -373,7 +373,7 @@ export const dataDisciples: SeedDataMembers = {
       urbanSectorResidence: 'Ermitaño',
       addressResidence: 'Av. Las Orquídeas 890',
       addressResidenceReference: 'Cerca del centro de salud',
-      roles: ['disciple', 'member'],
+      roles: ['disciple'],
     },
   ],
 };

@@ -71,13 +71,13 @@ export class ZoneService {
 
     if (!supervisor) {
       throw new NotFoundException(
-        `Not found preacher with id ${theirSupervisor}`,
+        `Not found Supervisor with id ${theirSupervisor}`,
       );
     }
 
     if (supervisor.status === Status.Inactive) {
       throw new BadRequestException(
-        `The property status in Supervisor must be a "Active"`,
+        `The property status in Supervisor must be a "active"`,
       );
     }
 
@@ -90,30 +90,28 @@ export class ZoneService {
 
     const copastor = await this.copastorRepository.findOne({
       where: { id: supervisor?.theirCopastor?.id },
-      relations: ['zones'],
     });
 
     if (copastor?.status === Status.Inactive) {
       throw new BadRequestException(
-        `The property status in Copastor must be a "Active"`,
+        `The property status in Copastor must be a "active"`,
       );
     }
 
     //* Validate and assign pastor according supervisor
     if (!supervisor?.theirPastor) {
       throw new NotFoundException(
-        `Pastor was not found, verify that Supervisor has a co-pastor assigned`,
+        `Pastor was not found, verify that Supervisor has a pastor assigned`,
       );
     }
 
     const pastor = await this.pastorRepository.findOne({
       where: { id: supervisor?.theirPastor?.id },
-      relations: ['zones'],
     });
 
     if (pastor?.status === Status.Inactive) {
       throw new BadRequestException(
-        `The property status in Pastor must be a "Active"`,
+        `The property status in Pastor must be a "active"`,
       );
     }
 
@@ -126,12 +124,11 @@ export class ZoneService {
 
     const church = await this.churchRepository.findOne({
       where: { id: supervisor?.theirChurch?.id },
-      relations: ['zones'],
     });
 
     if (church.status === Status.Inactive) {
       throw new BadRequestException(
-        `The property status in Church must be a "Active"`,
+        `The property status in Church must be a "active"`,
       );
     }
 
@@ -247,10 +244,10 @@ export class ZoneService {
     const zone = await this.zoneRepository.findOne({
       where: { id: id },
       relations: [
-        'theirSupervisor',
-        'theirCopastor',
-        'theirPastor',
         'theirChurch',
+        'theirPastor',
+        'theirCopastor',
+        'theirSupervisor',
       ],
     });
 
@@ -265,15 +262,12 @@ export class ZoneService {
     }
 
     if (!theirSupervisor) {
-      throw new NotFoundException(
-        `Para actualizar o cambiar de supervisor coloque un supervisor id existente`,
-      );
+      throw new NotFoundException(`To update, supervisor id is required`);
     }
 
     //? Update if their Supervisor is different
     if (zone.theirSupervisor?.id !== theirSupervisor) {
-      // Validate supervisor
-
+      //* Validate supervisor
       const newSupervisor = await this.supervisorRepository.findOne({
         where: { id: theirSupervisor },
         relations: ['theirChurch', 'theirPastor', 'theirCopastor', 'theirZone'],
@@ -287,14 +281,14 @@ export class ZoneService {
 
       if (newSupervisor.status === Status.Inactive) {
         throw new BadRequestException(
-          `The property status in Supervisor must be "Active"`,
+          `The property status in Supervisor must be "active"`,
         );
       }
 
-      // Validate Copastor according supervisor
-      if (!newSupervisor.theirCopastor) {
+      //* Validate Copastor according supervisor
+      if (!newSupervisor?.theirCopastor) {
         throw new BadRequestException(
-          `Copastor was not found, verify that Supervisor has a Copastor assigned`,
+          `Copastor was not found, verify that Supervisor has a co-pastor assigned`,
         );
       }
 
@@ -304,14 +298,14 @@ export class ZoneService {
 
       if (newCopastor.status === Status.Inactive) {
         throw new BadRequestException(
-          `The property status in Copastor must be "Active"`,
+          `The property status in Copastor must be "active"`,
         );
       }
 
-      // Validate Pastor according supervisor
-      if (!newSupervisor.theirPastor) {
+      //* Validate Pastor according supervisor
+      if (!newSupervisor?.theirPastor) {
         throw new BadRequestException(
-          `Pastor was not found, verify that Supervisor has a Pastor assigned`,
+          `Pastor was not found, verify that Supervisor has a pastor assigned`,
         );
       }
 
@@ -321,14 +315,14 @@ export class ZoneService {
 
       if (newPastor.status === Status.Inactive) {
         throw new BadRequestException(
-          `The property status in Pastor must be "Active"`,
+          `The property status in Pastor must be "active"`,
         );
       }
 
-      // Validate Church according supervisor
+      //* Validate Church according supervisor
       if (!newSupervisor.theirChurch) {
         throw new BadRequestException(
-          `Church was not found, verify that Supervisor has a Church assigned`,
+          `Church was not found, verify that Supervisor has a church assigned`,
         );
       }
 
@@ -338,64 +332,20 @@ export class ZoneService {
 
       if (newChurch.status === Status.Inactive) {
         throw new BadRequestException(
-          `The property status in Church must be "Active"`,
+          `The property status in Church must be "active"`,
         );
       }
+      // NOTE : aqui al hacer el cambio de supervisor y si este nuevo super esta asignado a otro dara un error
+      // NOTE : eliminar de la antigua zona ese super y sus relaciones subordinadas, eliminar la zone del super antiguo
+      // NOTE : eliminar en otras tablas segun la zona, si tiene esa zona se elimina su super.
+      // NOTE : luego recien se podra asignar ese super liberado, remplazando al existente y seteando en sus subordinados que tienen esa zona
+      // NOTE : cuando se actualize la zona con el nuevo super, donde tenga esta zona se setea el nuevo super y sus roles superiores.
 
-      //? All members by module
-      const allPreachers = await this.preacherRepository.find({
-        relations: ['theirZone'],
-      });
+      // tecnicamente se borra solo el super del anterior zona, a la nueva zona se le asigna el nuevo super
 
-      const allFamilyHouses = await this.familyHouseRepository.find({
-        relations: ['theirZone'],
-      });
-
-      const allDisciples = await this.discipleRepository.find({
-        relations: ['theirZone'],
-      });
-
-      //* Update in all preachers the new relations of the zone that is updated.
-      const preachersByZone = allPreachers.filter(
-        (preacher) => preacher.theirZone?.id === zone?.id,
-      );
-
-      const updatePreachers = preachersByZone.map(async (preacher) => {
-        await this.preacherRepository.update(preacher.id, {
-          theirChurch: newChurch,
-          theirPastor: newPastor,
-          theirCopastor: newCopastor,
-          theirSupervisor: newSupervisor,
-        });
-      });
-
-      //* Update in all family houses the new relations of the zone that is updated.
-      const familyHousesByZone = allFamilyHouses.filter(
-        (familyHouse) => familyHouse.theirZone?.id === zone?.id,
-      );
-
-      const updateFamilyHouses = familyHousesByZone.map(async (familyHouse) => {
-        await this.familyHouseRepository.update(familyHouse.id, {
-          theirChurch: newChurch,
-          theirPastor: newPastor,
-          theirCopastor: newCopastor,
-          theirSupervisor: newSupervisor,
-        });
-      });
-
-      //* Update in all disciples the new relations of the zone that is updated.
-      const disciplesByZone = allDisciples.filter(
-        (disciple) => disciple.theirZone?.id === zone?.id,
-      );
-
-      const updateDisciples = disciplesByZone.map(async (disciple) => {
-        await this.discipleRepository.update(disciple.id, {
-          theirChurch: newChurch,
-          theirPastor: newPastor,
-          theirCopastor: newCopastor,
-          theirSupervisor: newSupervisor,
-        });
-      });
+      // Del antiguo si es rolando se elimina de todos sus subordinados
+      // Al nuevo si es marleny se elimna de todos y se setea en todos rolando.
+      // Ya esta hecho el seteo nuevo solo hacer igual para el antiguo
 
       // Update and save
       const updatedZone = await this.zoneRepository.preload({
@@ -416,10 +366,6 @@ export class ZoneService {
       });
 
       try {
-        await Promise.all(updatePreachers);
-        await Promise.all(updateFamilyHouses);
-        await Promise.all(updateDisciples);
-
         oldSupervisor.theirZone = null;
         await this.supervisorRepository.save(oldSupervisor);
 
@@ -427,8 +373,71 @@ export class ZoneService {
 
         newSupervisor.theirZone = savedZone;
         await this.supervisorRepository.save(newSupervisor);
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
 
-        return savedZone;
+      //? All members by module
+      const allPreachers = await this.preacherRepository.find({
+        relations: ['theirZone'],
+      });
+
+      const allFamilyHouses = await this.familyHouseRepository.find({
+        relations: ['theirZone'],
+      });
+
+      const allDisciples = await this.discipleRepository.find({
+        relations: ['theirZone'],
+      });
+
+      try {
+        //* Update and set to null relationships in Preacher
+        const preachersByZone = allPreachers.filter(
+          (preacher) => preacher.theirZone?.id === zone?.id,
+        );
+
+        await Promise.all(
+          preachersByZone.map(async (preacher) => {
+            await this.preacherRepository.update(preacher.id, {
+              theirChurch: newChurch,
+              theirPastor: newPastor,
+              theirCopastor: newCopastor,
+              theirSupervisor: newSupervisor,
+            });
+          }),
+        );
+
+        //* Update and set to null relationships in Family House
+        const familyHousesByZone = allFamilyHouses.filter(
+          (familyHouse) => familyHouse.theirZone?.id === zone?.id,
+        );
+
+        await Promise.all(
+          familyHousesByZone.map(async (familyHouse) => {
+            await this.familyHouseRepository.update(familyHouse.id, {
+              theirChurch: newChurch,
+              theirPastor: newPastor,
+              theirCopastor: newCopastor,
+              theirSupervisor: newSupervisor,
+            });
+          }),
+        );
+
+        //* Update and set to null relationships in Disciple
+        const disciplesByZone = allDisciples.filter(
+          (disciple) => disciple.theirZone?.id === zone?.id,
+        );
+
+        await Promise.all(
+          disciplesByZone.map(async (disciple) => {
+            await this.discipleRepository.update(disciple.id, {
+              theirChurch: newChurch,
+              theirPastor: newPastor,
+              theirCopastor: newCopastor,
+              theirSupervisor: newSupervisor,
+            });
+          }),
+        );
       } catch (error) {
         this.handleDBExceptions(error);
       }
@@ -458,8 +467,9 @@ export class ZoneService {
   // NOTE : la zona no debería eliminarse  ni desactivarse, solo actualizarse, porque afectaría a sus relaciones con ofrenda
   // NOTE : si la zona se actualiza de super es indiferente porque la relacione s solo con zona.
   // NOTE : no debería eliminarse
+
   //! DELETE ZONE
-  async remove(id: string, user: User): Promise<void> {
+  /*async remove(id: string, user: User): Promise<void> {
     // Validations
     if (!isUUID(id)) {
       throw new BadRequestException(`Not valid UUID`);
@@ -544,7 +554,7 @@ export class ZoneService {
     } catch (error) {
       this.handleDBExceptions(error);
     }
-  }
+  }*/
 
   //? PRIVATE METHODS
   // For future index errors or constrains with code.

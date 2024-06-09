@@ -250,22 +250,22 @@ export class SupervisorService {
     const result = data.map((data) => ({
       ...data,
       preachers: data.preachers.map((preacher) => ({
-        id: preacher.id,
-        firstName: preacher.firstName,
-        lastName: preacher.lastName,
+        id: preacher?.id,
+        firstName: preacher?.firstName,
+        lastName: preacher?.lastName,
       })),
       familyHouses: data.familyHouses.map((familyHouse) => ({
-        id: familyHouse.id,
-        houseName: familyHouse.houseName,
-        zoneName: familyHouse.zoneName,
-        codeHouse: familyHouse.codeHouse,
-        district: familyHouse.district,
-        urbanSector: familyHouse.urbanSector,
+        id: familyHouse?.id,
+        houseName: familyHouse?.houseName,
+        zoneName: familyHouse?.zoneName,
+        codeHouse: familyHouse?.codeHouse,
+        district: familyHouse?.district,
+        urbanSector: familyHouse?.urbanSector,
       })),
       disciples: data.disciples.map((disciple) => ({
-        id: disciple.id,
-        firstName: disciple.firstName,
-        lastName: disciple.lastName,
+        id: disciple?.id,
+        firstName: disciple?.firstName,
+        lastName: disciple?.lastName,
       })),
     }));
 

@@ -72,28 +72,22 @@ export class Zone {
   disciples: Disciple[];
 
   //* Relation (FK)
-  @ManyToOne(() => Pastor, (pastor) => pastor.zones, {
-    // eager: true,
-  })
+  @ManyToOne(() => Pastor, (pastor) => pastor.zones)
   @JoinColumn({ name: 'their_pastor_id' })
   theirPastor: Pastor;
 
   @ManyToOne(() => Copastor, (copastor) => copastor.zones, {
     onDelete: 'SET NULL',
-    // eager: true,
   })
   @JoinColumn({ name: 'their_copastor_id' })
   theirCopastor: Copastor;
 
-  @ManyToOne(() => Church, (church) => church.zones, {
-    // eager: true,
-  })
+  @ManyToOne(() => Church, (church) => church.zones)
   @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 
   @OneToOne(() => Supervisor, {
     onDelete: 'SET NULL',
-    // eager: true,
   })
   @JoinColumn({ name: 'their_supervisor_id' })
   theirSupervisor: Supervisor;
