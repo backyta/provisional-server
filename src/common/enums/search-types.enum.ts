@@ -9,6 +9,7 @@ export enum SearchType {
   isActive = 'is_active',
   roles = 'roles',
 
+  // TODO : Renombrar todo esto
   // NOTE : esto no seria necesario porque se busca por nombre y no por ID
   //* Extras
   code = 'code',

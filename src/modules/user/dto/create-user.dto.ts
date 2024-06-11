@@ -11,8 +11,8 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { UserRoles } from '@/modules/auth/enums';
 import { Status } from '@/common/enums';
+import { UserRoles } from '@/modules/auth/enums';
 
 export class CreateUserDto {
   @ApiProperty({

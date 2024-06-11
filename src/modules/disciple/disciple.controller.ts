@@ -52,7 +52,7 @@ export class DiscipleController {
   @Post()
   @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
   @ApiCreatedResponse({
-    description: 'Zone has been successfully created.',
+    description: 'Disciple has been successfully created.',
   })
   @ApiForbiddenResponse({
     description: 'Forbidden.',

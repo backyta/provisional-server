@@ -1,7 +1,8 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
-import { Disciple } from '@/modules/disciple/entities';
 import { SearchNamesOptions } from '@/common/interfaces';
+
+import { Disciple } from '@/modules/disciple/entities';
 
 export const searchByNames = async ({
   term,

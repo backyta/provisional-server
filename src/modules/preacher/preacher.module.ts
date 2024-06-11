@@ -7,13 +7,13 @@ import { Preacher } from '@/modules/preacher/entities';
 import { PreacherService } from '@/modules/preacher/preacher.service';
 import { PreacherController } from '@/modules/preacher/preacher.controller';
 
+import { ZoneModule } from '@/modules/zone/zone.module';
 import { PastorModule } from '@/modules/pastor/pastor.module';
 import { ChurchModule } from '@/modules/church/church.module';
+import { DiscipleModule } from '@/modules/disciple/disciple.module';
 import { CopastorModule } from '@/modules/copastor/copastor.module';
 import { SupervisorModule } from '@/modules/supervisor/supervisor.module';
-import { ZoneModule } from '@/modules/zone/zone.module';
 import { FamilyHouseModule } from '@/modules/family-house/family-house.module';
-import { DiscipleModule } from '@/modules/disciple/disciple.module';
 
 @Module({
   controllers: [PreacherController],

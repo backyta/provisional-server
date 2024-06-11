@@ -22,16 +22,19 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { FamilyHouseService } from '@/modules/family-house/family-house.service';
-import { Auth, GetUser } from '@/modules/auth/decorators';
-import { UserRoles } from '@/modules/auth/enums';
+import { PaginationDto } from '@/common/dtos';
+
 import { User } from '@/modules/user/entities';
-import { FamilyHouse } from '@/modules/family-house/entities';
+
+import { UserRoles } from '@/modules/auth/enums';
+import { Auth, GetUser } from '@/modules/auth/decorators';
+
 import {
   CreateFamilyHouseDto,
   UpdateFamilyHouseDto,
 } from '@/modules/family-house/dto';
-import { PaginationDto } from '@/common/dtos';
+import { FamilyHouse } from '@/modules/family-house/entities';
+import { FamilyHouseService } from '@/modules/family-house/family-house.service';
 
 @ApiTags('Family-Houses')
 @ApiBearerAuth()

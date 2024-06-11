@@ -6,14 +6,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { isUUID } from 'class-validator';
+import { InjectRepository } from '@nestjs/typeorm';
 
 import { PaginationDto } from '@/common/dtos';
 import { MemberRoles, Status } from '@/common/enums';
 
-import { CreatePreacherDto, UpdatePreacherDto } from '@/modules/preacher/dto';
 import { Preacher } from '@/modules/preacher/entities';
+import { CreatePreacherDto, UpdatePreacherDto } from '@/modules/preacher/dto';
 
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
@@ -108,7 +108,7 @@ export class PreacherService {
     //* Validate and assign zone according supervisor
     if (!supervisor?.theirZone) {
       throw new NotFoundException(
-        `Copastor was not found, verify that Supervisor has a copastor assigned`,
+        `Zone was not found, verify that Supervisor has a zone assigned`,
       );
     }
 
@@ -125,7 +125,7 @@ export class PreacherService {
     //* Validate and assign copastor according supervisor
     if (!supervisor?.theirCopastor) {
       throw new NotFoundException(
-        `Copastor was not found, verify that Supervisor has a copastor assigned`,
+        `Copastor was not found, verify that Supervisor has a co-pastor assigned`,
       );
     }
 
@@ -159,7 +159,7 @@ export class PreacherService {
     //* Validate and assign church according supervisor
     if (!supervisor?.theirChurch) {
       throw new NotFoundException(
-        `Church was not found, verify that Copastor has a church assigned`,
+        `Church was not found, verify that Supervisor has a church assigned`,
       );
     }
 
@@ -334,7 +334,7 @@ export class PreacherService {
           roles.includes(MemberRoles.Pastor)))
     ) {
       throw new BadRequestException(
-        `A lower or higher role cannot be assigned without going through the hierarchy: [preacher, supervisor, co-pastor, pastor]`,
+        `A lower or higher role cannot be assigned without going through the hierarchy: [disciple, preacher, supervisor, co-pastor, pastor]`,
       );
     }
 
@@ -423,7 +423,7 @@ export class PreacherService {
         //* Validate Copastor according supervisor
         if (!newSupervisor?.theirCopastor) {
           throw new BadRequestException(
-            `Copastor was not found, verify that Supervisor has a copastor assigned`,
+            `Copastor was not found, verify that Supervisor has a co-pastor assigned`,
           );
         }
 
@@ -440,7 +440,7 @@ export class PreacherService {
         //* Validate Pastor according copastor
         if (!newSupervisor?.theirPastor) {
           throw new BadRequestException(
-            `Pastor was not found, verify that Copastor has a pastor assigned`,
+            `Pastor was not found, verify that Supervisor has a pastor assigned`,
           );
         }
 
@@ -457,7 +457,7 @@ export class PreacherService {
         //* Validate Church according copastor
         if (!newSupervisor?.theirChurch) {
           throw new BadRequestException(
-            `Church was not found, verify that Copastor has a church assigned`,
+            `Church was not found, verify that Supervisor has a church assigned`,
           );
         }
 
@@ -480,7 +480,7 @@ export class PreacherService {
           theirCopastor: newCopastor,
           theirSupervisor: newSupervisor,
           theirZone: newZone,
-          theirFamilyHouse: null,
+          theirFamilyHouse: preacher.theirFamilyHouse,
           updatedAt: new Date(),
           updatedBy: user,
           status: status,
@@ -712,8 +712,6 @@ export class PreacherService {
     }
   }
 
-  // TODO : falta probar el preacher delete y la family house y luego el disciples
-  // TODO : falta actualizar zona ordenando las promesas
   //! DELETE PREACHER
   async remove(id: string, user: User): Promise<void> {
     // Validations

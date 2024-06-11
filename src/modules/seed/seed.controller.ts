@@ -1,5 +1,5 @@
 import { BadRequestException, Controller, Get } from '@nestjs/common';
-import { SeedService } from './seed.service';
+import { ConfigService } from '@nestjs/config';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -8,9 +8,11 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ConfigService } from '@nestjs/config';
+
 import { Auth } from '@/modules/auth/decorators';
 import { UserRoles } from '@/modules/auth/enums';
+
+import { SeedService } from '@/modules/seed/seed.service';
 
 @ApiTags('Seed')
 @ApiBearerAuth()

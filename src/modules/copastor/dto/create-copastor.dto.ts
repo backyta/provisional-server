@@ -135,7 +135,7 @@ export class CreateCopastorDto {
   urbanSectorResidence: string;
 
   @ApiProperty({
-    example: 'Jr Pacana 123',
+    example: 'Jr Pascana 123',
   })
   @IsString()
   @IsNotEmpty()

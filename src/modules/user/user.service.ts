@@ -6,8 +6,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { isUUID } from 'class-validator';
+import { InjectRepository } from '@nestjs/typeorm';
 
 import { SearchType, Status } from '@/common/enums';
 import { PaginationDto, SearchTypeAndPaginationDto } from '@/common/dtos';
@@ -210,19 +210,5 @@ export class UserService {
     throw new InternalServerErrorException(
       'Unexpected errors, check server logs',
     );
-  }
-
-  //! DELETE FOR SEED
-  async deleteAllUsers() {
-    const query = this.userRepository.createQueryBuilder('users');
-
-    try {
-      return await query
-        .delete()
-        .where('NOT :role = ANY(roles)', { role: 'super-user' })
-        .execute();
-    } catch (error) {
-      this.handleDBExceptions(error);
-    }
   }
 }

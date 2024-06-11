@@ -5,4 +5,5 @@ export * from './seed-zone';
 export * from './seed-supervisor';
 export * from './seed-copastors';
 export * from './seed-pastors';
+export * from './seed-users';
 export * from './seed-churches';

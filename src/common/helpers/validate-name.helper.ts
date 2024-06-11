@@ -20,7 +20,7 @@ export const validateName = (name: string): string => {
 //? /^[^+]+(?:\+[^+]+)*\+$/.
 
 //! This Regex validates:
-//* No comienze con signo +
+//* No comience con signo +
 //* termina con signo +
 //* Puede tener múltiples secciones que consisten en un "+" seguido de uno o más caracteres que no sean un "+".
 

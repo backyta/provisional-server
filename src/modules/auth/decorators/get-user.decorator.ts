@@ -17,4 +17,5 @@ export const GetUser = createParamDecorator(
   },
 );
 
-// Takes the user out of the context (which was set on strategy validation) and sets it as the user that is held as property (user: User)
+// Takes the user out of the context (which was set on strategy validation) and sets it as the user
+//  that is held as property (user: User)

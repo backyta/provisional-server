@@ -1,4 +1,5 @@
 import { Repository } from 'typeorm';
+
 import { SearchType } from '@/common/enums';
 
 export interface SearchNamesOptions<T> {

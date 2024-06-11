@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
-import { IncomeService } from './income.service';
-import { IncomeController } from './income.controller';
-import { Income } from '@/modules/offering/income/entities';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { Income } from '@/modules/offering/income/entities';
+import { IncomeService } from '@/modules/offering/income/income.service';
+import { IncomeController } from '@/modules/offering/income/income.controller';
 
 @Module({
   controllers: [IncomeController],

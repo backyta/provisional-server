@@ -8,8 +8,8 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 
-import { META_ROLES } from '@/modules/auth/decorators';
 import { User } from '@/modules/user/entities';
+import { META_ROLES } from '@/modules/auth/decorators';
 
 @Injectable()
 export class UserRoleGuard implements CanActivate {

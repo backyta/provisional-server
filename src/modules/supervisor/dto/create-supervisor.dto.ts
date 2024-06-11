@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { MaritalStatus, MemberRoles, Gender, Status } from '@/common/enums';
 import {
   IsArray,
   IsBoolean,
@@ -13,6 +12,8 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+
+import { MaritalStatus, MemberRoles, Gender, Status } from '@/common/enums';
 
 export class CreateSupervisorDto {
   // General and Personal info
@@ -176,7 +177,6 @@ export class CreateSupervisorDto {
   @IsBoolean()
   isDirectRelationToPastor: boolean;
 
-  // NOTE : revisar esto
   // Relations
   @ApiProperty({
     example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',

@@ -6,16 +6,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { isUUID } from 'class-validator';
+import { InjectRepository } from '@nestjs/typeorm';
 
 import {
   CreateSupervisorDto,
   UpdateSupervisorDto,
 } from '@/modules/supervisor/dto';
 
-import { MemberRoles, Status } from '@/common/enums';
 import { PaginationDto } from '@/common/dtos';
+import { MemberRoles, Status } from '@/common/enums';
 
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
@@ -199,7 +199,6 @@ export class SupervisorService {
 
       const church = await this.churchRepository.findOne({
         where: { id: pastor?.theirChurch?.id },
-        relations: ['supervisors'],
       });
 
       if (pastor.status === Status.Inactive) {
@@ -508,7 +507,6 @@ export class SupervisorService {
           this.handleDBExceptions(error);
         }
 
-        // NOTE : el supervisor no puede cambiar de zona, la zona se le asigna, cuando se crea una zona o se actualiza
         //? Update in subordinate relations
         const allZones = await this.zoneRepository.find({
           relations: ['theirSupervisor'],
@@ -527,7 +525,7 @@ export class SupervisorService {
         });
 
         try {
-          //* Update and set to null relationships in Zone
+          //* Update and set new relationships in Zone
           const zonesBySupervisor = allZones.filter(
             (zone) => zone.theirSupervisor?.id === supervisor?.id,
           );
@@ -542,7 +540,7 @@ export class SupervisorService {
             }),
           );
 
-          //* Update and set to null relationships in Preacher
+          //* Update and set new relationships in Preacher
           const preachersBySupervisor = allPreachers.filter(
             (preacher) => preacher.theirSupervisor?.id === supervisor?.id,
           );
@@ -557,7 +555,7 @@ export class SupervisorService {
             }),
           );
 
-          //* Update and set to null relationships in Family House
+          //* Update and set new relationships in Family House
           const familyHousesBySupervisor = allFamilyHouses.filter(
             (familyHouse) => familyHouse.theirSupervisor?.id === supervisor?.id,
           );
@@ -572,7 +570,7 @@ export class SupervisorService {
             }),
           );
 
-          //* Update and set to null relationships in Disciple
+          //* Update and set new relationships in Disciple
           const disciplesBySupervisor = allDisciples.filter(
             (disciple) => disciple.theirSupervisor?.id === supervisor?.id,
           );
@@ -621,7 +619,7 @@ export class SupervisorService {
         //* Validate Church according pastor
         if (!newPastor?.theirChurch) {
           throw new BadRequestException(
-            `Church was not found, verify that Pastor has a Church assigned`,
+            `Church was not found, verify that Pastor has a church assigned`,
           );
         }
 
@@ -673,7 +671,7 @@ export class SupervisorService {
         });
 
         try {
-          //* Update and set to null relationships in Zone
+          //* Update and set mew relationships and null copastor in Zone
           const zonesBySupervisor = allZones.filter(
             (zone) => zone.theirSupervisor?.id === supervisor?.id,
           );
@@ -688,7 +686,7 @@ export class SupervisorService {
             }),
           );
 
-          //* Update and set to null relationships in Preacher
+          //* Update and set mew relationships and null copastor in Preacher
           const preachersBySupervisor = allPreachers.filter(
             (preacher) => preacher.theirSupervisor?.id === supervisor?.id,
           );
@@ -703,7 +701,7 @@ export class SupervisorService {
             }),
           );
 
-          //* Update and set to null relationships in Family House
+          //* Update and set mew relationships and null copastor in Family House
           const familyHousesBySupervisor = allFamilyHouses.filter(
             (familyHouse) => familyHouse.theirSupervisor?.id === supervisor?.id,
           );
@@ -718,7 +716,7 @@ export class SupervisorService {
             }),
           );
 
-          //* Update and set to null relationships in Disciple
+          //* Update and set mew relationships and null copastor in Disciple
           const disciplesBySupervisor = allDisciples.filter(
             (disciple) => disciple.theirSupervisor?.id === supervisor?.id,
           );

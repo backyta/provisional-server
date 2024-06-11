@@ -7,9 +7,12 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { IncomeService } from './income.service';
-import { CreateIncomeDto } from './dto/create-income.dto';
-import { UpdateIncomeDto } from './dto/update-income.dto';
+
+import {
+  CreateIncomeDto,
+  UpdateIncomeDto,
+} from '@/modules/offering/income/dto';
+import { IncomeService } from '@/modules/offering/income/income.service';
 
 @Controller('income')
 export class IncomeController {

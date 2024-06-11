@@ -6,8 +6,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { isUUID } from 'class-validator';
+import { InjectRepository } from '@nestjs/typeorm';
 
 import { PaginationDto } from '@/common/dtos';
 import { MemberRoles, Status } from '@/common/enums';
@@ -144,7 +144,7 @@ export class DiscipleService {
     }
 
     //* Validate and assign supervisor according family house
-    if (!familyHouse.theirSupervisor) {
+    if (!familyHouse?.theirSupervisor) {
       throw new NotFoundException(
         `Supervisor was not found, verify that Family House has a supervisor assigned`,
       );
@@ -212,25 +212,23 @@ export class DiscipleService {
     }
 
     // Create new instance
-    if (roles.includes(MemberRoles.Disciple)) {
-      try {
-        const newDisciple = this.discipleRepository.create({
-          ...createDiscipleDto,
-          theirChurch: church,
-          theirPastor: pastor,
-          theirCopastor: copastor,
-          theirSupervisor: supervisor,
-          theirZone: zone,
-          theirPreacher: preacher,
-          theirFamilyHouse: familyHouse,
-          createdAt: new Date(),
-          createdBy: user,
-        });
+    try {
+      const newDisciple = this.discipleRepository.create({
+        ...createDiscipleDto,
+        theirChurch: church,
+        theirPastor: pastor,
+        theirCopastor: copastor,
+        theirSupervisor: supervisor,
+        theirZone: zone,
+        theirPreacher: preacher,
+        theirFamilyHouse: familyHouse,
+        createdAt: new Date(),
+        createdBy: user,
+      });
 
-        return await this.discipleRepository.save(newDisciple);
-      } catch (error) {
-        this.handleDBExceptions(error);
-      }
+      return await this.discipleRepository.save(newDisciple);
+    } catch (error) {
+      this.handleDBExceptions(error);
     }
   }
 

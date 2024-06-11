@@ -8,13 +8,6 @@ import {
   ParseUUIDPipe,
   Query,
 } from '@nestjs/common';
-
-import { ZoneService } from '@/modules/zone/zone.service';
-import { CreateZoneDto, UpdateZoneDto } from '@/modules/zone/dto';
-import { Auth, GetUser } from '@/modules/auth/decorators';
-import { UserRoles } from '@/modules/auth/enums';
-import { User } from '@/modules/user/entities';
-import { Zone } from '@/modules/zone/entities';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -26,7 +19,17 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+
 import { PaginationDto } from '@/common/dtos';
+
+import { UserRoles } from '@/modules/auth/enums';
+import { Auth, GetUser } from '@/modules/auth/decorators';
+
+import { User } from '@/modules/user/entities';
+
+import { Zone } from '@/modules/zone/entities';
+import { ZoneService } from '@/modules/zone/zone.service';
+import { CreateZoneDto, UpdateZoneDto } from '@/modules/zone/dto';
 
 @ApiTags('Zones')
 @ApiBearerAuth()

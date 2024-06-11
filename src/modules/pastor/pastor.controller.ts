@@ -21,15 +21,16 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { Auth, GetUser } from '@/modules/auth/decorators';
+import { PaginationDto } from '@/common/dtos';
+
 import { UserRoles } from '@/modules/auth/enums';
+import { Auth, GetUser } from '@/modules/auth/decorators';
 
 import { User } from '@/modules/user/entities';
 
 import { Pastor } from '@/modules/pastor/entities';
 import { PastorService } from '@/modules/pastor/pastor.service';
 import { CreatePastorDto, UpdatePastorDto } from '@/modules/pastor/dto';
-import { PaginationDto } from '@/common/dtos';
 
 @ApiTags('Pastors')
 @ApiBearerAuth()

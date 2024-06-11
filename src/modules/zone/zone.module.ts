@@ -6,13 +6,13 @@ import { ZoneService } from '@/modules/zone/zone.service';
 import { ZoneController } from '@/modules/zone/zone.controller';
 
 import { AuthModule } from '@/modules/auth/auth.module';
-import { PastorModule } from '@/modules/pastor/pastor.module';
-import { CopastorModule } from '@/modules/copastor/copastor.module';
-import { SupervisorModule } from '@/modules/supervisor/supervisor.module';
 import { ChurchModule } from '@/modules/church/church.module';
+import { PastorModule } from '@/modules/pastor/pastor.module';
 import { PreacherModule } from '@/modules/preacher/preacher.module';
-import { FamilyHouseModule } from '@/modules/family-house/family-house.module';
+import { CopastorModule } from '@/modules/copastor/copastor.module';
 import { DiscipleModule } from '@/modules/disciple/disciple.module';
+import { SupervisorModule } from '@/modules/supervisor/supervisor.module';
+import { FamilyHouseModule } from '@/modules/family-house/family-house.module';
 
 @Module({
   controllers: [ZoneController],

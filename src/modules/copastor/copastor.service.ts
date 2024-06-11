@@ -112,7 +112,6 @@ export class CopastorService {
 
     const church = await this.churchRepository.findOne({
       where: { id: pastor?.theirChurch?.id },
-      relations: ['copastors'],
     });
 
     if (church.status === Status.Inactive) {
@@ -125,8 +124,8 @@ export class CopastorService {
     try {
       const newCopastor = this.copastorRepository.create({
         ...createCopastorDto,
-        theirPastor: pastor,
         theirChurch: church,
+        theirPastor: pastor,
         createdAt: new Date(),
         createdBy: user,
       });
@@ -274,7 +273,7 @@ export class CopastorService {
         //* Validate pastor
         if (!theirPastor) {
           throw new NotFoundException(
-            `Para actualizar o cambiar de pastor coloque un pastor id existente`,
+            `To update the co-pastor put an existing pastor id`,
           );
         }
 
@@ -291,7 +290,7 @@ export class CopastorService {
 
         if (newPastor.status === Status.Inactive) {
           throw new BadRequestException(
-            `The property status in Pastor must be "Active"`,
+            `The property status in Pastor must be "active"`,
           );
         }
 
@@ -309,7 +308,7 @@ export class CopastorService {
 
         if (newChurch.status === Status.Inactive) {
           throw new BadRequestException(
-            `The property status in Church must be "Active"`,
+            `The property status in Church must be "active"`,
           );
         }
 
@@ -351,7 +350,7 @@ export class CopastorService {
         try {
           //* Update and set to null relationships in Supervisor
           const supervisorsByCopastor = allSupervisors.filter(
-            (supervisor) => supervisor.theirCopastor?.id === copastor.id,
+            (supervisor) => supervisor.theirCopastor?.id === copastor?.id,
           );
 
           await Promise.all(
@@ -365,7 +364,7 @@ export class CopastorService {
 
           //* Update and set to null relationships in Zone
           const zonesByCopastor = allZones.filter(
-            (zone) => zone.theirCopastor?.id === copastor.id,
+            (zone) => zone.theirCopastor?.id === copastor?.id,
           );
 
           await Promise.all(
@@ -379,7 +378,7 @@ export class CopastorService {
 
           //* Update and set to null relationships in Preacher
           const preachersByCopastor = allPreachers.filter(
-            (preacher) => preacher.theirCopastor?.id === copastor.id,
+            (preacher) => preacher.theirCopastor?.id === copastor?.id,
           );
 
           await Promise.all(
@@ -393,7 +392,7 @@ export class CopastorService {
 
           //* Update and set to null relationships in Family House
           const familyHousesByCopastor = allFamilyHouses.filter(
-            (familyHouse) => familyHouse.theirCopastor?.id === copastor.id,
+            (familyHouse) => familyHouse.theirCopastor?.id === copastor?.id,
           );
 
           await Promise.all(
@@ -407,7 +406,7 @@ export class CopastorService {
 
           //* Update and set to null relationships in Disciple
           const disciplesByCopastor = allDisciples.filter(
-            (disciple) => disciple.theirCopastor?.id === copastor.id,
+            (disciple) => disciple.theirCopastor?.id === copastor?.id,
           );
 
           await Promise.all(
@@ -522,8 +521,8 @@ export class CopastorService {
     //* Update and set in Inactive on Copastor
     const updatedCopastor = await this.copastorRepository.preload({
       id: copastor.id,
-      theirPastor: null,
       theirChurch: null,
+      theirPastor: null,
       updatedAt: new Date(),
       updatedBy: user,
       status: Status.Inactive,
@@ -604,7 +603,7 @@ export class CopastorService {
 
       //* Update and set to null relationships in Family House
       const familyHousesByCopastor = allFamilyHouses.filter(
-        (familyHome) => familyHome.theirCopastor?.id === copastor.id,
+        (familyHome) => familyHome.theirCopastor?.id === copastor?.id,
       );
 
       await Promise.all(
@@ -619,7 +618,7 @@ export class CopastorService {
 
       //* Update and set to null relationships in Disciple
       const disciplesByCopastor = allDisciples.filter(
-        (disciple) => disciple.theirCopastor?.id === copastor.id,
+        (disciple) => disciple.theirCopastor?.id === copastor?.id,
       );
 
       await Promise.all(

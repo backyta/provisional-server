@@ -114,48 +114,36 @@ export class Preacher {
   status: string;
 
   //* Relations (Array)
-  // @OneToMany(() => FamilyHouse, (familyHouse) => familyHouse.theirPreacher)
-  // familyHouses: FamilyHouse[];
-
   @OneToMany(() => Disciple, (disciple) => disciple.theirPreacher)
   disciples: Disciple[];
 
   //* Relations(FK)
-  @ManyToOne(() => Church, (church) => church.preachers, {
-    // eager: true,
-  })
+  @ManyToOne(() => Church, (church) => church.preachers)
   @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 
-  @ManyToOne(() => Pastor, (pastor) => pastor.preachers, {
-    // eager: true,
-  })
+  @ManyToOne(() => Pastor, (pastor) => pastor.preachers)
   @JoinColumn({ name: 'their_pastor_id' })
   theirPastor: Pastor;
 
   @ManyToOne(() => Copastor, (copastor) => copastor.preachers, {
     onDelete: 'SET NULL',
-    // eager: true,
   })
   @JoinColumn({ name: 'their_copastor_id' })
   theirCopastor: Copastor;
 
   @ManyToOne(() => Supervisor, (supervisor) => supervisor.preachers, {
     onDelete: 'SET NULL',
-    // eager: true,
   })
   @JoinColumn({ name: 'their_supervisor_id' })
   theirSupervisor: Supervisor;
 
-  @ManyToOne(() => Zone, (zone) => zone.preachers, {
-    // eager: true,
-  })
+  @ManyToOne(() => Zone, (zone) => zone.preachers)
   @JoinColumn({ name: 'their_zone_id' })
   theirZone: Zone;
 
   @OneToOne(() => FamilyHouse, {
     onDelete: 'SET NULL',
-    // eager: true,
   })
   @JoinColumn({ name: 'their_family_house_id' })
   theirFamilyHouse: FamilyHouse;

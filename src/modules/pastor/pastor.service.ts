@@ -6,8 +6,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { isUUID } from 'class-validator';
+import { InjectRepository } from '@nestjs/typeorm';
 
 import { MemberRoles, Status } from '@/common/enums';
 
@@ -318,7 +318,7 @@ export class PastorService {
         });
 
         try {
-          //* Update and set to null relationships in Copastor
+          //* Update and set new relationships in Copastor
           const copastorsByPastor = allCopastors.filter(
             (copastor) => copastor.theirPastor?.id === pastor?.id,
           );
@@ -331,7 +331,7 @@ export class PastorService {
             }),
           );
 
-          //* Update and set to null relationships in Supervisor
+          //* Update and set new relationships in Supervisor
           const supervisorsByPastor = allSupervisors.filter(
             (supervisor) => supervisor.theirPastor?.id === pastor.id,
           );
@@ -344,7 +344,7 @@ export class PastorService {
             }),
           );
 
-          //* Update and set to null relationships in Zone
+          //* Update and set new relationships in Zone
           const zonesByPastor = allZones.filter(
             (zone) => zone.theirPastor?.id === pastor.id,
           );
@@ -357,7 +357,7 @@ export class PastorService {
             }),
           );
 
-          //* Update and set to null relationships in Preacher
+          //* Update and set new relationships in Preacher
           const preachersByPastor = allPreachers.filter(
             (preacher) => preacher.theirPastor?.id === pastor.id,
           );
@@ -370,7 +370,7 @@ export class PastorService {
             }),
           );
 
-          //* Update and set to null relationships in Family House
+          //* Update and set new relationships in Family House
           const familyHousesByPastor = allFamilyHouses.filter(
             (familyHouse) => familyHouse.theirPastor?.id === pastor.id,
           );
@@ -383,7 +383,7 @@ export class PastorService {
             }),
           );
 
-          //* Update and set to null relationships in Disciple
+          //* Update and set new relationships in Disciple
           const disciplesByPastor = allDisciples.filter(
             (disciple) => disciple.theirPastor?.id === pastor.id,
           );

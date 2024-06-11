@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CurrencyType } from '@/modules/offering/shared/enums';
 import {
   IsEnum,
   IsNotEmpty,
@@ -10,8 +9,12 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { TypesOfferingExpense } from '../enums/types-offering-expense.enum';
-import { SubTypesOfferingExpense } from '../enums/sub-types-offering-expense.enum';
+import { CurrencyType } from '@/modules/offering/shared/enums';
+
+import {
+  TypesOfferingExpense,
+  SubTypesOfferingExpense,
+} from '@/modules/offering/expenses/enums';
 
 export class CreateExpenseDto {
   @ApiProperty({

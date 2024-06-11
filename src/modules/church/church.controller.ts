@@ -21,15 +21,16 @@ import {
   Query,
 } from '@nestjs/common';
 
-import { Auth, GetUser } from '@/modules/auth/decorators';
+import { PaginationDto } from '@/common/dtos';
+
 import { UserRoles } from '@/modules/auth/enums';
+import { Auth, GetUser } from '@/modules/auth/decorators';
 
 import { User } from '@/modules/user/entities';
 
 import { Church } from '@/modules/church/entities';
 import { ChurchService } from '@/modules/church/church.service';
 import { CreateChurchDto, UpdateChurchDto } from '@/modules/church/dto';
-import { PaginationDto } from '@/common/dtos';
 
 @ApiTags('Churches')
 @ApiBearerAuth()

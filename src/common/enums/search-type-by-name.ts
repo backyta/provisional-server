@@ -1,4 +1,5 @@
-// TODO : cambiar a sub_type de busqueda para que tenga ams coherencia
+// TODO : cambiar a sub_type de búsqueda para que tenga mas coherencia
+
 export enum SearchTypeOfName {
   //* Module Offering
   offeringMember = 'offering-member',

@@ -6,17 +6,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { isUUID } from 'class-validator';
+import { InjectRepository } from '@nestjs/typeorm';
 
-import { User } from '@/modules/user/entities/';
-
-import { CreateChurchDto, UpdateChurchDto } from '@/modules/church/dto';
 import { Church } from '@/modules/church/entities';
+import { CreateChurchDto, UpdateChurchDto } from '@/modules/church/dto';
 
 import { Status } from '@/common/enums';
 import { PaginationDto } from '@/common/dtos';
 
+import { User } from '@/modules/user/entities';
 import { Zone } from '@/modules/zone/entities';
 import { Pastor } from '@/modules/pastor/entities';
 import { Preacher } from '@/modules/preacher/entities';

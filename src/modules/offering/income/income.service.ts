@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { CreateIncomeDto } from './dto/create-income.dto';
-import { UpdateIncomeDto } from './dto/update-income.dto';
+import {
+  CreateIncomeDto,
+  UpdateIncomeDto,
+} from '@/modules/offering/income/dto';
 
 @Injectable()
 export class IncomeService {

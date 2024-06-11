@@ -9,7 +9,6 @@ import {
   ParseUUIDPipe,
   Query,
 } from '@nestjs/common';
-
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -22,14 +21,17 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { PreacherService } from '@/modules/preacher/preacher.service';
-import { CreatePreacherDto, UpdatePreacherDto } from '@/modules/preacher/dto';
+import { PaginationDto } from '@/common/dtos';
+
 import { UserRoles } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
+
 import { Preacher } from '@/modules/preacher/entities';
+import { PreacherService } from '@/modules/preacher/preacher.service';
+import { CreatePreacherDto, UpdatePreacherDto } from '@/modules/preacher/dto';
+
 import { User } from '@/modules/user/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
-import { PaginationDto } from '@/common/dtos';
 
 @ApiTags('Preachers')
 @ApiBearerAuth()

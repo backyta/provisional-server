@@ -29,9 +29,9 @@ import { CreateCopastorDto, UpdateCopastorDto } from '@/modules/copastor/dto';
 import { UserRoles } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
 
+import { User } from '@/modules/user/entities';
 import { Pastor } from '@/modules/pastor/entities';
 import { Copastor } from '@/modules/copastor/entities';
-import { User } from '@/modules/user/entities';
 
 @ApiTags('Copastors')
 @ApiBearerAuth()

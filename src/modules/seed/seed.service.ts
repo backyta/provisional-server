@@ -4,28 +4,30 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Pastor } from '@/modules/pastor/entities';
-import { Copastor } from '@/modules/copastor/entities';
-import { Preacher } from '@/modules/preacher/entities';
-import { FamilyHouse } from '@/modules/family-house/entities';
-import { Disciple } from '@/modules/disciple/entities/';
-import { User } from '@/modules/user/entities';
 import { Repository } from 'typeorm';
-import { DiscipleService } from '@/modules/disciple/disciple.service';
-import { FamilyHouseService } from '@/modules/family-house/family-house.service';
-import { ChurchService } from '@/modules/church/church.service';
-import { PastorService } from '@/modules/pastor/pastor.service';
-import { CopastorService } from '@/modules/copastor/copastor.service';
-import { SupervisorService } from '@/modules/supervisor/supervisor.service';
-import { ZoneService } from '@/modules/zone/zone.service';
-import { PreacherService } from '@/modules/preacher/preacher.service';
+import { InjectRepository } from '@nestjs/typeorm';
+
 import { AuthService } from '@/modules/auth/auth.service';
 import { UserService } from '@/modules/user/user.service';
-import { dataUsers } from './data/seed-users';
-import { Church } from '@/modules/church/entities';
-import { Supervisor } from '@/modules/supervisor/entities';
+import { ZoneService } from '@/modules/zone/zone.service';
+import { ChurchService } from '@/modules/church/church.service';
+import { PastorService } from '@/modules/pastor/pastor.service';
+import { PreacherService } from '@/modules/preacher/preacher.service';
+import { DiscipleService } from '@/modules/disciple/disciple.service';
+import { CopastorService } from '@/modules/copastor/copastor.service';
+import { SupervisorService } from '@/modules/supervisor/supervisor.service';
+import { FamilyHouseService } from '@/modules/family-house/family-house.service';
+
 import { Zone } from '@/modules/zone/entities';
+import { User } from '@/modules/user/entities';
+import { Pastor } from '@/modules/pastor/entities';
+import { Church } from '@/modules/church/entities';
+import { Copastor } from '@/modules/copastor/entities';
+import { Preacher } from '@/modules/preacher/entities';
+import { Disciple } from '@/modules/disciple/entities';
+import { Supervisor } from '@/modules/supervisor/entities';
+import { FamilyHouse } from '@/modules/family-house/entities';
+
 import {
   dataChurches,
   dataCopastors,
@@ -35,7 +37,8 @@ import {
   dataPreachers,
   dataSupervisors,
   dataZones,
-} from './data';
+  dataUsers,
+} from '@/modules/seed/data';
 
 @Injectable()
 export class SeedService {
@@ -165,9 +168,6 @@ export class SeedService {
     const promisesSupervisor = [];
     const promisesZone = [];
     const promisesPreacher = [];
-
-    // const promisesMembers = [];
-    // const promisesOfferings = [];
 
     //* Create Main Church
     await this.churchService.create(church[0], user);
@@ -360,6 +360,7 @@ export class SeedService {
   private handleDBExceptions(error: any) {
     if (error.code === '23505') throw new BadRequestException(error.detail);
     this.logger.error(error);
+
     throw new InternalServerErrorException(
       'Unexpected errors, check server logs',
     );

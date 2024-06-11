@@ -7,17 +7,18 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
+import { Status } from '@/common/enums';
+
+import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
+import { Pastor } from '@/modules/pastor/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Copastor } from '@/modules/copastor/entities';
-import { FamilyHouse } from '@/modules/family-house/entities';
-import { Status } from '@/common/enums';
 import { Preacher } from '@/modules/preacher/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
-import { Pastor } from '@/modules/pastor/entities';
-import { Zone } from '@/modules/zone/entities';
+import { FamilyHouse } from '@/modules/family-house/entities';
 
-//TODO : seguir con la semilla , revisar antes si al crear se setea aen los [] de las relaciones opuestas
+//TODO : seguir con la semilla , revisar antes si al crear se setea en los [] de las relaciones opuestas
 // NOTE : Al momento hacer la consultas ver los indices agregar
 @Entity({ name: 'offerings_income' })
 @Index(['type', 'subType'])

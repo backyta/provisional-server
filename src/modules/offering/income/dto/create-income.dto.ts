@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CurrencyType } from '@/modules/offering/shared/enums';
 import {
   IsEnum,
   IsNotEmpty,
@@ -10,6 +9,8 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+
+import { CurrencyType } from '@/modules/offering/shared/enums';
 
 import {
   SubTypesOfferingIncome,

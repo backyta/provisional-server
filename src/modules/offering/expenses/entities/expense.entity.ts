@@ -6,8 +6,9 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { User } from '@/modules/user/entities';
 import { Status } from '@/common/enums';
+
+import { User } from '@/modules/user/entities';
 
 @Entity({ name: 'offerings_expense' })
 export class Expense {

@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { MaritalStatus, MemberRoles, Gender, Status } from '@/common/enums';
 import {
   IsArray,
   IsEmail,
@@ -12,6 +11,8 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+
+import { MaritalStatus, MemberRoles, Gender, Status } from '@/common/enums';
 
 export class CreatePastorDto {
   // General and Personal info

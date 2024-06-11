@@ -26,13 +26,14 @@ import { PaginationDto } from '@/common/dtos';
 import { UserRoles } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
 
+import { User } from '@/modules/user/entities';
+
 import {
   CreateSupervisorDto,
   UpdateSupervisorDto,
 } from '@/modules/supervisor/dto';
 import { SupervisorService } from '@/modules/supervisor/supervisor.service';
 
-import { User } from '@/modules/user/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
 
@@ -55,7 +56,7 @@ export class SupervisorController {
   @Post()
   @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
   @ApiCreatedResponse({
-    description: 'Preacher has been successfully created.',
+    description: 'Supervisor has been successfully created.',
   })
   @ApiForbiddenResponse({
     description: 'Forbidden.',

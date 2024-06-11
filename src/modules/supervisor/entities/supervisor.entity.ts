@@ -21,12 +21,14 @@ import { Copastor } from '@/modules/copastor/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { FamilyHouse } from '@/modules/family-house/entities';
-// TODO : los supervisores tmb se podrán ligar directamente al pastor, ya que si se crea un anexo
+
+// NOTE : los supervisores tmb se podrán ligar directamente al pastor, ya que si se crea un anexo
 // Habrán un pastor y no hay copastor los supervisores se encargaran de las casas, se podría mandar
 // un copastor como entrenamiento o apoyo a esa zona y este copastor apoyaría a los supervisores.
 // este copastor englobaría a los supervisores y al pastor y se enlaza directo al pastor.
 
 // TODO : hacer un valor true o false para poder asignar un theirPastor directo al supervisor
+
 @Entity({ name: 'supervisors' })
 @Index(['firstName', 'lastName'])
 export class Supervisor {

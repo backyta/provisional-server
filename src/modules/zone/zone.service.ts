@@ -6,8 +6,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { isUUID } from 'class-validator';
+import { InjectRepository } from '@nestjs/typeorm';
 
 import { Status } from '@/common/enums';
 import { PaginationDto } from '@/common/dtos';
@@ -61,7 +61,7 @@ export class ZoneService {
     //? Validate and assign supervisor
     if (!theirSupervisor) {
       throw new NotFoundException(
-        `Para crear una nueva zona coloque un supervisor id existente`,
+        `To create a new zone enter an existing supervisor id`,
       );
     }
     const supervisor = await this.supervisorRepository.findOne({
@@ -165,11 +165,11 @@ export class ZoneService {
       skip: offset,
       relations: [
         'theirChurch',
-        'theirCopastor',
         'theirPastor',
+        'theirCopastor',
         'theirSupervisor',
-        'preachers',
         'familyHouses',
+        'preachers',
         'disciples',
       ],
       relationLoadStrategy: 'query',
@@ -320,7 +320,7 @@ export class ZoneService {
       }
 
       //* Validate Church according supervisor
-      if (!newSupervisor.theirChurch) {
+      if (!newSupervisor?.theirChurch) {
         throw new BadRequestException(
           `Church was not found, verify that Supervisor has a church assigned`,
         );
@@ -335,49 +335,8 @@ export class ZoneService {
           `The property status in Church must be "active"`,
         );
       }
-      // NOTE : aqui al hacer el cambio de supervisor y si este nuevo super esta asignado a otro dara un error
-      // NOTE : eliminar de la antigua zona ese super y sus relaciones subordinadas, eliminar la zone del super antiguo
-      // NOTE : eliminar en otras tablas segun la zona, si tiene esa zona se elimina su super.
-      // NOTE : luego recien se podra asignar ese super liberado, remplazando al existente y seteando en sus subordinados que tienen esa zona
-      // NOTE : cuando se actualize la zona con el nuevo super, donde tenga esta zona se setea el nuevo super y sus roles superiores.
 
-      // tecnicamente se borra solo el super del anterior zona, a la nueva zona se le asigna el nuevo super
-
-      // Del antiguo si es rolando se elimina de todos sus subordinados
-      // Al nuevo si es marleny se elimna de todos y se setea en todos rolando.
-      // Ya esta hecho el seteo nuevo solo hacer igual para el antiguo
-
-      // Update and save
-      const updatedZone = await this.zoneRepository.preload({
-        id: zone.id,
-        ...updateZoneDto,
-        theirChurch: newChurch,
-        theirPastor: newPastor,
-        theirCopastor: newCopastor,
-        theirSupervisor: newSupervisor,
-        updatedAt: new Date(),
-        updatedBy: user,
-        status: status,
-      });
-
-      const oldSupervisor = await this.supervisorRepository.findOne({
-        where: { id: zone?.theirSupervisor?.id },
-        relations: ['theirZone'],
-      });
-
-      try {
-        oldSupervisor.theirZone = null;
-        await this.supervisorRepository.save(oldSupervisor);
-
-        const savedZone = await this.zoneRepository.save(updatedZone);
-
-        newSupervisor.theirZone = savedZone;
-        await this.supervisorRepository.save(newSupervisor);
-      } catch (error) {
-        this.handleDBExceptions(error);
-      }
-
-      //? All members by module
+      //? All subordinate entities
       const allPreachers = await this.preacherRepository.find({
         relations: ['theirZone'],
       });
@@ -390,8 +349,110 @@ export class ZoneService {
         relations: ['theirZone'],
       });
 
+      //! Eliminar relaciones de zone y supervisor (independiente)
+      //* Setear a null la zona del antiguo supervisor
+      if (zone?.theirSupervisor?.id) {
+        const updateOldSupervisor = await this.supervisorRepository.preload({
+          id: zone?.theirSupervisor?.id,
+          theirZone: null,
+          updatedAt: new Date(),
+          updatedBy: user,
+          status: status,
+        });
+
+        await this.supervisorRepository.save(updateOldSupervisor);
+      }
+
+      //* Setear a null el supervisor de la nueva zona
+      if (newSupervisor?.theirZone?.id) {
+        const updatedNewZone = await this.zoneRepository.preload({
+          id: newSupervisor?.theirZone?.id,
+          theirSupervisor: null,
+          updatedAt: new Date(),
+          updatedBy: user,
+          status: status,
+        });
+
+        await this.zoneRepository.save(updatedNewZone);
+      }
+
+      //! Quitamos del nuevo supervisor todas sus relaciones subordinadas porque pertenecerá a otra zona
       try {
         //* Update and set to null relationships in Preacher
+        const preachersByNewZone = allPreachers.filter(
+          (preacher) => preacher.theirZone?.id === newSupervisor?.theirZone?.id,
+        );
+
+        await Promise.all(
+          preachersByNewZone.map(async (preacher) => {
+            await this.preacherRepository.update(preacher.id, {
+              theirSupervisor: null,
+            });
+          }),
+        );
+
+        //* Update and set to null relationships in Family House
+        const familyHousesByNewZone = allFamilyHouses.filter(
+          (familyHouse) =>
+            familyHouse.theirZone?.id === newSupervisor?.theirZone?.id,
+        );
+
+        await Promise.all(
+          familyHousesByNewZone.map(async (familyHouse) => {
+            await this.familyHouseRepository.update(familyHouse.id, {
+              theirSupervisor: null,
+            });
+          }),
+        );
+
+        //* Update and set to null relationships in Disciple
+        const disciplesByNewZone = allDisciples.filter(
+          (disciple) => disciple.theirZone?.id === newSupervisor?.theirZone?.id,
+        );
+
+        await Promise.all(
+          disciplesByNewZone.map(async (disciple) => {
+            await this.discipleRepository.update(disciple.id, {
+              theirSupervisor: null,
+            });
+          }),
+        );
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
+
+      // Update zone
+      const updatedZone = await this.zoneRepository.preload({
+        id: zone.id,
+        ...updateZoneDto,
+        theirChurch: newChurch,
+        theirPastor: newPastor,
+        theirCopastor: newCopastor,
+        theirSupervisor: newSupervisor,
+        updatedAt: new Date(),
+        updatedBy: user,
+        status: status,
+      });
+
+      let savedZone: Zone;
+      try {
+        newSupervisor.theirZone = null;
+        await this.supervisorRepository.save(newSupervisor);
+
+        savedZone = await this.zoneRepository.save(updatedZone);
+
+        newSupervisor.theirZone = savedZone;
+        newSupervisor.updatedAt = new Date();
+        newSupervisor.updatedBy = user;
+
+        await this.supervisorRepository.save(newSupervisor);
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
+
+      //? Set new relationships in subordinate entities
+      try {
+        //* Update and set new relationships in Preacher
         const preachersByZone = allPreachers.filter(
           (preacher) => preacher.theirZone?.id === zone?.id,
         );
@@ -407,23 +468,25 @@ export class ZoneService {
           }),
         );
 
-        //* Update and set to null relationships in Family House
+        //* Update and set new relationships in Family House
         const familyHousesByZone = allFamilyHouses.filter(
           (familyHouse) => familyHouse.theirZone?.id === zone?.id,
         );
 
         await Promise.all(
-          familyHousesByZone.map(async (familyHouse) => {
+          familyHousesByZone.map(async (familyHouse, index) => {
             await this.familyHouseRepository.update(familyHouse.id, {
               theirChurch: newChurch,
               theirPastor: newPastor,
               theirCopastor: newCopastor,
               theirSupervisor: newSupervisor,
+              zoneName: savedZone.zoneName,
+              codeHouse: `${savedZone.zoneName}-${index + 1}`,
             });
           }),
         );
 
-        //* Update and set to null relationships in Disciple
+        //* Update and set new relationships in Disciple
         const disciplesByZone = allDisciples.filter(
           (disciple) => disciple.theirZone?.id === zone?.id,
         );
@@ -441,29 +504,54 @@ export class ZoneService {
       } catch (error) {
         this.handleDBExceptions(error);
       }
+      return savedZone;
     }
 
     //? Update and save if is same supervisor
-    const updatedZone = await this.zoneRepository.preload({
-      id: zone.id,
-      ...updateZoneDto,
-      theirChurch: zone.theirChurch,
-      theirPastor: zone.theirPastor,
-      theirCopastor: zone.theirCopastor,
-      theirSupervisor: zone.theirSupervisor,
-      updatedAt: new Date(),
-      updatedBy: user,
-      status: status,
-    });
+    if (zone.theirSupervisor?.id === theirSupervisor) {
+      const updatedZone = await this.zoneRepository.preload({
+        id: zone.id,
+        ...updateZoneDto,
+        theirChurch: zone.theirChurch,
+        theirPastor: zone.theirPastor,
+        theirCopastor: zone.theirCopastor,
+        theirSupervisor: zone.theirSupervisor,
+        updatedAt: new Date(),
+        updatedBy: user,
+        status: status,
+      });
 
-    try {
-      return await this.zoneRepository.save(updatedZone);
-    } catch (error) {
-      this.handleDBExceptions(error);
+      const allFamilyHouses = await this.familyHouseRepository.find({
+        relations: ['theirZone'],
+      });
+
+      //* Update and set new zone name and code in Family House
+      const familyHousesByZone = allFamilyHouses.filter(
+        (familyHouse) => familyHouse.theirZone?.id === zone?.id,
+      );
+
+      await Promise.all(
+        familyHousesByZone.map(async (familyHouse, index) => {
+          await this.familyHouseRepository.update(familyHouse.id, {
+            theirChurch: zone.theirChurch,
+            theirPastor: zone.theirPastor,
+            theirCopastor: zone.theirCopastor,
+            theirSupervisor: zone.theirSupervisor,
+            zoneName: updateZoneDto.zoneName,
+            codeHouse: `${updateZoneDto.zoneName}-${index + 1}`,
+          });
+        }),
+      );
+
+      try {
+        return await this.zoneRepository.save(updatedZone);
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
     }
   }
 
-  //TODO : Seguir aquí no usar el delete
+  // NOTE : Seguir aquí no usar el delete
   // NOTE : la zona no debería eliminarse  ni desactivarse, solo actualizarse, porque afectaría a sus relaciones con ofrenda
   // NOTE : si la zona se actualiza de super es indiferente porque la relacione s solo con zona.
   // NOTE : no debería eliminarse

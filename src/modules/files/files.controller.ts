@@ -8,11 +8,6 @@ import {
   ParseFilePipe,
   BadRequestException,
 } from '@nestjs/common';
-
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { AnyFilesInterceptor } from '@nestjs/platform-express';
-import { UserRoles } from '../auth/enums';
-import { Auth } from '@/modules/auth/decorators';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -22,6 +17,12 @@ import {
   ApiInternalServerErrorResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
+
+import { Auth } from '@/modules/auth/decorators';
+import { UserRoles } from '@/modules/auth/enums';
+
+import { CloudinaryService } from '@/modules/cloudinary/cloudinary.service';
 
 // NOTE : Al subir als imágenes se llama este endpoint, se obtienen la secure_url en un array de las imágenes y se
 // NOTE : ponen al objeto del formulario en secure urls , que sera enviado al backend para guardar
@@ -63,9 +64,7 @@ export class FilesController {
     files: Express.Multer.File[],
   ) {
     if (files.length > 4) {
-      throw new BadRequestException(
-        'Se han excedido los límites de imágenes (max 4).',
-      );
+      throw new BadRequestException('Image limits have been exceeded (max 4).');
     }
 
     const uploadedFilesPromises = files.map((file) =>
