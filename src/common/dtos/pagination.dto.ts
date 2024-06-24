@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsOptional, Min } from 'class-validator';
+import { IsOptional, IsString, Min } from 'class-validator';
 
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -20,4 +20,13 @@ export class PaginationDto {
   @Min(0)
   @Type(() => Number)
   offset?: number;
+
+  @ApiProperty({
+    default: 'ASC',
+    description: 'En que tipo de orden necesitas los registros?',
+  })
+  @IsOptional()
+  @IsString()
+  @Type(() => String)
+  order?: string;
 }

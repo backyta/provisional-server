@@ -58,25 +58,25 @@ export class UserController {
   }
 
   //* Fin By Term
-  @Get(':term')
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
-  @ApiParam({
-    name: 'term',
-    description: 'Could be id, full names, first name, last name.',
-    example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
-  })
-  @ApiOkResponse({
-    description: 'Successful operation.',
-  })
-  @ApiNotFoundResponse({
-    description: 'Not found resource.',
-  })
-  findTerm(
-    @Param('term') term: string,
-    @Query() searchTypeAndPaginationDto: SearchTypeAndPaginationDto,
-  ): Promise<User | User[]> {
-    return this.userService.findTerm(term, searchTypeAndPaginationDto);
-  }
+  // @Get(':term')
+  // @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  // @ApiParam({
+  //   name: 'term',
+  //   description: 'Could be id, full names, first name, last name.',
+  //   example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
+  // })
+  // @ApiOkResponse({
+  //   description: 'Successful operation.',
+  // })
+  // @ApiNotFoundResponse({
+  //   description: 'Not found resource.',
+  // })
+  // findTerm(
+  //   @Param('term') term: string,
+  //   @Query() searchTypeAndPaginationDto: SearchTypeAndPaginationDto,
+  // ): Promise<User | User[]> {
+  //   return this.userService.findTerm(term, searchTypeAndPaginationDto);
+  // }
 
   //* Update
   @Patch(':id')

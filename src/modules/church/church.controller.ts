@@ -6,6 +6,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -21,7 +22,7 @@ import {
   Query,
 } from '@nestjs/common';
 
-import { PaginationDto } from '@/common/dtos';
+import { PaginationDto, SearchTypeAndPaginationDto } from '@/common/dtos';
 
 import { UserRoles } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
@@ -63,6 +64,19 @@ export class ChurchController {
     return this.churchService.create(createChurchDto, user);
   }
 
+  //* Find Main Church
+  @Get('/main-church')
+  @Auth()
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found resource.',
+  })
+  findMainChurch(@Query() paginationDto: PaginationDto): Promise<Church[]> {
+    return this.churchService.findMainChurch(paginationDto);
+  }
+
   //* Find All
   @Get()
   @Auth()
@@ -76,9 +90,25 @@ export class ChurchController {
     return this.churchService.findAll(paginationDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.churchService.findOne(+id);
+  //* Find By Term
+  @Get(':term')
+  @Auth()
+  @ApiParam({
+    name: 'term',
+    description: 'Could be id, names, code, roles, etc.',
+    example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
+  })
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found resource.',
+  })
+  findTerm(
+    @Param('term') term: string,
+    @Query() searchTypeAndPaginationDto: SearchTypeAndPaginationDto,
+  ): Promise<Church | Church[]> {
+    return this.churchService.findByTerm(term, searchTypeAndPaginationDto);
   }
 
   //* Update

@@ -1,35 +1,68 @@
 export enum SearchType {
-  //* Basic
-  id = 'id',
-  gender = 'gender',
-  marital_status = 'marital_is_active',
-  firstName = 'first_name',
-  lastName = 'last_name',
-  fullName = 'full_name',
-  isActive = 'is_active',
-  roles = 'roles',
+  ID = 'id',
 
-  // TODO : Renombrar todo esto
-  // NOTE : esto no seria necesario porque se busca por nombre y no por ID
-  //* Extras
-  code = 'code',
-  their_pastor = 'their_pastor', // not necessary
-  their_copastor = 'their_copastor', // not necessary
-  their_preacher = 'their_preacher', // not necessary
-  their_family_home = 'their_family_home', // not necessary
-  address = 'address',
-  zone = 'zone',
+  //* Church
+  ChurchName = 'church_name',
+  FoundingDate = 'founding_date',
 
-  //* Offering and Tithe
-  type_offering = 'type_offering', // cambiar por offering y tithe el type
-  offering_sub_type = 'offering_sub_type', // subtipo
-  offering_sub_type_date = 'offering_sub_type_date', // subtipo - ofrenda con nombre por fecha
-  type_offering_date = 'type_offering_date', // subtipo diezmo u ofrenda por fecha
+  //* Members, Pastor, Copastor, Supervisor, Preacher, Offering, User
+  FirstName = 'first_name',
+  LastName = 'last_name',
+  FullName = 'full_name',
 
-  date = 'date',
-  copastor_id = 'copastor_id', // not necessary , usar nombres y apellidos
-  family_home_id = 'family_home_id', // not necessary , usar nombres y apellidos
-  member_id = 'member_id', // not necessary , usar nombres y apellidos
+  //* Members, Pastor, Copastor, Supervisor, Preacher
+  DateBirth = 'date_birth',
+  MonthBirth = 'month_birth',
+  Gender = 'gender',
+  MaritalStatus = 'marital_status',
+
+  //* Members, Supervisor, Preacher, Family House
+  Zone = 'zone',
+
+  //* Members, Supervisor, Preacher, Fam. House,
+  CodeHouse = 'code_house',
+  NameHouse = 'name_house',
+
+  //* Members, Pastor, Copastor, Sup, Preacher, Family House
+  Address = 'address',
+
+  //* Members, Pastor, Copastor, Supervisor, Preacher.
+  OriginCountry = 'origin_country',
+
+  //* Members, Pastor, Copastor, Supervisor, Preacher, Family House
+  Department = 'department',
+  Province = 'province',
+  District = 'district',
+  UrbanSector = 'urban_sector',
+
+  //* Members, Pastor, Copastor, Supervisor, Preacher, Fam. House, Offering, User
+  Status = 'status',
+
+  //* Members, User
+  Roles = 'roles',
+
+  //* Offering Income (tithe and offering)
+  Tithe = 'tithe',
+  SundayWorship = 'sunday_worship',
+  FamilyHouse = 'family_house',
+  GeneralFasting = 'general_fasting',
+  GeneralVigil = 'general_vigil',
+  ZonalFasting = 'zonal_fasting',
+  ZonalVigil = 'zonal_vigil',
+  SundaySchool = 'sunday_school',
+  YouthWorship = 'youth_worship',
+  UnitedWorship = 'united_worship',
+  Activities = 'activities',
+  ChurchGround = 'church_ground',
+  Special = 'special',
+  IncomeAdjustment = 'income_adjustment',
+
+  //* Offering Expenses
+  OperationalExpenses = 'operative_expenses',
+  MaintenanceAndRepairExpenses = 'maintenance_and_repair_expenses',
+  DecorationExpenses = 'decoration_expenses',
+  EquipmentAndTechnologyExpenses = 'equipment_and_technology_expenses',
+  SuppliesExpenses = 'supplies_expenses',
+  ActivitiesAndEventsExpenses = 'activities_and_events_expenses',
+  ExpensesAdjustment = 'expenses_adjustment',
 }
-
-//TODO : AGREGAR indices para las busquedas mas rapidas, hacer lista y asignar indices.

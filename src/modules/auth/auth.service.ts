@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
   Injectable,
@@ -37,6 +38,8 @@ export class AuthService {
         createdAt: new Date(),
       });
 
+      // TODO : no deberia generarse el token porque es una creacion dentro del sistema no para que ingrese directo
+      // NOTE : su ruta deberia ser user/create-user no auth-register (MOVERLO)
       await this.userRepository.save(newUser);
       delete newUser.password;
       return {
@@ -54,7 +57,15 @@ export class AuthService {
 
     const user = await this.userRepository.findOne({
       where: { email },
-      select: { email: true, password: true, id: true },
+      select: {
+        firstName: true,
+        lastName: true,
+        roles: true,
+        status: true,
+        email: true,
+        password: true,
+        id: true,
+      },
     });
 
     if (!user) {
@@ -65,14 +76,16 @@ export class AuthService {
       throw new UnauthorizedException(`Email or password are not valid`);
     }
 
+    const { password: _, ...userWithoutPassword } = user;
+
     return {
-      ...user,
+      ...userWithoutPassword,
       token: this.getJetToken({ id: user.id }),
     };
   }
 
   //* Check auth status (regenerate token)
-  async checkAuthStatus(user: User) {
+  async checkStatus(user: User) {
     return {
       ...user,
       token: this.getJetToken({ id: user.id }),

@@ -57,8 +57,8 @@ export class AuthController {
   }
 
   //* Check auth status (regenerate new token)
-  @ApiBearerAuth('check-auth-status')
-  @Get('check-auth-status')
+  @ApiBearerAuth('check-status')
+  @Get('check-status')
   @Auth()
   @ApiOkResponse({
     description: 'Successful operation',
@@ -67,6 +67,6 @@ export class AuthController {
     description: 'Forbidden.',
   })
   checkAuthStatus(@GetUser() user: User) {
-    return this.authService.checkAuthStatus(user);
+    return this.authService.checkStatus(user);
   }
 }

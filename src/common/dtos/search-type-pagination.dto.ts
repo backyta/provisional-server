@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
 
-import { SearchType, SearchTypeOfName } from '@/common/enums';
+import { SearchType, SearchSubType } from '@/common/enums';
 
 export class SearchTypeAndPaginationDto {
   @ApiProperty({
@@ -11,9 +11,10 @@ export class SearchTypeAndPaginationDto {
     description:
       'Choose one of types, to search for types (different entities).',
   })
+  @IsEnum(SearchType)
   @IsNotEmpty()
   @IsString()
-  type: string;
+  'search-type': string;
 
   @ApiProperty({
     default: 10,
@@ -33,11 +34,11 @@ export class SearchTypeAndPaginationDto {
   offset?: number;
 
   @ApiProperty({
-    enum: SearchTypeOfName,
-    description: 'Choose one of types, parameters for name search.',
+    enum: SearchSubType,
+    description: 'Choose one sub type.',
   })
-  @IsEnum(SearchTypeOfName)
+  @IsEnum(SearchSubType)
   @IsOptional()
   @IsString()
-  type_of_name?: string;
+  'search-sub-type'?: string;
 }

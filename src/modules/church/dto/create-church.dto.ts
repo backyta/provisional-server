@@ -8,7 +8,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUUID,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -138,6 +137,5 @@ export class CreateChurchDto {
   })
   @IsString()
   @IsOptional()
-  @IsUUID()
   theirMainChurch?: string;
 }

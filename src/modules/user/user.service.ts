@@ -38,104 +38,104 @@ export class UserService {
   }
 
   //* FIND BY SEARCH TERM AND TYPE (FILTER)
-  async findTerm(
-    term: string,
-    searchTypeAndPaginationDto: SearchTypeAndPaginationDto,
-  ): Promise<User[] | User> {
-    const { type, limit = 20, offset = 0 } = searchTypeAndPaginationDto;
-    let member: User | User[];
+  // async findTerm(
+  //   term: string,
+  //   searchTypeAndPaginationDto: SearchTypeAndPaginationDto,
+  // ): Promise<User[] | User> {
+  // const { type, limit = 20, offset = 0 } = searchTypeAndPaginationDto;
+  // let member: User | User[];
 
-    //* Find UUID --> One (inactive or active)
-    if (isUUID(term) && type === SearchType.id) {
-      member = await this.userRepository.findOne({
-        where: { id: term },
-      });
+  // //* Find UUID --> One (inactive or active)
+  // if (isUUID(term) && type === SearchType.id) {
+  //   member = await this.userRepository.findOne({
+  //     where: { id: term },
+  //   });
 
-      if (!member) {
-        throw new NotFoundException(`Pastor was not found with this UUID`);
-      }
-    }
+  //   if (!member) {
+  //     throw new NotFoundException(`Pastor was not found with this UUID`);
+  //   }
+  // }
 
-    //* Find isActive --> Many
-    if (term && type === SearchType.isActive) {
-      const whereCondition = {};
-      try {
-        whereCondition[type] = term;
+  // //* Find isActive --> Many
+  // if (term && type === SearchType.isActive) {
+  //   const whereCondition = {};
+  //   try {
+  //     whereCondition[type] = term;
 
-        const users = await this.userRepository.find({
-          where: [whereCondition],
-          take: limit,
-          skip: offset,
-          order: { createdAt: 'ASC' },
-        });
+  //     const users = await this.userRepository.find({
+  //       where: [whereCondition],
+  //       take: limit,
+  //       skip: offset,
+  //       order: { createdAt: 'ASC' },
+  //     });
 
-        if (users.length === 0) {
-          throw new NotFoundException(`Not found Users with this: ${term}`);
-        }
-        return users;
-      } catch (error) {
-        if (error.code === '22P02') {
-          throw new BadRequestException(
-            `This term is not a valid boolean value`,
-          );
-        }
+  //     if (users.length === 0) {
+  //       throw new NotFoundException(`Not found Users with this: ${term}`);
+  //     }
+  //     return users;
+  //   } catch (error) {
+  //     if (error.code === '22P02') {
+  //       throw new BadRequestException(
+  //         `This term is not a valid boolean value`,
+  //       );
+  //     }
 
-        throw error;
-      }
-    }
+  //     throw error;
+  //   }
+  // }
 
-    //* Find firstName --> Many
-    if (term && type === SearchType.firstName) {
-      const resultSearch = await searchUserByNames({
-        term,
-        search_type: SearchType.firstName,
-        limit,
-        offset,
-        search_repository: this.userRepository,
-      });
+  // //* Find firstName --> Many
+  // if (term && type === SearchType.firstName) {
+  //   const resultSearch = await searchUserByNames({
+  //     term,
+  //     search_type: SearchType.firstName,
+  //     limit,
+  //     offset,
+  //     search_repository: this.userRepository,
+  //   });
 
-      return resultSearch;
-    }
+  //   return resultSearch;
+  // }
 
-    //* Find lastName --> Many
-    if (term && type === SearchType.lastName) {
-      const resultSearch = await searchUserByNames({
-        term,
-        search_type: SearchType.lastName,
-        limit,
-        offset,
-        search_repository: this.userRepository,
-      });
+  // //* Find lastName --> Many
+  // if (term && type === SearchType.lastName) {
+  //   const resultSearch = await searchUserByNames({
+  //     term,
+  //     search_type: SearchType.lastName,
+  //     limit,
+  //     offset,
+  //     search_repository: this.userRepository,
+  //   });
 
-      return resultSearch;
-    }
+  //   return resultSearch;
+  // }
 
-    //* Find fullName --> One
-    if (term && type === SearchType.fullName) {
-      const resultSearch = await searchUserByNames({
-        term,
-        search_type: SearchType.fullName,
-        limit,
-        offset,
-        search_repository: this.userRepository,
-      });
+  // //* Find fullName --> One
+  // if (term && type === SearchType.fullName) {
+  //   const resultSearch = await searchUserByNames({
+  //     term,
+  //     search_type: SearchType.fullName,
+  //     limit,
+  //     offset,
+  //     search_repository: this.userRepository,
+  //   });
 
-      return resultSearch;
-    }
+  //   return resultSearch;
+  // }
 
-    //! General Exceptions
-    if (!isUUID(term) && type === SearchType.id) {
-      throw new BadRequestException(`Not valid UUID`);
-    }
+  // //! General Exceptions
+  // if (!isUUID(term) && type === SearchType.id) {
+  //   throw new BadRequestException(`Not valid UUID`);
+  // }
 
-    if (term && !Object.values(SearchType).includes(type as SearchType)) {
-      throw new BadRequestException(
-        `Type not valid, should be: ${Object.values(SearchType).join(', ')}`,
-      );
-    }
+  // if (term && !Object.values(SearchType).includes(type as SearchType)) {
+  //   throw new BadRequestException(
+  //     `Type not valid, should be: ${Object.values(SearchType).join(', ')}`,
+  //   );
+  // }
 
-    if (!member) throw new NotFoundException(`Member with ${term} not found`);
-  }
+  // if (!member) throw new NotFoundException(`Member with ${term} not found`);
+  // }
 
   //* UPDATE USER
   async update(
