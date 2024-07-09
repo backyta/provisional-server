@@ -5,14 +5,16 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { FindOptionsOrderValue, Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Between, FindOptionsOrderValue, ILike, Repository } from 'typeorm';
 
 import { Church } from '@/modules/church/entities';
+import { formatDataChurch } from '@/modules/church/helpers';
 import { CreateChurchDto, UpdateChurchDto } from '@/modules/church/dto';
 
 import { SearchType, Status } from '@/common/enums';
+import { formatToDDMMYYYY } from '@/common/helpers';
 import { PaginationDto, SearchTypeAndPaginationDto } from '@/common/dtos';
 
 import { User } from '@/modules/user/entities';
@@ -22,8 +24,7 @@ import { Preacher } from '@/modules/preacher/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyHouse } from '@/modules/family-house/entities';
-import { formatDataChurch } from './helpers/formatDataChurch';
+import { FamilyGroup } from '@/modules/family-group/entities';
 
 @Injectable()
 export class ChurchService {
@@ -48,8 +49,8 @@ export class ChurchService {
     @InjectRepository(Preacher)
     private readonly preacherRepository: Repository<Preacher>,
 
-    @InjectRepository(FamilyHouse)
-    private readonly familyHouseRepository: Repository<FamilyHouse>,
+    @InjectRepository(FamilyGroup)
+    private readonly familyGroupRepository: Repository<FamilyGroup>,
 
     @InjectRepository(Disciple)
     private readonly discipleRepository: Repository<Disciple>,
@@ -131,7 +132,7 @@ export class ChurchService {
     const { limit = 1, offset = 0, order = 'ASC' } = paginationDto;
 
     const data = await this.churchRepository.find({
-      where: { status: Status.Active },
+      where: { isAnexe: false, status: Status.Active },
       take: limit,
       skip: offset,
       order: { createdAt: order as FindOptionsOrderValue },
@@ -149,13 +150,15 @@ export class ChurchService {
       take: limit,
       skip: offset,
       relations: [
+        'createdBy',
+        'updatedBy',
         'anexes',
         'pastors',
         'copastors',
         'supervisors',
         'zones',
         'preachers',
-        'familyHouses',
+        'familyGroups',
         'disciples',
       ],
       relationLoadStrategy: 'query',
@@ -178,29 +181,31 @@ export class ChurchService {
       'search-type': searchType,
       limit = 10,
       offset = 0,
+      order,
     } = searchTypeAndPaginationDto;
-
-    let church: Church | Church[];
 
     //? Find by church name --> Many
     if (term && searchType === SearchType.ChurchName) {
-      const queryBuilder = this.churchRepository.createQueryBuilder('church');
-      const churches = await queryBuilder
-        .leftJoinAndSelect('church.anexes', 'rel1')
-        .leftJoinAndSelect('church.pastors', 'rel2')
-        .leftJoinAndSelect('church.copastors', 'rel3')
-        .leftJoinAndSelect('church.supervisors', 'rel5')
-        .leftJoinAndSelect('church.zones', 'rel6')
-        .leftJoinAndSelect('church.preachers', 'rel7')
-        .leftJoinAndSelect('church.familyHouses', 'rel8')
-        .leftJoinAndSelect('church.disciples', 'rel9')
-        .where(`church.church_name ILIKE :searchTerm`, {
-          searchTerm: `%${term}%`,
-        })
-        .andWhere(`church.status =:status`, { status: Status.Active })
-        .skip(offset)
-        .limit(limit)
-        .getMany();
+      const churches = await this.churchRepository.find({
+        where: {
+          churchName: ILike(`%${term}%`),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'anexes',
+          'pastors',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
 
       if (churches.length === 0) {
         throw new NotFoundException(
@@ -212,7 +217,6 @@ export class ChurchService {
         const theirMainChurch = await this.churchRepository.findOne({
           where: { status: Status.Active, isAnexe: false },
         });
-
         return formatDataChurch({ theirMainChurch, churches }) as any;
       } catch (error) {
         throw new BadRequestException(
@@ -229,33 +233,36 @@ export class ChurchService {
         throw new NotFoundException('Formato de marca de tiempo invalido.');
       }
 
-      const fromDate = new Date(fromTimestamp).toISOString().split('T')[0];
-      const toDate = toTimestamp
-        ? new Date(toTimestamp).toISOString().split('T')[0]
-        : fromDate;
+      const fromDate = new Date(fromTimestamp);
+      const toDate = toTimestamp ? new Date(toTimestamp) : fromDate;
 
-      const queryBuilder = this.churchRepository.createQueryBuilder('church');
-      const churches = await queryBuilder
-        .leftJoinAndSelect('church.anexes', 'rel1')
-        .leftJoinAndSelect('church.pastors', 'rel2')
-        .leftJoinAndSelect('church.copastors', 'rel3')
-        .leftJoinAndSelect('church.supervisors', 'rel5')
-        .leftJoinAndSelect('church.zones', 'rel6')
-        .leftJoinAndSelect('church.preachers', 'rel7')
-        .leftJoinAndSelect('church.familyHouses', 'rel8')
-        .leftJoinAndSelect('church.disciples', 'rel9')
-        .where('church.founding_date BETWEEN :from AND :to', {
-          from: fromDate,
-          to: toDate,
-        })
-        .andWhere(`church.status =:status`, { status: Status.Active })
-        .skip(offset)
-        .limit(limit)
-        .getMany();
+      const churches = await this.churchRepository.find({
+        where: {
+          foundingDate: Between(fromDate, toDate),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'anexes',
+          'pastors',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
 
       if (churches.length === 0) {
+        const fromDate = formatToDDMMYYYY(fromTimestamp);
+        const toDate = formatToDDMMYYYY(toTimestamp);
+
         throw new NotFoundException(
-          `No se encontraron iglesias con esta fecha o rango de fechas: ${term}`,
+          `No se encontraron iglesias con esta fecha o rango de fechas: ${fromDate} - ${toDate}`,
         );
       }
 
@@ -263,7 +270,6 @@ export class ChurchService {
         const theirMainChurch = await this.churchRepository.findOne({
           where: { status: Status.Active, isAnexe: false },
         });
-
         return formatDataChurch({ theirMainChurch, churches }) as any;
       } catch (error) {
         throw new BadRequestException(
@@ -274,23 +280,26 @@ export class ChurchService {
 
     //? Find by department --> Many
     if (term && searchType === SearchType.Department) {
-      const queryBuilder = this.churchRepository.createQueryBuilder('church');
-      const churches = await queryBuilder
-        .leftJoinAndSelect('church.anexes', 'rel1')
-        .leftJoinAndSelect('church.pastors', 'rel2')
-        .leftJoinAndSelect('church.copastors', 'rel3')
-        .leftJoinAndSelect('church.supervisors', 'rel5')
-        .leftJoinAndSelect('church.zones', 'rel6')
-        .leftJoinAndSelect('church.preachers', 'rel7')
-        .leftJoinAndSelect('church.familyHouses', 'rel8')
-        .leftJoinAndSelect('church.disciples', 'rel9')
-        .where(`church.department ILIKE :searchTerm`, {
-          searchTerm: `%${term}%`,
-        })
-        .andWhere(`church.status =:status`, { status: Status.Active })
-        .skip(offset)
-        .limit(limit)
-        .getMany();
+      const churches = await this.churchRepository.find({
+        where: {
+          department: ILike(`%${term}%`),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'anexes',
+          'pastors',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
 
       if (churches.length === 0) {
         throw new NotFoundException(
@@ -302,7 +311,6 @@ export class ChurchService {
         const theirMainChurch = await this.churchRepository.findOne({
           where: { status: Status.Active, isAnexe: false },
         });
-
         return formatDataChurch({ theirMainChurch, churches }) as any;
       } catch (error) {
         throw new BadRequestException(
@@ -313,23 +321,26 @@ export class ChurchService {
 
     //? Find by province --> Many
     if (term && searchType === SearchType.Province) {
-      const queryBuilder = this.churchRepository.createQueryBuilder('church');
-      const churches = await queryBuilder
-        .leftJoinAndSelect('church.anexes', 'rel1')
-        .leftJoinAndSelect('church.pastors', 'rel2')
-        .leftJoinAndSelect('church.copastors', 'rel3')
-        .leftJoinAndSelect('church.supervisors', 'rel5')
-        .leftJoinAndSelect('church.zones', 'rel6')
-        .leftJoinAndSelect('church.preachers', 'rel7')
-        .leftJoinAndSelect('church.familyHouses', 'rel8')
-        .leftJoinAndSelect('church.disciples', 'rel9')
-        .where(`church.province ILIKE :searchTerm`, {
-          searchTerm: `%${term}%`,
-        })
-        .andWhere(`church.status =:status`, { status: Status.Active })
-        .skip(offset)
-        .limit(limit)
-        .getMany();
+      const churches = await this.churchRepository.find({
+        where: {
+          province: ILike(`%${term}%`),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'anexes',
+          'pastors',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
 
       if (churches.length === 0) {
         throw new NotFoundException(
@@ -341,7 +352,6 @@ export class ChurchService {
         const theirMainChurch = await this.churchRepository.findOne({
           where: { status: Status.Active, isAnexe: false },
         });
-
         return formatDataChurch({ theirMainChurch, churches }) as any;
       } catch (error) {
         throw new BadRequestException(
@@ -352,23 +362,26 @@ export class ChurchService {
 
     //? Find by district --> Many
     if (term && searchType === SearchType.District) {
-      const queryBuilder = this.churchRepository.createQueryBuilder('church');
-      const churches = await queryBuilder
-        .leftJoinAndSelect('church.anexes', 'rel1')
-        .leftJoinAndSelect('church.pastors', 'rel2')
-        .leftJoinAndSelect('church.copastors', 'rel3')
-        .leftJoinAndSelect('church.supervisors', 'rel5')
-        .leftJoinAndSelect('church.zones', 'rel6')
-        .leftJoinAndSelect('church.preachers', 'rel7')
-        .leftJoinAndSelect('church.familyHouses', 'rel8')
-        .leftJoinAndSelect('church.disciples', 'rel9')
-        .where(`church.district ILIKE :searchTerm`, {
-          searchTerm: `%${term}%`,
-        })
-        .andWhere(`church.status =:status`, { status: Status.Active })
-        .skip(offset)
-        .limit(limit)
-        .getMany();
+      const churches = await this.churchRepository.find({
+        where: {
+          district: ILike(`%${term}%`),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'anexes',
+          'pastors',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
 
       if (churches.length === 0) {
         throw new NotFoundException(
@@ -380,7 +393,6 @@ export class ChurchService {
         const theirMainChurch = await this.churchRepository.findOne({
           where: { status: Status.Active, isAnexe: false },
         });
-
         return formatDataChurch({ theirMainChurch, churches }) as any;
       } catch (error) {
         throw new BadRequestException(
@@ -391,23 +403,26 @@ export class ChurchService {
 
     //? Find by urban sector --> Many
     if (term && searchType === SearchType.UrbanSector) {
-      const queryBuilder = this.churchRepository.createQueryBuilder('church');
-      const churches = await queryBuilder
-        .leftJoinAndSelect('church.anexes', 'rel1')
-        .leftJoinAndSelect('church.pastors', 'rel2')
-        .leftJoinAndSelect('church.copastors', 'rel3')
-        .leftJoinAndSelect('church.supervisors', 'rel5')
-        .leftJoinAndSelect('church.zones', 'rel6')
-        .leftJoinAndSelect('church.preachers', 'rel7')
-        .leftJoinAndSelect('church.familyHouses', 'rel8')
-        .leftJoinAndSelect('church.disciples', 'rel9')
-        .where(`church.urban_sector ILIKE :searchTerm`, {
-          searchTerm: `%${term}%`,
-        })
-        .andWhere(`church.status =:status`, { status: Status.Active })
-        .skip(offset)
-        .limit(limit)
-        .getMany();
+      const churches = await this.churchRepository.find({
+        where: {
+          urbanSector: ILike(`%${term}%`),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'anexes',
+          'pastors',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
 
       if (churches.length === 0) {
         throw new NotFoundException(
@@ -419,7 +434,6 @@ export class ChurchService {
         const theirMainChurch = await this.churchRepository.findOne({
           where: { status: Status.Active, isAnexe: false },
         });
-
         return formatDataChurch({ theirMainChurch, churches }) as any;
       } catch (error) {
         throw new BadRequestException(
@@ -428,68 +442,32 @@ export class ChurchService {
       }
     }
 
-    //? Find by urban sector --> Many
-    if (term && searchType === SearchType.UrbanSector) {
-      const queryBuilder = this.churchRepository.createQueryBuilder('church');
-      const churches = await queryBuilder
-        .leftJoinAndSelect('church.anexes', 'rel1')
-        .leftJoinAndSelect('church.pastors', 'rel2')
-        .leftJoinAndSelect('church.copastors', 'rel3')
-        .leftJoinAndSelect('church.supervisors', 'rel5')
-        .leftJoinAndSelect('church.zones', 'rel6')
-        .leftJoinAndSelect('church.preachers', 'rel7')
-        .leftJoinAndSelect('church.familyHouses', 'rel8')
-        .leftJoinAndSelect('church.disciples', 'rel9')
-        .where(`church.urban_sector ILIKE :searchTerm`, {
-          searchTerm: `%${term}%`,
-        })
-        .andWhere(`church.status =:status`, { status: Status.Active })
-        .skip(offset)
-        .limit(limit)
-        .getMany();
-
-      if (churches.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron iglesias con este sector urbano: ${term}`,
-        );
-      }
-
-      try {
-        const theirMainChurch = await this.churchRepository.findOne({
-          where: { status: Status.Active, isAnexe: false },
-        });
-
-        return formatDataChurch({ theirMainChurch, churches }) as any;
-      } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
-        );
-      }
-    }
-
-    //? Find by urban sector --> Many
+    //? Find by address --> Many
     if (term && searchType === SearchType.Address) {
-      const queryBuilder = this.churchRepository.createQueryBuilder('church');
-      const churches = await queryBuilder
-        .leftJoinAndSelect('church.anexes', 'rel1')
-        .leftJoinAndSelect('church.pastors', 'rel2')
-        .leftJoinAndSelect('church.copastors', 'rel3')
-        .leftJoinAndSelect('church.supervisors', 'rel5')
-        .leftJoinAndSelect('church.zones', 'rel6')
-        .leftJoinAndSelect('church.preachers', 'rel7')
-        .leftJoinAndSelect('church.familyHouses', 'rel8')
-        .leftJoinAndSelect('church.disciples', 'rel9')
-        .where(`church.address ILIKE :searchTerm`, {
-          searchTerm: `%${term}%`,
-        })
-        .andWhere(`church.status =:status`, { status: Status.Active })
-        .skip(offset)
-        .limit(limit)
-        .getMany();
+      const churches = await this.churchRepository.find({
+        where: {
+          address: ILike(`%${term}%`),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'anexes',
+          'pastors',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
 
       if (churches.length === 0) {
         throw new NotFoundException(
-          `No se encontraron iglesias con este dirección: ${term}`,
+          `No se encontraron iglesias con esta dirección: ${term}`,
         );
       }
 
@@ -497,7 +475,6 @@ export class ChurchService {
         const theirMainChurch = await this.churchRepository.findOne({
           where: { status: Status.Active, isAnexe: false },
         });
-
         return formatDataChurch({ theirMainChurch, churches }) as any;
       } catch (error) {
         throw new BadRequestException(
@@ -508,26 +485,31 @@ export class ChurchService {
 
     //? Find by status --> Many
     if (term && searchType === SearchType.Status) {
-      const queryBuilder = this.churchRepository.createQueryBuilder('church');
-      const churches = await queryBuilder
-        .leftJoinAndSelect('church.anexes', 'rel1')
-        .leftJoinAndSelect('church.pastors', 'rel2')
-        .leftJoinAndSelect('church.copastors', 'rel3')
-        .leftJoinAndSelect('church.supervisors', 'rel5')
-        .leftJoinAndSelect('church.zones', 'rel6')
-        .leftJoinAndSelect('church.preachers', 'rel7')
-        .leftJoinAndSelect('church.familyHouses', 'rel8')
-        .leftJoinAndSelect('church.disciples', 'rel9')
-        .where(`church.status ILIKE :searchTerm`, {
-          searchTerm: `%${term}%`,
-        })
-        .skip(offset)
-        .limit(limit)
-        .getMany();
+      const churches = await this.churchRepository.find({
+        where: {
+          status: ILike(`%${term}%`),
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'anexes',
+          'pastors',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
 
       if (churches.length === 0) {
+        const value = term === 'inactive' ? 'Inactivo' : 'Activo';
+
         throw new NotFoundException(
-          `No se encontraron iglesias con este estado: ${term}`,
+          `No se encontraron iglesias con este estado: ${value}`,
         );
       }
 
@@ -554,22 +536,6 @@ export class ChurchService {
         `Tipos de búsqueda no validos, solo son validos: ${Object.values(SearchType).join(', ')}`,
       );
     }
-
-    if (
-      term &&
-      (SearchType.FirstName || SearchType.LastName || SearchType.FullName)
-    ) {
-      throw new BadRequestException(
-        `Para buscar por nombres o apellidos el sub-tipo es requerido`,
-      );
-    }
-
-    if (!church)
-      throw new NotFoundException(
-        `Iglesia con este termino: ${term} no se encontró`,
-      );
-
-    return church;
   }
 
   //* UPDATE CHURCH
@@ -582,7 +548,7 @@ export class ChurchService {
 
     // Validations
     if (!isUUID(id)) {
-      throw new BadRequestException(`Not valid UUID`);
+      throw new BadRequestException(`UUID no valido`);
     }
 
     const church = await this.churchRepository.findOne({
@@ -591,24 +557,24 @@ export class ChurchService {
     });
 
     if (!church) {
-      throw new NotFoundException(`Church not found with id: ${id}`);
+      throw new NotFoundException(`No se encontró iglesia con id: ${id}`);
     }
 
     if (!church.isAnexe && theirMainChurch) {
       throw new BadRequestException(
-        `Cannot assign a home church to the home church`,
+        `No se puede asignar una iglesia principal a la iglesia principal.`,
       );
     }
 
     if (!church.isAnexe && church.isAnexe) {
       throw new BadRequestException(
-        `You cannot change the main church to an annex`,
+        `No se puede cambiar la iglesia a un anexo`,
       );
     }
 
     if (church.status === Status.Active && status === Status.Inactive) {
       throw new BadRequestException(
-        `You cannot update it to "inactive", you must delete the record`,
+        `No se puede actualizar el registro a "Inactivo", se debe eliminar.`,
       );
     }
 
@@ -628,26 +594,27 @@ export class ChurchService {
           'supervisors',
           'zones',
           'preachers',
-          'familyHouses',
+          'familyGroups',
           'disciples',
         ],
+        relationLoadStrategy: 'query',
       });
 
       if (!newMainChurch) {
         throw new NotFoundException(
-          `Main church not found with id ${theirMainChurch}`,
+          `No se encontró iglesia principal con id ${theirMainChurch}`,
         );
       }
 
       if (newMainChurch.isAnexe) {
         throw new NotFoundException(
-          `You cannot assign an annex church as the main church`,
+          `No se puede asignar una iglesia anexo como iglesia principal`,
         );
       }
 
       if (newMainChurch.status === Status.Inactive) {
         throw new BadRequestException(
-          `The property status in main church must be "active"`,
+          `La propiedad estado en Iglesia principal debe ser "Activo"`,
         );
       }
 
@@ -666,6 +633,8 @@ export class ChurchService {
       } catch (error) {
         this.handleDBExceptions(error);
       }
+
+      return;
     }
 
     //? Update and save if is same Church
@@ -689,7 +658,7 @@ export class ChurchService {
   async remove(id: string, user: User) {
     // Validations
     if (!isUUID(id)) {
-      throw new BadRequestException(`Not valid UUID`);
+      throw new BadRequestException(`UUID no valido.`);
     }
 
     const church = await this.churchRepository.findOne({
@@ -698,11 +667,13 @@ export class ChurchService {
     });
 
     if (!church) {
-      throw new NotFoundException(`Church with id: ${id} not exits`);
+      throw new NotFoundException(`Iglesia con: ${id} no existe.`);
     }
 
     if (!church.isAnexe) {
-      throw new NotFoundException(`Main Church cannot be removed`);
+      throw new NotFoundException(
+        `La iglesia principal no puede ser eliminada.`,
+      );
     }
 
     //* Update and set in Inactive on Church (anexe)
@@ -741,7 +712,7 @@ export class ChurchService {
       relations: ['theirChurch'],
     });
 
-    const allFamilyHouses = await this.familyHouseRepository.find({
+    const allFamilyGroups = await this.familyGroupRepository.find({
       relations: ['theirChurch'],
     });
 
@@ -825,14 +796,14 @@ export class ChurchService {
         }),
       );
 
-      //* Update and set to null relationships in Family house
-      const familyHousesByPastor = allFamilyHouses.filter(
-        (familyHome) => familyHome.theirChurch?.id === church?.id,
+      //* Update and set to null relationships in Family group
+      const familyGroupsByPastor = allFamilyGroups.filter(
+        (familyGroup) => familyGroup.theirChurch?.id === church?.id,
       );
 
       await Promise.all(
-        familyHousesByPastor.map(async (familyHome) => {
-          await this.familyHouseRepository.update(familyHome.id, {
+        familyGroupsByPastor.map(async (familyGroup) => {
+          await this.familyGroupRepository.update(familyGroup.id, {
             theirChurch: null,
             updatedAt: new Date(),
             updatedBy: user,
@@ -872,8 +843,9 @@ export class ChurchService {
       }
     }
 
+    this.logger.error(error);
     throw new InternalServerErrorException(
-      'Unexpected errors, check server logs',
+      'Sucedió un error inesperado, revise los registros de consola',
     );
   }
 }

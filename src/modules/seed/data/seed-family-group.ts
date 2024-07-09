@@ -1,9 +1,9 @@
-interface SeedFamilyHome {
+interface SeedFamilyGroup {
   //* General Info
-  houseName: string;
+  familyGroupName: string;
   zoneName?: string;
-  houseNumber?: string;
-  codeHouse?: string;
+  familyGroupNumber?: string;
+  familyGroupCode?: string;
   worshipTime: string;
 
   //* Contact info
@@ -21,15 +21,15 @@ interface SeedFamilyHome {
   theirZone?: string;
 }
 
-interface SeedDataHouses {
-  houses: SeedFamilyHome[];
+interface SeedDataGroups {
+  houses: SeedFamilyGroup[];
 }
 
 //! Data Family Houses
-export const dataFamilyHouses: SeedDataHouses = {
+export const dataFamilyGroups: SeedDataGroups = {
   houses: [
     {
-      houseName: 'Faro de Luz',
+      familyGroupName: 'Faro de Luz',
       worshipTime: '17:00',
       district: 'Independencia',
       urbanSector: 'Payet',
@@ -37,7 +37,7 @@ export const dataFamilyHouses: SeedDataHouses = {
       referenceAddress: 'Frente al parque zonal',
     },
     {
-      houseName: 'Bethel',
+      familyGroupName: 'Bethel',
       worshipTime: '18:00',
       district: 'Independencia',
       urbanSector: 'Tahuantinsuyo',
@@ -45,7 +45,7 @@ export const dataFamilyHouses: SeedDataHouses = {
       referenceAddress: 'Cerca del mercado municipal',
     },
     {
-      houseName: 'Monte Sion',
+      familyGroupName: 'Monte Sion',
       worshipTime: '19:00',
       district: 'Independencia',
       urbanSector: 'Ermitaño',
@@ -53,7 +53,7 @@ export const dataFamilyHouses: SeedDataHouses = {
       referenceAddress: 'A una cuadra del colegio',
     },
     {
-      houseName: 'Renuevo Espiritual',
+      familyGroupName: 'Renuevo Espiritual',
       worshipTime: '20:00',
       district: 'Independencia',
       urbanSector: 'Payet',
@@ -61,7 +61,7 @@ export const dataFamilyHouses: SeedDataHouses = {
       referenceAddress: 'Frente al parque industrial',
     },
     {
-      houseName: 'Centro Cristiano',
+      familyGroupName: 'Centro Cristiano',
       worshipTime: '10:00',
       district: 'Independencia',
       urbanSector: 'Tahuantinsuyo',
@@ -69,7 +69,7 @@ export const dataFamilyHouses: SeedDataHouses = {
       referenceAddress: 'Cerca del centro educativo',
     },
     {
-      houseName: 'Puerta del Cielo',
+      familyGroupName: 'Puerta del Cielo',
       worshipTime: '17:00',
       district: 'Independencia',
       urbanSector: 'Ermitaño',
@@ -77,7 +77,7 @@ export const dataFamilyHouses: SeedDataHouses = {
       referenceAddress: 'Frente al mercado municipal',
     },
     {
-      houseName: 'Manantial de Vida',
+      familyGroupName: 'Manantial de Vida',
       worshipTime: '18:00',
       district: 'Independencia',
       urbanSector: 'Payet',
@@ -85,7 +85,7 @@ export const dataFamilyHouses: SeedDataHouses = {
       referenceAddress: 'Cerca del parque zonal',
     },
     {
-      houseName: 'Cristo Vive',
+      familyGroupName: 'Cristo Vive',
       worshipTime: '19:00',
       district: 'Independencia',
       urbanSector: 'Tahuantinsuyo',
@@ -93,7 +93,7 @@ export const dataFamilyHouses: SeedDataHouses = {
       referenceAddress: 'Frente a la plaza central',
     },
     {
-      houseName: 'Nueva Esperanza',
+      familyGroupName: 'Nueva Esperanza',
       worshipTime: '20:00',
       district: 'Independencia',
       urbanSector: 'Ermitaño',
@@ -101,7 +101,7 @@ export const dataFamilyHouses: SeedDataHouses = {
       referenceAddress: 'Cerca del centro comercial',
     },
     {
-      houseName: 'Iglesia de la Paz',
+      familyGroupName: 'Iglesia de la Paz',
       worshipTime: '10:00',
       district: 'Independencia',
       urbanSector: 'Payet',

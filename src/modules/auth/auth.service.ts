@@ -63,6 +63,7 @@ export class AuthService {
         roles: true,
         status: true,
         email: true,
+        gender: true,
         password: true,
         id: true,
       },

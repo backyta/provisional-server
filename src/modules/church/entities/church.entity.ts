@@ -17,14 +17,14 @@ import { Copastor } from '@/modules/copastor/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyHouse } from '@/modules/family-house/entities';
+import { FamilyGroup } from '@/modules/family-group/entities';
 
 @Entity({ name: 'churches' })
 export class Church {
+  //* General info
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  //General info
   @Index()
   @Column('text', { name: 'church_name', unique: true })
   churchName: string;
@@ -38,7 +38,7 @@ export class Church {
   @Column('date', { name: 'founding_date' })
   foundingDate: Date;
 
-  // Contact Info
+  //* Contact Info
   @Index()
   @Column('text', { name: 'email', unique: true, nullable: true })
   email: string;
@@ -70,7 +70,7 @@ export class Church {
   @Column('text', { name: 'reference_address' })
   referenceAddress: string;
 
-  // Info register and update date
+  //* Info register and update date
   @Column('timestamp', { name: 'created_at', nullable: true })
   createdAt: string | Date;
 
@@ -107,8 +107,8 @@ export class Church {
   @OneToMany(() => Zone, (zone) => zone.theirChurch)
   zones: Zone[];
 
-  @OneToMany(() => FamilyHouse, (familyHouse) => familyHouse.theirChurch)
-  familyHouses: FamilyHouse[];
+  @OneToMany(() => FamilyGroup, (familyGroup) => familyGroup.theirChurch)
+  familyGroups: FamilyGroup[];
 
   @OneToMany(() => Disciple, (disciple) => disciple.theirChurch)
   disciples: Disciple[];

@@ -14,7 +14,7 @@ import {
 } from 'class-validator';
 
 export class CreateDiscipleDto {
-  // General and Personal info
+  //* General and Personal info
   @ApiProperty({
     example: 'John Martin',
   })
@@ -74,7 +74,7 @@ export class CreateDiscipleDto {
   @IsOptional()
   conversionDate?: string | Date;
 
-  // Contact Info
+  //* Contact Info
   @ApiProperty({
     example: 'example@example.com',
   })
@@ -152,7 +152,7 @@ export class CreateDiscipleDto {
   @MaxLength(100)
   addressResidenceReference: string;
 
-  // Roles and Status
+  //* Roles and Status
   @ApiProperty({
     example: ['disciple'],
   })
@@ -168,14 +168,14 @@ export class CreateDiscipleDto {
   @IsOptional()
   status?: string;
 
-  // Relations
+  //* Relations
   @ApiProperty({
     example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
   })
   @IsString()
   @IsUUID()
   @IsOptional()
-  theirFamilyHouse?: string;
+  theirFamilyGroup?: string;
 
   @ApiProperty({
     example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',

@@ -18,6 +18,7 @@ import {
 } from '@/modules/offering/income/enums';
 
 export class CreateIncomeDto {
+  //* General data
   @ApiProperty({
     example: 'offering',
   })
@@ -77,14 +78,14 @@ export class CreateIncomeDto {
   @IsOptional()
   reasonElimination?: string;
 
-  // Relations
+  //* Relations
   @ApiProperty({
     example: '0b46eb7e-7730-4cbb-8c61-3ccdfa6da391',
   })
   @IsString()
   @IsUUID()
   @IsOptional()
-  theirFamilyHouse?: string;
+  theirFamilyGroup?: string;
 
   @ApiProperty({
     example: '0b46eb7e-7730-4cbb-8c61-3ccdfa6da391',

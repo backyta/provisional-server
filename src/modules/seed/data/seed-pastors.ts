@@ -4,22 +4,22 @@ interface SeedPastor {
   lastName: string;
   gender: string;
   originCountry: string;
-  dateBirth: string | Date;
+  birthDate: string | Date;
   age?: number;
   maritalStatus: string;
-  numberChildren?: number;
+  numberChildren?: string;
   conversionDate?: string | Date;
 
   //* Contact Info
   email: string;
   phoneNumber: string;
-  countryResidence?: string;
-  departmentResidence?: string;
-  provinceResidence?: string;
-  districtResidence: string;
-  urbanSectorResidence: string;
-  addressResidence: string;
-  addressResidenceReference: string;
+  country?: string;
+  department?: string;
+  province?: string;
+  district: string;
+  urbanSector: string;
+  address: string;
+  referenceAddress: string;
   roles: string[];
   status?: string;
 
@@ -38,16 +38,16 @@ export const dataPastors: SeedDataPastors = {
       lastName: 'Vega Rosales',
       gender: 'male',
       originCountry: 'Peru',
-      dateBirth: '1968-08-25',
+      birthDate: '1968-08-25',
       maritalStatus: 'married',
-      numberChildren: 3,
+      numberChildren: '3',
       conversionDate: '2005-06-05',
       email: 'michael.vega@google.com',
       phoneNumber: '990-555-876',
-      districtResidence: 'Independencia',
-      urbanSectorResidence: 'Tahuantinsuyo',
-      addressResidence: 'Jr. Tamputoco 100',
-      addressResidenceReference: 'A 2 cuadras del parque cantuta',
+      district: 'Independencia',
+      urbanSector: 'Tahuantinsuyo',
+      address: 'Jr. Tamputoco 100',
+      referenceAddress: 'A 2 cuadras del parque cantuta',
       roles: ['pastor', 'disciple'],
     },
     {
@@ -55,17 +55,16 @@ export const dataPastors: SeedDataPastors = {
       lastName: 'Perez Torres',
       gender: 'male',
       originCountry: 'Peru',
-      dateBirth: '1970-12-08',
+      birthDate: '1970-12-08',
       maritalStatus: 'married',
-      numberChildren: 4,
+      numberChildren: '4',
       conversionDate: '2006-03-10',
       email: 'daniel.perez@google.com',
       phoneNumber: '999-555-578',
-      districtResidence: 'Independencia',
-      urbanSectorResidence: 'Ermitaño',
-      addressResidence: 'Jr. Las flores 125',
-      addressResidenceReference:
-        'Casa blanca al frente del colegio Maria Parado',
+      district: 'Independencia',
+      urbanSector: 'Ermitaño',
+      address: 'Jr. Las flores 125',
+      referenceAddress: 'Casa blanca al frente del colegio Maria Parado',
       roles: ['pastor', 'disciple'],
     },
     {
@@ -73,16 +72,16 @@ export const dataPastors: SeedDataPastors = {
       lastName: 'Prado Torrealva',
       gender: 'male',
       originCountry: 'Peru',
-      dateBirth: '1978-05-20',
+      birthDate: '1978-05-20',
       maritalStatus: 'married',
-      numberChildren: 2,
+      numberChildren: '2',
       conversionDate: '2010-07-15',
       email: 'carlos.prado@google.com',
       phoneNumber: '+1-555-1234',
-      districtResidence: 'Independencia',
-      urbanSectorResidence: 'Payet',
-      addressResidence: 'Av. Tupac Amaru 500',
-      addressResidenceReference: 'A 2 cuadras del mercado productores',
+      district: 'Independencia',
+      urbanSector: 'Payet',
+      address: 'Av. Tupac Amaru 500',
+      referenceAddress: 'A 2 cuadras del mercado productores',
       roles: ['pastor', 'disciple'],
     },
   ],

@@ -11,5 +11,5 @@ export const MaritalStatusNames: Record<MaritalStatus, string> = {
   married: 'Casado(a)',
   widowed: 'Viudo(a)',
   divorced: 'Divorciado(a)',
-  other: 'otro',
+  other: 'Otro',
 };

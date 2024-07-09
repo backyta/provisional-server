@@ -17,6 +17,15 @@ export class SearchTypeAndPaginationDto {
   'search-type': string;
 
   @ApiProperty({
+    enum: SearchSubType,
+    description: 'Choose one sub type.',
+  })
+  @IsEnum(SearchSubType)
+  @IsOptional()
+  @IsString()
+  'search-sub-type'?: string;
+
+  @ApiProperty({
     default: 10,
     description: 'How many rows do you need?',
   })
@@ -34,11 +43,11 @@ export class SearchTypeAndPaginationDto {
   offset?: number;
 
   @ApiProperty({
-    enum: SearchSubType,
-    description: 'Choose one sub type.',
+    default: 'ASC',
+    description: 'En que tipo de orden necesitas los registros?',
   })
-  @IsEnum(SearchSubType)
   @IsOptional()
   @IsString()
-  'search-sub-type'?: string;
+  @Type(() => String)
+  order?: string;
 }

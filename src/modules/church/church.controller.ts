@@ -95,7 +95,7 @@ export class ChurchController {
   @Auth()
   @ApiParam({
     name: 'term',
-    description: 'Could be id, names, code, roles, etc.',
+    description: 'Could be name church, dates, department, address, etc.',
     example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
   })
   @ApiOkResponse({

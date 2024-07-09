@@ -20,7 +20,7 @@ import { Pastor } from '@/modules/pastor/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyHouse } from '@/modules/family-house/entities';
+import { FamilyGroup } from '@/modules/family-group/entities';
 
 @Entity({ name: 'preachers' })
 @Index(['firstName', 'lastName'])
@@ -142,11 +142,11 @@ export class Preacher {
   @JoinColumn({ name: 'their_zone_id' })
   theirZone: Zone;
 
-  @OneToOne(() => FamilyHouse, {
+  @OneToOne(() => FamilyGroup, {
     onDelete: 'SET NULL',
   })
-  @JoinColumn({ name: 'their_family_house_id' })
-  theirFamilyHouse: FamilyHouse;
+  @JoinColumn({ name: 'their_family_group_id' })
+  theirFamilyGroup: FamilyGroup;
 
   // Internal Functions
   @BeforeInsert()

@@ -22,7 +22,7 @@ import { Copastor } from '@/modules/copastor/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyHouse } from '@/modules/family-house/entities';
+import { FamilyGroup } from '@/modules/family-group/entities';
 
 @Injectable()
 export class ZoneService {
@@ -47,8 +47,8 @@ export class ZoneService {
     @InjectRepository(Preacher)
     private readonly preacherRepository: Repository<Preacher>,
 
-    @InjectRepository(FamilyHouse)
-    private readonly familyHouseRepository: Repository<FamilyHouse>,
+    @InjectRepository(FamilyGroup)
+    private readonly familyGroupRepository: Repository<FamilyGroup>,
 
     @InjectRepository(Disciple)
     private readonly discipleRepository: Repository<Disciple>,
@@ -168,7 +168,7 @@ export class ZoneService {
         'theirPastor',
         'theirCopastor',
         'theirSupervisor',
-        'familyHouses',
+        'familyGroups',
         'preachers',
         'disciples',
       ],
@@ -205,13 +205,13 @@ export class ZoneService {
         firstName: preacher.firstName,
         lastName: preacher.lastName,
       })),
-      familyHouses: data.familyHouses.map((familyHouse) => ({
-        id: familyHouse.id,
-        houseName: familyHouse.houseName,
-        zoneName: familyHouse.zoneName,
-        codeHouse: familyHouse.codeHouse,
-        district: familyHouse.district,
-        urbanSector: familyHouse.urbanSector,
+      familyGroups: data.familyGroups.map((familyGroup) => ({
+        id: familyGroup.id,
+        familyGroupName: familyGroup.familyGroupName,
+        zoneName: familyGroup.zoneName,
+        familyGroupCode: familyGroup.familyGroupCode,
+        district: familyGroup.district,
+        urbanSector: familyGroup.urbanSector,
       })),
       disciples: data.disciples.map((disciple) => ({
         id: disciple.id,
@@ -341,7 +341,7 @@ export class ZoneService {
         relations: ['theirZone'],
       });
 
-      const allFamilyHouses = await this.familyHouseRepository.find({
+      const allFamilyGroups = await this.familyGroupRepository.find({
         relations: ['theirZone'],
       });
 
@@ -392,14 +392,14 @@ export class ZoneService {
         );
 
         //* Update and set to null relationships in Family House
-        const familyHousesByNewZone = allFamilyHouses.filter(
-          (familyHouse) =>
-            familyHouse.theirZone?.id === newSupervisor?.theirZone?.id,
+        const familyGroupsByNewZone = allFamilyGroups.filter(
+          (familyGroup) =>
+            familyGroup.theirZone?.id === newSupervisor?.theirZone?.id,
         );
 
         await Promise.all(
-          familyHousesByNewZone.map(async (familyHouse) => {
-            await this.familyHouseRepository.update(familyHouse.id, {
+          familyGroupsByNewZone.map(async (familyGroup) => {
+            await this.familyGroupRepository.update(familyGroup.id, {
               theirSupervisor: null,
             });
           }),
@@ -469,19 +469,19 @@ export class ZoneService {
         );
 
         //* Update and set new relationships in Family House
-        const familyHousesByZone = allFamilyHouses.filter(
-          (familyHouse) => familyHouse.theirZone?.id === zone?.id,
+        const familyGroupsByZone = allFamilyGroups.filter(
+          (familyGroup) => familyGroup.theirZone?.id === zone?.id,
         );
 
         await Promise.all(
-          familyHousesByZone.map(async (familyHouse, index) => {
-            await this.familyHouseRepository.update(familyHouse.id, {
+          familyGroupsByZone.map(async (familyGroup, index) => {
+            await this.familyGroupRepository.update(familyGroup.id, {
               theirChurch: newChurch,
               theirPastor: newPastor,
               theirCopastor: newCopastor,
               theirSupervisor: newSupervisor,
               zoneName: savedZone.zoneName,
-              codeHouse: `${savedZone.zoneName}-${index + 1}`,
+              familyGroupCode: `${savedZone.zoneName}-${index + 1}`,
             });
           }),
         );
@@ -521,24 +521,24 @@ export class ZoneService {
         status: status,
       });
 
-      const allFamilyHouses = await this.familyHouseRepository.find({
+      const allFamilyGroups = await this.familyGroupRepository.find({
         relations: ['theirZone'],
       });
 
       //* Update and set new zone name and code in Family House
-      const familyHousesByZone = allFamilyHouses.filter(
-        (familyHouse) => familyHouse.theirZone?.id === zone?.id,
+      const familyGroupsByZone = allFamilyGroups.filter(
+        (familyGroup) => familyGroup.theirZone?.id === zone?.id,
       );
 
       await Promise.all(
-        familyHousesByZone.map(async (familyHouse, index) => {
-          await this.familyHouseRepository.update(familyHouse.id, {
+        familyGroupsByZone.map(async (familyGroup, index) => {
+          await this.familyGroupRepository.update(familyGroup.id, {
             theirChurch: zone.theirChurch,
             theirPastor: zone.theirPastor,
             theirCopastor: zone.theirCopastor,
             theirSupervisor: zone.theirSupervisor,
             zoneName: updateZoneDto.zoneName,
-            codeHouse: `${updateZoneDto.zoneName}-${index + 1}`,
+            familyGroupCode: `${updateZoneDto.zoneName}-${index + 1}`,
           });
         }),
       );

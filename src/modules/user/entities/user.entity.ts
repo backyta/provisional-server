@@ -26,6 +26,10 @@ export class User {
   lastName: string;
 
   @Index()
+  @Column('text')
+  gender: string;
+
+  @Index()
   @Column('text', { unique: true })
   email: string;
 

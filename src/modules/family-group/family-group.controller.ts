@@ -30,13 +30,13 @@ import { UserRoles } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
 
 import {
-  CreateFamilyHouseDto,
-  UpdateFamilyHouseDto,
-} from '@/modules/family-house/dto';
-import { FamilyHouse } from '@/modules/family-house/entities';
-import { FamilyHouseService } from '@/modules/family-house/family-house.service';
+  CreateFamilyGroupDto,
+  UpdateFamilyGroupDto,
+} from '@/modules/family-group/dto';
+import { FamilyGroup } from '@/modules/family-group/entities';
+import { FamilyGroupService } from '@/modules/family-group/family-group.service';
 
-@ApiTags('Family-Houses')
+@ApiTags('Family-Groups')
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({
   description: 'Unauthorized Bearer Auth.',
@@ -47,9 +47,9 @@ import { FamilyHouseService } from '@/modules/family-house/family-house.service'
 @ApiBadRequestResponse({
   description: 'Bad request.',
 })
-@Controller('family-houses')
-export class FamilyHouseController {
-  constructor(private readonly familyHouseService: FamilyHouseService) {}
+@Controller('family-groups')
+export class FamilyGroupController {
+  constructor(private readonly familyGroupService: FamilyGroupService) {}
 
   //* Create
   @Post()
@@ -61,10 +61,10 @@ export class FamilyHouseController {
     description: 'Forbidden.',
   })
   create(
-    @Body() createFamilyHouseDto: CreateFamilyHouseDto,
+    @Body() createFamilyGroupDto: CreateFamilyGroupDto,
     @GetUser() user: User,
-  ): Promise<FamilyHouse> {
-    return this.familyHouseService.create(createFamilyHouseDto, user);
+  ): Promise<FamilyGroup> {
+    return this.familyGroupService.create(createFamilyGroupDto, user);
   }
 
   //* Find All
@@ -76,13 +76,13 @@ export class FamilyHouseController {
   @ApiNotFoundResponse({
     description: 'Not found resource.',
   })
-  findAll(@Query() paginationDto: PaginationDto): Promise<FamilyHouse[]> {
-    return this.familyHouseService.findAll(paginationDto);
+  findAll(@Query() paginationDto: PaginationDto): Promise<FamilyGroup[]> {
+    return this.familyGroupService.findAll(paginationDto);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.familyHouseService.findOne(+id);
+    return this.familyGroupService.findOne(+id);
   }
 
   //* Update
@@ -96,10 +96,10 @@ export class FamilyHouseController {
   })
   update(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateFamilyHomeDto: UpdateFamilyHouseDto,
+    @Body() updateFamilyGroupDto: UpdateFamilyGroupDto,
     @GetUser() user: User,
-  ): Promise<FamilyHouse> {
-    return this.familyHouseService.update(id, updateFamilyHomeDto, user);
+  ): Promise<FamilyGroup> {
+    return this.familyGroupService.update(id, updateFamilyGroupDto, user);
   }
 
   //* Delete
@@ -112,6 +112,6 @@ export class FamilyHouseController {
   })
   @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
   remove(@Param('id') id: string, @GetUser() user: User): Promise<void> {
-    return this.familyHouseService.remove(id, user);
+    return this.familyGroupService.remove(id, user);
   }
 }

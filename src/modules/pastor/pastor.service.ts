@@ -5,13 +5,15 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Between, FindOptionsOrderValue, ILike, Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { MemberRoles, Status } from '@/common/enums';
+import { MemberRoles, SearchType, Status } from '@/common/enums';
+import { formatToDDMMYYYY, getBirthdaysByMonth } from '@/common/helpers';
+import { PaginationDto, SearchTypeAndPaginationDto } from '@/common/dtos';
 
-import { PaginationDto } from '@/common/dtos';
+import { formatDataPastor } from '@/modules/pastor/helpers';
 import { CreatePastorDto, UpdatePastorDto } from '@/modules/pastor/dto';
 
 import { Zone } from '@/modules/zone/entities';
@@ -22,7 +24,7 @@ import { Disciple } from '@/modules/disciple/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyHouse } from '@/modules/family-house/entities';
+import { FamilyGroup } from '@/modules/family-group/entities';
 
 @Injectable()
 export class PastorService {
@@ -47,8 +49,8 @@ export class PastorService {
     @InjectRepository(Preacher)
     private readonly preacherRepository: Repository<Preacher>,
 
-    @InjectRepository(FamilyHouse)
-    private readonly familyHouseRepository: Repository<FamilyHouse>,
+    @InjectRepository(FamilyGroup)
+    private readonly familyGroupRepository: Repository<FamilyGroup>,
 
     @InjectRepository(Disciple)
     private readonly discipleRepository: Repository<Disciple>,
@@ -56,15 +58,14 @@ export class PastorService {
 
   //* CREATE PASTOR
   async create(createPastorDto: CreatePastorDto, user: User): Promise<Pastor> {
-    const { roles, theirChurch } = createPastorDto;
-
+    const { roles, numberChildren, theirChurch } = createPastorDto;
     // Validations
     if (
       !roles.includes(MemberRoles.Disciple) &&
       !roles.includes(MemberRoles.Pastor)
     ) {
       throw new BadRequestException(
-        `The role "disciple" and "pastor" must be included`,
+        `El rol "Discípulo" y "Pastor" deben ser incluidos.`,
       );
     }
 
@@ -75,13 +76,13 @@ export class PastorService {
       roles.includes(MemberRoles.Treasurer)
     ) {
       throw new BadRequestException(
-        `To create a Pastor you only need to have the "disciple" and "pastor" roles.`,
+        `Para crear un Pastor, solo se requiere los roles: "Discípulo" y "Pastor".`,
       );
     }
 
     if (!theirChurch) {
       throw new NotFoundException(
-        `To create a pastor you must enter an existing church id.`,
+        `Para crear un Pastor, debes asignarle una Iglesia.`,
       );
     }
 
@@ -91,12 +92,14 @@ export class PastorService {
     });
 
     if (!church) {
-      throw new NotFoundException(`Not found church with id ${theirChurch}`);
+      throw new NotFoundException(
+        `No se encontró iglesia con id: ${theirChurch}.`,
+      );
     }
 
     if (church.status === Status.Inactive) {
       throw new BadRequestException(
-        `The property status in Church must be a "active"`,
+        `La propiedad "Estado" en Iglesia debe ser "Activo".`,
       );
     }
 
@@ -104,6 +107,7 @@ export class PastorService {
     try {
       const newPastor = this.pastorRepository.create({
         ...createPastorDto,
+        numberChildren: +numberChildren,
         theirChurch: church,
         createdAt: new Date(),
         createdBy: user,
@@ -117,67 +121,648 @@ export class PastorService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit = 10, offset = 0 } = paginationDto;
+    const { limit = 10, offset = 0, order = 'ASC' } = paginationDto;
 
-    const data = await this.pastorRepository.find({
+    const pastors = await this.pastorRepository.find({
       where: { status: Status.Active },
       take: limit,
       skip: offset,
       relations: [
+        'updatedBy',
+        'createdBy',
         'theirChurch',
         'copastors',
         'supervisors',
         'zones',
         'preachers',
-        'familyHouses',
+        'familyGroups',
         'disciples',
       ],
       relationLoadStrategy: 'query',
-      order: { createdAt: 'ASC' },
+      order: { createdAt: order as FindOptionsOrderValue },
     });
 
-    const result = data.map((data) => ({
-      ...data,
-      copastors: data.copastors.map((copastor) => ({
-        id: copastor?.id,
-        firstName: copastor?.firstName,
-        lastName: copastor?.lastName,
-      })),
-      supervisors: data.supervisors.map((supervisor) => ({
-        id: supervisor?.id,
-        firstName: supervisor?.firstName,
-        lastName: supervisor?.lastName,
-      })),
-      zones: data.zones.map((zone) => ({
-        id: zone?.id,
-        zoneName: zone?.zoneName,
-        district: zone?.district,
-      })),
-      preachers: data.preachers.map((preacher) => ({
-        id: preacher?.id,
-        firstName: preacher?.firstName,
-        lastName: preacher?.lastName,
-      })),
-      familyHouses: data.familyHouses.map((familyHouse) => ({
-        id: familyHouse?.id,
-        houseName: familyHouse?.houseName,
-        zoneName: familyHouse?.zoneName,
-        codeHouse: familyHouse?.codeHouse,
-        district: familyHouse?.disciples,
-        urbanSector: familyHouse?.urbanSector,
-      })),
-      disciples: data.disciples.map((disciple) => ({
-        id: disciple?.id,
-        firstName: disciple?.firstName,
-        lastName: disciple?.lastName,
-      })),
-    }));
-
-    return result;
+    return formatDataPastor({ pastors }) as any;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} pastor`;
+  //* FIND BY TERM
+  async findByTerm(
+    term: string,
+    searchTypeAndPaginationDto: SearchTypeAndPaginationDto,
+  ): Promise<Pastor | Pastor[]> {
+    const {
+      'search-type': searchType,
+      limit = 10,
+      offset = 0,
+      order,
+    } = searchTypeAndPaginationDto;
+
+    //? Find by first name --> Many
+    if (term && searchType === SearchType.FirstName) {
+      const firstNames = term.replace(/\+/g, ' ');
+
+      const pastors = await this.pastorRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (pastors.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron pastores(as) con este nombre: ${firstNames}`,
+        );
+      }
+
+      try {
+        return formatDataPastor({ pastors }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by last name --> Many
+    if (term && searchType === SearchType.LastName) {
+      const lastNames = term.replace(/\+/g, ' ');
+
+      const pastors = await this.pastorRepository.find({
+        where: {
+          lastName: ILike(`%${lastNames}%`),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (pastors.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron pastores(as) con esos apellidos: ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataPastor({ pastors }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by full name --> Many
+    if (term && searchType === SearchType.FullName) {
+      const firstNames = term.split('-')[0].replace(/\+/g, ' ');
+      const lastNames = term.split('-')[1].replace(/\+/g, ' ');
+
+      const pastors = await this.pastorRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          lastName: ILike(`%${lastNames}%`),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (pastors.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron pastores(as) con esos nombres y apellidos: ${firstNames} ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataPastor({ pastors }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by birth date --> Many
+    if (term && searchType === SearchType.BirthDate) {
+      const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
+
+      if (isNaN(fromTimestamp)) {
+        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      }
+
+      const fromDate = new Date(fromTimestamp);
+      const toDate = toTimestamp ? new Date(toTimestamp) : fromDate;
+
+      const pastors = await this.pastorRepository.find({
+        where: {
+          birthDate: Between(fromDate, toDate),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (pastors.length === 0) {
+        const fromDate = formatToDDMMYYYY(fromTimestamp);
+        const toDate = formatToDDMMYYYY(toTimestamp);
+
+        throw new NotFoundException(
+          `No se encontraron pastores(as) con estas fechas de nacimiento: ${fromDate} - ${toDate}`,
+        );
+      }
+
+      try {
+        return formatDataPastor({ pastors }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by month birth --> Many
+    if (term && searchType === SearchType.BirthMonth) {
+      const pastors = await this.pastorRepository.find({
+        where: {
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const resultPastors = getBirthdaysByMonth({ month: term, data: pastors });
+
+      if (resultPastors.length === 0) {
+        const monthNames = {
+          january: 'Enero',
+          february: 'Febrero',
+          march: 'Marzo',
+          april: 'Abril',
+          may: 'Mayo',
+          june: 'Junio',
+          july: 'Julio',
+          august: 'Agosto',
+          september: 'Septiembre',
+          october: 'Octubre',
+          november: 'Noviembre',
+          december: 'Diciembre',
+        };
+
+        const monthInSpanish = monthNames[term.toLowerCase()] ?? term;
+
+        throw new NotFoundException(
+          `No se encontraron pastores(as) con este mes de nacimiento: ${monthInSpanish}`,
+        );
+      }
+
+      try {
+        return formatDataPastor({ pastors: resultPastors as Pastor[] }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by gender --> Many
+    if (term && searchType === SearchType.Gender) {
+      const pastors = await this.pastorRepository.find({
+        where: {
+          gender: ILike(`%${term}%`),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (pastors.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron pastores(as) con este genero: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataPastor({ pastors }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by marital status --> Many
+    if (term && searchType === SearchType.MaritalStatus) {
+      const pastors = await this.pastorRepository.find({
+        where: {
+          maritalStatus: ILike(`%${term}%`),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (pastors.length === 0) {
+        const maritalStatusNames = {
+          single: 'Soltero(a)',
+          married: 'Casado(a)',
+          widowed: 'Viudo(a)',
+          divorced: 'Divorciado(a)',
+          other: 'Otro',
+        };
+
+        const maritalStatusInSpanish =
+          maritalStatusNames[term.toLowerCase()] ?? term;
+
+        throw new NotFoundException(
+          `No se encontraron pastores(as) con este estado civil: ${maritalStatusInSpanish}`,
+        );
+      }
+
+      try {
+        return formatDataPastor({ pastors }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by origin country --> Many
+    if (term && searchType === SearchType.OriginCountry) {
+      const pastors = await this.pastorRepository.find({
+        where: {
+          originCountry: ILike(`%${term}%`),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (pastors.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron pastores(as) con este país de origen: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataPastor({ pastors }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by department --> Many
+    if (term && searchType === SearchType.Department) {
+      const pastors = await this.pastorRepository.find({
+        where: {
+          department: ILike(`%${term}%`),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (pastors.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron pastores(as) con este departamento: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataPastor({ pastors }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by province --> Many
+    if (term && searchType === SearchType.Province) {
+      const pastors = await this.pastorRepository.find({
+        where: {
+          province: ILike(`%${term}%`),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (pastors.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron pastores(as) con esta provincia: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataPastor({ pastors }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by district --> Many
+    if (term && searchType === SearchType.District) {
+      const pastors = await this.pastorRepository.find({
+        where: {
+          district: ILike(`%${term}%`),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (pastors.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron pastores(as) con este distrito: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataPastor({ pastors }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by urban sector --> Many
+    if (term && searchType === SearchType.UrbanSector) {
+      const pastors = await this.pastorRepository.find({
+        where: {
+          urbanSector: ILike(`%${term}%`),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (pastors.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron pastores(as) con este sector urbano: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataPastor({ pastors }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by address --> Many
+    if (term && searchType === SearchType.Address) {
+      const pastors = await this.pastorRepository.find({
+        where: {
+          address: ILike(`%${term}%`),
+          status: Status.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (pastors.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron pastores(as) con esta dirección: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataPastor({ pastors }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by status --> Many
+    if (term && searchType === SearchType.Status) {
+      const pastors = await this.pastorRepository.find({
+        where: {
+          status: ILike(`%${term}%`),
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (pastors.length === 0) {
+        const value = term === 'inactive' ? 'Inactivo' : 'Activo';
+
+        throw new NotFoundException(
+          `No se encontraron pastores(as) con este estado: ${value}`,
+        );
+      }
+
+      try {
+        return formatDataPastor({ pastors }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //! General Exceptions
+    if (!searchType) {
+      throw new BadRequestException(`El tipo de búsqueda es obligatorio`);
+    }
+
+    if (term && !Object.values(SearchType).includes(searchType as SearchType)) {
+      throw new BadRequestException(
+        `Tipos de búsqueda no validos, solo son validos: ${Object.values(SearchType).join(', ')}`,
+      );
+    }
   }
 
   //* UPDATE PASTOR
@@ -186,17 +771,17 @@ export class PastorService {
     updatePastorDto: UpdatePastorDto,
     user: User,
   ): Promise<Pastor> {
-    const { roles, status, theirChurch } = updatePastorDto;
+    const { roles, status, numberChildren, theirChurch } = updatePastorDto;
 
     // Validations
     if (!roles) {
       throw new BadRequestException(
-        `Required assign roles to update the pastor`,
+        `Los roles son requeridos para actualizar el pastor.`,
       );
     }
 
     if (!isUUID(id)) {
-      throw new BadRequestException(`Not valid UUID`);
+      throw new BadRequestException(`UUID no valido.`);
     }
 
     const pastor = await this.pastorRepository.findOne({
@@ -205,12 +790,12 @@ export class PastorService {
     });
 
     if (!pastor) {
-      throw new NotFoundException(`Pastor not found with id: ${id}`);
+      throw new NotFoundException(`Pastor con id: ${id} no encontrado.`);
     }
 
     if (!roles.some((role) => ['disciple', 'pastor'].includes(role))) {
       throw new BadRequestException(
-        `The roles should include "disciple" and "pastor"`,
+        `Los roles deben incluir "discípulo" y  "pastor"`,
       );
     }
 
@@ -227,7 +812,7 @@ export class PastorService {
         roles.includes(MemberRoles.Treasurer))
     ) {
       throw new BadRequestException(
-        `A lower role cannot be assigned without going through the hierarchy: [disciple, preacher, supervisor, co-pastor, pastor]`,
+        `No se puede asignar un rol inferior sin pasar por la jerarquía: [discípulo, predicador, supervisor, copastor, pastor]`,
       );
     }
 
@@ -248,7 +833,7 @@ export class PastorService {
     ) {
       if (pastor.status === Status.Active && status === Status.Inactive) {
         throw new BadRequestException(
-          `You cannot update it to "inactive", you must delete the record`,
+          `No se puede actualizar un registro a "Inactivo", se debe eliminar.`,
         );
       }
 
@@ -256,7 +841,9 @@ export class PastorService {
       if (pastor.theirChurch?.id !== theirChurch) {
         //* Validate church
         if (!theirChurch) {
-          throw new NotFoundException(`To update, church id is required`);
+          throw new NotFoundException(
+            `Para poder actualizar un Pastor, se debe asignar una Iglesia.`,
+          );
         }
 
         const newChurch = await this.churchRepository.findOne({
@@ -265,13 +852,13 @@ export class PastorService {
 
         if (!newChurch) {
           throw new NotFoundException(
-            `Church not found with id ${theirChurch}`,
+            `Iglesia con id ${theirChurch} no fue encontrado.`,
           );
         }
 
         if (newChurch.status === Status.Inactive) {
           throw new BadRequestException(
-            `The property status in Church must be "active"`,
+            `La propiedad estado en Iglesia debe ser "Activo".`,
           );
         }
 
@@ -279,6 +866,7 @@ export class PastorService {
         const updatedPastor = await this.pastorRepository.preload({
           id: pastor.id,
           ...updatePastorDto,
+          numberChildren: +numberChildren,
           theirChurch: newChurch,
           updatedAt: new Date(),
           updatedBy: user,
@@ -309,7 +897,7 @@ export class PastorService {
           relations: ['theirPastor'],
         });
 
-        const allFamilyHouses = await this.familyHouseRepository.find({
+        const allFamilyGroups = await this.familyGroupRepository.find({
           relations: ['theirPastor'],
         });
 
@@ -371,13 +959,13 @@ export class PastorService {
           );
 
           //* Update and set new relationships in Family House
-          const familyHousesByPastor = allFamilyHouses.filter(
-            (familyHouse) => familyHouse.theirPastor?.id === pastor.id,
+          const familyGroupsByPastor = allFamilyGroups.filter(
+            (familyGroup) => familyGroup.theirPastor?.id === pastor.id,
           );
 
           await Promise.all(
-            familyHousesByPastor.map(async (familyHouse) => {
-              await this.familyHouseRepository.update(familyHouse.id, {
+            familyGroupsByPastor.map(async (familyGroup) => {
+              await this.familyGroupRepository.update(familyGroup.id, {
                 theirChurch: newChurch,
               });
             }),
@@ -403,10 +991,11 @@ export class PastorService {
       }
 
       //? Update and save if is same Church
-      if (pastor.theirChurch?.id !== theirChurch) {
+      if (pastor.theirChurch?.id === theirChurch) {
         const updatedPastor = await this.pastorRepository.preload({
           id: pastor.id,
           ...updatePastorDto,
+          numberChildren: +numberChildren,
           theirChurch: pastor.theirChurch,
           updatedAt: new Date(),
           updatedBy: user,
@@ -426,13 +1015,13 @@ export class PastorService {
   async remove(id: string, user: User): Promise<void> {
     // Validations
     if (!isUUID(id)) {
-      throw new BadRequestException(`Not valid UUID`);
+      throw new BadRequestException(`UUID no valido.`);
     }
 
     const pastor = await this.pastorRepository.findOneBy({ id });
 
     if (!pastor) {
-      throw new NotFoundException(`Pastor with id: ${id} not exits`);
+      throw new NotFoundException(`Pastor con id: ${id} no existe.`);
     }
 
     //* Update and set in Inactive on Pastor
@@ -467,7 +1056,7 @@ export class PastorService {
       relations: ['theirPastor'],
     });
 
-    const allFamilyHouses = await this.familyHouseRepository.find({
+    const allFamilyGroups = await this.familyGroupRepository.find({
       relations: ['theirPastor'],
     });
 
@@ -537,13 +1126,13 @@ export class PastorService {
       );
 
       //* Update and set to null relationships in Family House
-      const familyHousesByPastor = allFamilyHouses.filter(
-        (familyHome) => familyHome.theirPastor?.id === pastor.id,
+      const familyGroupsByPastor = allFamilyGroups.filter(
+        (familyGroup) => familyGroup.theirPastor?.id === pastor.id,
       );
 
       await Promise.all(
-        familyHousesByPastor.map(async (familyHome) => {
-          await this.familyHouseRepository.update(familyHome.id, {
+        familyGroupsByPastor.map(async (familyGroup) => {
+          await this.familyGroupRepository.update(familyGroup.id, {
             theirPastor: null,
             updatedAt: new Date(),
             updatedBy: user,
@@ -573,11 +1162,20 @@ export class PastorService {
   //? PRIVATE METHODS
   // For future index errors or constrains with code.
   private handleDBExceptions(error: any): never {
-    if (error.code === '23505') throw new BadRequestException(error.detail);
+    if (error.code === '23505') {
+      const detail = error.detail;
+
+      if (detail.includes('email')) {
+        throw new BadRequestException('El correo electrónico ya está en uso.');
+      } else if (detail.includes('church')) {
+        throw new BadRequestException('El nombre de iglesia ya está en uso.');
+      }
+    }
+
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Unexpected errors, check server logs',
+      'Sucedió un error inesperado, revise los registros de consola',
     );
   }
 }

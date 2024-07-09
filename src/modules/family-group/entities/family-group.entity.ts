@@ -20,30 +20,30 @@ import { Preacher } from '@/modules/preacher/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
 
-@Entity({ name: 'family_houses' })
-export class FamilyHouse {
+@Entity({ name: 'family_groups' })
+export class FamilyGroup {
+  //* General info
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  //General info
   @Index()
-  @Column('text', { name: 'house_name', unique: true })
-  houseName: string;
+  @Column('text', { name: 'family_group_name', unique: true })
+  familyGroupName: string;
 
   @Column('text', { name: 'zone_name' })
   zoneName: string;
 
-  @Column('int', { name: 'house_number' })
-  houseNumber: number;
+  @Column('int', { name: 'family_group_number' })
+  familyGroupNumber: number;
 
   @Index()
-  @Column('text', { name: 'code_house' })
-  codeHouse: string;
+  @Column('text', { name: 'family_group_code' })
+  familyGroupCode: string;
 
   @Column('text', { name: 'worship_time' })
   worshipTime: string;
 
-  // Contact Info
+  //* Contact Info
   @Column('text', { name: 'country', default: 'Peru' })
   country: string;
 
@@ -68,7 +68,7 @@ export class FamilyHouse {
   @Column('text', { name: 'reference_address' })
   referenceAddress: string;
 
-  // Info register and update date
+  //* Info register and update date
   @Column('timestamp', { name: 'created_at', nullable: true })
   createdAt: string | Date;
 
@@ -87,31 +87,31 @@ export class FamilyHouse {
   status: string;
 
   //* Relations (Array)
-  @OneToMany(() => Disciple, (disciple) => disciple.theirFamilyHouse)
+  @OneToMany(() => Disciple, (disciple) => disciple.theirFamilyGroup)
   disciples: Disciple[];
 
   //* Relations(FK)
-  @ManyToOne(() => Church, (church) => church.familyHouses)
+  @ManyToOne(() => Church, (church) => church.familyGroups)
   @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 
-  @ManyToOne(() => Pastor, (pastor) => pastor.familyHouses)
+  @ManyToOne(() => Pastor, (pastor) => pastor.familyGroups)
   @JoinColumn({ name: 'their_pastor_id' })
   theirPastor: Pastor;
 
-  @ManyToOne(() => Copastor, (copastor) => copastor.familyHouses, {
+  @ManyToOne(() => Copastor, (copastor) => copastor.familyGroups, {
     onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'their_copastor_id' })
   theirCopastor: Copastor;
 
-  @ManyToOne(() => Supervisor, (supervisor) => supervisor.familyHouses, {
+  @ManyToOne(() => Supervisor, (supervisor) => supervisor.familyGroups, {
     onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'their_supervisor_id' })
   theirSupervisor: Supervisor;
 
-  @ManyToOne(() => Zone, (zone) => zone.familyHouses)
+  @ManyToOne(() => Zone, (zone) => zone.familyGroups)
   @JoinColumn({ name: 'their_zone_id' })
   theirZone: Zone;
 

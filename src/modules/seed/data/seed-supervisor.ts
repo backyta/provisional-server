@@ -4,7 +4,7 @@ interface SeedSupervisor {
   lastName: string;
   gender: string;
   originCountry: string;
-  dateBirth: string | Date;
+  birthDate: string | Date;
   age?: number;
   maritalStatus: string;
   numberChildren?: number;
@@ -14,13 +14,13 @@ interface SeedSupervisor {
   //* Contact Info
   email: string;
   phoneNumber: string;
-  countryResidence?: string;
-  departmentResidence?: string;
-  provinceResidence?: string;
-  districtResidence: string;
-  urbanSectorResidence: string;
-  addressResidence: string;
-  addressResidenceReference: string;
+  country?: string;
+  department?: string;
+  province?: string;
+  district: string;
+  urbanSector: string;
+  address: string;
+  referenceAddress: string;
   roles: string[];
   status?: string;
 
@@ -41,16 +41,16 @@ export const dataSupervisors: SeedDataSupervisors = {
       lastName: 'Fernandez Torres',
       gender: 'female',
       originCountry: 'Peru',
-      dateBirth: '1989-09-03',
+      birthDate: '1989-09-03',
       maritalStatus: 'married',
       numberChildren: 3,
       conversionDate: '2007-11-20',
       email: 'gabriela.fernandez@google.com',
       phoneNumber: '+1-234-5678',
-      districtResidence: 'Independencia',
-      urbanSectorResidence: 'Tahuantinsuyo',
-      addressResidence: 'Av. Los Nogales 890',
-      addressResidenceReference: 'Frente al parque zonal',
+      district: 'Independencia',
+      urbanSector: 'Tahuantinsuyo',
+      address: 'Av. Los Nogales 890',
+      referenceAddress: 'Frente al parque zonal',
       roles: ['supervisor', 'disciple'],
       isDirectRelationToPastor: false,
     },
@@ -59,16 +59,16 @@ export const dataSupervisors: SeedDataSupervisors = {
       lastName: 'Lopez Martinez',
       gender: 'male',
       originCountry: 'Peru',
-      dateBirth: '1984-05-16',
+      birthDate: '1984-05-16',
       maritalStatus: 'single',
       numberChildren: 0,
       conversionDate: '2005-08-30',
       email: 'juan.lopez@google.com',
       phoneNumber: '+1-678-9012',
-      districtResidence: 'Independencia',
-      urbanSectorResidence: 'Ermitaño',
-      addressResidence: 'Jr. Las Acacias 567',
-      addressResidenceReference: 'Cerca del mercado municipal',
+      district: 'Independencia',
+      urbanSector: 'Ermitaño',
+      address: 'Jr. Las Acacias 567',
+      referenceAddress: 'Cerca del mercado municipal',
       roles: ['supervisor', 'disciple'],
       isDirectRelationToPastor: false,
     },
@@ -77,16 +77,16 @@ export const dataSupervisors: SeedDataSupervisors = {
       lastName: 'Ramirez Silva',
       gender: 'female',
       originCountry: 'Peru',
-      dateBirth: '1993-02-12',
+      birthDate: '1993-02-12',
       maritalStatus: 'divorced',
       numberChildren: 1,
       conversionDate: '2011-03-25',
       email: 'sandra.ramirez@google.com',
       phoneNumber: '+1-890-1234',
-      districtResidence: 'Independencia',
-      urbanSectorResidence: 'Payet',
-      addressResidence: 'Av. Las Hortensias 234',
-      addressResidenceReference: 'Cerca del parque industrial',
+      district: 'Independencia',
+      urbanSector: 'Payet',
+      address: 'Av. Las Hortensias 234',
+      referenceAddress: 'Cerca del parque industrial',
       roles: ['supervisor', 'disciple'],
       isDirectRelationToPastor: false,
     },
@@ -95,16 +95,16 @@ export const dataSupervisors: SeedDataSupervisors = {
       lastName: 'Gomez Diaz',
       gender: 'male',
       originCountry: 'Peru',
-      dateBirth: '1981-07-30',
+      birthDate: '1981-07-30',
       maritalStatus: 'married',
       numberChildren: 2,
       conversionDate: '2002-12-15',
       email: 'ricardo.gomez@google.com',
       phoneNumber: '+1-345-6789',
-      districtResidence: 'Independencia',
-      urbanSectorResidence: 'Unificada',
-      addressResidence: 'Jr. Los Laureles 890',
-      addressResidenceReference: 'Al lado del centro educativo',
+      district: 'Independencia',
+      urbanSector: 'Unificada',
+      address: 'Jr. Los Laureles 890',
+      referenceAddress: 'Al lado del centro educativo',
       roles: ['supervisor', 'disciple'],
       isDirectRelationToPastor: false,
     },
@@ -113,16 +113,16 @@ export const dataSupervisors: SeedDataSupervisors = {
       lastName: 'Perez Rodriguez',
       gender: 'female',
       originCountry: 'Peru',
-      dateBirth: '1990-11-25',
+      birthDate: '1990-11-25',
       maritalStatus: 'widower',
       numberChildren: 4,
       conversionDate: '2008-06-20',
       email: 'maria.perez@google.com',
       phoneNumber: '+1-901-2345',
-      districtResidence: 'Independencia',
-      urbanSectorResidence: 'Industrial',
-      addressResidence: 'Av. Los Cipreses 567',
-      addressResidenceReference: 'Frente a la fábrica textil',
+      district: 'Independencia',
+      urbanSector: 'Industrial',
+      address: 'Av. Los Cipreses 567',
+      referenceAddress: 'Frente a la fábrica textil',
       roles: ['supervisor', 'disciple'],
       isDirectRelationToPastor: false,
     },
@@ -131,16 +131,16 @@ export const dataSupervisors: SeedDataSupervisors = {
       lastName: 'Castro Alvarez',
       gender: 'male',
       originCountry: 'Peru',
-      dateBirth: '1987-04-20',
+      birthDate: '1987-04-20',
       maritalStatus: 'single',
       numberChildren: 0,
       conversionDate: '2006-10-10',
       email: 'diego.castro@google.com',
       phoneNumber: '+1-012-3456',
-      districtResidence: 'Independencia',
-      urbanSectorResidence: 'Ermitaño',
-      addressResidence: 'Jr. Las Orquídeas 123',
-      addressResidenceReference: 'Cerca del parque zonal',
+      district: 'Independencia',
+      urbanSector: 'Ermitaño',
+      address: 'Jr. Las Orquídeas 123',
+      referenceAddress: 'Cerca del parque zonal',
       roles: ['supervisor', 'disciple'],
       isDirectRelationToPastor: false,
     },

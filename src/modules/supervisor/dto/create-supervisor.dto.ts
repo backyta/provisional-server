@@ -5,10 +5,8 @@ import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
-  IsUUID,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -16,7 +14,7 @@ import {
 import { MaritalStatus, MemberRoles, Gender, Status } from '@/common/enums';
 
 export class CreateSupervisorDto {
-  // General and Personal info
+  //* General and Personal info
   @ApiProperty({
     example: 'John Martin',
   })
@@ -60,14 +58,13 @@ export class CreateSupervisorDto {
   })
   @IsString()
   @IsNotEmpty()
-  dateBirth: string | Date;
+  birthDate: string | Date;
 
   @ApiProperty({
     example: '2',
   })
-  @IsNumber()
   @IsOptional()
-  numberChildren?: number;
+  numberChildren?: number | string;
 
   @ApiProperty({
     example: '2001/12/23',
@@ -76,7 +73,7 @@ export class CreateSupervisorDto {
   @IsOptional()
   conversionDate?: string | Date;
 
-  // Contact Info
+  //* Contact Info
   @ApiProperty({
     example: 'example@example.com',
   })
@@ -98,7 +95,7 @@ export class CreateSupervisorDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  countryResidence?: string;
+  country?: string;
 
   @ApiProperty({
     example: 'Lima',
@@ -107,7 +104,7 @@ export class CreateSupervisorDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  departmentResidence?: string;
+  department?: string;
 
   @ApiProperty({
     example: 'Lima',
@@ -116,7 +113,7 @@ export class CreateSupervisorDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  provinceResidence?: string;
+  province?: string;
 
   @ApiProperty({
     example: 'Comas',
@@ -125,7 +122,7 @@ export class CreateSupervisorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(20)
-  districtResidence: string;
+  district: string;
 
   @ApiProperty({
     example: 'Las Lomas',
@@ -134,7 +131,7 @@ export class CreateSupervisorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(30)
-  urbanSectorResidence: string;
+  urbanSector: string;
 
   @ApiProperty({
     example: 'Jr. Central 123',
@@ -143,7 +140,7 @@ export class CreateSupervisorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(50)
-  addressResidence: string;
+  address: string;
 
   @ApiProperty({
     example: 'A 1 cuadra del parque',
@@ -152,9 +149,9 @@ export class CreateSupervisorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(100)
-  addressResidenceReference: string;
+  referenceAddress: string;
 
-  // Roles and Status
+  //* Roles and Status
   @ApiProperty({
     example: ['disciple', 'supervisor'],
   })
@@ -177,13 +174,12 @@ export class CreateSupervisorDto {
   @IsBoolean()
   isDirectRelationToPastor: boolean;
 
-  // Relations
+  //* Relations
   @ApiProperty({
     example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
   })
   @IsString()
   @IsOptional()
-  @IsUUID()
   theirCopastor?: string;
 
   @ApiProperty({
@@ -191,6 +187,5 @@ export class CreateSupervisorDto {
   })
   @IsString()
   @IsOptional()
-  @IsUUID()
   theirPastor?: string;
 }

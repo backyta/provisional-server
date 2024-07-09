@@ -17,11 +17,12 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { PaginationDto } from '@/common/dtos';
+import { PaginationDto, SearchTypeAndPaginationDto } from '@/common/dtos';
 
 import { UserRoles } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
@@ -76,9 +77,25 @@ export class PastorController {
     return this.pastorService.findAll(paginationDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.pastorService.findOne(+id);
+  //* Find By Term
+  @Get(':term')
+  @Auth()
+  @ApiParam({
+    name: 'term',
+    description: 'Could be names, dates, districts, address, etc.',
+    example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
+  })
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found resource.',
+  })
+  findTerm(
+    @Param('term') term: string,
+    @Query() searchTypeAndPaginationDto: SearchTypeAndPaginationDto,
+  ): Promise<Pastor | Pastor[]> {
+    return this.pastorService.findByTerm(term, searchTypeAndPaginationDto);
   }
 
   //* Update

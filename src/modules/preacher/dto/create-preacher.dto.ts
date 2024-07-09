@@ -15,7 +15,7 @@ import {
 import { MaritalStatus, MemberRoles, Gender, Status } from '@/common/enums';
 
 export class CreatePreacherDto {
-  // General and Personal info
+  //* General and Personal info
   @ApiProperty({
     example: 'John Martin',
   })
@@ -75,7 +75,7 @@ export class CreatePreacherDto {
   @IsOptional()
   conversionDate?: string | Date;
 
-  // Contact Info
+  //* Contact Info
   @ApiProperty({
     example: 'example@example.com',
   })
@@ -153,7 +153,7 @@ export class CreatePreacherDto {
   @MaxLength(100)
   addressResidenceReference: string;
 
-  // Roles and Status
+  //* Roles and Status
   @ApiProperty({
     example: ['disciple', 'preacher'],
   })
@@ -170,7 +170,7 @@ export class CreatePreacherDto {
   @IsOptional()
   status?: string;
 
-  // Relations
+  //* Relations
   @ApiProperty({
     example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
   })

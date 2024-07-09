@@ -13,7 +13,7 @@ import { PastorModule } from '@/modules/pastor/pastor.module';
 import { CopastorModule } from '@/modules/copastor/copastor.module';
 import { PreacherModule } from '@/modules/preacher/preacher.module';
 import { SupervisorModule } from '@/modules/supervisor/supervisor.module';
-import { FamilyHouseModule } from '@/modules/family-house/family-house.module';
+import { FamilyGroupModule } from '@/modules/family-group/family-group.module';
 
 @Module({
   controllers: [DiscipleController],
@@ -26,7 +26,7 @@ import { FamilyHouseModule } from '@/modules/family-house/family-house.module';
     forwardRef(() => SupervisorModule),
     forwardRef(() => ZoneModule),
     forwardRef(() => PreacherModule),
-    forwardRef(() => FamilyHouseModule),
+    forwardRef(() => FamilyGroupModule),
     AuthModule,
   ],
   exports: [TypeOrmModule, DiscipleService],

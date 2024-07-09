@@ -22,7 +22,7 @@ import { Pastor } from '@/modules/pastor/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Disciple } from '@/modules/disciple/entities/';
 import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyHouse } from '@/modules/family-house/entities';
+import { FamilyGroup } from '@/modules/family-group/entities';
 
 @Injectable()
 export class PreacherService {
@@ -47,8 +47,8 @@ export class PreacherService {
     @InjectRepository(Preacher)
     private readonly preacherRepository: Repository<Preacher>,
 
-    @InjectRepository(FamilyHouse)
-    private readonly familyHouseRepository: Repository<FamilyHouse>,
+    @InjectRepository(FamilyGroup)
+    private readonly familyGroupRepository: Repository<FamilyGroup>,
 
     @InjectRepository(Disciple)
     private readonly discipleRepository: Repository<Disciple>,
@@ -206,7 +206,7 @@ export class PreacherService {
         'theirCopastor',
         'theirSupervisor',
         'theirZone',
-        'theirFamilyHouse',
+        'theirFamilyGroup',
         'disciples',
       ],
       relationLoadStrategy: 'query',
@@ -242,12 +242,12 @@ export class PreacherService {
         zoneName: data.theirZone?.zoneName,
         district: data.theirZone?.district,
       },
-      theirFamilyHouse: {
-        id: data.theirFamilyHouse?.id,
-        zoneName: data.theirFamilyHouse?.houseName,
-        codeHouse: data.theirFamilyHouse?.codeHouse,
-        district: data.theirFamilyHouse?.district,
-        urbanSector: data.theirFamilyHouse?.urbanSector,
+      theirFamilyGroup: {
+        id: data.theirFamilyGroup?.id,
+        familyGroupName: data.theirFamilyGroup?.familyGroupName,
+        familyGroupCode: data.theirFamilyGroup?.familyGroupCode,
+        district: data.theirFamilyGroup?.district,
+        urbanSector: data.theirFamilyGroup?.urbanSector,
       },
 
       disciples: data.disciples.map((disciple) => ({
@@ -480,7 +480,7 @@ export class PreacherService {
           theirCopastor: newCopastor,
           theirSupervisor: newSupervisor,
           theirZone: newZone,
-          theirFamilyHouse: preacher.theirFamilyHouse,
+          theirFamilyGroup: preacher.theirFamilyGroup,
           updatedAt: new Date(),
           updatedBy: user,
           status: status,
@@ -494,7 +494,7 @@ export class PreacherService {
         }
 
         //? Update in subordinate relations
-        const allFamilyHouses = await this.familyHouseRepository.find({
+        const allFamilyGroups = await this.familyGroupRepository.find({
           relations: ['theirPreacher', 'theirZone'],
         });
 
@@ -504,31 +504,31 @@ export class PreacherService {
 
         try {
           //* Update in all family houses the new relations of the copastor that is updated.
-          const familyHousesByPreacher = allFamilyHouses.filter(
-            (familyHouse) => familyHouse.theirPreacher?.id === preacher?.id,
+          const familyGroupsByPreacher = allFamilyGroups.filter(
+            (familyGroup) => familyGroup.theirPreacher?.id === preacher?.id,
           );
 
-          const allFamilyHousesByZone = allFamilyHouses.filter(
+          const allFamilyGroupsByZone = allFamilyGroups.filter(
             (house) => house.theirZone?.id === newZone?.id,
           );
 
           await Promise.all(
-            familyHousesByPreacher.map(async (familyHouse) => {
-              await this.familyHouseRepository.update(familyHouse.id, {
+            familyGroupsByPreacher.map(async (familyGroup) => {
+              await this.familyGroupRepository.update(familyGroup.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: newCopastor,
                 theirSupervisor: newSupervisor,
                 theirZone: newZone,
                 zoneName: newZone.zoneName,
-                houseNumber:
-                  allFamilyHousesByZone.length === 0
+                familyGroupNumber:
+                  allFamilyGroupsByZone.length === 0
                     ? 1
-                    : allFamilyHousesByZone.length + 1,
-                codeHouse:
-                  allFamilyHousesByZone.length === 0
+                    : allFamilyGroupsByZone.length + 1,
+                familyGroupCode:
+                  allFamilyGroupsByZone.length === 0
                     ? `${newZone.zoneName.toUpperCase()}-${1}`
-                    : `${newZone.zoneName.toUpperCase()}-${allFamilyHousesByZone.length + 1}`,
+                    : `${newZone.zoneName.toUpperCase()}-${allFamilyGroupsByZone.length + 1}`,
               });
             }),
           );
@@ -551,20 +551,20 @@ export class PreacherService {
           );
 
           //* Reorder family house numbers and code in the old zone
-          const allFamilyHousesByOrder = await this.familyHouseRepository.find({
+          const allFamilyGroupsByOrder = await this.familyGroupRepository.find({
             relations: ['theirZone'],
-            order: { houseNumber: 'ASC' },
+            order: { familyGroupNumber: 'ASC' },
           });
 
-          const allResult = allFamilyHousesByOrder.filter(
+          const allResult = allFamilyGroupsByOrder.filter(
             (house) => house.theirZone?.id === preacher.theirZone?.id,
           );
 
           await Promise.all(
-            allResult.map(async (familyHouse, index) => {
-              await this.familyHouseRepository.update(familyHouse.id, {
-                houseNumber: index + 1,
-                codeHouse: `${familyHouse.zoneName.toUpperCase()}-${index + 1}`,
+            allResult.map(async (familyGroup, index) => {
+              await this.familyGroupRepository.update(familyGroup.id, {
+                familyGroupNumber: index + 1,
+                familyGroupCode: `${familyGroup.zoneName.toUpperCase()}-${index + 1}`,
               });
             }),
           );
@@ -732,7 +732,7 @@ export class PreacherService {
       theirPastor: null,
       theirCopastor: null,
       theirSupervisor: null,
-      theirFamilyHouse: null,
+      theirFamilyGroup: null,
       theirZone: null,
       updatedAt: new Date(),
       updatedBy: user,
@@ -746,7 +746,7 @@ export class PreacherService {
     }
 
     //? Update in subordinate relations
-    const allFamilyHouses = await this.familyHouseRepository.find({
+    const allFamilyGroups = await this.familyGroupRepository.find({
       relations: ['theirPreacher'],
     });
 
@@ -756,13 +756,13 @@ export class PreacherService {
 
     try {
       //* Update and set to null relationships in Family House
-      const familyHousesByPreacher = allFamilyHouses.filter(
-        (familyHome) => familyHome.theirPreacher?.id === preacher?.id,
+      const familyGroupsByPreacher = allFamilyGroups.filter(
+        (familyGroup) => familyGroup.theirPreacher?.id === preacher?.id,
       );
 
       await Promise.all(
-        familyHousesByPreacher.map(async (familyHome) => {
-          await this.familyHouseRepository.update(familyHome.id, {
+        familyGroupsByPreacher.map(async (familyGroup) => {
+          await this.familyGroupRepository.update(familyGroup.id, {
             theirPreacher: null,
             updatedAt: new Date(),
             updatedBy: user,

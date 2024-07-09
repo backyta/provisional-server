@@ -20,7 +20,7 @@ import { Church } from '@/modules/church/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Preacher } from '@/modules/preacher/entities';
-import { FamilyHouse } from '@/modules/family-house/entities';
+import { FamilyGroup } from '@/modules/family-group/entities';
 
 // NOTE : los supervisores tmb se podrán ligar directamente al pastor, ya que si se crea un anexo
 // Habrán un pastor y no hay copastor los supervisores se encargaran de las casas, se podría mandar
@@ -32,7 +32,7 @@ import { FamilyHouse } from '@/modules/family-house/entities';
 @Entity({ name: 'supervisors' })
 @Index(['firstName', 'lastName'])
 export class Supervisor {
-  //General and Personal info
+  //* General and Personal info
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -51,8 +51,8 @@ export class Supervisor {
   originCountry: string;
 
   @Index()
-  @Column('date', { name: 'date_birth' })
-  dateBirth: Date;
+  @Column('date', { name: 'birth_date' })
+  birthDate: Date;
 
   @Column('int', { name: 'age' })
   age: number;
@@ -67,7 +67,7 @@ export class Supervisor {
   @Column('date', { name: 'conversion_date' })
   conversionDate: Date;
 
-  // Contact Info
+  //* Contact Info
   @Index()
   @Column('text', { name: 'email', unique: true, nullable: true })
   email: string;
@@ -75,34 +75,40 @@ export class Supervisor {
   @Column('text', { name: 'phone_number', nullable: true })
   phoneNumber: string;
 
-  @Column('text', { name: 'country_residence', default: 'Peru' })
-  countryResidence: string;
+  @Column('text', { name: 'country', default: 'Peru' })
+  country: string;
 
-  @Column('text', { name: 'department_residence', default: 'Lima' })
-  departmentResidence: string;
+  @Column('text', { name: 'department', default: 'Lima' })
+  department: string;
 
-  @Column('text', { name: 'province_residence', default: 'Lima' })
-  provinceResidence: string;
-
-  @Index()
-  @Column('text', { name: 'district_residence' })
-  districtResidence: string;
+  @Column('text', { name: 'province', default: 'Lima' })
+  province: string;
 
   @Index()
-  @Column('text', { name: 'urban_sector_residence' })
-  urbanSectorResidence: string;
+  @Column('text', { name: 'district' })
+  district: string;
 
   @Index()
-  @Column('text', { name: 'address_residence' })
-  addressResidence: string;
+  @Column('text', { name: 'urban_sector' })
+  urbanSector: string;
 
-  @Column('text', { name: 'address_residence_reference' })
-  addressResidenceReference: string;
+  @Index()
+  @Column('text', { name: 'address' })
+  address: string;
+
+  @Column('text', { name: 'reference_address' })
+  referenceAddress: string;
 
   @Column({ name: 'roles', type: 'text', array: true })
   roles: string[];
 
-  // Info register and update date
+  @Column('boolean', {
+    name: 'is_direct_relation_to_pastor',
+    default: false,
+  })
+  isDirectRelationToPastor: boolean;
+
+  //* Info register and update date
   @Column('timestamp', { name: 'created_at', nullable: true })
   createdAt: string | Date;
 
@@ -120,45 +126,32 @@ export class Supervisor {
   @Column('text', { name: 'status', default: Status.Active })
   status: string;
 
-  @Column('boolean', {
-    name: 'is_direct_relation_to_pastor',
-    default: false,
-  })
-  isDirectRelationToPastor: boolean;
-
   //* Relations (Array)
   @OneToMany(() => Preacher, (preacher) => preacher.theirSupervisor)
   preachers: Preacher[];
 
-  @OneToMany(() => FamilyHouse, (familyHouse) => familyHouse.theirSupervisor)
-  familyHouses: FamilyHouse[];
+  @OneToMany(() => FamilyGroup, (familyGroup) => familyGroup.theirSupervisor)
+  familyGroups: FamilyGroup[];
 
   @OneToMany(() => Disciple, (disciple) => disciple.theirSupervisor)
   disciples: Disciple[];
 
   //* Relations (FK)
-  @ManyToOne(() => Church, (church) => church.supervisors, {
-    // eager: true,
-  })
+  @ManyToOne(() => Church, (church) => church.supervisors)
   @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 
-  @ManyToOne(() => Pastor, (pastor) => pastor.supervisors, {
-    // eager: true,
-  })
+  @ManyToOne(() => Pastor, (pastor) => pastor.supervisors)
   @JoinColumn({ name: 'their_pastor_id' })
   theirPastor: Pastor;
 
   @ManyToOne(() => Copastor, (copastor) => copastor.supervisors, {
     onDelete: 'SET NULL',
-    // eager: true,
   })
   @JoinColumn({ name: 'their_copastor_id' })
   theirCopastor: Copastor;
 
-  @OneToOne(() => Zone, {
-    // eager: true,
-  })
+  @OneToOne(() => Zone, {})
   @JoinColumn({ name: 'their_zone_id' })
   theirZone: Zone;
 
@@ -166,11 +159,11 @@ export class Supervisor {
   @BeforeInsert()
   @BeforeUpdate()
   transformToDates() {
-    this.dateBirth = new Date(this.dateBirth);
+    this.birthDate = new Date(this.birthDate);
     this.conversionDate = new Date(this.conversionDate);
 
     // Generate age with date_birth
-    const ageMiliSeconds = Date.now() - this.dateBirth.getTime();
+    const ageMiliSeconds = Date.now() - this.birthDate.getTime();
 
     const ageDate = new Date(ageMiliSeconds);
     const age = Math.abs(ageDate.getUTCFullYear() - 1970);

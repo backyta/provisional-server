@@ -18,14 +18,14 @@ import { Copastor } from '@/modules/copastor/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyHouse } from '@/modules/family-house/entities';
+import { FamilyGroup } from '@/modules/family-group/entities';
 
 @Entity({ name: 'zones' })
 export class Zone {
+  //* General info
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  //General info
   @Index()
   @Column('text', { name: 'zone_name' })
   zoneName: string;
@@ -65,8 +65,8 @@ export class Zone {
   @OneToMany(() => Preacher, (preacher) => preacher.theirZone)
   preachers: Preacher[];
 
-  @OneToMany(() => FamilyHouse, (familyHouse) => familyHouse.theirZone)
-  familyHouses: FamilyHouse[];
+  @OneToMany(() => FamilyGroup, (familyGroup) => familyGroup.theirZone)
+  familyGroups: FamilyGroup[];
 
   @OneToMany(() => Disciple, (disciple) => disciple.theirZone)
   disciples: Disciple[];

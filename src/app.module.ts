@@ -20,7 +20,7 @@ import { IncomeModule } from '@/modules/offering/income/income.module';
 import { CloudinaryModule } from '@/modules/cloudinary/cloudinary.module';
 import { SupervisorModule } from '@/modules/supervisor/supervisor.module';
 import { ExpensesModule } from '@/modules/offering/expenses/expenses.module';
-import { FamilyHouseModule } from '@/modules/family-house/family-house.module';
+import { FamilyGroupModule } from '@/modules/family-group/family-group.module';
 
 @Module({
   imports: [
@@ -47,7 +47,7 @@ import { FamilyHouseModule } from '@/modules/family-house/family-house.module';
     CopastorModule,
     SupervisorModule,
     PreacherModule,
-    FamilyHouseModule,
+    FamilyGroupModule,
     ZoneModule,
     ChurchModule,
     AuthModule,

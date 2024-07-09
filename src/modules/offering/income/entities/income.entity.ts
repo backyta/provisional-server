@@ -16,17 +16,17 @@ import { Disciple } from '@/modules/disciple/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyHouse } from '@/modules/family-house/entities';
+import { FamilyGroup } from '@/modules/family-group/entities';
 
 //TODO : seguir con la semilla , revisar antes si al crear se setea en los [] de las relaciones opuestas
 // NOTE : Al momento hacer la consultas ver los indices agregar
 @Entity({ name: 'offerings_income' })
 @Index(['type', 'subType'])
 export class Income {
+  //* General data
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // General data
   @Column('text')
   type: string;
 
@@ -56,7 +56,7 @@ export class Income {
   @Column('text', { name: 'shift', nullable: true })
   shift: string;
 
-  // Info register and update date
+  //* Info register and update date
   @Column('timestamp', { name: 'created_at', nullable: true })
   createdAt: string | Date;
 
@@ -77,14 +77,14 @@ export class Income {
   //* Relations (FK)
   // NOTE : la casa no se elimina solo se desactiva por el momento y se actualiza su info
   // Family House
-  @ManyToOne(() => FamilyHouse, {
+  @ManyToOne(() => FamilyGroup, {
     nullable: true,
     eager: true,
     onDelete: 'SET NULL',
     // onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'their_family_house_id' })
-  theirFamilyHouse: FamilyHouse;
+  @JoinColumn({ name: 'their_family_group_id' })
+  theirFamilyGroup: FamilyGroup;
 
   // Tithe or special or ground church
   // NOTE : agregar en cada entidad que al subir de nivel se elimina pero se coloca el nuevo en todos los registros que tenia el anterior ID.

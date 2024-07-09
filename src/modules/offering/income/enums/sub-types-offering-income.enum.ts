@@ -4,7 +4,7 @@ export enum SubTypesOfferingIncome {
   GeneralVigil = 'general_vigil',
   ZonalVigil = 'zonal_vigil',
   ZonalFasting = 'zonal_fasting',
-  FamilyHouse = 'family_house',
+  FamilyGroup = 'family_group',
   SundaySchool = 'sunday_school',
   YouthWorship = 'youth_worship',
   UnitedWorship = 'united_worship',
@@ -18,7 +18,7 @@ export const SubTypesOfferingIncomeNames: Record<
   string
 > = {
   sunday_worship: 'Culto Dominical',
-  family_house: 'Casa Familiar',
+  family_group: 'Grupo Familiar',
   general_fasting: 'Ayuno General',
   general_vigil: 'Vigilia General',
   zonal_fasting: 'Ayuno Zonal',

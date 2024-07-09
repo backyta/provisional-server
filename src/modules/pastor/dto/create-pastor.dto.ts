@@ -4,10 +4,8 @@ import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
-  IsUUID,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -15,7 +13,7 @@ import {
 import { MaritalStatus, MemberRoles, Gender, Status } from '@/common/enums';
 
 export class CreatePastorDto {
-  // General and Personal info
+  //* General and Personal info
   @ApiProperty({
     example: 'John Martin',
   })
@@ -59,14 +57,13 @@ export class CreatePastorDto {
   })
   @IsString()
   @IsNotEmpty()
-  dateBirth: string | Date;
+  birthDate: string | Date;
 
   @ApiProperty({
     example: '2',
   })
-  @IsNumber()
   @IsOptional()
-  numberChildren?: number;
+  numberChildren?: string | number;
 
   @ApiProperty({
     example: '2001/12/23',
@@ -75,7 +72,7 @@ export class CreatePastorDto {
   @IsOptional()
   conversionDate?: string | Date;
 
-  // Contact Info
+  //* Contact Info
   @ApiProperty({
     example: 'example@example.com',
   })
@@ -97,7 +94,7 @@ export class CreatePastorDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  countryResidence?: string;
+  country?: string;
 
   @ApiProperty({
     example: 'Lima',
@@ -106,7 +103,7 @@ export class CreatePastorDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  departmentResidence?: string;
+  department?: string;
 
   @ApiProperty({
     example: 'Lima',
@@ -115,7 +112,7 @@ export class CreatePastorDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  provinceResidence?: string;
+  province?: string;
 
   @ApiProperty({
     example: 'Comas',
@@ -124,7 +121,7 @@ export class CreatePastorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(20)
-  districtResidence: string;
+  district: string;
 
   @ApiProperty({
     example: 'Las Lomas',
@@ -133,7 +130,7 @@ export class CreatePastorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(30)
-  urbanSectorResidence: string;
+  urbanSector: string;
 
   @ApiProperty({
     example: 'Av. Central 123',
@@ -142,7 +139,7 @@ export class CreatePastorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(50)
-  addressResidence: string;
+  address: string;
 
   @ApiProperty({
     example: 'A 2 cuadras al colegio',
@@ -151,9 +148,9 @@ export class CreatePastorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(100)
-  addressResidenceReference: string;
+  referenceAddress: string;
 
-  // Roles and Status
+  //* Roles and Status
   @ApiProperty({
     example: ['disciple', 'pastor'],
   })
@@ -176,6 +173,5 @@ export class CreatePastorDto {
   })
   @IsString()
   @IsOptional()
-  @IsUUID()
   theirChurch?: string;
 }

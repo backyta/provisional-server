@@ -13,7 +13,7 @@ import { PreacherModule } from '@/modules/preacher/preacher.module';
 import { DiscipleModule } from '@/modules/disciple/disciple.module';
 import { CopastorModule } from '@/modules/copastor/copastor.module';
 import { SupervisorModule } from '@/modules/supervisor/supervisor.module';
-import { FamilyHouseModule } from '@/modules/family-house/family-house.module';
+import { FamilyGroupModule } from '@/modules/family-group/family-group.module';
 
 @Module({
   controllers: [SeedController],
@@ -25,7 +25,7 @@ import { FamilyHouseModule } from '@/modules/family-house/family-house.module';
     SupervisorModule,
     ZoneModule,
     PreacherModule,
-    FamilyHouseModule,
+    FamilyGroupModule,
     DiscipleModule,
     AuthModule,
     UserModule,

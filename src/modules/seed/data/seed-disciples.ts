@@ -24,7 +24,7 @@ interface SeedDisciples {
   status?: string;
 
   //* Relations
-  theirFamilyHouse?: string;
+  theirFamilyGroup?: string;
 }
 
 //? Array Interfaces

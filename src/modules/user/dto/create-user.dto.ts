@@ -11,7 +11,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { Status } from '@/common/enums';
+import { Gender, Status } from '@/common/enums';
 import { UserRoles } from '@/modules/auth/enums';
 
 export class CreateUserDto {
@@ -48,6 +48,12 @@ export class CreateUserDto {
   @IsString()
   @MinLength(1)
   lastName: string;
+
+  @ApiProperty({
+    example: Gender.Female,
+  })
+  @IsEnum(Gender)
+  gender: string;
 
   @ApiProperty({
     example: Status.Active,

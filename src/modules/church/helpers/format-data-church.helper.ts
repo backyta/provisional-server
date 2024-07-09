@@ -1,4 +1,5 @@
-import { Church } from '../entities/church.entity';
+import { Church } from '@/modules/church/entities';
+
 export interface Options {
   theirMainChurch: Church;
   churches: Church[];
@@ -39,13 +40,13 @@ export const formatDataChurch = ({ theirMainChurch, churches }: Options) => {
       firstName: preacher?.firstName,
       lastName: preacher?.lastName,
     })),
-    familyHouses: church?.familyHouses.map((familyHouse) => ({
-      id: familyHouse?.id,
-      houseName: familyHouse?.houseName,
-      zoneName: familyHouse?.zoneName,
-      codeHouse: familyHouse?.codeHouse,
-      district: familyHouse?.disciples,
-      urbanSector: familyHouse?.urbanSector,
+    familyGroups: church?.familyGroups.map((familyGroup) => ({
+      id: familyGroup?.id,
+      familyGroupName: familyGroup?.familyGroupName,
+      zoneName: familyGroup?.zoneName,
+      familyGroupCode: familyGroup?.familyGroupCode,
+      district: familyGroup?.disciples,
+      urbanSector: familyGroup?.urbanSector,
     })),
     disciples: church.disciples.map((disciple) => ({
       id: disciple?.id,

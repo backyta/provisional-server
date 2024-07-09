@@ -18,7 +18,7 @@ import { Church } from '@/modules/church/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyHouse } from '@/modules/family-house/entities';
+import { FamilyGroup } from '@/modules/family-group/entities';
 
 @Entity({ name: 'disciples' })
 @Index(['firstName', 'lastName'])
@@ -80,7 +80,6 @@ export class Disciple {
   @Column('text', { name: 'district_residence' })
   districtResidence: string;
 
-  // TODO : agregar urban sector en las búsquedas del front en los miembros and age
   @Index()
   @Column('text', { name: 'urban_sector_residence' })
   urbanSectorResidence: string;
@@ -144,9 +143,9 @@ export class Disciple {
   @JoinColumn({ name: 'their_preacher_id' })
   theirPreacher: Preacher;
 
-  @ManyToOne(() => FamilyHouse, (familyHouse) => familyHouse.disciples)
-  @JoinColumn({ name: 'their_family_house_id' })
-  theirFamilyHouse: FamilyHouse;
+  @ManyToOne(() => FamilyGroup, (familyGroup) => familyGroup.disciples)
+  @JoinColumn({ name: 'their_family_group_id' })
+  theirFamilyGroup: FamilyGroup;
 
   // Internal Functions
   @BeforeInsert()

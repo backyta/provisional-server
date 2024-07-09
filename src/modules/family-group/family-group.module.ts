@@ -1,9 +1,9 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module, forwardRef } from '@nestjs/common';
 
-import { FamilyHouse } from '@/modules/family-house/entities';
-import { FamilyHouseService } from '@/modules/family-house/family-house.service';
-import { FamilyHouseController } from '@/modules/family-house/family-house.controller';
+import { FamilyGroup } from '@/modules/family-group/entities';
+import { FamilyGroupService } from '@/modules/family-group/family-group.service';
+import { FamilyGroupController } from '@/modules/family-group/family-group.controller';
 
 import { AuthModule } from '@/modules/auth/auth.module';
 import { ZoneModule } from '@/modules/zone/zone.module';
@@ -15,10 +15,10 @@ import { DiscipleModule } from '@/modules/disciple/disciple.module';
 import { SupervisorModule } from '@/modules/supervisor/supervisor.module';
 
 @Module({
-  controllers: [FamilyHouseController],
-  providers: [FamilyHouseService],
+  controllers: [FamilyGroupController],
+  providers: [FamilyGroupService],
   imports: [
-    TypeOrmModule.forFeature([FamilyHouse]),
+    TypeOrmModule.forFeature([FamilyGroup]),
     forwardRef(() => ChurchModule),
     forwardRef(() => PastorModule),
     forwardRef(() => CopastorModule),
@@ -28,6 +28,6 @@ import { SupervisorModule } from '@/modules/supervisor/supervisor.module';
     forwardRef(() => DiscipleModule),
     AuthModule,
   ],
-  exports: [TypeOrmModule, FamilyHouseService],
+  exports: [TypeOrmModule, FamilyGroupService],
 })
-export class FamilyHouseModule {}
+export class FamilyGroupModule {}

@@ -19,12 +19,12 @@ import { Copastor } from '@/modules/copastor/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { Disciple } from '@/modules/disciple/entities/';
 import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyHouse } from '@/modules/family-house/entities';
+import { FamilyGroup } from '@/modules/family-group/entities';
 
 @Entity({ name: 'pastors' })
 @Index(['firstName', 'lastName'])
 export class Pastor {
-  //General and Personal info
+  //* General and Personal info
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -43,8 +43,8 @@ export class Pastor {
   originCountry: string;
 
   @Index()
-  @Column('date', { name: 'date_birth' })
-  dateBirth: Date;
+  @Column('date', { name: 'birth_date' })
+  birthDate: Date;
 
   @Column('int', { name: 'age' })
   age: number;
@@ -59,7 +59,7 @@ export class Pastor {
   @Column('date', { name: 'conversion_date' })
   conversionDate: Date;
 
-  // Contact Info
+  //* Contact Info
   @Index()
   @Column('text', { name: 'email', unique: true, nullable: true })
   email: string;
@@ -67,34 +67,34 @@ export class Pastor {
   @Column('text', { name: 'phone_number', nullable: true })
   phoneNumber: string;
 
-  @Column('text', { name: 'country_residence', default: 'Peru' })
-  countryResidence: string;
+  @Column('text', { name: 'country', default: 'Peru' })
+  country: string;
 
-  @Column('text', { name: 'department_residence', default: 'Lima' })
-  departmentResidence: string;
+  @Column('text', { name: 'department', default: 'Lima' })
+  department: string;
 
-  @Column('text', { name: 'province_residence', default: 'Lima' })
-  provinceResidence: string;
-
-  @Index()
-  @Column('text', { name: 'district_residence' })
-  districtResidence: string;
+  @Column('text', { name: 'province', default: 'Lima' })
+  province: string;
 
   @Index()
-  @Column('text', { name: 'urban_sector_residence' })
-  urbanSectorResidence: string;
+  @Column('text', { name: 'district' })
+  district: string;
 
   @Index()
-  @Column('text', { name: 'address_residence' })
-  addressResidence: string;
+  @Column('text', { name: 'urban_sector' })
+  urbanSector: string;
 
-  @Column('text', { name: 'address_residence_reference' })
-  addressResidenceReference: string;
+  @Index()
+  @Column('text', { name: 'address' })
+  address: string;
+
+  @Column('text', { name: 'reference_address' })
+  referenceAddress: string;
 
   @Column({ name: 'roles', type: 'text', array: true })
   roles: string[];
 
-  // Info register and update date
+  //* Info register and update date
   @Column('timestamp', { name: 'created_at', nullable: true })
   createdAt: string | Date;
 
@@ -125,8 +125,8 @@ export class Pastor {
   @OneToMany(() => Zone, (zone) => zone.theirPastor)
   zones: Zone[];
 
-  @OneToMany(() => FamilyHouse, (familyHouse) => familyHouse.theirPastor)
-  familyHouses: FamilyHouse[];
+  @OneToMany(() => FamilyGroup, (familyGroup) => familyGroup.theirPastor)
+  familyGroups: FamilyGroup[];
 
   @OneToMany(() => Disciple, (disciple) => disciple.theirPastor)
   disciples: Disciple[];
@@ -136,15 +136,15 @@ export class Pastor {
   @JoinColumn({ name: 'their_church_id' })
   theirChurch: Church;
 
-  // Internal Functions
+  //? Internal Functions
   @BeforeInsert()
   @BeforeUpdate()
   transformToDates() {
-    this.dateBirth = new Date(this.dateBirth);
+    this.birthDate = new Date(this.birthDate);
     this.conversionDate = new Date(this.conversionDate);
 
-    // Generate age with date_birth
-    const ageMiliSeconds = Date.now() - this.dateBirth.getTime();
+    // Generate age with birth date
+    const ageMiliSeconds = Date.now() - this.birthDate.getTime();
 
     const ageDate = new Date(ageMiliSeconds);
     const age = Math.abs(ageDate.getUTCFullYear() - 1970);

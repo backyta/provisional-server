@@ -13,7 +13,7 @@ import {
 } from 'class-validator';
 
 export class CreateChurchDto {
-  // General and Personal info
+  //* General and Personal info
   @ApiProperty({
     example: 'Iglesia Cristiana Fortaleza - Agua Viva',
   })
@@ -44,7 +44,7 @@ export class CreateChurchDto {
   @IsNotEmpty()
   foundingDate: string | Date;
 
-  // Contact Info
+  //* Contact Info
   @ApiProperty({
     example: 'iglesia@example.com',
   })
@@ -122,7 +122,7 @@ export class CreateChurchDto {
   @MaxLength(100)
   referenceAddress: string;
 
-  // Roles and Status
+  //* Roles and Status
   @ApiProperty({
     example: 'active',
   })
@@ -131,7 +131,7 @@ export class CreateChurchDto {
   @IsOptional()
   status?: string;
 
-  // Relations
+  //* Relations
   @ApiProperty({
     example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
   })

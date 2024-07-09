@@ -16,7 +16,7 @@ import { PreacherService } from '@/modules/preacher/preacher.service';
 import { DiscipleService } from '@/modules/disciple/disciple.service';
 import { CopastorService } from '@/modules/copastor/copastor.service';
 import { SupervisorService } from '@/modules/supervisor/supervisor.service';
-import { FamilyHouseService } from '@/modules/family-house/family-house.service';
+import { FamilyGroupService } from '@/modules/family-group/family-group.service';
 
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
@@ -26,13 +26,13 @@ import { Copastor } from '@/modules/copastor/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyHouse } from '@/modules/family-house/entities';
+import { FamilyGroup } from '@/modules/family-group/entities';
 
 import {
   dataChurches,
   dataCopastors,
   dataDisciples,
-  dataFamilyHouses,
+  dataFamilyGroups,
   dataPastors,
   dataPreachers,
   dataSupervisors,
@@ -63,8 +63,8 @@ export class SeedService {
     @InjectRepository(Preacher)
     private readonly preacherRepository: Repository<Preacher>,
 
-    @InjectRepository(FamilyHouse)
-    private readonly familyHouseRepository: Repository<FamilyHouse>,
+    @InjectRepository(FamilyGroup)
+    private readonly familyGroupRepository: Repository<FamilyGroup>,
 
     @InjectRepository(Disciple)
     private readonly discipleRepository: Repository<Disciple>,
@@ -78,7 +78,7 @@ export class SeedService {
     private readonly supervisorService: SupervisorService,
     private readonly zoneService: ZoneService,
     private readonly preacherService: PreacherService,
-    private readonly familyHouseService: FamilyHouseService,
+    private readonly familyGroupService: FamilyGroupService,
     private readonly discipleService: DiscipleService,
 
     private readonly userService: UserService,
@@ -100,8 +100,8 @@ export class SeedService {
     const queryPreachers =
       this.preacherRepository.createQueryBuilder('preachers');
 
-    const queryFamilyHouses =
-      this.familyHouseRepository.createQueryBuilder('family-houses');
+    const queryFamilyGroups =
+      this.familyGroupRepository.createQueryBuilder('family-houses');
 
     const queryDisciples =
       this.discipleRepository.createQueryBuilder('disciples');
@@ -110,7 +110,7 @@ export class SeedService {
 
     try {
       await queryDisciples.delete().where({}).execute();
-      await queryFamilyHouses.delete().where({}).execute();
+      await queryFamilyGroups.delete().where({}).execute();
       await queryPreachers.delete().where({}).execute();
       await querySupervisors.delete().where({}).execute();
       await queryZones.delete().where({}).execute();
@@ -159,7 +159,7 @@ export class SeedService {
     const supervisors = dataSupervisors.supervisors;
     const zones = dataZones.zones;
     const preachers = dataPreachers.preachers;
-    const familyHouses = dataFamilyHouses.houses;
+    const familyGroups = dataFamilyGroups.houses;
     const disciples = dataDisciples.disciples;
 
     const promisesAnexes = [];
@@ -252,20 +252,20 @@ export class SeedService {
     });
 
     async function crearCasasEnOrden(
-      familyHouses,
+      familyGroups,
       allPreachers,
       user,
-      familyHouseService,
+      familyGroupService,
     ) {
       const promisesCreation = [];
 
-      for (const [index, familyHouse] of familyHouses.entries()) {
-        familyHouse.theirZone = allPreachers[0]?.theirZone?.id;
-        familyHouse.theirPreacher = allPreachers[index]?.id;
+      for (const [index, familyGroup] of familyGroups.entries()) {
+        familyGroup.theirZone = allPreachers[0]?.theirZone?.id;
+        familyGroup.theirPreacher = allPreachers[index]?.id;
 
         try {
-          const createdHouse = await familyHouseService.create(
-            familyHouse,
+          const createdHouse = await familyGroupService.create(
+            familyGroup,
             user,
           );
           promisesCreation.push(createdHouse);
@@ -278,80 +278,80 @@ export class SeedService {
     }
 
     await crearCasasEnOrden(
-      familyHouses,
+      familyGroups,
       allPreachers,
       user,
-      this.familyHouseService,
+      this.familyGroupService,
     );
 
     //* Create Disciples
-    const allFamilyHouses = await this.familyHouseRepository.find({
+    const allFamilyGroups = await this.familyGroupRepository.find({
       relations: ['theirPreacher'],
     });
 
     //? First House
-    disciples[0].theirFamilyHouse = allFamilyHouses[0]?.id;
+    disciples[0].theirFamilyGroup = allFamilyGroups[0]?.id;
     await this.discipleService.create(disciples[0], user);
 
-    disciples[1].theirFamilyHouse = allFamilyHouses[0]?.id;
+    disciples[1].theirFamilyGroup = allFamilyGroups[0]?.id;
     await this.discipleService.create(disciples[1], user);
 
-    disciples[2].theirFamilyHouse = allFamilyHouses[0]?.id;
+    disciples[2].theirFamilyGroup = allFamilyGroups[0]?.id;
     await this.discipleService.create(disciples[2], user);
 
-    disciples[3].theirFamilyHouse = allFamilyHouses[0]?.id;
+    disciples[3].theirFamilyGroup = allFamilyGroups[0]?.id;
     await this.discipleService.create(disciples[3], user);
 
     //? Second House
-    disciples[4].theirFamilyHouse = allFamilyHouses[1]?.id;
+    disciples[4].theirFamilyGroup = allFamilyGroups[1]?.id;
     await this.discipleService.create(disciples[4], user);
 
-    disciples[5].theirFamilyHouse = allFamilyHouses[1]?.id;
+    disciples[5].theirFamilyGroup = allFamilyGroups[1]?.id;
     await this.discipleService.create(disciples[5], user);
 
-    disciples[6].theirFamilyHouse = allFamilyHouses[1]?.id;
+    disciples[6].theirFamilyGroup = allFamilyGroups[1]?.id;
     await this.discipleService.create(disciples[6], user);
 
-    disciples[7].theirFamilyHouse = allFamilyHouses[1]?.id;
+    disciples[7].theirFamilyGroup = allFamilyGroups[1]?.id;
     await this.discipleService.create(disciples[7], user);
 
     //? Third House
-    disciples[8].theirFamilyHouse = allFamilyHouses[2]?.id;
+    disciples[8].theirFamilyGroup = allFamilyGroups[2]?.id;
     await this.discipleService.create(disciples[8], user);
 
-    disciples[9].theirFamilyHouse = allFamilyHouses[2]?.id;
+    disciples[9].theirFamilyGroup = allFamilyGroups[2]?.id;
     await this.discipleService.create(disciples[9], user);
 
-    disciples[10].theirFamilyHouse = allFamilyHouses[2]?.id;
+    disciples[10].theirFamilyGroup = allFamilyGroups[2]?.id;
     await this.discipleService.create(disciples[10], user);
 
-    disciples[11].theirFamilyHouse = allFamilyHouses[2]?.id;
+    disciples[11].theirFamilyGroup = allFamilyGroups[2]?.id;
     await this.discipleService.create(disciples[11], user);
 
     //? Fourth House
-    disciples[12].theirFamilyHouse = allFamilyHouses[3]?.id;
+    disciples[12].theirFamilyGroup = allFamilyGroups[3]?.id;
     await this.discipleService.create(disciples[12], user);
 
-    disciples[13].theirFamilyHouse = allFamilyHouses[3]?.id;
+    disciples[13].theirFamilyGroup = allFamilyGroups[3]?.id;
     await this.discipleService.create(disciples[13], user);
 
-    disciples[14].theirFamilyHouse = allFamilyHouses[3]?.id;
+    disciples[14].theirFamilyGroup = allFamilyGroups[3]?.id;
     await this.discipleService.create(disciples[14], user);
 
-    disciples[15].theirFamilyHouse = allFamilyHouses[3]?.id;
+    disciples[15].theirFamilyGroup = allFamilyGroups[3]?.id;
     await this.discipleService.create(disciples[15], user);
 
     //? Fifth House
-    disciples[16].theirFamilyHouse = allFamilyHouses[4]?.id;
+    disciples[16].theirFamilyGroup = allFamilyGroups[4]?.id;
     await this.discipleService.create(disciples[16], user);
 
-    disciples[17].theirFamilyHouse = allFamilyHouses[4]?.id;
+    disciples[17].theirFamilyGroup = allFamilyGroups[4]?.id;
     await this.discipleService.create(disciples[17], user);
 
-    disciples[18].theirFamilyHouse = allFamilyHouses[4]?.id;
+    disciples[18].theirFamilyGroup = allFamilyGroups[4]?.id;
     await this.discipleService.create(disciples[18], user);
 
-    disciples[19].theirFamilyHouse = allFamilyHouses[4]?.id;
+    disciples[19].theirFamilyGroup = allFamilyGroups[4]?.id;
     await this.discipleService.create(disciples[19], user);
   }
 
@@ -360,6 +360,8 @@ export class SeedService {
   private handleDBExceptions(error: any) {
     if (error.code === '23505') throw new BadRequestException(error.detail);
     this.logger.error(error);
+
+    console.log(error);
 
     throw new InternalServerErrorException(
       'Unexpected errors, check server logs',

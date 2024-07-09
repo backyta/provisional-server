@@ -4,7 +4,7 @@ interface SeedCopastor {
   lastName: string;
   gender: string;
   originCountry: string;
-  dateBirth: string | Date;
+  birthDate: string | Date;
   age?: number;
   maritalStatus: string;
   numberChildren?: number;
@@ -13,13 +13,13 @@ interface SeedCopastor {
   //* Contact Info
   email: string;
   phoneNumber: string;
-  countryResidence?: string;
-  departmentResidence?: string;
-  provinceResidence?: string;
-  districtResidence: string;
-  urbanSectorResidence: string;
-  addressResidence: string;
-  addressResidenceReference: string;
+  country?: string;
+  department?: string;
+  province?: string;
+  district: string;
+  urbanSector: string;
+  address: string;
+  referenceAddress: string;
   roles: string[];
   status?: string;
 
@@ -39,16 +39,16 @@ export const dataCopastors: SeedDataCopastors = {
       lastName: 'Salgado Huaman',
       gender: 'female',
       originCountry: 'Peru',
-      dateBirth: '1987-03-15',
+      birthDate: '1987-03-15',
       maritalStatus: 'married',
       numberChildren: 2,
       conversionDate: '2007-03-15',
       email: 'luz.salgado@google.com',
       phoneNumber: '+1-623-1091',
-      districtResidence: 'Independencia',
-      urbanSectorResidence: 'Payet',
-      addressResidence: 'Av. Cariancha 231',
-      addressResidenceReference: 'A 2 cuadras del colegio',
+      district: 'Independencia',
+      urbanSector: 'Payet',
+      address: 'Av. Cariancha 231',
+      referenceAddress: 'A 2 cuadras del colegio',
       roles: ['copastor', 'disciple'],
     },
     {
@@ -56,16 +56,16 @@ export const dataCopastors: SeedDataCopastors = {
       lastName: 'Cordova Flores',
       gender: 'male',
       originCountry: 'Peru',
-      dateBirth: '1992-08-21',
+      birthDate: '1992-08-21',
       maritalStatus: 'single',
       numberChildren: 0,
       conversionDate: '2010-05-12',
       email: 'eduardo.cordova@google.com',
       phoneNumber: '+1-567-9876',
-      districtResidence: 'Independencia',
-      urbanSectorResidence: 'Ermitaño',
-      addressResidence: 'Av. Los Pinos 512',
-      addressResidenceReference: 'Frente a la plaza central',
+      district: 'Independencia',
+      urbanSector: 'Ermitaño',
+      address: 'Av. Los Pinos 512',
+      referenceAddress: 'Frente a la plaza central',
       roles: ['copastor', 'disciple'],
     },
     {
@@ -73,16 +73,16 @@ export const dataCopastors: SeedDataCopastors = {
       lastName: 'Gomez Rodriguez',
       gender: 'female',
       originCountry: 'Peru',
-      dateBirth: '1985-12-10',
+      birthDate: '1985-12-10',
       maritalStatus: 'married',
       numberChildren: 3,
       conversionDate: '2005-06-30',
       email: 'carla.gomez@google.com',
       phoneNumber: '+1-987-6543',
-      districtResidence: 'Independencia',
-      urbanSectorResidence: 'Tahuantinsuyo',
-      addressResidence: 'Jr. Los Alamos 321',
-      addressResidenceReference: 'Cerca del mercado municipal',
+      district: 'Independencia',
+      urbanSector: 'Tahuantinsuyo',
+      address: 'Jr. Los Alamos 321',
+      referenceAddress: 'Cerca del mercado municipal',
       roles: ['copastor', 'disciple'],
     },
     {
@@ -90,16 +90,16 @@ export const dataCopastors: SeedDataCopastors = {
       lastName: 'Vargas Medina',
       gender: 'male',
       originCountry: 'Peru',
-      dateBirth: '1978-04-03',
-      maritalStatus: 'widower',
+      birthDate: '1978-04-03',
+      maritalStatus: 'widowed',
       numberChildren: 2,
       conversionDate: '2000-11-17',
       email: 'julio.vargas@google.com',
       phoneNumber: '+1-234-5678',
-      districtResidence: 'Independencia',
-      urbanSectorResidence: 'Payet',
-      addressResidence: 'Av. Los Jazmines 456',
-      addressResidenceReference: 'Cerca del parque infantil',
+      district: 'Independencia',
+      urbanSector: 'Payet',
+      address: 'Av. Los Jazmines 456',
+      referenceAddress: 'Cerca del parque infantil',
       roles: ['copastor', 'disciple'],
     },
     {
@@ -107,16 +107,16 @@ export const dataCopastors: SeedDataCopastors = {
       lastName: 'Torres Gutierrez',
       gender: 'female',
       originCountry: 'Peru',
-      dateBirth: '1990-02-28',
+      birthDate: '1990-02-28',
       maritalStatus: 'married',
       numberChildren: 1,
       conversionDate: '2009-09-05',
       email: 'ana.torres@google.com',
       phoneNumber: '+1-876-5432',
-      districtResidence: 'Independencia',
-      urbanSectorResidence: 'Ermitaño',
-      addressResidence: 'Jr. Los Rosales 789',
-      addressResidenceReference: 'A una cuadra de la iglesia',
+      district: 'Independencia',
+      urbanSector: 'Ermitaño',
+      address: 'Jr. Los Rosales 789',
+      referenceAddress: 'A una cuadra de la iglesia',
       roles: ['copastor', 'disciple'],
     },
     {
@@ -124,16 +124,16 @@ export const dataCopastors: SeedDataCopastors = {
       lastName: 'Soto Chavez',
       gender: 'male',
       originCountry: 'Peru',
-      dateBirth: '1982-11-17',
+      birthDate: '1982-11-17',
       maritalStatus: 'married',
       numberChildren: 4,
       conversionDate: '2003-08-12',
       email: 'pedro.soto@google.com',
       phoneNumber: '+1-432-1098',
-      districtResidence: 'Independencia',
-      urbanSectorResidence: 'Tahuantinsuyo',
-      addressResidence: 'Av. Los Laureles 123',
-      addressResidenceReference: 'Al lado del colegio San Miguel',
+      district: 'Independencia',
+      urbanSector: 'Tahuantinsuyo',
+      address: 'Av. Los Laureles 123',
+      referenceAddress: 'Al lado del colegio San Miguel',
       roles: ['copastor', 'disciple'],
     },
   ],

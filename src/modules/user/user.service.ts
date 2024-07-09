@@ -9,12 +9,11 @@ import { Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { SearchType, Status } from '@/common/enums';
-import { PaginationDto, SearchTypeAndPaginationDto } from '@/common/dtos';
+import { Status } from '@/common/enums';
+import { PaginationDto } from '@/common/dtos';
 
 import { User } from '@/modules/user/entities';
 import { UpdateUserDto } from '@/modules/user/dto';
-import { searchUserByNames } from '@/modules/user/helpers';
 
 @Injectable()
 export class UserService {

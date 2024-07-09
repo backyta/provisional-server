@@ -4,6 +4,7 @@ interface SeedUser {
   email: string;
   firstName: string;
   lastName: string;
+  gender: string;
   password: string;
   roles: string[];
 }
@@ -18,6 +19,7 @@ export const dataUsers: SeedDataUsers = {
       firstName: 'Luisa Maria',
       lastName: 'Torres Zapata',
       email: 'luisa@google.com',
+      gender: 'female',
       password: bcrypt.hashSync('Abc1234', 10),
       roles: ['admin-user'],
     },
@@ -25,6 +27,7 @@ export const dataUsers: SeedDataUsers = {
       firstName: 'Eva Daniela',
       lastName: 'Carranza Valle',
       email: 'eva@google.com',
+      gender: 'female',
       password: bcrypt.hashSync('Abc1234', 10),
       roles: ['treasurer-user'],
     },
@@ -32,6 +35,7 @@ export const dataUsers: SeedDataUsers = {
       firstName: 'Luz Estrella',
       lastName: 'Vallejo Zambrano',
       email: 'luz@google.com',
+      gender: 'female',
       password: bcrypt.hashSync('Abc1234', 10),
       roles: ['user'],
     },
