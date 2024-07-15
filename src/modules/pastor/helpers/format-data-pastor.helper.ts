@@ -7,6 +7,10 @@ interface Options {
 export const formatDataPastor = ({ pastors }: Options) => {
   return pastors.map((pastor) => ({
     ...pastor,
+    theirChurch: {
+      id: pastor.theirChurch?.id,
+      churchName: pastor.theirChurch?.churchName,
+    },
     copastors: pastor?.copastors.map((copastor) => ({
       id: copastor?.id,
       firstName: copastor?.firstName,
@@ -32,7 +36,7 @@ export const formatDataPastor = ({ pastors }: Options) => {
       familyGroupName: familyGroup?.familyGroupName,
       zoneName: familyGroup?.zoneName,
       familyGroupCode: familyGroup?.familyGroupCode,
-      district: familyGroup?.disciples,
+      district: familyGroup?.district,
       urbanSector: familyGroup?.urbanSector,
     })),
     disciples: pastor.disciples.map((disciple) => ({

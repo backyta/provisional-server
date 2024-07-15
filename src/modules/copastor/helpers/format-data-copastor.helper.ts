@@ -7,6 +7,18 @@ interface Options {
 export const formatDataCopastor = ({ copastors }: Options) => {
   return copastors.map((copastor) => ({
     ...copastor,
+    theirChurch: {
+      id: copastor.theirChurch?.id,
+      churchName: copastor.theirChurch?.churchName,
+      district: copastor.theirChurch?.district,
+      urbanSector: copastor.theirChurch?.urbanSector,
+    },
+    theirPastor: {
+      id: copastor.theirPastor?.id,
+      firstName: copastor.theirPastor?.firstName,
+      lastName: copastor.theirPastor?.lastName,
+      roles: copastor.theirPastor?.roles,
+    },
     supervisors: copastor?.supervisors.map((supervisor) => ({
       id: supervisor?.id,
       firstName: supervisor?.firstName,
@@ -27,7 +39,7 @@ export const formatDataCopastor = ({ copastors }: Options) => {
       familyGroupName: familyGroup?.familyGroupName,
       zoneName: familyGroup?.zoneName,
       familyGroupCode: familyGroup?.familyGroupCode,
-      district: familyGroup?.disciples,
+      district: familyGroup?.district,
       urbanSector: familyGroup?.urbanSector,
     })),
     disciples: copastor.disciples.map((disciple) => ({

@@ -13,6 +13,7 @@ import {
 
 import { MaritalStatus, MemberRoles, Gender, Status } from '@/common/enums';
 
+//TODO : poner errores en spanish a cada enum de los DTO (decorador)
 export class CreateSupervisorDto {
   //* General and Personal info
   @ApiProperty({
@@ -42,7 +43,10 @@ export class CreateSupervisorDto {
   @ApiProperty({
     example: 'single',
   })
-  @IsEnum(MaritalStatus)
+  @IsEnum(MaritalStatus, {
+    message:
+      'El estado civil debe ser uno de los siguientes valores: Soltero(a), Casado(a), Divorciado(a), Viudo(a), Otro.',
+  })
   @IsNotEmpty()
   maritalStatus: string;
 

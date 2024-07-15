@@ -25,7 +25,7 @@ import { FamilyGroup } from '@/modules/family-group/entities';
 @Entity({ name: 'preachers' })
 @Index(['firstName', 'lastName'])
 export class Preacher {
-  //General and Personal info
+  //* General and Personal info
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -44,8 +44,8 @@ export class Preacher {
   originCountry: string;
 
   @Index()
-  @Column('date', { name: 'date_birth' })
-  dateBirth: Date;
+  @Column('date', { name: 'birth_date' })
+  birthDate: Date;
 
   @Column('int', { name: 'age' })
   age: number;
@@ -60,7 +60,7 @@ export class Preacher {
   @Column('date', { name: 'conversion_date' })
   conversionDate: Date;
 
-  // Contact Info
+  //* Contact Info
   @Index()
   @Column('text', { name: 'email', unique: true, nullable: true })
   email: string;
@@ -68,34 +68,34 @@ export class Preacher {
   @Column('text', { name: 'phone_number', nullable: true })
   phoneNumber: string;
 
-  @Column('text', { name: 'country_residence', default: 'Peru' })
-  countryResidence: string;
+  @Column('text', { name: 'country', default: 'Peru' })
+  country: string;
 
-  @Column('text', { name: 'department_residence', default: 'Lima' })
-  departmentResidence: string;
+  @Column('text', { name: 'department', default: 'Lima' })
+  department: string;
 
   @Column('text', { name: 'province_residence', default: 'Lima' })
-  provinceResidence: string;
+  province: string;
 
   @Index()
   @Column('text', { name: 'district_residence' })
-  districtResidence: string;
+  district: string;
 
   @Index()
   @Column('text', { name: 'urban_sector_residence' })
-  urbanSectorResidence: string;
+  urbanSector: string;
 
   @Index()
   @Column('text', { name: 'address_residence' })
-  addressResidence: string;
+  address: string;
 
-  @Column('text', { name: 'address_residence_reference' })
-  addressResidenceReference: string;
+  @Column('text', { name: 'reference_address' })
+  referenceAddress: string;
 
   @Column({ name: 'roles', type: 'text', array: true })
   roles: string[];
 
-  // Info register and update date
+  //* Info register and update date
   @Column('timestamp', { name: 'created_at', nullable: true })
   createdAt: string | Date;
 
@@ -152,11 +152,11 @@ export class Preacher {
   @BeforeInsert()
   @BeforeUpdate()
   transformToDates() {
-    this.dateBirth = new Date(this.dateBirth);
+    this.birthDate = new Date(this.birthDate);
     this.conversionDate = new Date(this.conversionDate);
 
     // Generate age with date_birth
-    const ageMiliSeconds = Date.now() - this.dateBirth.getTime();
+    const ageMiliSeconds = Date.now() - this.birthDate.getTime();
 
     const ageDate = new Date(ageMiliSeconds);
     const age = Math.abs(ageDate.getUTCFullYear() - 1970);

@@ -20,8 +20,8 @@ export enum SearchType {
   Zone = 'zone',
 
   //* Disciple, Supervisor, Preacher, Fam. House,
-  CodeHouse = 'code_house',
-  NameHouse = 'name_house',
+  FamilyGroupCode = 'family_group_code',
+  FamilyGroupName = 'family_group_name',
 
   //* Disciple, Pastor, Copastor, Sup, Preacher, Family House
   Address = 'address',
@@ -41,6 +41,7 @@ export enum SearchType {
   //* Disciple, User
   Roles = 'roles',
 
+  //TODO : renombrar anteponer offering para mas claridad
   //* Offering Income (tithe and offering)
   Tithe = 'tithe',
   SundayWorship = 'sunday_worship',

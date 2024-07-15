@@ -213,7 +213,7 @@ export class CopastorService {
 
       if (copastors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron co-pastores(as) con este nombre: ${firstNames}`,
+          `No se encontraron co-pastores(as) con estos nombres: ${firstNames}`,
         );
       }
 
@@ -268,7 +268,7 @@ export class CopastorService {
 
       if (copastors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron co-pastores(as) con este nombre: ${firstNames}`,
+          `No se encontraron co-pastores(as) por los nombres de su pastor: ${firstNames}`,
         );
       }
 
@@ -314,7 +314,7 @@ export class CopastorService {
 
       if (copastors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron co-pastores(as) con esos apellidos: ${lastNames}`,
+          `No se encontraron co-pastores(as) con estos apellidos: ${lastNames}`,
         );
       }
 
@@ -369,7 +369,7 @@ export class CopastorService {
 
       if (copastors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron co-pastores(as) con este apellido: ${lastNames}`,
+          `No se encontraron co-pastores(as) por los apellidos de su pastor: ${lastNames}`,
         );
       }
 
@@ -417,7 +417,7 @@ export class CopastorService {
 
       if (copastors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron co-pastores(as) con esos nombres y apellidos: ${firstNames} ${lastNames}`,
+          `No se encontraron co-pastores(as) con estos nombres y apellidos: ${firstNames} ${lastNames}`,
         );
       }
 
@@ -474,7 +474,7 @@ export class CopastorService {
 
       if (copastors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron co-pastores(as) con esos nombres y apellidos:: ${lastNames}`,
+          `No se encontraron co-pastores(as) por los nombres y apellidos de su pastor: ${lastNames}`,
         );
       }
 
@@ -525,7 +525,7 @@ export class CopastorService {
         const toDate = formatToDDMMYYYY(toTimestamp);
 
         throw new NotFoundException(
-          `No se encontraron co-pastores(as) con estas fechas de nacimiento: ${fromDate} - ${toDate}`,
+          `No se encontraron co-pastores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
         );
       }
 
@@ -602,9 +602,16 @@ export class CopastorService {
 
     //? Find by gender --> Many
     if (term && searchType === SearchType.Gender) {
+      const genderTerm = term.toLowerCase();
+      const validGenders = ['male', 'female'];
+
+      if (!validGenders.includes(genderTerm)) {
+        throw new BadRequestException(`Género no válido: ${term}`);
+      }
+
       const copastors = await this.copastorRepository.find({
         where: {
-          gender: ILike(`%${term}%`),
+          gender: genderTerm,
           status: Status.Active,
         },
         take: limit,
@@ -625,8 +632,15 @@ export class CopastorService {
       });
 
       if (copastors.length === 0) {
+        const genderNames = {
+          male: 'Masculino',
+          female: 'Femenino',
+        };
+
+        const genderInSpanish = genderNames[term.toLowerCase()] ?? term;
+
         throw new NotFoundException(
-          `No se encontraron co-pastores(as) con este genero: ${term}`,
+          `No se encontraron co-pastores(as) con este genero: ${genderInSpanish}`,
         );
       }
 
@@ -641,9 +655,22 @@ export class CopastorService {
 
     //? Find by marital status --> Many
     if (term && searchType === SearchType.MaritalStatus) {
+      const maritalStatusTerm = term.toLowerCase();
+      const validMaritalStatus = [
+        'singles',
+        'married',
+        'widowed',
+        'divorced',
+        'other',
+      ];
+
+      if (!validMaritalStatus.includes(maritalStatusTerm)) {
+        throw new BadRequestException(`Estado Civil no válido: ${term}`);
+      }
+
       const copastors = await this.copastorRepository.find({
         where: {
-          maritalStatus: ILike(`%${term}%`),
+          maritalStatus: maritalStatusTerm,
           status: Status.Active,
         },
         take: limit,
@@ -925,9 +952,16 @@ export class CopastorService {
 
     //? Find by status --> Many
     if (term && searchType === SearchType.Status) {
+      const statusTerm = term.toLowerCase();
+      const validStatus = ['active', 'inactive'];
+
+      if (!validStatus.includes(statusTerm)) {
+        throw new BadRequestException(`Estado no válido: ${term}`);
+      }
+
       const copastors = await this.copastorRepository.find({
         where: {
-          status: ILike(`%${term}%`),
+          status: statusTerm,
         },
         take: limit,
         skip: offset,
@@ -1062,7 +1096,7 @@ export class CopastorService {
         //* Validate pastor
         if (!theirPastor) {
           throw new NotFoundException(
-            `Para poder actualizar un Co-Pastor, se debe asignar una Pastor.`,
+            `Para poder actualizar un Co-Pastor, se debe asignar un Pastor.`,
           );
         }
 
@@ -1292,7 +1326,7 @@ export class CopastorService {
       }
     } else {
       throw new BadRequestException(
-        `No se puede subir de nivel este registro, el modo debe ser "Activo", los roles ["Discípulo", "Pastor"], revisar y actualizar el registro.`,
+        `No se puede subir de nivel este registro, el modo debe ser "Activo", los roles ["discípulo", "pastor"], revisar y actualizar el registro.`,
       );
     }
   }

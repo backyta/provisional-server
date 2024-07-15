@@ -165,11 +165,7 @@ export class ChurchService {
       order: { createdAt: order as FindOptionsOrderValue },
     });
 
-    const theirMainChurch = await this.churchRepository.findOne({
-      where: { status: Status.Active, isAnexe: false },
-    });
-
-    return formatDataChurch({ theirMainChurch, churches }) as any;
+    return formatDataChurch({ churches }) as any;
   }
 
   //* FIND BY TERM
@@ -214,10 +210,7 @@ export class ChurchService {
       }
 
       try {
-        const theirMainChurch = await this.churchRepository.findOne({
-          where: { status: Status.Active, isAnexe: false },
-        });
-        return formatDataChurch({ theirMainChurch, churches }) as any;
+        return formatDataChurch({ churches }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -227,7 +220,7 @@ export class ChurchService {
 
     //? Find by founding date --> Many
     if (term && searchType === SearchType.FoundingDate) {
-      const [fromTimestamp, toTimestamp] = term.split('-').map(Number);
+      const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
 
       if (isNaN(fromTimestamp)) {
         throw new NotFoundException('Formato de marca de tiempo invalido.');
@@ -262,15 +255,12 @@ export class ChurchService {
         const toDate = formatToDDMMYYYY(toTimestamp);
 
         throw new NotFoundException(
-          `No se encontraron iglesias con esta fecha o rango de fechas: ${fromDate} - ${toDate}`,
+          `No se encontraron iglesias con este rango de fechas: ${fromDate} - ${toDate}`,
         );
       }
 
       try {
-        const theirMainChurch = await this.churchRepository.findOne({
-          where: { status: Status.Active, isAnexe: false },
-        });
-        return formatDataChurch({ theirMainChurch, churches }) as any;
+        return formatDataChurch({ churches }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -308,10 +298,7 @@ export class ChurchService {
       }
 
       try {
-        const theirMainChurch = await this.churchRepository.findOne({
-          where: { status: Status.Active, isAnexe: false },
-        });
-        return formatDataChurch({ theirMainChurch, churches }) as any;
+        return formatDataChurch({ churches }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -349,10 +336,7 @@ export class ChurchService {
       }
 
       try {
-        const theirMainChurch = await this.churchRepository.findOne({
-          where: { status: Status.Active, isAnexe: false },
-        });
-        return formatDataChurch({ theirMainChurch, churches }) as any;
+        return formatDataChurch({ churches }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -390,10 +374,7 @@ export class ChurchService {
       }
 
       try {
-        const theirMainChurch = await this.churchRepository.findOne({
-          where: { status: Status.Active, isAnexe: false },
-        });
-        return formatDataChurch({ theirMainChurch, churches }) as any;
+        return formatDataChurch({ churches }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -431,10 +412,7 @@ export class ChurchService {
       }
 
       try {
-        const theirMainChurch = await this.churchRepository.findOne({
-          where: { status: Status.Active, isAnexe: false },
-        });
-        return formatDataChurch({ theirMainChurch, churches }) as any;
+        return formatDataChurch({ churches }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -472,10 +450,7 @@ export class ChurchService {
       }
 
       try {
-        const theirMainChurch = await this.churchRepository.findOne({
-          where: { status: Status.Active, isAnexe: false },
-        });
-        return formatDataChurch({ theirMainChurch, churches }) as any;
+        return formatDataChurch({ churches }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -514,11 +489,7 @@ export class ChurchService {
       }
 
       try {
-        const theirMainChurch = await this.churchRepository.findOne({
-          where: { status: Status.Active, isAnexe: false },
-        });
-
-        return formatDataChurch({ theirMainChurch, churches }) as any;
+        return formatDataChurch({ churches }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,

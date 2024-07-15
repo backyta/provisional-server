@@ -1,13 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
+  IsBoolean,
   IsEmail,
   IsEnum,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
-  IsUUID,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -59,14 +58,13 @@ export class CreatePreacherDto {
   })
   @IsString()
   @IsNotEmpty()
-  dateBirth: string | Date;
+  birthDate: string | Date;
 
   @ApiProperty({
     example: '2',
   })
-  @IsNumber()
   @IsOptional()
-  numberChildren?: number;
+  numberChildren?: number | string;
 
   @ApiProperty({
     example: '2001/12/23',
@@ -97,7 +95,7 @@ export class CreatePreacherDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  countryResidence?: string;
+  country?: string;
 
   @ApiProperty({
     example: 'Lima',
@@ -106,7 +104,7 @@ export class CreatePreacherDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  departmentResidence?: string;
+  department?: string;
 
   @ApiProperty({
     example: 'Lima',
@@ -115,7 +113,7 @@ export class CreatePreacherDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  provinceResidence?: string;
+  province?: string;
 
   @ApiProperty({
     example: 'Comas',
@@ -124,7 +122,7 @@ export class CreatePreacherDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(20)
-  districtResidence: string;
+  district: string;
 
   @ApiProperty({
     example: 'Las Lomas',
@@ -133,7 +131,7 @@ export class CreatePreacherDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(30)
-  urbanSectorResidence: string;
+  urbanSector: string;
 
   @ApiProperty({
     example: 'Av. Central 123',
@@ -142,7 +140,7 @@ export class CreatePreacherDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(50)
-  addressResidence: string;
+  address: string;
 
   @ApiProperty({
     example: 'A 1 cuadra del colegio',
@@ -151,7 +149,7 @@ export class CreatePreacherDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(100)
-  addressResidenceReference: string;
+  referenceAddress: string;
 
   //* Roles and Status
   @ApiProperty({
@@ -170,20 +168,32 @@ export class CreatePreacherDto {
   @IsOptional()
   status?: string;
 
+  @ApiProperty({
+    example: true,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isDirectRelationToPastor?: boolean;
+
   //* Relations
   @ApiProperty({
     example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
   })
   @IsString()
   @IsOptional()
-  @IsUUID()
+  theirPastor?: string;
+
+  @ApiProperty({
+    example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
+  })
+  @IsString()
+  @IsOptional()
   theirCopastor?: string;
 
   @ApiProperty({
     example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
   })
   @IsString()
-  @IsUUID()
   @IsOptional()
   theirSupervisor?: string;
 }

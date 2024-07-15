@@ -15,6 +15,7 @@ import {
 } from '@/modules/supervisor/dto';
 import { formatDataSupervisor } from '@/modules/supervisor/helpers';
 
+import { formatToDDMMYYYY, getBirthdaysByMonth } from '@/common/helpers';
 import { PaginationDto, SearchTypeAndPaginationDto } from '@/common/dtos';
 import { MemberRoles, SearchSubType, SearchType, Status } from '@/common/enums';
 
@@ -27,7 +28,6 @@ import { Disciple } from '@/modules/disciple/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
 import { FamilyGroup } from '@/modules/family-group/entities';
-import { formatToDDMMYYYY, getBirthdaysByMonth } from '@/common/helpers';
 
 @Injectable()
 export class SupervisorService {
@@ -88,7 +88,7 @@ export class SupervisorService {
       roles.includes(MemberRoles.Preacher)
     ) {
       throw new BadRequestException(
-        `Para crear un Co-Pastor, solo se requiere los roles: "Discípulo" y "Co-Pastor" o también "Tesorero."`,
+        `Para crear un Supervisor, solo se requiere los roles: "Discípulo" y "Supervisor" o también "Tesorero."`,
       );
     }
 
@@ -98,7 +98,7 @@ export class SupervisorService {
     if (!isDirectRelationToPastor) {
       if (!theirCopastor) {
         throw new NotFoundException(
-          `Para crear un nuevo Supervisor se debe asigna un Co-Pastor`,
+          `Para crear un nuevo Supervisor se debe asigna un Co-Pastor.`,
         );
       }
 
@@ -115,7 +115,7 @@ export class SupervisorService {
 
       if (copastor.status === Status.Inactive) {
         throw new BadRequestException(
-          `La propiedad "Estado" en Co-Pastor debe ser "Activo"`,
+          `La propiedad "Estado" en Co-Pastor debe ser "Activo".`,
         );
       }
 
@@ -139,7 +139,7 @@ export class SupervisorService {
       //* Validate and assign church according copastor
       if (!copastor?.theirChurch) {
         throw new NotFoundException(
-          `o se encontró la Iglesia, verifica que Co-Pastor tenga una Iglesia asignada`,
+          `No se encontró la Iglesia, verifica que Co-Pastor tenga una Iglesia asignada`,
         );
       }
 
@@ -236,7 +236,7 @@ export class SupervisorService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit = 10, offset = 0, order } = paginationDto;
+    const { limit = 10, offset = 0, order = 'ASC' } = paginationDto;
 
     const supervisors = await this.supervisorRepository.find({
       where: { status: Status.Active },
@@ -306,7 +306,7 @@ export class SupervisorService {
 
       if (supervisors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron supervisores(as) con este nombre: ${firstNames}`,
+          `No se encontraron supervisores(as) con estos nombres: ${firstNames}`,
         );
       }
 
@@ -361,7 +361,7 @@ export class SupervisorService {
 
       if (supervisors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron supervisores(as) con este nombre: ${firstNames}`,
+          `No se encontraron supervisores(as) por los nombres de su co-pastor: ${firstNames}`,
         );
       }
 
@@ -416,7 +416,7 @@ export class SupervisorService {
 
       if (supervisors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron supervisores(as) con este nombre: ${firstNames}`,
+          `No se encontraron supervisores(as) por los nombres de su pastor: ${firstNames}`,
         );
       }
 
@@ -462,7 +462,7 @@ export class SupervisorService {
 
       if (supervisors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron supervisores(as) con esos apellidos: ${lastNames}`,
+          `No se encontraron supervisores(as) con estos apellidos: ${lastNames}`,
         );
       }
 
@@ -517,7 +517,7 @@ export class SupervisorService {
 
       if (supervisors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron supervisores(as) con este apellido: ${lastNames}`,
+          `No se encontraron supervisores(as) por los apellidos de su co-pastor: ${lastNames}`,
         );
       }
 
@@ -572,7 +572,7 @@ export class SupervisorService {
 
       if (supervisors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron supervisores(as) con este apellido: ${lastNames}`,
+          `No se encontraron supervisores(as) por los apellidos de su pastor: ${lastNames}`,
         );
       }
 
@@ -620,7 +620,7 @@ export class SupervisorService {
 
       if (supervisors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron supervisores(as) con esos nombres y apellidos: ${firstNames} ${lastNames}`,
+          `No se encontraron supervisores(as) con estos nombres y apellidos: ${firstNames} ${lastNames}`,
         );
       }
 
@@ -677,7 +677,7 @@ export class SupervisorService {
 
       if (supervisors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron supervisores(as) con esos nombres y apellidos: ${firstNames} ${lastNames}`,
+          `No se encontraron supervisores(as) por los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames}`,
         );
       }
 
@@ -734,7 +734,7 @@ export class SupervisorService {
 
       if (supervisors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron supervisores(as) con esos nombres y apellidos: ${firstNames} ${lastNames}`,
+          `No se encontraron supervisores(as) por los nombres y apellidos de su pastor: ${firstNames} ${lastNames}`,
         );
       }
 
@@ -785,7 +785,7 @@ export class SupervisorService {
         const toDate = formatToDDMMYYYY(toTimestamp);
 
         throw new NotFoundException(
-          `No se encontraron supervisores(as) con estas fechas de nacimiento: ${fromDate} - ${toDate}`,
+          `No se encontraron supervisores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
         );
       }
 
@@ -821,12 +821,12 @@ export class SupervisorService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const resultCopastors = getBirthdaysByMonth({
+      const resultSupervisors = getBirthdaysByMonth({
         month: term,
         data: supervisors,
       });
 
-      if (resultCopastors.length === 0) {
+      if (resultSupervisors.length === 0) {
         const monthNames = {
           january: 'Enero',
           february: 'Febrero',
@@ -851,7 +851,7 @@ export class SupervisorService {
 
       try {
         return formatDataSupervisor({
-          supervisors: resultCopastors as Supervisor[],
+          supervisors: resultSupervisors as Supervisor[],
         }) as any;
       } catch (error) {
         throw new BadRequestException(
@@ -862,9 +862,19 @@ export class SupervisorService {
 
     //? Find by zone --> Many
     if (term && searchType === SearchType.Zone) {
+      const zones = await this.zoneRepository.find({
+        where: {
+          zoneName: ILike(`%${term}%`),
+          status: Status.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const zonesId = zones.map((zone) => zone.id);
+
       const supervisors = await this.supervisorRepository.find({
         where: {
-          theirZone: ILike(`%${term}%`),
+          theirZone: In(zonesId),
           status: Status.Active,
         },
         take: limit,
@@ -886,7 +896,7 @@ export class SupervisorService {
 
       if (supervisors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron co-supervisores(as) con este genero: ${term}`,
+          `No se encontraron supervisores(as) con este genero: ${term}`,
         );
       }
 
@@ -901,9 +911,16 @@ export class SupervisorService {
 
     //? Find by gender --> Many
     if (term && searchType === SearchType.Gender) {
+      const genderTerm = term.toLowerCase();
+      const validGenders = ['male', 'female'];
+
+      if (!validGenders.includes(genderTerm)) {
+        throw new BadRequestException(`Género no válido: ${term}`);
+      }
+
       const supervisors = await this.supervisorRepository.find({
         where: {
-          gender: ILike(`%${term}%`),
+          gender: genderTerm,
           status: Status.Active,
         },
         take: limit,
@@ -924,8 +941,15 @@ export class SupervisorService {
       });
 
       if (supervisors.length === 0) {
+        const genderNames = {
+          male: 'Masculino',
+          female: 'Femenino',
+        };
+
+        const genderInSpanish = genderNames[term.toLowerCase()] ?? term;
+
         throw new NotFoundException(
-          `No se encontraron co-supervisores(as) con este genero: ${term}`,
+          `No se encontraron supervisores(as) con este genero: ${genderInSpanish}`,
         );
       }
 
@@ -940,9 +964,22 @@ export class SupervisorService {
 
     //? Find by marital status --> Many
     if (term && searchType === SearchType.MaritalStatus) {
+      const maritalStatusTerm = term.toLowerCase();
+      const validMaritalStatus = [
+        'singles',
+        'married',
+        'widowed',
+        'divorced',
+        'other',
+      ];
+
+      if (!validMaritalStatus.includes(maritalStatusTerm)) {
+        throw new BadRequestException(`Estado Civil no válido: ${term}`);
+      }
+
       const supervisors = await this.supervisorRepository.find({
         where: {
-          maritalStatus: ILike(`%${term}%`),
+          maritalStatus: maritalStatusTerm,
           status: Status.Active,
         },
         take: limit,
@@ -1224,9 +1261,16 @@ export class SupervisorService {
 
     //? Find by status --> Many
     if (term && searchType === SearchType.Status) {
+      const statusTerm = term.toLowerCase();
+      const validStatus = ['active', 'inactive'];
+
+      if (!validStatus.includes(statusTerm)) {
+        throw new BadRequestException(`Estado no válido: ${term}`);
+      }
+
       const supervisors = await this.supervisorRepository.find({
         where: {
-          status: ILike(`%${term}%`),
+          status: statusTerm,
         },
         take: limit,
         skip: offset,
@@ -1292,8 +1336,8 @@ export class SupervisorService {
     const {
       roles,
       status,
-      theirCopastor,
       theirPastor,
+      theirCopastor,
       isDirectRelationToPastor,
       numberChildren,
     } = updateSupervisorDto;
@@ -1301,12 +1345,12 @@ export class SupervisorService {
     // Validations
     if (!roles) {
       throw new BadRequestException(
-        `Required assign roles to update the supervisor`,
+        `Los roles son requeridos para actualizar el Supervisor.`,
       );
     }
 
     if (!isUUID(id)) {
-      throw new BadRequestException(`Not valid UUID`);
+      throw new BadRequestException(`UUID no valido.`);
     }
 
     // validation supervisor
@@ -1316,64 +1360,58 @@ export class SupervisorService {
     });
 
     if (!supervisor) {
-      throw new NotFoundException(`Supervisor not found with id: ${id}`);
+      throw new NotFoundException(
+        `Supervisor con id: ${id} no fue encontrado.`,
+      );
     }
 
     if (!roles.some((role) => ['disciple', 'supervisor'].includes(role))) {
       throw new BadRequestException(
-        `The roles should include "disciple" and "supervisor"`,
+        `Los roles deben incluir "Discípulo" y "Supervisor".`,
       );
     }
 
-    if (
-      roles.includes(MemberRoles.Pastor) ||
-      roles.includes(MemberRoles.Copastor) ||
-      roles.includes(MemberRoles.Preacher)
-    ) {
-      throw new BadRequestException(
-        `To create a Preacher you must have the roles "disciple" and "supervisor" or also "treasurer"`,
-      );
-    }
+    //todo : corregir esto. ver casos de uso en el front
+    // NOTE : revisar esto porque si se podría
+    // if (
+    //   roles.includes(MemberRoles.Supervisor) &&
+    //   supervisor.isDirectRelationToPastor &&
+    //   theirCopastor
+    // ) {
+    //   throw new BadRequestException(
+    //     `No se puede asignar un co-pastor mientras "relación directa" con Pastor esta activo.`,
+    //   );
+    // }
 
-    if (
-      roles.includes(MemberRoles.Supervisor) &&
-      supervisor.isDirectRelationToPastor &&
-      theirCopastor
-    ) {
-      throw new BadRequestException(
-        `Cannot assign a co-pastor while isDirectRelationToPastor is true`,
-      );
-    }
+    // if (
+    //   roles.includes(MemberRoles.Supervisor) &&
+    //   isDirectRelationToPastor &&
+    //   theirCopastor
+    // ) {
+    //   throw new BadRequestException(
+    //     `No se puede asignar un co-pastor mientras "relación directa" con Pastor esta activo.`,
+    //   );
+    // }
 
-    if (
-      roles.includes(MemberRoles.Supervisor) &&
-      isDirectRelationToPastor &&
-      theirCopastor
-    ) {
-      throw new BadRequestException(
-        `Cannot assign a co-pastor while isDirectRelationToPastor is true`,
-      );
-    }
+    // if (
+    //   roles.includes(MemberRoles.Supervisor) &&
+    //   !supervisor.isDirectRelationToPastor &&
+    //   theirPastor
+    // ) {
+    //   throw new BadRequestException(
+    //     `No se puede asignar un pastor mientras "relación directa" con Pastor esta inactivo.2`,
+    //   );
+    // }
 
-    if (
-      roles.includes(MemberRoles.Supervisor) &&
-      !supervisor.isDirectRelationToPastor &&
-      theirPastor
-    ) {
-      throw new BadRequestException(
-        `Cannot assign a pastor while isDirectRelationToPastor is false`,
-      );
-    }
-
-    if (
-      roles.includes(MemberRoles.Supervisor) &&
-      !isDirectRelationToPastor &&
-      theirPastor
-    ) {
-      throw new BadRequestException(
-        `Cannot assign a pastor while isDirectRelationToPastor is false`,
-      );
-    }
+    // if (
+    //   roles.includes(MemberRoles.Supervisor) &&
+    //   !isDirectRelationToPastor &&
+    //   theirPastor
+    // ) {
+    //   throw new BadRequestException(
+    //     `No se puede asignar un pastor mientras "relación directa" con Pastor esta inactivo.`,
+    //   );
+    // }
 
     if (
       (supervisor.roles.includes(MemberRoles.Supervisor) &&
@@ -1394,7 +1432,7 @@ export class SupervisorService {
           roles.includes(MemberRoles.Preacher)))
     ) {
       throw new BadRequestException(
-        `A lower or higher role cannot be assigned without going through the hierarchy: [disciple, preacher, supervisor, co-pastor, pastor]`,
+        `No se puede asignar un rol inferior o superior sin pasar por la jerarquía: [discípulo, predicador, supervisor, copastor, pastor].`,
       );
     }
 
@@ -1423,12 +1461,36 @@ export class SupervisorService {
         roles.includes(MemberRoles.Treasurer) &&
         !roles.includes(MemberRoles.Copastor) &&
         !roles.includes(MemberRoles.Pastor) &&
+        !roles.includes(MemberRoles.Preacher)) ||
+      (supervisor.roles.includes(MemberRoles.Disciple) &&
+        supervisor.roles.includes(MemberRoles.Supervisor) &&
+        !supervisor.roles.includes(MemberRoles.Pastor) &&
+        !supervisor.roles.includes(MemberRoles.Copastor) &&
+        !supervisor.roles.includes(MemberRoles.Preacher) &&
+        !supervisor.roles.includes(MemberRoles.Treasurer) &&
+        roles.includes(MemberRoles.Disciple) &&
+        roles.includes(MemberRoles.Supervisor) &&
+        roles.includes(MemberRoles.Treasurer) &&
+        !roles.includes(MemberRoles.Pastor) &&
+        !roles.includes(MemberRoles.Copastor) &&
+        !roles.includes(MemberRoles.Preacher)) ||
+      (supervisor.roles.includes(MemberRoles.Disciple) &&
+        supervisor.roles.includes(MemberRoles.Supervisor) &&
+        supervisor.roles.includes(MemberRoles.Treasurer) &&
+        !supervisor.roles.includes(MemberRoles.Pastor) &&
+        !supervisor.roles.includes(MemberRoles.Copastor) &&
+        !supervisor.roles.includes(MemberRoles.Preacher) &&
+        roles.includes(MemberRoles.Disciple) &&
+        roles.includes(MemberRoles.Supervisor) &&
+        !roles.includes(MemberRoles.Treasurer) &&
+        !roles.includes(MemberRoles.Pastor) &&
+        !roles.includes(MemberRoles.Copastor) &&
         !roles.includes(MemberRoles.Preacher))
     ) {
       // Validations
       if (supervisor.status === Status.Active && status === Status.Inactive) {
         throw new BadRequestException(
-          `You cannot update it to "inactive", you must delete the record`,
+          `No se puede actualizar un registro a "Inactivo", se debe eliminar.`,
         );
       }
 
@@ -1440,7 +1502,7 @@ export class SupervisorService {
         //* Validate copastor
         if (!theirCopastor) {
           throw new NotFoundException(
-            `To update copastor enter an existing copastor id`,
+            `Para poder actualizar un Supervisor, se debe asignar un Co-Pastor.`,
           );
         }
 
@@ -1451,20 +1513,20 @@ export class SupervisorService {
 
         if (!newCopastor) {
           throw new NotFoundException(
-            `Copastor not found with id ${theirCopastor}`,
+            `Co-Pastor con id: ${theirCopastor} no fue encontrado.`,
           );
         }
 
         if (newCopastor.status === Status.Inactive) {
           throw new BadRequestException(
-            `The property status in Copastor must be "active"`,
+            `La propiedad "Estado" en Co-Pastor debe ser "Activo".`,
           );
         }
 
         //* Validate Pastor according copastor
         if (!newCopastor?.theirPastor) {
           throw new BadRequestException(
-            `Pastor was not found, verify that Copastor has a pastor assigned`,
+            `No se encontró el Pastor, verifica que Co-Pastor tenga un Pastor asignado.`,
           );
         }
 
@@ -1474,14 +1536,14 @@ export class SupervisorService {
 
         if (newPastor.status === Status.Inactive) {
           throw new BadRequestException(
-            `The property status in Pastor must be "active"`,
+            `La propiedad "Estado" en Pastor debe ser "Activo".`,
           );
         }
 
         //* Validate Church according copastor
         if (!newCopastor?.theirChurch) {
           throw new BadRequestException(
-            `Church was not found, verify that Copastor has a church assigned`,
+            `No se encontró la Iglesia, verifica que Co-Pastor tenga una Iglesia asignado.`,
           );
         }
 
@@ -1491,7 +1553,7 @@ export class SupervisorService {
 
         if (newChurch.status === Status.Inactive) {
           throw new BadRequestException(
-            `The property status in Church must be "active"`,
+            `La propiedad "Estado" en Iglesia debe ser "Activo".`,
           );
         }
 
@@ -1605,7 +1667,7 @@ export class SupervisorService {
         //* Validate pastor
         if (!theirPastor) {
           throw new NotFoundException(
-            `To directly link a supervisor to a pastor, enter an existing pastor id`,
+            `Para vincular directamente un Supervisor con un Pastor, debe asignar un Pastor.`,
           );
         }
 
@@ -1616,20 +1678,20 @@ export class SupervisorService {
 
         if (!newPastor) {
           throw new NotFoundException(
-            `Pastor not found with id ${theirPastor}`,
+            `Pastor con id: ${theirPastor} no fue encontrado.`,
           );
         }
 
         if (newPastor.status === Status.Inactive) {
           throw new BadRequestException(
-            `The property status in Pastor must be "active"`,
+            `La propiedad "Estado" en Pastor debe ser "Activo".`,
           );
         }
 
         //* Validate Church according pastor
         if (!newPastor?.theirChurch) {
           throw new BadRequestException(
-            `Church was not found, verify that Pastor has a church assigned`,
+            `No se encontró la Iglesia, verifica que Pastor tenga una Iglesia asignado.`,
           );
         }
 
@@ -1639,7 +1701,7 @@ export class SupervisorService {
 
         if (newChurch.status === Status.Inactive) {
           throw new BadRequestException(
-            `The property status in Church must be "active"`,
+            `La propiedad "Estado" en Iglesia debe ser "Activo".`,
           );
         }
 
@@ -1804,7 +1866,7 @@ export class SupervisorService {
       //* Validation new pastor
       if (!theirPastor) {
         throw new NotFoundException(
-          `To upgrade from supervisor to co-pastor enter an existing pastor id`,
+          `Para subir de nivel de Supervisor a Co-Pastor, debe asignar un Pastor.`,
         );
       }
 
@@ -1814,19 +1876,19 @@ export class SupervisorService {
       });
 
       if (!newPastor) {
-        throw new NotFoundException(`Pastor not found with id: ${id}`);
+        throw new NotFoundException(`Pastor con id: ${id} no fue encontrado.`);
       }
 
       if (newPastor.status === Status.Inactive) {
         throw new NotFoundException(
-          `The property status in Pastor must be a "active"`,
+          `La propiedad "Estado" en Pastor debe ser "Activo".`,
         );
       }
 
       //* Validation new church according pastor
       if (!newPastor?.theirChurch) {
         throw new BadRequestException(
-          `Church was not found, verify that Pastor has a church assigned`,
+          `No se encontró la Iglesia, verifica que Pastor tenga una Iglesia asignado.`,
         );
       }
 
@@ -1837,7 +1899,7 @@ export class SupervisorService {
 
       if (newChurch.status === Status.Inactive) {
         throw new NotFoundException(
-          `The property status in Church must be a "active"`,
+          `La propiedad "Estado" en Iglesia debe ser "Activo".`,
         );
       }
 
@@ -1862,7 +1924,7 @@ export class SupervisorService {
       }
     } else {
       throw new BadRequestException(
-        `You cannot level up, you must have the registry in "active" mode and the appropriate roles, review and update the registry.`,
+        `No se puede subir de nivel este registro, el modo debe ser "Activo", los roles ["discípulo", "supervisor"], revisar y actualizar el registro.`,
       );
     }
   }
@@ -1871,13 +1933,15 @@ export class SupervisorService {
   async remove(id: string, user: User): Promise<void> {
     // Validations
     if (!isUUID(id)) {
-      throw new BadRequestException(`Not valid UUID`);
+      throw new BadRequestException(`UUID no valido.`);
     }
 
     const supervisor = await this.supervisorRepository.findOneBy({ id });
 
     if (!supervisor) {
-      throw new NotFoundException(`Supervisor with id: ${id} not exits`);
+      throw new NotFoundException(
+        `Supervisor con id: ${id} no fue encontrado.`,
+      );
     }
 
     //* Update and set in Inactive on Supervisor
@@ -1983,11 +2047,20 @@ export class SupervisorService {
   //? PRIVATE METHODS
   // For future index errors or constrains with code.
   private handleDBExceptions(error: any): never {
-    if (error.code === '23505') throw new BadRequestException(error.detail);
+    if (error.code === '23505') {
+      const detail = error.detail;
+
+      if (detail.includes('email')) {
+        throw new BadRequestException('El correo electrónico ya está en uso.');
+      } else if (detail.includes('church')) {
+        throw new BadRequestException('El nombre de iglesia ya está en uso.');
+      }
+    }
+
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Unexpected errors, check server logs',
+      'Sucedió un error inesperado, revise los registros de consola',
     );
   }
 }

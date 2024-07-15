@@ -185,7 +185,7 @@ export class PastorService {
 
       if (pastors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron pastores(as) con este nombre: ${firstNames}`,
+          `No se encontraron pastores(as) con estos nombres: ${firstNames}`,
         );
       }
 
@@ -226,7 +226,7 @@ export class PastorService {
 
       if (pastors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron pastores(as) con esos apellidos: ${lastNames}`,
+          `No se encontraron pastores(as) con estos apellidos: ${lastNames}`,
         );
       }
 
@@ -269,7 +269,7 @@ export class PastorService {
 
       if (pastors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron pastores(as) con esos nombres y apellidos: ${firstNames} ${lastNames}`,
+          `No se encontraron pastores(as) con estos nombres y apellidos: ${firstNames} ${lastNames}`,
         );
       }
 
@@ -320,7 +320,7 @@ export class PastorService {
         const toDate = formatToDDMMYYYY(toTimestamp);
 
         throw new NotFoundException(
-          `No se encontraron pastores(as) con estas fechas de nacimiento: ${fromDate} - ${toDate}`,
+          `No se encontraron pastores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
         );
       }
 
@@ -392,9 +392,16 @@ export class PastorService {
 
     //? Find by gender --> Many
     if (term && searchType === SearchType.Gender) {
+      const genderTerm = term.toLowerCase();
+      const validGenders = ['male', 'female'];
+
+      if (!validGenders.includes(genderTerm)) {
+        throw new BadRequestException(`Género no válido: ${term}`);
+      }
+
       const pastors = await this.pastorRepository.find({
         where: {
-          gender: ILike(`%${term}%`),
+          gender: genderTerm,
           status: Status.Active,
         },
         take: limit,
@@ -415,8 +422,15 @@ export class PastorService {
       });
 
       if (pastors.length === 0) {
+        const genderNames = {
+          male: 'Masculino',
+          female: 'Femenino',
+        };
+
+        const genderInSpanish = genderNames[term.toLowerCase()] ?? term;
+
         throw new NotFoundException(
-          `No se encontraron pastores(as) con este genero: ${term}`,
+          `No se encontraron pastores(as) con este genero: ${genderInSpanish}`,
         );
       }
 
@@ -431,9 +445,22 @@ export class PastorService {
 
     //? Find by marital status --> Many
     if (term && searchType === SearchType.MaritalStatus) {
+      const maritalStatusTerm = term.toLowerCase();
+      const validMaritalStatus = [
+        'singles',
+        'married',
+        'widowed',
+        'divorced',
+        'other',
+      ];
+
+      if (!validMaritalStatus.includes(maritalStatusTerm)) {
+        throw new BadRequestException(`Estado Civil no válido: ${term}`);
+      }
+
       const pastors = await this.pastorRepository.find({
         where: {
-          maritalStatus: ILike(`%${term}%`),
+          maritalStatus: maritalStatusTerm,
           status: Status.Active,
         },
         take: limit,
@@ -676,9 +703,16 @@ export class PastorService {
 
     //? Find by address --> Many
     if (term && searchType === SearchType.Address) {
+      const statusTerm = term.toLowerCase();
+      const validStatus = ['active', 'inactive'];
+
+      if (!validStatus.includes(statusTerm)) {
+        throw new BadRequestException(`Estado no válido: ${term}`);
+      }
+
       const pastors = await this.pastorRepository.find({
         where: {
-          address: ILike(`%${term}%`),
+          address: statusTerm,
           status: Status.Active,
         },
         take: limit,

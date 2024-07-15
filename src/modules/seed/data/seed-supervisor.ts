@@ -114,7 +114,7 @@ export const dataSupervisors: SeedDataSupervisors = {
       gender: 'female',
       originCountry: 'Peru',
       birthDate: '1990-11-25',
-      maritalStatus: 'widower',
+      maritalStatus: 'widowed',
       numberChildren: 4,
       conversionDate: '2008-06-20',
       email: 'maria.perez@google.com',

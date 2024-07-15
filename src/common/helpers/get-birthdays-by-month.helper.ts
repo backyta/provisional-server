@@ -1,10 +1,11 @@
 import { Copastor } from '@/modules/copastor/entities';
 import { Pastor } from '@/modules/pastor/entities';
+import { Preacher } from '@/modules/preacher/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
 
 interface Options {
   month: string;
-  data: Pastor[] | Copastor[] | Supervisor[];
+  data: Pastor[] | Copastor[] | Supervisor[] | Preacher[];
 }
 
 export const getBirthdaysByMonth = ({ month, data }: Options) => {
