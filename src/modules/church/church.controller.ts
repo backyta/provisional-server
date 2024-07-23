@@ -22,9 +22,9 @@ import {
   Query,
 } from '@nestjs/common';
 
-import { PaginationDto, SearchTypeAndPaginationDto } from '@/common/dtos';
+import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
 
-import { UserRoles } from '@/modules/auth/enums';
+import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
 
 import { User } from '@/modules/user/entities';
@@ -50,7 +50,7 @@ export class ChurchController {
 
   //* Create
   @Post()
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiCreatedResponse({
     description: 'Church has been successfully created.',
   })
@@ -106,14 +106,14 @@ export class ChurchController {
   })
   findTerm(
     @Param('term') term: string,
-    @Query() searchTypeAndPaginationDto: SearchTypeAndPaginationDto,
+    @Query() searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
   ): Promise<Church | Church[]> {
     return this.churchService.findByTerm(term, searchTypeAndPaginationDto);
   }
 
   //* Update
   @Patch(':id')
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
     description: 'Successful operation',
   })
@@ -130,7 +130,7 @@ export class ChurchController {
 
   //* Delete
   @Delete(':id')
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
     description: 'Successful operation.',
   })

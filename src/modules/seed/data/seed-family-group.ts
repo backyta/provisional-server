@@ -14,7 +14,7 @@ interface SeedFamilyGroup {
   urbanSector: string;
   address: string;
   referenceAddress: string;
-  status?: string;
+  recordStatus?: string;
 
   //* Relations
   theirPreacher?: string;

@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 
 import { User } from '@/modules/user/entities';
 import { META_ROLES } from '@/modules/auth/decorators';
+import { getRoleNamesInSpanish } from '@/modules/auth/helpers';
 
 @Injectable()
 export class UserRoleGuard implements CanActivate {
@@ -18,7 +19,7 @@ export class UserRoleGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const validUserRoles: string = this.reflector.get(
+    const validUserRoles: string[] = this.reflector.get(
       META_ROLES,
       context.getHandler(),
     );
@@ -30,7 +31,7 @@ export class UserRoleGuard implements CanActivate {
     const user = req.user as User;
 
     if (!user) {
-      throw new BadRequestException(`User not found`);
+      throw new BadRequestException(`Usuario no encontrado.`);
     }
 
     for (const role of user.roles) {
@@ -40,7 +41,7 @@ export class UserRoleGuard implements CanActivate {
     }
 
     throw new ForbiddenException(
-      `User ${user.firstName}, ${user.lastName} need a valid roles ${validUserRoles}`,
+      `Operación rechazada, usuario ${user.firstName} ${user.lastName} necesita los roles de acceso: ${getRoleNamesInSpanish(validUserRoles)}`,
     );
   }
 }

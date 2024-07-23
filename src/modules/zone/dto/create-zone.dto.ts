@@ -1,4 +1,4 @@
-import { Status } from '@/common/enums';
+import { RecordStatus } from '@/common/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
@@ -57,9 +57,9 @@ export class CreateZoneDto {
     example: 'active',
   })
   @IsString()
-  @IsEnum(Status)
+  @IsEnum(RecordStatus)
   @IsOptional()
-  status?: string;
+  recordStatus?: string;
 
   //* Relations
   @ApiProperty({

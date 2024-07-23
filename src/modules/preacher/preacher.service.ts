@@ -5,12 +5,20 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Between, FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Between, FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
 
-import { PaginationDto, SearchTypeAndPaginationDto } from '@/common/dtos';
-import { MemberRoles, SearchSubType, SearchType, Status } from '@/common/enums';
+import { formatToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
+import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
+import {
+  MemberRole,
+  SearchSubType,
+  SearchType,
+  RecordStatus,
+  GenderNames,
+  MaritalStatusNames,
+} from '@/common/enums';
 
 import { Preacher } from '@/modules/preacher/entities';
 import { formatDataPreacher } from '@/modules/preacher/helpers';
@@ -24,7 +32,6 @@ import { Copastor } from '@/modules/copastor/entities';
 import { Disciple } from '@/modules/disciple/entities/';
 import { Supervisor } from '@/modules/supervisor/entities';
 import { FamilyGroup } from '@/modules/family-group/entities';
-import { formatToDDMMYYYY, getBirthdaysByMonth } from '@/common/helpers';
 
 @Injectable()
 export class PreacherService {
@@ -65,8 +72,8 @@ export class PreacherService {
 
     // Validations
     if (
-      !roles.includes(MemberRoles.Disciple) &&
-      !roles.includes(MemberRoles.Preacher)
+      !roles.includes(MemberRole.Disciple) &&
+      !roles.includes(MemberRole.Preacher)
     ) {
       throw new BadRequestException(
         `El rol "Discípulo" y "Predicador" deben ser incluidos.`,
@@ -74,18 +81,18 @@ export class PreacherService {
     }
 
     if (
-      roles.includes(MemberRoles.Pastor) ||
-      roles.includes(MemberRoles.Copastor) ||
-      roles.includes(MemberRoles.Supervisor)
+      roles.includes(MemberRole.Pastor) ||
+      roles.includes(MemberRole.Copastor) ||
+      roles.includes(MemberRole.Supervisor)
     ) {
       throw new BadRequestException(
-        `Para crear un Co-Pastor, solo se requiere los roles: "Discípulo" y "Predicador" o también "Tesorero."`,
+        `Para crear un Predicador, solo se requiere los roles: "Discípulo" y "Predicador" o también "Tesorero."`,
       );
     }
 
     if (!theirSupervisor) {
       throw new NotFoundException(
-        `Para crear un nuevo Predicador se debe asigna un Supervisor.`,
+        `Para crear un nuevo Predicador se le debe asignar un Supervisor.`,
       );
     }
 
@@ -101,9 +108,9 @@ export class PreacherService {
       );
     }
 
-    if (supervisor.status === Status.Inactive) {
+    if (supervisor.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
-        `La propiedad "Estado" en Supervisor debe ser "Activo".`,
+        `La propiedad "Estado de registro" en Supervisor debe ser "Activo".`,
       );
     }
 
@@ -118,9 +125,9 @@ export class PreacherService {
       where: { id: supervisor?.theirZone?.id },
     });
 
-    if (zone.status === Status.Inactive) {
+    if (zone.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
-        `La propiedad "Estado" en Zona debe ser "Activo".`,
+        `La propiedad "Estado de registro" en Zona debe ser "Activo".`,
       );
     }
 
@@ -135,9 +142,9 @@ export class PreacherService {
       where: { id: supervisor?.theirCopastor?.id },
     });
 
-    if (copastor.status === Status.Inactive) {
+    if (copastor.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
-        `La propiedad "Estado" en Co-Pastor debe ser "Activo".`,
+        `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
       );
     }
 
@@ -152,9 +159,9 @@ export class PreacherService {
       where: { id: supervisor?.theirPastor?.id },
     });
 
-    if (pastor.status === Status.Inactive) {
+    if (pastor.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
-        `La propiedad "Estado" en Pastor debe ser "Activo".`,
+        `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
       );
     }
 
@@ -169,13 +176,13 @@ export class PreacherService {
       where: { id: supervisor?.theirChurch?.id },
     });
 
-    if (church.status === Status.Inactive) {
+    if (church.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
-        `La propiedad "Estado" en Iglesia debe ser "Activo".`,
+        `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
       );
     }
 
-    // Create new instance
+    //* Create new instance
     try {
       const newPreacher = this.preacherRepository.create({
         ...createPreacherDto,
@@ -195,13 +202,12 @@ export class PreacherService {
     }
   }
 
-  // TODO : ver el backend y redicir la entrega de datos incesarios en las consuiltas
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit = 10, offset = 0, order = 'ASC' } = paginationDto;
+    const { limit, offset = 0, order = 'ASC' } = paginationDto;
 
     const preachers = await this.preacherRepository.find({
-      where: { status: Status.Active },
+      where: { recordStatus: RecordStatus.Active },
       take: limit,
       skip: offset,
       relations: [
@@ -225,12 +231,12 @@ export class PreacherService {
   //* FIND BY TERM
   async findByTerm(
     term: string,
-    searchTypeAndPaginationDto: SearchTypeAndPaginationDto,
+    searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
   ): Promise<Preacher | Preacher[]> {
     const {
       'search-type': searchType,
       'search-sub-type': searchSubType,
-      limit = 10,
+      limit,
       offset = 0,
       order,
     } = searchTypeAndPaginationDto;
@@ -247,7 +253,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           firstName: ILike(`%${firstNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -292,7 +298,7 @@ export class PreacherService {
       const supervisors = await this.supervisorRepository.find({
         where: {
           firstName: ILike(`%${firstNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -302,7 +308,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           theirSupervisor: In(supervisorsId),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -347,7 +353,7 @@ export class PreacherService {
       const copastors = await this.copastorRepository.find({
         where: {
           firstName: ILike(`%${firstNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -357,7 +363,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           theirCopastor: In(copastorsId),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -402,7 +408,7 @@ export class PreacherService {
       const pastors = await this.pastorRepository.find({
         where: {
           firstName: ILike(`%${firstNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -412,7 +418,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           theirPastor: In(pastorsId),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -458,7 +464,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           lastName: ILike(`%${lastNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -503,7 +509,7 @@ export class PreacherService {
       const supervisors = await this.supervisorRepository.find({
         where: {
           lastName: ILike(`%${lastNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -513,7 +519,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           theirSupervisor: In(supervisorsId),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -558,7 +564,7 @@ export class PreacherService {
       const copastors = await this.copastorRepository.find({
         where: {
           lastName: ILike(`%${lastNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -568,7 +574,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           theirCopastor: In(copastorsId),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -613,7 +619,7 @@ export class PreacherService {
       const pastors = await this.pastorRepository.find({
         where: {
           lastName: ILike(`%${lastNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -623,7 +629,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           theirPastor: In(pastorsId),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -671,7 +677,7 @@ export class PreacherService {
         where: {
           firstName: ILike(`%${firstNames}%`),
           lastName: ILike(`%${lastNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -718,7 +724,7 @@ export class PreacherService {
         where: {
           firstName: ILike(`%${firstNames}%`),
           lastName: ILike(`%${lastNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -728,7 +734,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           theirSupervisor: In(supervisorsId),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -775,7 +781,7 @@ export class PreacherService {
         where: {
           firstName: ILike(`%${firstNames}%`),
           lastName: ILike(`%${lastNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -785,7 +791,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           theirCopastor: In(copastorsId),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -832,7 +838,7 @@ export class PreacherService {
         where: {
           firstName: ILike(`%${firstNames}%`),
           lastName: ILike(`%${lastNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -842,7 +848,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           theirPastor: In(pastorsId),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -890,7 +896,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           birthDate: Between(fromDate, toDate),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -931,7 +937,7 @@ export class PreacherService {
     if (term && searchType === SearchType.BirthMonth) {
       const preachers = await this.preacherRepository.find({
         where: {
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -950,7 +956,7 @@ export class PreacherService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const resultPreachers = getBirthdaysByMonth({
+      const resultPreachers = getBirthDateByMonth({
         month: term,
         data: preachers,
       });
@@ -994,7 +1000,7 @@ export class PreacherService {
       const familyGroups = await this.familyGroupRepository.find({
         where: {
           familyGroupCode: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -1004,7 +1010,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           theirFamilyGroup: In(familyGroupsId),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -1043,7 +1049,7 @@ export class PreacherService {
       const familyGroups = await this.familyGroupRepository.find({
         where: {
           familyGroupName: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -1053,7 +1059,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           theirFamilyGroup: In(familyGroupsId),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -1092,7 +1098,7 @@ export class PreacherService {
       const zones = await this.zoneRepository.find({
         where: {
           zoneName: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -1102,7 +1108,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           theirZone: In(zonesId),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -1148,7 +1154,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           gender: genderTerm,
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -1168,12 +1174,7 @@ export class PreacherService {
       });
 
       if (preachers.length === 0) {
-        const genderNames = {
-          male: 'Masculino',
-          female: 'Femenino',
-        };
-
-        const genderInSpanish = genderNames[term.toLowerCase()] ?? term;
+        const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
 
         throw new NotFoundException(
           `No se encontraron predicadores(as) con este genero: ${genderInSpanish}`,
@@ -1207,7 +1208,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           maritalStatus: maritalStatusTerm,
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -1227,16 +1228,8 @@ export class PreacherService {
       });
 
       if (preachers.length === 0) {
-        const maritalStatusNames = {
-          single: 'Soltero(a)',
-          married: 'Casado(a)',
-          widowed: 'Viudo(a)',
-          divorced: 'Divorciado(a)',
-          other: 'Otro',
-        };
-
         const maritalStatusInSpanish =
-          maritalStatusNames[term.toLowerCase()] ?? term;
+          MaritalStatusNames[term.toLowerCase()] ?? term;
 
         throw new NotFoundException(
           `No se encontraron predicadores(as) con este estado civil: ${maritalStatusInSpanish}`,
@@ -1257,7 +1250,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           originCountry: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -1296,7 +1289,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           department: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -1335,7 +1328,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           province: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -1374,7 +1367,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           district: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -1413,7 +1406,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           urbanSector: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -1452,7 +1445,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           address: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -1487,17 +1480,17 @@ export class PreacherService {
     }
 
     //? Find by status --> Many
-    if (term && searchType === SearchType.Status) {
-      const statusTerm = term.toLowerCase();
-      const validStatus = ['active', 'inactive'];
+    if (term && searchType === SearchType.RecordStatus) {
+      const recordStatusTerm = term.toLowerCase();
+      const validRecordStatus = ['active', 'inactive'];
 
-      if (!validStatus.includes(statusTerm)) {
-        throw new BadRequestException(`Estado no válido: ${term}`);
+      if (!validRecordStatus.includes(recordStatusTerm)) {
+        throw new BadRequestException(`Estado de registro no válido: ${term}`);
       }
 
       const preachers = await this.preacherRepository.find({
         where: {
-          status: statusTerm,
+          recordStatus: recordStatusTerm,
         },
         take: limit,
         skip: offset,
@@ -1517,10 +1510,10 @@ export class PreacherService {
       });
 
       if (preachers.length === 0) {
-        const value = term === 'inactive' ? 'Inactivo' : 'Activo';
+        const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
 
         throw new NotFoundException(
-          `No se encontraron predicadores(as) con este estado: ${value}`,
+          `No se encontraron predicadores(as) con este estado de registro: ${value}`,
         );
       }
 
@@ -1562,7 +1555,7 @@ export class PreacherService {
   ): Promise<Preacher | Supervisor> {
     const {
       roles,
-      status,
+      recordStatus,
       theirSupervisor,
       theirCopastor,
       theirPastor,
@@ -1606,22 +1599,22 @@ export class PreacherService {
     }
 
     if (
-      (preacher.roles.includes(MemberRoles.Preacher) &&
-        preacher.roles.includes(MemberRoles.Disciple) &&
-        !preacher.roles.includes(MemberRoles.Supervisor) &&
-        !preacher.roles.includes(MemberRoles.Copastor) &&
-        !preacher.roles.includes(MemberRoles.Pastor) &&
-        !preacher.roles.includes(MemberRoles.Treasurer) &&
-        (roles.includes(MemberRoles.Copastor) ||
-          roles.includes(MemberRoles.Pastor))) ||
-      (preacher.roles.includes(MemberRoles.Preacher) &&
-        preacher.roles.includes(MemberRoles.Disciple) &&
-        preacher.roles.includes(MemberRoles.Treasurer) &&
-        !preacher.roles.includes(MemberRoles.Supervisor) &&
-        !preacher.roles.includes(MemberRoles.Copastor) &&
-        !preacher.roles.includes(MemberRoles.Pastor) &&
-        (roles.includes(MemberRoles.Copastor) ||
-          roles.includes(MemberRoles.Pastor)))
+      (preacher.roles.includes(MemberRole.Preacher) &&
+        preacher.roles.includes(MemberRole.Disciple) &&
+        !preacher.roles.includes(MemberRole.Supervisor) &&
+        !preacher.roles.includes(MemberRole.Copastor) &&
+        !preacher.roles.includes(MemberRole.Pastor) &&
+        !preacher.roles.includes(MemberRole.Treasurer) &&
+        (roles.includes(MemberRole.Copastor) ||
+          roles.includes(MemberRole.Pastor))) ||
+      (preacher.roles.includes(MemberRole.Preacher) &&
+        preacher.roles.includes(MemberRole.Disciple) &&
+        preacher.roles.includes(MemberRole.Treasurer) &&
+        !preacher.roles.includes(MemberRole.Supervisor) &&
+        !preacher.roles.includes(MemberRole.Copastor) &&
+        !preacher.roles.includes(MemberRole.Pastor) &&
+        (roles.includes(MemberRole.Copastor) ||
+          roles.includes(MemberRole.Pastor)))
     ) {
       throw new BadRequestException(
         `No se puede asignar un rol inferior o superior sin pasar por la jerarquía: [discípulo, predicador, supervisor, copastor, pastor].`,
@@ -1630,57 +1623,60 @@ export class PreacherService {
 
     //* Update info about Preacher
     if (
-      (preacher.roles.includes(MemberRoles.Disciple) &&
-        preacher.roles.includes(MemberRoles.Preacher) &&
-        !preacher.roles.includes(MemberRoles.Pastor) &&
-        !preacher.roles.includes(MemberRoles.Copastor) &&
-        !preacher.roles.includes(MemberRoles.Supervisor) &&
-        !preacher.roles.includes(MemberRoles.Treasurer) &&
-        roles.includes(MemberRoles.Disciple) &&
-        roles.includes(MemberRoles.Preacher) &&
-        !roles.includes(MemberRoles.Pastor) &&
-        !roles.includes(MemberRoles.Copastor) &&
-        !roles.includes(MemberRoles.Supervisor) &&
-        !roles.includes(MemberRoles.Treasurer)) ||
-      (preacher.roles.includes(MemberRoles.Disciple) &&
-        preacher.roles.includes(MemberRoles.Preacher) &&
-        preacher.roles.includes(MemberRoles.Treasurer) &&
-        !preacher.roles.includes(MemberRoles.Copastor) &&
-        !preacher.roles.includes(MemberRoles.Supervisor) &&
-        !preacher.roles.includes(MemberRoles.Pastor) &&
-        roles.includes(MemberRoles.Disciple) &&
-        roles.includes(MemberRoles.Preacher) &&
-        roles.includes(MemberRoles.Treasurer) &&
-        !roles.includes(MemberRoles.Copastor) &&
-        !roles.includes(MemberRoles.Pastor) &&
-        !roles.includes(MemberRoles.Supervisor)) ||
-      (preacher.roles.includes(MemberRoles.Disciple) &&
-        preacher.roles.includes(MemberRoles.Preacher) &&
-        !preacher.roles.includes(MemberRoles.Pastor) &&
-        !preacher.roles.includes(MemberRoles.Copastor) &&
-        !preacher.roles.includes(MemberRoles.Supervisor) &&
-        !preacher.roles.includes(MemberRoles.Treasurer) &&
-        roles.includes(MemberRoles.Disciple) &&
-        roles.includes(MemberRoles.Preacher) &&
-        roles.includes(MemberRoles.Treasurer) &&
-        !roles.includes(MemberRoles.Pastor) &&
-        !roles.includes(MemberRoles.Copastor) &&
-        !roles.includes(MemberRoles.Supervisor)) ||
-      (preacher.roles.includes(MemberRoles.Disciple) &&
-        preacher.roles.includes(MemberRoles.Preacher) &&
-        preacher.roles.includes(MemberRoles.Treasurer) &&
-        !preacher.roles.includes(MemberRoles.Pastor) &&
-        !preacher.roles.includes(MemberRoles.Copastor) &&
-        !preacher.roles.includes(MemberRoles.Supervisor) &&
-        roles.includes(MemberRoles.Disciple) &&
-        roles.includes(MemberRoles.Preacher) &&
-        !roles.includes(MemberRoles.Treasurer) &&
-        !roles.includes(MemberRoles.Pastor) &&
-        !roles.includes(MemberRoles.Copastor) &&
-        !roles.includes(MemberRoles.Supervisor))
+      (preacher.roles.includes(MemberRole.Disciple) &&
+        preacher.roles.includes(MemberRole.Preacher) &&
+        !preacher.roles.includes(MemberRole.Pastor) &&
+        !preacher.roles.includes(MemberRole.Copastor) &&
+        !preacher.roles.includes(MemberRole.Supervisor) &&
+        !preacher.roles.includes(MemberRole.Treasurer) &&
+        roles.includes(MemberRole.Disciple) &&
+        roles.includes(MemberRole.Preacher) &&
+        !roles.includes(MemberRole.Pastor) &&
+        !roles.includes(MemberRole.Copastor) &&
+        !roles.includes(MemberRole.Supervisor) &&
+        !roles.includes(MemberRole.Treasurer)) ||
+      (preacher.roles.includes(MemberRole.Disciple) &&
+        preacher.roles.includes(MemberRole.Preacher) &&
+        preacher.roles.includes(MemberRole.Treasurer) &&
+        !preacher.roles.includes(MemberRole.Copastor) &&
+        !preacher.roles.includes(MemberRole.Supervisor) &&
+        !preacher.roles.includes(MemberRole.Pastor) &&
+        roles.includes(MemberRole.Disciple) &&
+        roles.includes(MemberRole.Preacher) &&
+        roles.includes(MemberRole.Treasurer) &&
+        !roles.includes(MemberRole.Copastor) &&
+        !roles.includes(MemberRole.Pastor) &&
+        !roles.includes(MemberRole.Supervisor)) ||
+      (preacher.roles.includes(MemberRole.Disciple) &&
+        preacher.roles.includes(MemberRole.Preacher) &&
+        !preacher.roles.includes(MemberRole.Pastor) &&
+        !preacher.roles.includes(MemberRole.Copastor) &&
+        !preacher.roles.includes(MemberRole.Supervisor) &&
+        !preacher.roles.includes(MemberRole.Treasurer) &&
+        roles.includes(MemberRole.Disciple) &&
+        roles.includes(MemberRole.Preacher) &&
+        roles.includes(MemberRole.Treasurer) &&
+        !roles.includes(MemberRole.Pastor) &&
+        !roles.includes(MemberRole.Copastor) &&
+        !roles.includes(MemberRole.Supervisor)) ||
+      (preacher.roles.includes(MemberRole.Disciple) &&
+        preacher.roles.includes(MemberRole.Preacher) &&
+        preacher.roles.includes(MemberRole.Treasurer) &&
+        !preacher.roles.includes(MemberRole.Pastor) &&
+        !preacher.roles.includes(MemberRole.Copastor) &&
+        !preacher.roles.includes(MemberRole.Supervisor) &&
+        roles.includes(MemberRole.Disciple) &&
+        roles.includes(MemberRole.Preacher) &&
+        !roles.includes(MemberRole.Treasurer) &&
+        !roles.includes(MemberRole.Pastor) &&
+        !roles.includes(MemberRole.Copastor) &&
+        !roles.includes(MemberRole.Supervisor))
     ) {
       // Validations
-      if (preacher.status === Status.Active && status === Status.Inactive) {
+      if (
+        preacher.recordStatus === RecordStatus.Active &&
+        recordStatus === RecordStatus.Inactive
+      ) {
         throw new BadRequestException(
           `No se puede actualizar un registro a "Inactivo", se debe eliminar.`,
         );
@@ -1691,7 +1687,7 @@ export class PreacherService {
         //* Validate supervisor
         if (!theirSupervisor) {
           throw new NotFoundException(
-            `Para poder actualizar un Predicador, se debe asignar un Supervisor.`,
+            `Para poder actualizar un Predicador, se le debe asignar un Supervisor.`,
           );
         }
 
@@ -1711,9 +1707,9 @@ export class PreacherService {
           );
         }
 
-        if (newSupervisor.status === Status.Inactive) {
+        if (newSupervisor.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
-            `La propiedad "Estado" en Supervisor debe ser "Activo".`,
+            `La propiedad "Estado de registro" en Supervisor debe ser "Activo".`,
           );
         }
 
@@ -1728,9 +1724,9 @@ export class PreacherService {
           where: { id: newSupervisor?.theirZone?.id },
         });
 
-        if (newZone.status === Status.Inactive) {
+        if (newZone.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
-            `La propiedad "Estado" en Zona debe ser "Activo".`,
+            `La propiedad "Estado de registro" en Zona debe ser "Activo".`,
           );
         }
 
@@ -1745,9 +1741,9 @@ export class PreacherService {
           where: { id: newSupervisor?.theirCopastor?.id },
         });
 
-        if (newCopastor.status === Status.Inactive) {
+        if (newCopastor.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
-            `La propiedad "Estado" en Co-Pastor debe ser "Activo".`,
+            `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
           );
         }
 
@@ -1762,9 +1758,9 @@ export class PreacherService {
           where: { id: newSupervisor?.theirPastor?.id },
         });
 
-        if (newPastor.status === Status.Inactive) {
+        if (newPastor.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
-            `La propiedad "Estado" en Pastor debe ser "Activo".`,
+            `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
           );
         }
 
@@ -1779,9 +1775,9 @@ export class PreacherService {
           where: { id: newSupervisor?.theirChurch?.id },
         });
 
-        if (newChurch.status === Status.Inactive) {
+        if (newChurch.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
-            `La propiedad "Estado" en Iglesia debe ser "Activo".`,
+            `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
           );
         }
 
@@ -1798,7 +1794,7 @@ export class PreacherService {
           theirFamilyGroup: preacher.theirFamilyGroup,
           updatedAt: new Date(),
           updatedBy: user,
-          status: status,
+          recordStatus: recordStatus,
         });
 
         let savedPreacher: Preacher;
@@ -1903,7 +1899,7 @@ export class PreacherService {
           theirSupervisor: preacher.theirSupervisor,
           updatedAt: new Date(),
           updatedBy: user,
-          status: status,
+          recordStatus: recordStatus,
         });
 
         try {
@@ -1916,39 +1912,39 @@ export class PreacherService {
 
     //* Raise Preacher level to Supervisor
     if (
-      (preacher.roles.includes(MemberRoles.Disciple) &&
-        preacher.roles.includes(MemberRoles.Preacher) &&
-        !preacher.roles.includes(MemberRoles.Treasurer) &&
-        !preacher.roles.includes(MemberRoles.Copastor) &&
-        !preacher.roles.includes(MemberRoles.Supervisor) &&
-        !preacher.roles.includes(MemberRoles.Pastor) &&
-        roles.includes(MemberRoles.Disciple) &&
-        roles.includes(MemberRoles.Supervisor) &&
-        !roles.includes(MemberRoles.Treasurer) &&
-        !roles.includes(MemberRoles.Copastor) &&
-        !roles.includes(MemberRoles.Pastor) &&
-        !roles.includes(MemberRoles.Preacher) &&
-        status === Status.Active) ||
-      (preacher.roles.includes(MemberRoles.Disciple) &&
-        preacher.roles.includes(MemberRoles.Preacher) &&
-        preacher.roles.includes(MemberRoles.Treasurer) &&
-        !preacher.roles.includes(MemberRoles.Copastor) &&
-        !preacher.roles.includes(MemberRoles.Supervisor) &&
-        !preacher.roles.includes(MemberRoles.Pastor) &&
-        roles.includes(MemberRoles.Disciple) &&
-        roles.includes(MemberRoles.Supervisor) &&
-        roles.includes(MemberRoles.Treasurer) &&
-        !roles.includes(MemberRoles.Copastor) &&
-        !roles.includes(MemberRoles.Pastor) &&
-        !roles.includes(MemberRoles.Preacher) &&
-        status === Status.Active)
+      (preacher.roles.includes(MemberRole.Disciple) &&
+        preacher.roles.includes(MemberRole.Preacher) &&
+        !preacher.roles.includes(MemberRole.Treasurer) &&
+        !preacher.roles.includes(MemberRole.Copastor) &&
+        !preacher.roles.includes(MemberRole.Supervisor) &&
+        !preacher.roles.includes(MemberRole.Pastor) &&
+        roles.includes(MemberRole.Disciple) &&
+        roles.includes(MemberRole.Supervisor) &&
+        !roles.includes(MemberRole.Treasurer) &&
+        !roles.includes(MemberRole.Copastor) &&
+        !roles.includes(MemberRole.Pastor) &&
+        !roles.includes(MemberRole.Preacher) &&
+        recordStatus === RecordStatus.Active) ||
+      (preacher.roles.includes(MemberRole.Disciple) &&
+        preacher.roles.includes(MemberRole.Preacher) &&
+        preacher.roles.includes(MemberRole.Treasurer) &&
+        !preacher.roles.includes(MemberRole.Copastor) &&
+        !preacher.roles.includes(MemberRole.Supervisor) &&
+        !preacher.roles.includes(MemberRole.Pastor) &&
+        roles.includes(MemberRole.Disciple) &&
+        roles.includes(MemberRole.Supervisor) &&
+        roles.includes(MemberRole.Treasurer) &&
+        !roles.includes(MemberRole.Copastor) &&
+        !roles.includes(MemberRole.Pastor) &&
+        !roles.includes(MemberRole.Preacher) &&
+        recordStatus === RecordStatus.Active)
     ) {
       //? Raise level and create with relation to copastor
       if (!isDirectRelationToPastor) {
         //* Validation new copastor
         if (!theirCopastor) {
           throw new NotFoundException(
-            `Para subir de nivel de Predicador a Supervisor, debe asignar un Co-Pastor.`,
+            `Para subir de nivel de Predicador a Supervisor, se le debe asignar un Co-Pastor.`,
           );
         }
 
@@ -1963,9 +1959,9 @@ export class PreacherService {
           );
         }
 
-        if (newCopastor.status === Status.Inactive) {
+        if (newCopastor.recordStatus === RecordStatus.Inactive) {
           throw new NotFoundException(
-            `La propiedad "Estado" en Co-Pastor debe ser "Activo".`,
+            `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
           );
         }
 
@@ -1981,9 +1977,9 @@ export class PreacherService {
           relations: ['theirChurch'],
         });
 
-        if (newPastor.status === Status.Inactive) {
+        if (newPastor.recordStatus === RecordStatus.Inactive) {
           throw new NotFoundException(
-            `La propiedad "Estado" en Pastor debe ser "Activo".`,
+            `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
           );
         }
 
@@ -1999,9 +1995,9 @@ export class PreacherService {
           relations: ['theirMainChurch'],
         });
 
-        if (newChurch.status === Status.Inactive) {
+        if (newChurch.recordStatus === RecordStatus.Inactive) {
           throw new NotFoundException(
-            `La propiedad "Estado" en Iglesia debe ser "Activo".`,
+            `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
           );
         }
 
@@ -2047,9 +2043,9 @@ export class PreacherService {
           );
         }
 
-        if (newPastor.status === Status.Inactive) {
+        if (newPastor.recordStatus === RecordStatus.Inactive) {
           throw new NotFoundException(
-            `La propiedad "Estado" en Co-Pastor debe ser "Activo".`,
+            `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
           );
         }
 
@@ -2065,9 +2061,9 @@ export class PreacherService {
           relations: ['theirMainChurch'],
         });
 
-        if (newChurch.status === Status.Inactive) {
+        if (newChurch.recordStatus === RecordStatus.Inactive) {
           throw new NotFoundException(
-            `La propiedad "Estado" en Iglesia debe ser "Activo".`,
+            `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
           );
         }
 
@@ -2126,7 +2122,7 @@ export class PreacherService {
       theirZone: null,
       updatedAt: new Date(),
       updatedBy: user,
-      status: Status.Inactive,
+      recordStatus: RecordStatus.Inactive,
     });
 
     try {
@@ -2187,8 +2183,6 @@ export class PreacherService {
 
       if (detail.includes('email')) {
         throw new BadRequestException('El correo electrónico ya está en uso.');
-      } else if (detail.includes('church')) {
-        throw new BadRequestException('El nombre de iglesia ya está en uso.');
       }
     }
 

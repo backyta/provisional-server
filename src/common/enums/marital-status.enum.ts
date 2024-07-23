@@ -7,9 +7,9 @@ export enum MaritalStatus {
 }
 
 export const MaritalStatusNames: Record<MaritalStatus, string> = {
-  single: 'Soltero(a)',
-  married: 'Casado(a)',
-  widowed: 'Viudo(a)',
-  divorced: 'Divorciado(a)',
-  other: 'Otro',
+  [MaritalStatus.Single]: 'Soltero(a)',
+  [MaritalStatus.Married]: 'Casado(a)',
+  [MaritalStatus.Widowed]: 'Viudo(a)',
+  [MaritalStatus.Divorced]: 'Divorciado(a)',
+  [MaritalStatus.Other]: 'Otro',
 };

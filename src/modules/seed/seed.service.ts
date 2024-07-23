@@ -7,7 +7,6 @@ import {
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { AuthService } from '@/modules/auth/auth.service';
 import { UserService } from '@/modules/user/user.service';
 import { ZoneService } from '@/modules/zone/zone.service';
 import { ChurchService } from '@/modules/church/church.service';
@@ -82,9 +81,9 @@ export class SeedService {
     private readonly discipleService: DiscipleService,
 
     private readonly userService: UserService,
-    private readonly authService: AuthService,
   ) {}
 
+  //TODO : HACER SEMILLA PARA OFRENDAS DESPUES Y TMB ANIADIR MAS PARA PROBARCON MAS USUARIOS Y MIEMBROS
   async runSeed(): Promise<string> {
     const queryChurches = this.churchRepository.createQueryBuilder('churches');
     const queryPastors = this.pastorRepository.createQueryBuilder('pastors');
@@ -143,7 +142,7 @@ export class SeedService {
       .getOne();
 
     seedUsers.forEach((user) => {
-      users.push(this.authService.register(user, superUser));
+      users.push(this.userService.create(user, superUser));
     });
 
     await Promise.all(users);

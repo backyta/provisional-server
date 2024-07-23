@@ -11,12 +11,17 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { MaritalStatus, MemberRoles, Gender, Status } from '@/common/enums';
+import {
+  MaritalStatus,
+  MemberRole,
+  Gender,
+  RecordStatus,
+} from '@/common/enums';
 
 export class CreatePreacherDto {
   //* General and Personal info
   @ApiProperty({
-    example: 'John Martin',
+    example: 'Felix Alberto',
   })
   @IsString()
   @IsNotEmpty()
@@ -25,7 +30,7 @@ export class CreatePreacherDto {
   firstName: string;
 
   @ApiProperty({
-    example: 'Rojas Castro',
+    example: 'Garcia Perez',
   })
   @IsString()
   @IsNotEmpty()
@@ -34,20 +39,26 @@ export class CreatePreacherDto {
   lastName: string;
 
   @ApiProperty({
-    example: 'male',
+    example: Gender.Male,
   })
-  @IsEnum(Gender)
+  @IsEnum(Gender, {
+    message:
+      'El genero debe ser uno de los siguientes valores: Masculino o Femenino',
+  })
   gender: string;
 
   @ApiProperty({
-    example: 'single',
+    example: MaritalStatus.Widowed,
   })
-  @IsEnum(MaritalStatus)
+  @IsEnum(MaritalStatus, {
+    message:
+      'El estado civil debe ser uno de los siguientes valores: Soltero(a), Casado(a), Divorciado(a), Viudo(a), Otro.',
+  })
   @IsNotEmpty()
   maritalStatus: string;
 
   @ApiProperty({
-    example: 'Colombia',
+    example: 'Chile',
   })
   @IsString()
   @IsNotEmpty()
@@ -153,20 +164,27 @@ export class CreatePreacherDto {
 
   //* Roles and Status
   @ApiProperty({
-    example: ['disciple', 'preacher'],
+    example: [MemberRole.Disciple, MemberRole.Preacher],
   })
-  @IsEnum(MemberRoles, { each: true })
+  @IsEnum(MemberRole, {
+    each: true,
+    message:
+      'Los roles deben contener "Discípulo" y uno de los siguientes valores: Tesorero, Predicador, Supervisor, Co-Pastor, Pastor.',
+  })
   @IsArray()
   @IsNotEmpty()
   roles: string[];
 
   @ApiProperty({
-    example: 'active',
+    example: RecordStatus.Active,
   })
   @IsString()
-  @IsEnum(Status)
+  @IsEnum(RecordStatus, {
+    message:
+      'El estado de registro debe ser uno de los siguientes valores: Activo o Inactivo',
+  })
   @IsOptional()
-  status?: string;
+  recordStatus?: string;
 
   @ApiProperty({
     example: true,

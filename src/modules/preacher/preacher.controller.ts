@@ -22,17 +22,17 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { PaginationDto, SearchTypeAndPaginationDto } from '@/common/dtos';
+import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
 
-import { UserRoles } from '@/modules/auth/enums';
+import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
+
+import { User } from '@/modules/user/entities';
+import { Supervisor } from '@/modules/supervisor/entities';
 
 import { Preacher } from '@/modules/preacher/entities';
 import { PreacherService } from '@/modules/preacher/preacher.service';
 import { CreatePreacherDto, UpdatePreacherDto } from '@/modules/preacher/dto';
-
-import { User } from '@/modules/user/entities';
-import { Supervisor } from '@/modules/supervisor/entities';
 
 @ApiTags('Preachers')
 @ApiBearerAuth()
@@ -51,7 +51,7 @@ export class PreacherController {
 
   //* Create
   @Post()
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiCreatedResponse({
     description: 'Preacher has been successfully created.',
   })
@@ -94,14 +94,14 @@ export class PreacherController {
   })
   findTerm(
     @Param('term') term: string,
-    @Query() searchTypeAndPaginationDto: SearchTypeAndPaginationDto,
+    @Query() searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
   ): Promise<Preacher | Preacher[]> {
     return this.preacherService.findByTerm(term, searchTypeAndPaginationDto);
   }
 
   //* Update
   @Patch(':id')
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
     description: 'Successful operation',
   })
@@ -118,7 +118,7 @@ export class PreacherController {
 
   //* Delete
   @Delete(':id')
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
     description: 'Successful operation.',
   })

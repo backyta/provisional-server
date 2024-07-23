@@ -11,7 +11,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { Status } from '@/common/enums';
+import { RecordStatus } from '@/common/enums';
 
 import { User } from '@/modules/user/entities';
 import { Zone } from '@/modules/zone/entities';
@@ -74,19 +74,19 @@ export class Preacher {
   @Column('text', { name: 'department', default: 'Lima' })
   department: string;
 
-  @Column('text', { name: 'province_residence', default: 'Lima' })
+  @Column('text', { name: 'province', default: 'Lima' })
   province: string;
 
   @Index()
-  @Column('text', { name: 'district_residence' })
+  @Column('text', { name: 'district' })
   district: string;
 
   @Index()
-  @Column('text', { name: 'urban_sector_residence' })
+  @Column('text', { name: 'urban_sector' })
   urbanSector: string;
 
   @Index()
-  @Column('text', { name: 'address_residence' })
+  @Column('text', { name: 'address' })
   address: string;
 
   @Column('text', { name: 'reference_address' })
@@ -110,8 +110,11 @@ export class Preacher {
   @JoinColumn({ name: 'updated_by' })
   updatedBy: User;
 
-  @Column('text', { name: 'status', default: Status.Active })
-  status: string;
+  @Column('text', {
+    name: 'record_status',
+    default: RecordStatus.Active,
+  })
+  recordStatus: string;
 
   //* Relations (Array)
   @OneToMany(() => Disciple, (disciple) => disciple.theirPreacher)

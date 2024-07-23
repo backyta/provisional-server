@@ -1,4 +1,4 @@
-import { Status } from '@/common/enums';
+import { RecordStatus } from '@/common/enums';
 import {
   BeforeInsert,
   BeforeUpdate,
@@ -13,10 +13,10 @@ import {
 @Entity({ name: 'users' })
 @Index(['firstName', 'lastName'])
 export class User {
+  //* General info
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  //General info
   @Index()
   @Column('text')
   firstName: string;
@@ -39,7 +39,7 @@ export class User {
   @Column('text', { array: true, default: ['user'] })
   roles: string[];
 
-  // Info register and update date
+  //* Info register and update date
   @Column('timestamp', { name: 'created_at', nullable: true })
   createdAt: string | Date;
 
@@ -54,8 +54,11 @@ export class User {
   @JoinColumn({ name: 'updated_by' })
   updatedBy: User;
 
-  @Column('text', { name: 'status', default: Status.Active })
-  status: string;
+  @Column('text', {
+    name: 'record_status',
+    default: RecordStatus.Active,
+  })
+  recordStatus: string;
 
   @BeforeInsert()
   checkFieldsBeforeInsert() {

@@ -2,7 +2,6 @@ import { Controller, Post, Body, Get, HttpCode } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
-  ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
@@ -11,12 +10,11 @@ import {
 } from '@nestjs/swagger';
 
 import { User } from '@/modules/user/entities';
-import { CreateUserDto } from '@/modules/user/dto';
 
-import { UserRoles } from '@/modules/auth/enums';
+import { Auth, GetUser } from '@/modules/auth/decorators';
+
 import { LoginUserDto } from '@/modules/auth/dto';
 import { AuthService } from '@/modules/auth/auth.service';
-import { Auth, GetUser } from '@/modules/auth/decorators';
 
 @ApiTags('Auth')
 @ApiUnauthorizedResponse({
@@ -31,20 +29,6 @@ import { Auth, GetUser } from '@/modules/auth/decorators';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
-  //* Create
-  @ApiBearerAuth()
-  @Post('register')
-  @Auth(UserRoles.SuperUser)
-  @ApiCreatedResponse({
-    description: 'User has been successfully created.',
-  })
-  @ApiForbiddenResponse({
-    description: 'Forbidden.',
-  })
-  registerUser(@Body() createUserDto: CreateUserDto, @GetUser() user: User) {
-    return this.authService.register(createUserDto, user);
-  }
 
   //* Login
   @Post('login')

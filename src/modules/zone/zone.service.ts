@@ -9,7 +9,7 @@ import { Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Status } from '@/common/enums';
+import { RecordStatus } from '@/common/enums';
 import { PaginationDto } from '@/common/dtos';
 
 import { CreateZoneDto, UpdateZoneDto } from '@/modules/zone/dto';
@@ -75,7 +75,7 @@ export class ZoneService {
       );
     }
 
-    if (supervisor.status === Status.Inactive) {
+    if (supervisor.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `The property status in Supervisor must be a "active"`,
       );
@@ -92,7 +92,7 @@ export class ZoneService {
       where: { id: supervisor?.theirCopastor?.id },
     });
 
-    if (copastor?.status === Status.Inactive) {
+    if (copastor?.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `The property status in Copastor must be a "active"`,
       );
@@ -109,7 +109,7 @@ export class ZoneService {
       where: { id: supervisor?.theirPastor?.id },
     });
 
-    if (pastor?.status === Status.Inactive) {
+    if (pastor?.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `The property status in Pastor must be a "active"`,
       );
@@ -126,7 +126,7 @@ export class ZoneService {
       where: { id: supervisor?.theirChurch?.id },
     });
 
-    if (church.status === Status.Inactive) {
+    if (church.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `The property status in Church must be a "active"`,
       );
@@ -160,7 +160,7 @@ export class ZoneService {
     const { limit = 10, offset = 0 } = paginationDto;
 
     const data = await this.zoneRepository.find({
-      where: { status: Status.Active },
+      where: { recordStatus: RecordStatus.Active },
       take: limit,
       skip: offset,
       relations: [
@@ -233,7 +233,7 @@ export class ZoneService {
     updateZoneDto: UpdateZoneDto,
     user: User,
   ): Promise<Zone> {
-    const { status, theirSupervisor } = updateZoneDto;
+    const { recordStatus, theirSupervisor } = updateZoneDto;
 
     // Validations
     if (!isUUID(id)) {
@@ -255,7 +255,10 @@ export class ZoneService {
       throw new NotFoundException(`Zone not found with id: ${id}`);
     }
 
-    if (zone.status === Status.Active && status === Status.Inactive) {
+    if (
+      zone.recordStatus === RecordStatus.Active &&
+      recordStatus === RecordStatus.Inactive
+    ) {
       throw new BadRequestException(
         `You cannot update it to "inactive", you must delete the record`,
       );
@@ -279,7 +282,7 @@ export class ZoneService {
         );
       }
 
-      if (newSupervisor.status === Status.Inactive) {
+      if (newSupervisor.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `The property status in Supervisor must be "active"`,
         );
@@ -296,7 +299,7 @@ export class ZoneService {
         where: { id: newSupervisor?.theirCopastor?.id },
       });
 
-      if (newCopastor.status === Status.Inactive) {
+      if (newCopastor.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `The property status in Copastor must be "active"`,
         );
@@ -313,7 +316,7 @@ export class ZoneService {
         where: { id: newSupervisor?.theirPastor?.id },
       });
 
-      if (newPastor.status === Status.Inactive) {
+      if (newPastor.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `The property status in Pastor must be "active"`,
         );
@@ -330,7 +333,7 @@ export class ZoneService {
         where: { id: newSupervisor?.theirChurch?.id },
       });
 
-      if (newChurch.status === Status.Inactive) {
+      if (newChurch.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `The property status in Church must be "active"`,
         );
@@ -357,7 +360,7 @@ export class ZoneService {
           theirZone: null,
           updatedAt: new Date(),
           updatedBy: user,
-          status: status,
+          recordStatus: recordStatus,
         });
 
         await this.supervisorRepository.save(updateOldSupervisor);
@@ -370,7 +373,7 @@ export class ZoneService {
           theirSupervisor: null,
           updatedAt: new Date(),
           updatedBy: user,
-          status: status,
+          recordStatus: recordStatus,
         });
 
         await this.zoneRepository.save(updatedNewZone);
@@ -431,7 +434,7 @@ export class ZoneService {
         theirSupervisor: newSupervisor,
         updatedAt: new Date(),
         updatedBy: user,
-        status: status,
+        recordStatus: recordStatus,
       });
 
       let savedZone: Zone;
@@ -518,7 +521,7 @@ export class ZoneService {
         theirSupervisor: zone.theirSupervisor,
         updatedAt: new Date(),
         updatedBy: user,
-        status: status,
+        recordStatus: recordStatus,
       });
 
       const allFamilyGroups = await this.familyGroupRepository.find({

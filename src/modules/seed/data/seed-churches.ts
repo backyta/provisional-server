@@ -15,7 +15,7 @@ interface SeedMainChurch {
   urbanSector: string;
   address: string;
   referenceAddress: string;
-  status?: string;
+  recordStatus?: string;
 }
 interface SeedAnexes {
   //* General Info
@@ -34,7 +34,7 @@ interface SeedAnexes {
   urbanSector: string;
   address: string;
   referenceAddress: string;
-  status?: string;
+  recordStatus?: string;
 
   //* Relations
   theirMainChurch?: string;

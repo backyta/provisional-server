@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { Status } from '@/common/enums';
+import { RecordStatus } from '@/common/enums';
 
 import { User } from '@/modules/user/entities';
 import { Church } from '@/modules/church/entities';
@@ -58,8 +58,11 @@ export class Zone {
   @JoinColumn({ name: 'updated_by' })
   updatedBy: User;
 
-  @Column('text', { default: Status.Active })
-  status: string;
+  @Column('text', {
+    name: 'record_status',
+    default: RecordStatus.Active,
+  })
+  recordStatus: string;
 
   //* Relations (Array)
   @OneToMany(() => Preacher, (preacher) => preacher.theirZone)

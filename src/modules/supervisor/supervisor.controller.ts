@@ -22,21 +22,20 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { PaginationDto, SearchTypeAndPaginationDto } from '@/common/dtos';
+import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
 
-import { UserRoles } from '@/modules/auth/enums';
+import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
 
 import { User } from '@/modules/user/entities';
+import { Copastor } from '@/modules/copastor/entities';
 
 import {
   CreateSupervisorDto,
   UpdateSupervisorDto,
 } from '@/modules/supervisor/dto';
-import { SupervisorService } from '@/modules/supervisor/supervisor.service';
-
-import { Copastor } from '@/modules/copastor/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
+import { SupervisorService } from '@/modules/supervisor/supervisor.service';
 
 @ApiTags('Supervisors')
 @ApiBearerAuth()
@@ -55,7 +54,7 @@ export class SupervisorController {
 
   //* Create
   @Post()
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiCreatedResponse({
     description: 'Supervisor has been successfully created.',
   })
@@ -98,14 +97,14 @@ export class SupervisorController {
   })
   findTerm(
     @Param('term') term: string,
-    @Query() searchTypeAndPaginationDto: SearchTypeAndPaginationDto,
+    @Query() searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
   ): Promise<Supervisor | Supervisor[]> {
     return this.supervisorService.findByTerm(term, searchTypeAndPaginationDto);
   }
 
   //* Update
   @Patch(':id')
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
     description: 'Successful operation',
   })
@@ -122,7 +121,7 @@ export class SupervisorController {
 
   //! Delete
   @Delete(':id')
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
     description: 'Successful operation.',
   })

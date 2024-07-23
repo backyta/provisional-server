@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { Status } from '@/common/enums';
+import { RecordStatus } from '@/common/enums';
 
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
@@ -23,7 +23,7 @@ import { FamilyGroup } from '@/modules/family-group/entities';
 @Entity({ name: 'disciples' })
 @Index(['firstName', 'lastName'])
 export class Disciple {
-  //General and Personal info
+  //* General and Personal info
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -59,7 +59,7 @@ export class Disciple {
   @Column('date', { name: 'conversion_date' })
   conversionDate: Date;
 
-  // Contact Info
+  //* Contact Info
   @Index()
   @Column('text', { name: 'email', unique: true, nullable: true })
   email: string;
@@ -67,34 +67,34 @@ export class Disciple {
   @Column('text', { name: 'phone_number', nullable: true })
   phoneNumber: string;
 
-  @Column('text', { name: 'country_residence', default: 'Peru' })
-  countryResidence: string;
+  @Column('text', { name: 'country', default: 'Peru' })
+  country: string;
 
-  @Column('text', { name: 'department_residence', default: 'Lima' })
-  departmentResidence: string;
+  @Column('text', { name: 'department', default: 'Lima' })
+  department: string;
 
-  @Column('text', { name: 'province_residence', default: 'Lima' })
-  provinceResidence: string;
-
-  @Index()
-  @Column('text', { name: 'district_residence' })
-  districtResidence: string;
+  @Column('text', { name: 'province', default: 'Lima' })
+  province: string;
 
   @Index()
-  @Column('text', { name: 'urban_sector_residence' })
-  urbanSectorResidence: string;
+  @Column('text', { name: 'district' })
+  district: string;
 
   @Index()
-  @Column('text', { name: 'address_residence' })
-  addressResidence: string;
+  @Column('text', { name: 'urban_sector' })
+  urbanSector: string;
 
-  @Column('text', { name: 'address_residence_reference' })
-  addressResidenceReference: string;
+  @Index()
+  @Column('text', { name: 'address' })
+  address: string;
+
+  @Column('text', { name: 'reference_address' })
+  referenceAddress: string;
 
   @Column({ name: 'roles', type: 'text', array: true })
   roles: string[];
 
-  // Info register and update date
+  //* Info register and update date
   @Column('timestamp', { name: 'created_at', nullable: true })
   createdAt: string | Date;
 
@@ -109,8 +109,11 @@ export class Disciple {
   @JoinColumn({ name: 'updated_by' })
   updatedBy: User;
 
-  @Column('text', { name: 'status', default: Status.Active })
-  status: string;
+  @Column('text', {
+    name: 'record_status',
+    default: RecordStatus.Active,
+  })
+  recordStatus: string;
 
   //* Relations (FK)
   @ManyToOne(() => Church, (church) => church.disciples)
@@ -147,7 +150,7 @@ export class Disciple {
   @JoinColumn({ name: 'their_family_group_id' })
   theirFamilyGroup: FamilyGroup;
 
-  // Internal Functions
+  //* Internal Functions
   @BeforeInsert()
   @BeforeUpdate()
   transformToDates() {

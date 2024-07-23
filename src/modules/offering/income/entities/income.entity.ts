@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { Status } from '@/common/enums';
+import { RecordStatus } from '@/common/enums';
 
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
@@ -71,8 +71,11 @@ export class Income {
   @JoinColumn({ name: 'updated_by' })
   updatedBy: User;
 
-  @Column('text', { name: 'status', default: Status.Active })
-  status: string;
+  @Column('text', {
+    name: 'record_status',
+    default: RecordStatus.Active,
+  })
+  recordStatus: string;
 
   //* Relations (FK)
   // NOTE : la casa no se elimina solo se desactiva por el momento y se actualiza su info

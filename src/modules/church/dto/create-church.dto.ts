@@ -1,4 +1,4 @@
-import { Status } from '@/common/enums';
+import { RecordStatus } from '@/common/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
@@ -46,14 +46,14 @@ export class CreateChurchDto {
 
   //* Contact Info
   @ApiProperty({
-    example: 'iglesia@example.com',
+    example: 'iglesia.aguaviva@gmail.com',
   })
   @IsEmail()
   @IsOptional()
   email?: string;
 
   @ApiProperty({
-    example: '99998888',
+    example: '+51 999-988-788',
   })
   @IsString()
   @IsOptional()
@@ -127,9 +127,12 @@ export class CreateChurchDto {
     example: 'active',
   })
   @IsString()
-  @IsEnum(Status)
+  @IsEnum(RecordStatus, {
+    message:
+      'El estado de registro debe ser uno de los siguientes valores: Activo o Inactivo.',
+  })
   @IsOptional()
-  status?: string;
+  recordStatus?: string;
 
   //* Relations
   @ApiProperty({

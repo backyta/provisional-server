@@ -13,9 +13,9 @@ import { Church } from '@/modules/church/entities';
 import { formatDataChurch } from '@/modules/church/helpers';
 import { CreateChurchDto, UpdateChurchDto } from '@/modules/church/dto';
 
-import { SearchType, Status } from '@/common/enums';
+import { SearchType, RecordStatus } from '@/common/enums';
 import { formatToDDMMYYYY } from '@/common/helpers';
-import { PaginationDto, SearchTypeAndPaginationDto } from '@/common/dtos';
+import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
 
 import { User } from '@/modules/user/entities';
 import { Zone } from '@/modules/zone/entities';
@@ -85,13 +85,13 @@ export class ChurchService {
 
       if (mainChurch.isAnexe) {
         throw new BadRequestException(
-          `No puedes asignar una iglesia anexo como iglesia principal.`,
+          `No puedes asignar una Iglesia anexo como Iglesia principal.`,
         );
       }
 
-      if (mainChurch.status === Status.Inactive) {
+      if (mainChurch.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
-          `La propiedad status en Iglesia Principal debe ser "activo"`,
+          `La propiedad "Estado de registro" en Iglesia Principal debe ser "Activo"`,
         );
       }
 
@@ -132,7 +132,7 @@ export class ChurchService {
     const { limit = 1, offset = 0, order = 'ASC' } = paginationDto;
 
     const data = await this.churchRepository.find({
-      where: { isAnexe: false, status: Status.Active },
+      where: { isAnexe: false, recordStatus: RecordStatus.Active },
       take: limit,
       skip: offset,
       order: { createdAt: order as FindOptionsOrderValue },
@@ -143,10 +143,10 @@ export class ChurchService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit = 10, offset = 0, order = 'ASC' } = paginationDto;
+    const { limit, offset = 0, order = 'ASC' } = paginationDto;
 
     const churches = await this.churchRepository.find({
-      where: { status: Status.Active },
+      where: { recordStatus: RecordStatus.Active },
       take: limit,
       skip: offset,
       relations: [
@@ -171,11 +171,11 @@ export class ChurchService {
   //* FIND BY TERM
   async findByTerm(
     term: string,
-    searchTypeAndPaginationDto: SearchTypeAndPaginationDto,
+    searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
   ): Promise<Church | Church[]> {
     const {
       'search-type': searchType,
-      limit = 10,
+      limit,
       offset = 0,
       order,
     } = searchTypeAndPaginationDto;
@@ -185,7 +185,7 @@ export class ChurchService {
       const churches = await this.churchRepository.find({
         where: {
           churchName: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -232,7 +232,7 @@ export class ChurchService {
       const churches = await this.churchRepository.find({
         where: {
           foundingDate: Between(fromDate, toDate),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -273,7 +273,7 @@ export class ChurchService {
       const churches = await this.churchRepository.find({
         where: {
           department: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -311,7 +311,7 @@ export class ChurchService {
       const churches = await this.churchRepository.find({
         where: {
           province: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -349,7 +349,7 @@ export class ChurchService {
       const churches = await this.churchRepository.find({
         where: {
           district: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -387,7 +387,7 @@ export class ChurchService {
       const churches = await this.churchRepository.find({
         where: {
           urbanSector: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -425,7 +425,7 @@ export class ChurchService {
       const churches = await this.churchRepository.find({
         where: {
           address: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -459,10 +459,17 @@ export class ChurchService {
     }
 
     //? Find by status --> Many
-    if (term && searchType === SearchType.Status) {
+    if (term && searchType === SearchType.RecordStatus) {
+      const recordStatusTerm = term.toLowerCase();
+      const validRecordStatus = ['active', 'inactive'];
+
+      if (!validRecordStatus.includes(recordStatusTerm)) {
+        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      }
+
       const churches = await this.churchRepository.find({
         where: {
-          status: ILike(`%${term}%`),
+          recordStatus: recordStatusTerm,
         },
         take: limit,
         skip: offset,
@@ -481,10 +488,10 @@ export class ChurchService {
       });
 
       if (churches.length === 0) {
-        const value = term === 'inactive' ? 'Inactivo' : 'Activo';
+        const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
 
         throw new NotFoundException(
-          `No se encontraron iglesias con este estado: ${value}`,
+          `No se encontraron iglesias con este estado de registro: ${value}`,
         );
       }
 
@@ -515,7 +522,7 @@ export class ChurchService {
     updateChurchDto: UpdateChurchDto,
     user: User,
   ): Promise<Church> {
-    const { status, theirMainChurch } = updateChurchDto;
+    const { recordStatus, theirMainChurch } = updateChurchDto;
 
     // Validations
     if (!isUUID(id)) {
@@ -539,11 +546,14 @@ export class ChurchService {
 
     if (!church.isAnexe && church.isAnexe) {
       throw new BadRequestException(
-        `No se puede cambiar la iglesia a un anexo`,
+        `No se puede cambiar la iglesia principal a un anexo.`,
       );
     }
 
-    if (church.status === Status.Active && status === Status.Inactive) {
+    if (
+      church.recordStatus === RecordStatus.Active &&
+      recordStatus === RecordStatus.Inactive
+    ) {
       throw new BadRequestException(
         `No se puede actualizar el registro a "Inactivo", se debe eliminar.`,
       );
@@ -573,19 +583,19 @@ export class ChurchService {
 
       if (!newMainChurch) {
         throw new NotFoundException(
-          `No se encontró iglesia principal con id ${theirMainChurch}`,
+          `No se encontró Iglesia principal con id ${theirMainChurch}`,
         );
       }
 
       if (newMainChurch.isAnexe) {
         throw new NotFoundException(
-          `No se puede asignar una iglesia anexo como iglesia principal`,
+          `No se puede asignar una Iglesia anexo como Iglesia principal`,
         );
       }
 
-      if (newMainChurch.status === Status.Inactive) {
+      if (newMainChurch.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
-          `La propiedad estado en Iglesia principal debe ser "Activo"`,
+          `La propiedad "Estado de registro" en Iglesia principal debe ser "Activo"`,
         );
       }
 
@@ -596,7 +606,7 @@ export class ChurchService {
         theirMainChurch: newMainChurch,
         updatedAt: new Date(),
         updatedBy: user,
-        status: status,
+        recordStatus: recordStatus,
       });
 
       try {
@@ -615,7 +625,7 @@ export class ChurchService {
       theirMainChurch: church.theirMainChurch,
       updatedAt: new Date(),
       updatedBy: user,
-      status: status,
+      recordStatus: recordStatus,
     });
 
     try {
@@ -638,7 +648,7 @@ export class ChurchService {
     });
 
     if (!church) {
-      throw new NotFoundException(`Iglesia con: ${id} no existe.`);
+      throw new NotFoundException(`Iglesia con: ${id} no fue encontrado.`);
     }
 
     if (!church.isAnexe) {
@@ -653,7 +663,7 @@ export class ChurchService {
       theirMainChurch: null,
       updatedAt: new Date(),
       updatedBy: user,
-      status: Status.Inactive,
+      recordStatus: RecordStatus.Inactive,
     });
 
     try {

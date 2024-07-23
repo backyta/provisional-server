@@ -9,7 +9,7 @@ import { Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Status } from '@/common/enums';
+import { RecordStatus } from '@/common/enums';
 import { PaginationDto } from '@/common/dtos';
 
 import {
@@ -85,7 +85,7 @@ export class FamilyGroupService {
       throw new NotFoundException(`Zona con id ${theirZone} no encontrada.`);
     }
 
-    if (zone.status === Status.Inactive) {
+    if (zone.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `La propiedad estado en Zona debe ser "Activo"`,
       );
@@ -115,7 +115,7 @@ export class FamilyGroupService {
       );
     }
 
-    if (preacher.status === Status.Inactive) {
+    if (preacher.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `La propiedad estado en Predicador debe ser "Activo"`,
       );
@@ -158,7 +158,7 @@ export class FamilyGroupService {
       where: { id: preacher?.theirSupervisor?.id },
     });
 
-    if (supervisor.status === Status.Inactive) {
+    if (supervisor.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `The property status in Supervisor must be a "active"`,
       );
@@ -175,7 +175,7 @@ export class FamilyGroupService {
       where: { id: preacher?.theirCopastor?.id },
     });
 
-    if (copastor.status === Status.Inactive) {
+    if (copastor.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `The property status in Copastor must be a "active"`,
       );
@@ -192,7 +192,7 @@ export class FamilyGroupService {
       where: { id: preacher?.theirPastor?.id },
     });
 
-    if (pastor.status === Status.Inactive) {
+    if (pastor.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `The property status in Pastor must be a "active"`,
       );
@@ -209,7 +209,7 @@ export class FamilyGroupService {
       where: { id: preacher?.theirChurch?.id },
     });
 
-    if (church.status === Status.Inactive) {
+    if (church.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `The property status in Church must be a "active"`,
       );
@@ -274,7 +274,7 @@ export class FamilyGroupService {
     const { limit = 10, offset = 0 } = paginationDto;
 
     const data = await this.familyGroupRepository.find({
-      where: { status: Status.Active },
+      where: { recordStatus: RecordStatus.Active },
       take: limit,
       skip: offset,
       relations: [
@@ -345,7 +345,7 @@ export class FamilyGroupService {
     updateFamilyGroupDto: UpdateFamilyGroupDto,
     user: User,
   ): Promise<FamilyGroup> {
-    const { status, theirPreacher } = updateFamilyGroupDto;
+    const { recordStatus, theirPreacher } = updateFamilyGroupDto;
 
     // Validations
     if (!isUUID(id)) {
@@ -369,7 +369,10 @@ export class FamilyGroupService {
       throw new NotFoundException(`Family Group not found with id: ${id}`);
     }
 
-    if (familyGroup.status === Status.Active && status === Status.Inactive) {
+    if (
+      familyGroup.recordStatus === RecordStatus.Active &&
+      recordStatus === RecordStatus.Inactive
+    ) {
       throw new BadRequestException(
         `You cannot update it to "inactive", you must delete the record`,
       );
@@ -402,7 +405,7 @@ export class FamilyGroupService {
         );
       }
 
-      if (!newPreacher.status) {
+      if (!newPreacher.recordStatus) {
         throw new BadRequestException(
           `The property status in Preacher must be a "active"`,
         );
@@ -420,7 +423,7 @@ export class FamilyGroupService {
         where: { id: newPreacher?.theirSupervisor?.id },
       });
 
-      if (!newSupervisor.status) {
+      if (!newSupervisor.recordStatus) {
         throw new BadRequestException(
           `The property status in Supervisor must be a "active"`,
         );
@@ -437,7 +440,7 @@ export class FamilyGroupService {
         where: { id: newPreacher?.theirZone?.id },
       });
 
-      if (!newZone.status) {
+      if (!newZone.recordStatus) {
         throw new BadRequestException(
           `The property status in Zone must be a "active"`,
         );
@@ -454,7 +457,7 @@ export class FamilyGroupService {
         where: { id: newPreacher?.theirCopastor?.id },
       });
 
-      if (!newCopastor.status) {
+      if (!newCopastor.recordStatus) {
         throw new BadRequestException(
           `The property status in Copastor must be a "active"`,
         );
@@ -471,7 +474,7 @@ export class FamilyGroupService {
         where: { id: newPreacher?.theirPastor?.id },
       });
 
-      if (!newPastor.status) {
+      if (!newPastor.recordStatus) {
         throw new BadRequestException(
           `The property status in Pastor must be a "active"`,
         );
@@ -488,7 +491,7 @@ export class FamilyGroupService {
         where: { id: newPreacher?.theirChurch?.id },
       });
 
-      if (!newChurch.status) {
+      if (!newChurch.recordStatus) {
         throw new BadRequestException(
           `The property status in Church must be a "active"`,
         );
@@ -507,7 +510,7 @@ export class FamilyGroupService {
           theirFamilyGroup: null,
           updatedAt: new Date(),
           updatedBy: user,
-          status: status,
+          recordStatus: recordStatus,
         });
 
         await this.preacherRepository.save(updateOldPreacher);
@@ -520,20 +523,20 @@ export class FamilyGroupService {
           theirPreacher: null,
           updatedAt: new Date(),
           updatedBy: user,
-          status: status,
+          recordStatus: recordStatus,
         });
 
         await this.familyGroupRepository.save(updateOldFamilyGroup);
       }
 
-      //* Setear a null el preacher de la nueva family house
+      //* Setear a null el preacher de family house del nuevo preacher
       if (newPreacher?.theirFamilyGroup?.id) {
         const updatedNewFamilyGroup = await this.familyGroupRepository.preload({
           id: newPreacher?.theirFamilyGroup?.id,
           theirPreacher: null,
           updatedAt: new Date(),
           updatedBy: user,
-          status: status,
+          recordStatus: recordStatus,
         });
 
         await this.familyGroupRepository.save(updatedNewFamilyGroup);
@@ -600,7 +603,7 @@ export class FamilyGroupService {
           theirPreacher: newPreacher,
           updatedAt: new Date(),
           updatedBy: user,
-          status: status,
+          recordStatus: recordStatus,
         });
 
         let savedFamilyGroup: FamilyGroup;
@@ -677,7 +680,7 @@ export class FamilyGroupService {
           theirPreacher: newPreacher,
           updatedAt: new Date(),
           updatedBy: user,
-          status: status,
+          recordStatus: recordStatus,
         });
 
         let savedFamilyGroup: FamilyGroup;
@@ -735,7 +738,7 @@ export class FamilyGroupService {
         theirPreacher: familyGroup.theirPreacher,
         updatedAt: new Date(),
         updatedBy: user,
-        status: status,
+        recordStatus: recordStatus,
       });
 
       try {
@@ -769,7 +772,7 @@ export class FamilyGroupService {
       theirPreacher: null,
       updatedAt: new Date(),
       updatedBy: user,
-      status: Status.Inactive,
+      recordStatus: RecordStatus.Inactive,
     });
 
     try {

@@ -22,7 +22,7 @@ interface SeedSupervisor {
   address: string;
   referenceAddress: string;
   roles: string[];
-  status?: string;
+  recordStatus?: string;
 
   //* Relations
   theirCopastor?: string;

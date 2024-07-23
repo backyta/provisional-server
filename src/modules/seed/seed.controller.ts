@@ -10,7 +10,7 @@ import {
 } from '@nestjs/swagger';
 
 import { Auth } from '@/modules/auth/decorators';
-import { UserRoles } from '@/modules/auth/enums';
+import { UserRole } from '@/modules/auth/enums';
 
 import { SeedService } from '@/modules/seed/seed.service';
 
@@ -36,7 +36,7 @@ export class SeedController {
   ) {}
 
   @Get()
-  @Auth(UserRoles.SuperUser)
+  @Auth(UserRole.SuperUser)
   executeSeed(): Promise<string> {
     if (this.configService.get('STAGE') === 'prod') {
       throw new BadRequestException('Cannot run seed in production.');

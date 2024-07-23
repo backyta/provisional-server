@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { Status } from '@/common/enums';
+import { RecordStatus } from '@/common/enums';
 
 import { User } from '@/modules/user/entities';
 
@@ -55,6 +55,9 @@ export class Expense {
   @JoinColumn({ name: 'updated_by' })
   updatedBy: User;
 
-  @Column('text', { name: 'status', default: Status.Active })
-  status: string;
+  @Column('text', {
+    name: 'record_status',
+    default: RecordStatus.Active,
+  })
+  recordStatus: string;
 }

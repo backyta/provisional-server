@@ -22,6 +22,7 @@ import { SupervisorModule } from '@/modules/supervisor/supervisor.module';
 import { ExpensesModule } from '@/modules/offering/expenses/expenses.module';
 import { FamilyGroupModule } from '@/modules/family-group/family-group.module';
 
+// TODO : Probar despliges con migraciones
 @Module({
   imports: [
     ConfigModule.forRoot(), // access to environment variables global in all modules

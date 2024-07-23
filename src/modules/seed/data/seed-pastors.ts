@@ -21,7 +21,7 @@ interface SeedPastor {
   address: string;
   referenceAddress: string;
   roles: string[];
-  status?: string;
+  recordStatus?: string;
 
   //* Relations
   theirChurch?: string;

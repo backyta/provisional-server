@@ -22,9 +22,9 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { PaginationDto, SearchTypeAndPaginationDto } from '@/common/dtos';
+import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
 
-import { UserRoles } from '@/modules/auth/enums';
+import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
 
 import { User } from '@/modules/user/entities';
@@ -50,7 +50,7 @@ export class PastorController {
 
   //* Create
   @Post()
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiCreatedResponse({
     description: 'Pastor has been successfully created.',
   })
@@ -93,14 +93,14 @@ export class PastorController {
   })
   findTerm(
     @Param('term') term: string,
-    @Query() searchTypeAndPaginationDto: SearchTypeAndPaginationDto,
+    @Query() searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
   ): Promise<Pastor | Pastor[]> {
     return this.pastorService.findByTerm(term, searchTypeAndPaginationDto);
   }
 
   //* Update
   @Patch(':id')
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
     description: 'Successful operation',
   })
@@ -117,7 +117,7 @@ export class PastorController {
 
   //! Delete
   @Delete(':id')
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
     description: 'Successful operation.',
   })

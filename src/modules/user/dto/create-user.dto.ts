@@ -11,24 +11,23 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { Gender, Status } from '@/common/enums';
-import { UserRoles } from '@/modules/auth/enums';
+import { Gender, RecordStatus } from '@/common/enums';
+import { UserRole } from '@/modules/auth/enums';
 
 export class CreateUserDto {
   @ApiProperty({
-    example: 'example@example.com',
+    example: 'jorge.villena@icup.com',
   })
   @IsString()
   @IsEmail()
   email: string;
 
-  // TODO : validar el regex del front con el del back
   @ApiProperty({
-    example: 'Abcd12345',
+    example: 'Abcd$12345$',
   })
   @IsString()
   @MinLength(6)
-  @MaxLength(50)
+  @MaxLength(20)
   @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message:
       'The password must have a Uppercase, lowercase letter and a number',
@@ -36,14 +35,14 @@ export class CreateUserDto {
   password: string;
 
   @ApiProperty({
-    example: 'John Martin',
+    example: 'Jorge Martin',
   })
   @IsString()
   @MinLength(1)
   firstName: string;
 
   @ApiProperty({
-    example: 'Rojas Sanchez',
+    example: 'Villena Sanchez',
   })
   @IsString()
   @MinLength(1)
@@ -52,17 +51,27 @@ export class CreateUserDto {
   @ApiProperty({
     example: Gender.Female,
   })
-  @IsEnum(Gender)
+  @IsEnum(Gender, {
+    message:
+      'El genero debe ser uno de los siguientes valores: Masculino o Femenino',
+  })
   gender: string;
 
   @ApiProperty({
-    example: Status.Active,
+    example: RecordStatus.Active,
   })
   @IsString()
   @IsOptional()
-  status?: string;
+  recordStatus?: string;
 
-  @IsEnum(UserRoles, { each: true })
+  @ApiProperty({
+    example: [UserRole.SuperUser, UserRole.TreasurerUser],
+  })
+  @IsEnum(UserRole, {
+    each: true,
+    message:
+      'Los roles pueden contener los siguientes valores: Super-Usuario, Usuario-Admin., Usuario-Tesor., Usuario.',
+  })
   @IsArray()
   @IsNotEmpty()
   roles: string[];

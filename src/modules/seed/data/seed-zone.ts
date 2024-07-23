@@ -5,7 +5,7 @@ interface SeedZone {
   department?: string;
   province?: string;
   district: string;
-  status?: string;
+  recordStatus?: string;
 
   //* Relations
   theirSupervisor?: string;

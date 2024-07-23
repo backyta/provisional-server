@@ -22,7 +22,7 @@ import {
 
 import { PaginationDto } from '@/common/dtos';
 
-import { UserRoles } from '@/modules/auth/enums';
+import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
 
 import { User } from '@/modules/user/entities';
@@ -48,7 +48,7 @@ export class ZoneController {
 
   //* Create
   @Post()
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiCreatedResponse({
     description: 'Zone has been successfully created.',
   })
@@ -82,7 +82,7 @@ export class ZoneController {
 
   //* Update
   @Patch(':id')
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
     description: 'Successful operation',
   })

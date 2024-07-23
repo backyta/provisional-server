@@ -1,22 +1,25 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { MaritalStatus, MemberRoles, Gender } from '@/common/enums';
 import {
   IsArray,
   IsEmail,
   IsEnum,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
-  IsUUID,
   MaxLength,
   MinLength,
 } from 'class-validator';
+import {
+  MaritalStatus,
+  MemberRole,
+  Gender,
+  RecordStatus,
+} from '@/common/enums';
 
 export class CreateDiscipleDto {
   //* General and Personal info
   @ApiProperty({
-    example: 'John Martin',
+    example: 'Maria Luisa',
   })
   @IsString()
   @IsNotEmpty()
@@ -25,7 +28,7 @@ export class CreateDiscipleDto {
   firstName: string;
 
   @ApiProperty({
-    example: 'Rojas Castro',
+    example: 'Paredes Villa',
   })
   @IsString()
   @IsNotEmpty()
@@ -34,20 +37,26 @@ export class CreateDiscipleDto {
   lastName: string;
 
   @ApiProperty({
-    example: 'male',
+    example: Gender.Female,
   })
-  @IsEnum(Gender)
+  @IsEnum(Gender, {
+    message:
+      'El genero debe ser uno de los siguientes valores: Masculino o Femenino',
+  })
   gender: string;
 
   @ApiProperty({
-    example: 'single',
+    example: MaritalStatus.Married,
   })
-  @IsEnum(MaritalStatus)
+  @IsEnum(MaritalStatus, {
+    message:
+      'El estado civil debe ser uno de los siguientes valores: Soltero(a), Casado(a), Divorciado(a), Viudo(a), Otro.',
+  })
   @IsNotEmpty()
   maritalStatus: string;
 
   @ApiProperty({
-    example: 'Colombia',
+    example: 'Ecuador',
   })
   @IsString()
   @IsNotEmpty()
@@ -63,9 +72,8 @@ export class CreateDiscipleDto {
   @ApiProperty({
     example: '2',
   })
-  @IsNumber()
   @IsOptional()
-  numberChildren?: number;
+  numberChildren?: number | string;
 
   @ApiProperty({
     example: '2001/12/23',
@@ -96,7 +104,7 @@ export class CreateDiscipleDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  countryResidence?: string;
+  country?: string;
 
   @ApiProperty({
     example: 'Lima',
@@ -105,7 +113,7 @@ export class CreateDiscipleDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  departmentResidence?: string;
+  department?: string;
 
   @ApiProperty({
     example: 'Lima',
@@ -114,7 +122,7 @@ export class CreateDiscipleDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  provinceResidence?: string;
+  province?: string;
 
   @ApiProperty({
     example: 'Comas',
@@ -123,7 +131,7 @@ export class CreateDiscipleDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(20)
-  districtResidence: string;
+  district: string;
 
   @ApiProperty({
     example: 'La Merced',
@@ -132,7 +140,7 @@ export class CreateDiscipleDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(30)
-  urbanSectorResidence: string;
+  urbanSector: string;
 
   @ApiProperty({
     example: 'Av. Central 123',
@@ -141,7 +149,7 @@ export class CreateDiscipleDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(50)
-  addressResidence: string;
+  address: string;
 
   @ApiProperty({
     example: 'A una cuadra del hospital central',
@@ -150,30 +158,37 @@ export class CreateDiscipleDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(100)
-  addressResidenceReference: string;
+  referenceAddress: string;
 
   //* Roles and Status
   @ApiProperty({
-    example: ['disciple'],
+    example: [MemberRole.Disciple],
   })
-  @IsEnum(MemberRoles, { each: true })
+  @IsEnum(MemberRole, {
+    each: true,
+    message:
+      'Los roles deben contener "Discípulo" y uno de los siguientes valores: Tesorero, Predicador, Supervisor, Co-Pastor, Pastor.',
+  })
   @IsArray()
   @IsNotEmpty()
   roles: string[];
 
   @ApiProperty({
-    example: 'Active',
+    example: RecordStatus.Active,
   })
   @IsString()
+  @IsEnum(RecordStatus, {
+    message:
+      'El estado de registro debe ser uno de los siguientes valores: Activo o Inactivo',
+  })
   @IsOptional()
-  status?: string;
+  recordStatus?: string;
 
   //* Relations
   @ApiProperty({
     example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
   })
   @IsString()
-  @IsUUID()
   @IsOptional()
   theirFamilyGroup?: string;
 
@@ -181,7 +196,6 @@ export class CreateDiscipleDto {
     example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
   })
   @IsString()
-  @IsUUID()
   @IsOptional()
   theirSupervisor?: string;
 }

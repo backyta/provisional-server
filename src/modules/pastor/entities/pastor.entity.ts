@@ -10,7 +10,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { Status } from '@/common/enums';
+import { RecordStatus } from '@/common/enums';
 
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
@@ -109,8 +109,11 @@ export class Pastor {
   @JoinColumn({ name: 'updated_by' })
   updatedBy: User;
 
-  @Column('text', { default: Status.Active })
-  status: string;
+  @Column('text', {
+    name: 'record_status',
+    default: RecordStatus.Active,
+  })
+  recordStatus: string;
 
   //* Relations (Array)
   @OneToMany(() => Copastor, (copastor) => copastor.theirPastor)

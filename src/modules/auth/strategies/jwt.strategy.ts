@@ -9,7 +9,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JwtPayload } from '@/modules/auth/interfaces';
 
 import { User } from '@/modules/user/entities';
-import { Status } from '@/common/enums';
+import { RecordStatus } from '@/common/enums';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -33,11 +33,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const user = await this.userRepository.findOneBy({ id });
 
     if (!user) {
-      throw new UnauthorizedException(`Token not valid`);
+      throw new UnauthorizedException(`Token no valido.`);
     }
 
-    if (user.status === Status.Inactive)
-      throw new UnauthorizedException('User is inactive, talk with an admin');
+    if (user.recordStatus === RecordStatus.Inactive) {
+      throw new UnauthorizedException(
+        'Usuario inactivo, habla con el administrador', //Does not throw the exception because he cannot delete himself if he is super admin, and another cannot delete because he does not have access
+      );
+    }
 
     return user; // Whatever that I returned here is added in request (From the request you have access to this user along the path through which the request passes)
   }

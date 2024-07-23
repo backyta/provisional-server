@@ -22,17 +22,17 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { PaginationDto, SearchTypeAndPaginationDto } from '@/common/dtos';
+import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
 
-import { CopastorService } from '@/modules/copastor/copastor.service';
-import { CreateCopastorDto, UpdateCopastorDto } from '@/modules/copastor/dto';
-
-import { UserRoles } from '@/modules/auth/enums';
+import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
 
 import { User } from '@/modules/user/entities';
 import { Pastor } from '@/modules/pastor/entities';
+
 import { Copastor } from '@/modules/copastor/entities';
+import { CopastorService } from '@/modules/copastor/copastor.service';
+import { CreateCopastorDto, UpdateCopastorDto } from '@/modules/copastor/dto';
 
 @ApiTags('Copastors')
 @ApiBearerAuth()
@@ -51,7 +51,7 @@ export class CopastorController {
 
   //* CREATE
   @Post()
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiCreatedResponse({
     description: 'Copastor has been successfully created.',
   })
@@ -94,14 +94,14 @@ export class CopastorController {
   })
   findTerm(
     @Param('term') term: string,
-    @Query() searchTypeAndPaginationDto: SearchTypeAndPaginationDto,
+    @Query() searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
   ): Promise<Copastor | Copastor[]> {
     return this.copastorService.findByTerm(term, searchTypeAndPaginationDto);
   }
 
   //* UPDATE
   @Patch(':id')
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
     description: 'Successful operation',
   })
@@ -118,7 +118,7 @@ export class CopastorController {
 
   //! DELETE
   @Delete(':id')
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
     description: 'Successful operation.',
   })

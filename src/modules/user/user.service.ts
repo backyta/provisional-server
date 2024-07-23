@@ -4,16 +4,26 @@ import {
   InternalServerErrorException,
   Logger,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
+import { FindOptionsOrderValue, ILike, Raw, Repository } from 'typeorm';
 
-import { Status } from '@/common/enums';
-import { PaginationDto } from '@/common/dtos';
+import * as bcrypt from 'bcrypt';
+
+import { UserRole } from '@/modules/auth/enums';
+
+import {
+  GenderNames,
+  MemberRoleNames,
+  RecordStatus,
+  SearchType,
+} from '@/common/enums';
+import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
 
 import { User } from '@/modules/user/entities';
-import { UpdateUserDto } from '@/modules/user/dto';
+import { CreateUserDto, UpdateUserDto } from '@/modules/user/dto';
 
 @Injectable()
 export class UserService {
@@ -24,117 +34,229 @@ export class UserService {
     private readonly userRepository: Repository<User>,
   ) {}
 
+  //* CREATE USER
+  async create(createUserDto: CreateUserDto, user: User) {
+    const { password, ...userData } = createUserDto;
+
+    try {
+      const newUser = this.userRepository.create({
+        ...userData,
+        password: bcrypt.hashSync(password, 10),
+        createdBy: user,
+        createdAt: new Date(),
+      });
+
+      await this.userRepository.save(newUser);
+      delete newUser.password;
+      return {
+        ...newUser,
+      };
+    } catch (error) {
+      this.handleDBExceptions(error);
+    }
+  }
+
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<User[]> {
-    const { limit = 10, offset = 0 } = paginationDto;
+    const { limit, offset = 0, order = 'ASC' } = paginationDto;
 
     return this.userRepository.find({
-      where: { status: Status.Active },
+      where: { recordStatus: RecordStatus.Active },
       take: limit,
       skip: offset,
-      order: { createdAt: 'ASC' },
+      relations: ['updatedBy', 'createdBy'],
+      order: { createdAt: order as FindOptionsOrderValue },
     });
   }
 
-  //* FIND BY SEARCH TERM AND TYPE (FILTER)
-  // async findTerm(
-  //   term: string,
-  //   searchTypeAndPaginationDto: SearchTypeAndPaginationDto,
-  // ): Promise<User[] | User> {
-  // const { type, limit = 20, offset = 0 } = searchTypeAndPaginationDto;
-  // let member: User | User[];
+  //* FIND BY TERM
+  async findByTerm(
+    term: string,
+    searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
+  ): Promise<User | User[]> {
+    const {
+      'search-type': searchType,
+      limit,
+      offset = 0,
+      order,
+    } = searchTypeAndPaginationDto;
 
-  // //* Find UUID --> One (inactive or active)
-  // if (isUUID(term) && type === SearchType.id) {
-  //   member = await this.userRepository.findOne({
-  //     where: { id: term },
-  //   });
+    //? Find by first name --> Many
+    if (term && searchType === SearchType.FirstName) {
+      const firstNames = term.replace(/\+/g, ' ');
 
-  //   if (!member) {
-  //     throw new NotFoundException(`Pastor was not found with this UUID`);
-  //   }
-  // }
+      const users = await this.userRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: ['updatedBy', 'createdBy'],
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
 
-  // //* Find isActive --> Many
-  // if (term && type === SearchType.isActive) {
-  //   const whereCondition = {};
-  //   try {
-  //     whereCondition[type] = term;
+      if (users.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron usuarios con estos nombres: ${firstNames}`,
+        );
+      }
 
-  //     const users = await this.userRepository.find({
-  //       where: [whereCondition],
-  //       take: limit,
-  //       skip: offset,
-  //       order: { createdAt: 'ASC' },
-  //     });
+      return users;
+    }
 
-  //     if (users.length === 0) {
-  //       throw new NotFoundException(`Not found Users with this: ${term}`);
-  //     }
-  //     return users;
-  //   } catch (error) {
-  //     if (error.code === '22P02') {
-  //       throw new BadRequestException(
-  //         `This term is not a valid boolean value`,
-  //       );
-  //     }
+    //? Find by last name --> Many
+    if (term && searchType === SearchType.LastName) {
+      const lastNames = term.replace(/\+/g, ' ');
 
-  //     throw error;
-  //   }
-  // }
+      const users = await this.userRepository.find({
+        where: {
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: ['updatedBy', 'createdBy'],
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
 
-  // //* Find firstName --> Many
-  // if (term && type === SearchType.firstName) {
-  //   const resultSearch = await searchUserByNames({
-  //     term,
-  //     search_type: SearchType.firstName,
-  //     limit,
-  //     offset,
-  //     search_repository: this.userRepository,
-  //   });
+      if (users.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron usuarios con estos apellidos: ${lastNames}`,
+        );
+      }
 
-  //   return resultSearch;
-  // }
+      return users;
+    }
 
-  // //* Find lastName --> Many
-  // if (term && type === SearchType.lastName) {
-  //   const resultSearch = await searchUserByNames({
-  //     term,
-  //     search_type: SearchType.lastName,
-  //     limit,
-  //     offset,
-  //     search_repository: this.userRepository,
-  //   });
+    //? Find by full name --> Many
+    if (term && searchType === SearchType.FullName) {
+      const firstNames = term.split('-')[0].replace(/\+/g, ' ');
+      const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
-  //   return resultSearch;
-  // }
+      const users = await this.userRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: ['updatedBy', 'createdBy'],
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
 
-  // //* Find fullName --> One
-  // if (term && type === SearchType.fullName) {
-  //   const resultSearch = await searchUserByNames({
-  //     term,
-  //     search_type: SearchType.fullName,
-  //     limit,
-  //     offset,
-  //     search_repository: this.userRepository,
-  //   });
+      if (users.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron usuarios con estos nombres y apellidos: ${firstNames} ${lastNames}`,
+        );
+      }
 
-  //   return resultSearch;
-  // }
+      return users;
+    }
 
-  // //! General Exceptions
-  // if (!isUUID(term) && type === SearchType.id) {
-  //   throw new BadRequestException(`Not valid UUID`);
-  // }
+    //? Find by roles --> Many
+    if (term && searchType === SearchType.Roles) {
+      const rolesArray = term.split('+');
 
-  // if (term && !Object.values(SearchType).includes(type as SearchType)) {
-  //   throw new BadRequestException(
-  //     `Type not valid, should be: ${Object.values(SearchType).join(', ')}`,
-  //   );
-  // }
+      const users = await this.userRepository.find({
+        where: {
+          roles: Raw((alias) => `ARRAY[:...rolesArray]::text[] && ${alias}`, {
+            rolesArray,
+          }),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: ['updatedBy', 'createdBy'],
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
 
-  // if (!member) throw new NotFoundException(`Member with ${term} not found`);
-  // }
+      if (users.length === 0) {
+        const rolesInSpanish = rolesArray
+          .map((role) => MemberRoleNames[role] ?? role)
+          .join(' - ');
+
+        throw new NotFoundException(
+          `No se encontraron usuarios con estos roles: ${rolesInSpanish}`,
+        );
+      }
+
+      return users;
+    }
+
+    //? Find by gender --> Many
+    if (term && searchType === SearchType.Gender) {
+      const genderTerm = term.toLowerCase();
+      const validGenders = ['male', 'female'];
+
+      if (!validGenders.includes(genderTerm)) {
+        throw new BadRequestException(`Género no válido: ${term}`);
+      }
+
+      const users = await this.userRepository.find({
+        where: {
+          gender: genderTerm,
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: ['updatedBy', 'createdBy'],
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (users.length === 0) {
+        const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
+
+        throw new NotFoundException(
+          `No se encontraron usuarios con este genero: ${genderInSpanish}`,
+        );
+      }
+
+      return users;
+    }
+
+    //? Find by status --> Many
+    if (term && searchType === SearchType.RecordStatus) {
+      const recordStatusTerm = term.toLowerCase();
+      const validRecordStatus = ['active', 'inactive'];
+
+      if (!validRecordStatus.includes(recordStatusTerm)) {
+        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      }
+
+      const users = await this.userRepository.find({
+        where: {
+          recordStatus: recordStatusTerm,
+        },
+        take: limit,
+        skip: offset,
+        relations: ['updatedBy', 'createdBy'],
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (users.length === 0) {
+        const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
+
+        throw new NotFoundException(
+          `No se encontraron usuarios con este estado de registro: ${value}`,
+        );
+      }
+
+      return users;
+    }
+
+    //! General Exceptions
+    if (!searchType) {
+      throw new BadRequestException(`El tipo de búsqueda es obligatorio`);
+    }
+
+    if (term && !Object.values(SearchType).includes(searchType as SearchType)) {
+      throw new BadRequestException(
+        `Tipos de búsqueda no validos, solo son validos: ${Object.values(SearchType).join(', ')}`,
+      );
+    }
+  }
 
   //* UPDATE USER
   async update(
@@ -142,55 +264,122 @@ export class UserService {
     updateUserDto: UpdateUserDto,
     user: User,
   ): Promise<User> {
-    const { status } = updateUserDto;
+    const {
+      firstName,
+      lastName,
+      gender,
+      email,
+      roles,
+      recordStatus,
+      currentPassword,
+      newPassword,
+    } = updateUserDto;
 
     if (!isUUID(id)) {
       throw new BadRequestException(`Not valid UUID`);
     }
 
-    const dataUser = await this.userRepository.findOneBy({ id });
+    const dataUser = await this.userRepository.findOne({
+      where: { id },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        roles: true,
+        recordStatus: true,
+        email: true,
+        gender: true,
+        password: true,
+      },
+    });
 
     if (!dataUser) {
-      throw new NotFoundException(`User not found with id: ${id}`);
+      throw new NotFoundException(`Usuario con id: ${id} no fue encontrado.`);
     }
 
-    if (dataUser.status === Status.Active && status === Status.Inactive) {
-      throw new BadRequestException(
-        `You cannot update it to "inactive", you must delete the record`,
+    if (
+      currentPassword &&
+      newPassword &&
+      !bcrypt.compareSync(currentPassword, dataUser.password)
+    ) {
+      throw new UnauthorizedException(
+        `La contraseña actual no coincide con la registrada en la base de datos.`,
       );
     }
 
-    try {
-      const updateUser = await this.userRepository.preload({
-        id: id,
-        ...updateUserDto,
-        status: status,
-        updatedAt: new Date(),
-        updatedBy: user,
-      });
+    if (
+      dataUser.recordStatus === RecordStatus.Active &&
+      recordStatus === RecordStatus.Inactive
+    ) {
+      throw new BadRequestException(
+        `No se puede actualizar un registro a "Inactivo", se debe eliminar.`,
+      );
+    }
 
-      return await this.userRepository.save(updateUser);
-    } catch (error) {
-      this.handleDBExceptions(error);
+    if (newPassword) {
+      try {
+        const updateUser = await this.userRepository.preload({
+          id: id,
+          firstName: firstName,
+          lastName: lastName,
+          gender: gender,
+          roles: roles,
+          email: email,
+          password: bcrypt.hashSync(newPassword, 10),
+          recordStatus: recordStatus,
+          updatedAt: new Date(),
+          updatedBy: user,
+        });
+
+        return await this.userRepository.save(updateUser);
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
+    }
+
+    if (!newPassword) {
+      try {
+        const updateUser = await this.userRepository.preload({
+          id: id,
+          firstName: firstName,
+          lastName: lastName,
+          gender: gender,
+          roles: roles,
+          email: email,
+          recordStatus: recordStatus,
+          updatedAt: new Date(),
+          updatedBy: user,
+        });
+
+        return await this.userRepository.save(updateUser);
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
     }
   }
 
   //! DELETE USER
   async delete(id: string, user: User): Promise<void> {
     if (!isUUID(id)) {
-      throw new BadRequestException(`Not valid UUID`);
+      throw new BadRequestException(`UUID no valido`);
     }
 
     const dataUser = await this.userRepository.findOneBy({ id });
 
     if (!dataUser) {
-      throw new NotFoundException(`User with id: ${id} not exits`);
+      throw new NotFoundException(`Usuario con id: ${id} no fue encontrado.`);
+    }
+
+    if (dataUser.roles.includes(UserRole.SuperUser)) {
+      throw new BadRequestException(
+        `Usuario con rol "Super-Usuario" no puede ser eliminado.`,
+      );
     }
 
     try {
       const deleteUser = await this.userRepository.preload({
         id: dataUser.id,
-        status: Status.Inactive,
+        recordStatus: RecordStatus.Inactive,
         updatedAt: new Date(),
         updatedBy: user,
       });
@@ -204,10 +393,20 @@ export class UserService {
   //? PRIVATE METHODS
   // For future index errors or constrains with code.
   private handleDBExceptions(error: any): never {
-    if (error.code === '23505') throw new BadRequestException(error.detail);
+    if (error.code === '23505') {
+      const detail = error.detail;
+
+      if (detail.includes('email')) {
+        throw new BadRequestException('El correo electrónico ya está en uso.');
+      } else if (detail.includes('church')) {
+        throw new BadRequestException('El nombre de iglesia ya está en uso.');
+      }
+    }
+
     this.logger.error(error);
+
     throw new InternalServerErrorException(
-      'Unexpected errors, check server logs',
+      'Sucedió un error inesperado, revise los registros de consola',
     );
   }
 }

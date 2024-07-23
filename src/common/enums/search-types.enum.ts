@@ -1,6 +1,4 @@
 export enum SearchType {
-  Id = 'id',
-
   //* Church
   ChurchName = 'church_name',
   FoundingDate = 'founding_date',
@@ -36,7 +34,7 @@ export enum SearchType {
   UrbanSector = 'urban_sector',
 
   //* Disciple, Pastor, Copastor, Supervisor, Preacher, Fam. House, Offering, User
-  Status = 'status',
+  RecordStatus = 'record_status',
 
   //* Disciple, User
   Roles = 'roles',

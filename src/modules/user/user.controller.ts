@@ -7,10 +7,12 @@ import {
   Delete,
   Query,
   ParseUUIDPipe,
+  Post,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
@@ -20,14 +22,14 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { PaginationDto, SearchTypeAndPaginationDto } from '@/common/dtos';
+import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
 
-import { UserRoles } from '@/modules/auth/enums';
+import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
 
 import { User } from '@/modules/user/entities';
-import { UpdateUserDto } from '@/modules/user/dto';
 import { UserService } from '@/modules/user/user.service';
+import { CreateUserDto, UpdateUserDto } from '@/modules/user/dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -44,9 +46,23 @@ import { UserService } from '@/modules/user/user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  //* Create
+  @ApiBearerAuth()
+  @Post()
+  @Auth(UserRole.SuperUser)
+  @ApiCreatedResponse({
+    description: 'User has been successfully created.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
+  registerUser(@Body() createUserDto: CreateUserDto, @GetUser() user: User) {
+    return this.userService.create(createUserDto, user);
+  }
+
   //* Find All
   @Get()
-  @Auth(UserRoles.SuperUser)
+  @Auth(UserRole.SuperUser)
   @ApiOkResponse({
     description: 'Successful operation.',
   })
@@ -57,30 +73,30 @@ export class UserController {
     return this.userService.findAll(paginationDto);
   }
 
-  //* Fin By Term
-  // @Get(':term')
-  // @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
-  // @ApiParam({
-  //   name: 'term',
-  //   description: 'Could be id, full names, first name, last name.',
-  //   example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
-  // })
-  // @ApiOkResponse({
-  //   description: 'Successful operation.',
-  // })
-  // @ApiNotFoundResponse({
-  //   description: 'Not found resource.',
-  // })
-  // findTerm(
-  //   @Param('term') term: string,
-  //   @Query() searchTypeAndPaginationDto: SearchTypeAndPaginationDto,
-  // ): Promise<User | User[]> {
-  //   return this.userService.findTerm(term, searchTypeAndPaginationDto);
-  // }
+  //* Find By Term
+  @Get(':term')
+  @Auth()
+  @ApiParam({
+    name: 'term',
+    description: 'Could be names, last names, roles, etc.',
+    example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
+  })
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found resource.',
+  })
+  findTerm(
+    @Param('term') term: string,
+    @Query() searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
+  ): Promise<User | User[]> {
+    return this.userService.findByTerm(term, searchTypeAndPaginationDto);
+  }
 
   //* Update
   @Patch(':id')
-  @Auth(UserRoles.SuperUser)
+  @Auth(UserRole.SuperUser)
   @ApiOkResponse({
     description: 'Successful operation',
   })
@@ -97,7 +113,7 @@ export class UserController {
 
   //* Delete
   @Delete(':id')
-  @Auth(UserRoles.SuperUser)
+  @Auth(UserRole.SuperUser)
   @ApiOkResponse({
     description: 'Successful operation.',
   })

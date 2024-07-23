@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Status } from '@/common/enums';
+import { RecordStatus } from '@/common/enums';
 import {
   IsEnum,
   IsNotEmpty,
@@ -85,9 +85,9 @@ export class CreateFamilyGroupDto {
     example: 'active',
   })
   @IsString()
-  @IsEnum(Status)
+  @IsEnum(RecordStatus)
   @IsOptional()
-  status?: string;
+  recordStatus?: string;
 
   //* Relations
   @ApiProperty({

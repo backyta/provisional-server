@@ -26,7 +26,7 @@ import { PaginationDto } from '@/common/dtos';
 
 import { User } from '@/modules/user/entities';
 
-import { UserRoles } from '@/modules/auth/enums';
+import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
 
 import {
@@ -53,7 +53,7 @@ export class FamilyGroupController {
 
   //* Create
   @Post()
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiCreatedResponse({
     description: 'Family House has been successfully created.',
   })
@@ -87,7 +87,7 @@ export class FamilyGroupController {
 
   //* Update
   @Patch(':id')
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
     description: 'Successful operation',
   })
@@ -110,7 +110,7 @@ export class FamilyGroupController {
   @ApiForbiddenResponse({
     description: 'Forbidden.',
   })
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   remove(@Param('id') id: string, @GetUser() user: User): Promise<void> {
     return this.familyGroupService.remove(id, user);
   }

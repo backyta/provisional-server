@@ -10,7 +10,12 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { MaritalStatus, MemberRoles, Gender, Status } from '@/common/enums';
+import {
+  MaritalStatus,
+  MemberRole,
+  Gender,
+  RecordStatus,
+} from '@/common/enums';
 
 export class CreatePastorDto {
   //* General and Personal info
@@ -33,13 +38,16 @@ export class CreatePastorDto {
   lastName: string;
 
   @ApiProperty({
-    example: 'male',
+    example: Gender.Male,
   })
-  @IsEnum(Gender)
+  @IsEnum(Gender, {
+    message:
+      'El genero debe ser uno de los siguientes valores: Masculino o Femenino',
+  })
   gender: string;
 
   @ApiProperty({
-    example: 'single',
+    example: MaritalStatus.Divorced,
   })
   @IsEnum(MaritalStatus, {
     message:
@@ -49,7 +57,7 @@ export class CreatePastorDto {
   maritalStatus: string;
 
   @ApiProperty({
-    example: 'Colombia',
+    example: 'Peru',
   })
   @IsString()
   @IsNotEmpty()
@@ -155,22 +163,29 @@ export class CreatePastorDto {
 
   //* Roles and Status
   @ApiProperty({
-    example: ['disciple', 'pastor'],
+    example: [MemberRole.Disciple, MemberRole.Pastor],
   })
-  @IsEnum(MemberRoles, { each: true })
+  @IsEnum(MemberRole, {
+    each: true,
+    message:
+      'Los roles deben contener "Discípulo" y uno de los siguientes valores: Tesorero, Predicador, Supervisor, Co-Pastor, Pastor.',
+  })
   @IsArray()
   @IsNotEmpty()
   roles: string[];
 
   @ApiProperty({
-    example: 'active',
+    example: RecordStatus.Active,
   })
   @IsString()
-  @IsEnum(Status)
+  @IsEnum(RecordStatus, {
+    message:
+      'El estado de registro debe ser uno de los siguientes valores: Activo o Inactivo',
+  })
   @IsOptional()
-  status?: string;
+  recordStatus?: string;
 
-  //Relations
+  //* Relations
   @ApiProperty({
     example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
   })

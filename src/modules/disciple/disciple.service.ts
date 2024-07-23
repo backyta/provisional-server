@@ -5,13 +5,22 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Between, FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
 
-import { PaginationDto } from '@/common/dtos';
-import { MemberRoles, Status } from '@/common/enums';
+import { formatToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
+import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
+import {
+  MemberRole,
+  SearchSubType,
+  SearchType,
+  RecordStatus,
+  GenderNames,
+  MaritalStatusNames,
+} from '@/common/enums';
 
+import { formatDataDisciple } from '@/modules/disciple/helpers';
 import { CreateDiscipleDto, UpdateDiscipleDto } from '@/modules/disciple/dto';
 
 import { Zone } from '@/modules/zone/entities';
@@ -59,29 +68,29 @@ export class DiscipleService {
     createDiscipleDto: CreateDiscipleDto,
     user: User,
   ): Promise<Disciple> {
-    const { roles, theirFamilyGroup } = createDiscipleDto;
+    const { roles, theirFamilyGroup, numberChildren } = createDiscipleDto;
 
     // Validations
-    if (!roles.includes(MemberRoles.Disciple)) {
-      throw new BadRequestException(`The "disciple" role must be included`);
+    if (!roles.includes(MemberRole.Disciple)) {
+      throw new BadRequestException(`El rol "Discípulo" debe ser incluido.`);
     }
 
     if (
-      roles.includes(MemberRoles.Pastor) ||
-      roles.includes(MemberRoles.Copastor) ||
-      roles.includes(MemberRoles.Preacher) ||
-      roles.includes(MemberRoles.Supervisor) ||
-      roles.includes(MemberRoles.Treasurer)
+      roles.includes(MemberRole.Pastor) ||
+      roles.includes(MemberRole.Copastor) ||
+      roles.includes(MemberRole.Preacher) ||
+      roles.includes(MemberRole.Supervisor) ||
+      roles.includes(MemberRole.Treasurer)
     ) {
       throw new BadRequestException(
-        `To create a Disciple you only need to have the "disciple" roles`,
+        `Para crear un Discípulo, solo se requiere el rol: "Discípulo"`,
       );
     }
 
     //? Validate and assign Family House
     if (!theirFamilyGroup) {
       throw new NotFoundException(
-        `To create a new disciple place an existing family house id`,
+        `Para crear un nuevo Discípulo se le debe asignar un Grupo familiar`,
       );
     }
 
@@ -99,20 +108,20 @@ export class DiscipleService {
 
     if (!familyGroup) {
       throw new NotFoundException(
-        `Not found Family house with id ${theirFamilyGroup}`,
+        `Grupo familiar con id: ${theirFamilyGroup}, no fue encontrado.`,
       );
     }
 
-    if (!familyGroup.status) {
+    if (!familyGroup.recordStatus) {
       throw new BadRequestException(
-        `The property status in Family House must be a "active"`,
+        `La propiedad "Estado de registro" en Grupo familiar debe ser "Activo".`,
       );
     }
 
     //* Validate and assign preacher according family house
     if (!familyGroup?.theirPreacher) {
       throw new NotFoundException(
-        `Preacher was not found, verify that Family House has a preacher assigned`,
+        `Predicador no fue encontrado, verifica que Grupo Familiar tenga un Predicador asignado.`,
       );
     }
 
@@ -120,16 +129,16 @@ export class DiscipleService {
       where: { id: familyGroup?.theirPreacher?.id },
     });
 
-    if (!preacher.status) {
+    if (!preacher.recordStatus) {
       throw new BadRequestException(
-        `The property status in Preacher must be "active"`,
+        `La propiedad "Estado de registro" en Predicador debe ser "Activo".`,
       );
     }
 
     //* Validate and assign zone according family house
     if (!familyGroup?.theirZone) {
       throw new NotFoundException(
-        `Zone was not found, verify that Family House has a zone assigned`,
+        `Zona no fue encontrada, verifica que Grupo Familiar tenga una Zona asignada.`,
       );
     }
 
@@ -137,16 +146,16 @@ export class DiscipleService {
       where: { id: familyGroup?.theirZone?.id },
     });
 
-    if (!zone.status) {
+    if (!zone.recordStatus) {
       throw new BadRequestException(
-        `The property status in Zone must be "active"`,
+        `La propiedad "Estado de registro" en Zona debe ser "Activo".`,
       );
     }
 
     //* Validate and assign supervisor according family house
     if (!familyGroup?.theirSupervisor) {
       throw new NotFoundException(
-        `Supervisor was not found, verify that Family House has a supervisor assigned`,
+        `Supervisor no fue encontrado, verifica que Grupo Familiar tenga un Supervisor asignado.`,
       );
     }
 
@@ -154,16 +163,16 @@ export class DiscipleService {
       where: { id: familyGroup?.theirSupervisor?.id },
     });
 
-    if (!supervisor.status) {
+    if (!supervisor.recordStatus) {
       throw new BadRequestException(
-        `The property status in Supervisor must be "active"`,
+        `La propiedad "Estado de registro" en Supervisor debe ser "Activo".`,
       );
     }
 
     //* Validate and assign copastor according family house
     if (!familyGroup?.theirCopastor) {
       throw new NotFoundException(
-        `Copastor was not found, verify that Family House has a co-pastor assigned`,
+        `Co-Pastor no fue encontrado, verifica que Grupo Familiar tenga un Co-Pastor asignado.`,
       );
     }
 
@@ -171,16 +180,16 @@ export class DiscipleService {
       where: { id: familyGroup?.theirCopastor?.id },
     });
 
-    if (!copastor.status) {
+    if (!copastor.recordStatus) {
       throw new BadRequestException(
-        `The property status in Copastor must be "active"`,
+        `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
       );
     }
 
     //* Validate and assign pastor according family house
     if (!familyGroup?.theirPastor) {
       throw new NotFoundException(
-        `Pastor was not found, verify that Family House has a pastor assigned`,
+        `Pastor no fue encontrado, verifica que Grupo Familiar tenga un Pastor asignado.`,
       );
     }
 
@@ -188,16 +197,16 @@ export class DiscipleService {
       where: { id: familyGroup?.theirPastor?.id },
     });
 
-    if (!pastor.status) {
+    if (!pastor.recordStatus) {
       throw new BadRequestException(
-        `The property status in Pastor must be "active"`,
+        `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
       );
     }
 
     //* Validate and assign church according family house
     if (!familyGroup?.theirChurch) {
       throw new NotFoundException(
-        `Church was not found, verify that Family House has a church assigned`,
+        `Iglesia no fue encontrada, verifica que Grupo Familiar tenga una Iglesia asignada.`,
       );
     }
 
@@ -205,9 +214,9 @@ export class DiscipleService {
       where: { id: familyGroup?.theirChurch?.id },
     });
 
-    if (!church.status) {
+    if (!church.recordStatus) {
       throw new BadRequestException(
-        `The property status in Church must be "active"`,
+        `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
       );
     }
 
@@ -215,6 +224,7 @@ export class DiscipleService {
     try {
       const newDisciple = this.discipleRepository.create({
         ...createDiscipleDto,
+        numberChildren: +numberChildren,
         theirChurch: church,
         theirPastor: pastor,
         theirCopastor: copastor,
@@ -234,73 +244,1513 @@ export class DiscipleService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit = 10, offset = 0 } = paginationDto;
+    const { limit, offset = 0, order = 'ASC' } = paginationDto;
 
-    const data = await this.discipleRepository.find({
-      where: { status: Status.Active },
+    const disciples = await this.discipleRepository.find({
+      where: { recordStatus: RecordStatus.Active },
       take: limit,
       skip: offset,
       relations: [
-        'theirFamilyGroup',
-        'theirPreacher',
-        'theirZone',
-        'theirSupervisor',
+        'updatedBy',
+        'createdBy',
+        'theirChurch',
         'theirPastor',
         'theirCopastor',
-        'theirChurch',
+        'theirSupervisor',
+        'theirZone',
+        'theirPreacher',
+        'theirFamilyGroup',
       ],
-      order: { createdAt: 'ASC' },
+      order: { createdAt: order as FindOptionsOrderValue },
     });
 
-    const result = data.map((data) => ({
-      ...data,
-      theirChurch: {
-        id: data.theirChurch?.id,
-        churchName: data.theirChurch?.churchName,
-      },
-      theirPastor: {
-        id: data.theirPastor?.id,
-        firstName: data.theirPastor?.firstName,
-        lastName: data.theirPastor?.lastName,
-        roles: data.theirPastor?.roles,
-      },
-      theirCopastor: {
-        id: data.theirCopastor?.id,
-        firstName: data.theirCopastor?.firstName,
-        lastName: data.theirCopastor?.lastName,
-        roles: data.theirCopastor?.roles,
-      },
-      theirSupervisor: {
-        id: data.theirSupervisor?.id,
-        firstName: data.theirSupervisor?.firstName,
-        lastName: data.theirSupervisor?.lastName,
-        roles: data.theirSupervisor?.roles,
-      },
-      theirZone: {
-        id: data.theirZone?.id,
-        zoneName: data.theirZone?.zoneName,
-        district: data.theirZone?.district,
-      },
-      theirPreacher: {
-        id: data.theirPreacher?.id,
-        firstName: data.theirPreacher?.firstName,
-        lastName: data.theirPreacher?.lastName,
-        roles: data.theirPreacher?.roles,
-      },
-      theirFamilyGroup: {
-        id: data.theirFamilyGroup?.id,
-        familyGroupName: data.theirFamilyGroup?.familyGroupName,
-        familyGroupCode: data.theirFamilyGroup?.familyGroupCode,
-        district: data.theirFamilyGroup?.district,
-        urbanSector: data.theirFamilyGroup?.urbanSector,
-      },
-    }));
-
-    return result;
+    return formatDataDisciple({ disciples }) as any;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} disciple`;
+  //* FIND BY TERM
+  async findByTerm(
+    term: string,
+    searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
+  ): Promise<Disciple | Disciple[]> {
+    const {
+      'search-type': searchType,
+      'search-sub-type': searchSubType,
+      limit,
+      offset = 0,
+      order,
+    } = searchTypeAndPaginationDto;
+
+    //? Find by first name () --> Many
+    //* Disciple by disciple names
+    if (
+      term &&
+      searchType === SearchType.FirstName &&
+      searchSubType === SearchSubType.ByDiscipleNames
+    ) {
+      const firstNames = term.replace(/\+/g, ' ');
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos con estos nombres: ${firstNames}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Disciples by preacher names
+    if (
+      term &&
+      searchType === SearchType.FirstName &&
+      searchSubType === SearchSubType.DiscipleByPreacherNames
+    ) {
+      const firstNames = term.replace(/\+/g, ' ');
+
+      const preachers = await this.preacherRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const preachersId = preachers.map((preacher) => preacher.id);
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          theirPreacher: In(preachersId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos por los nombres de su predicador: ${firstNames}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Disciples by supervisor names
+    if (
+      term &&
+      searchType === SearchType.FirstName &&
+      searchSubType === SearchSubType.DiscipleBySupervisorNames
+    ) {
+      const firstNames = term.replace(/\+/g, ' ');
+
+      const supervisors = await this.supervisorRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const supervisorsId = supervisors.map((supervisor) => supervisor.id);
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          theirSupervisor: In(supervisorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos por los nombres de su supervisor: ${firstNames}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Disciples by co-pastor names
+    if (
+      term &&
+      searchType === SearchType.FirstName &&
+      searchSubType === SearchSubType.DiscipleByCopastorNames
+    ) {
+      const firstNames = term.replace(/\+/g, ' ');
+
+      const copastors = await this.copastorRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const copastorsId = copastors.map((copastor) => copastor.id);
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          theirCopastor: In(copastorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos por los nombres de su co-pastor: ${firstNames}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Disciples by pastor names
+    if (
+      term &&
+      searchType === SearchType.FirstName &&
+      searchSubType === SearchSubType.DiscipleByPastorNames
+    ) {
+      const firstNames = term.replace(/\+/g, ' ');
+
+      const pastors = await this.pastorRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const pastorsId = pastors.map((pastor) => pastor.id);
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          theirPastor: In(pastorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos por los nombres de su pastor: ${firstNames}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by last name --> Many
+    //* Disciples by last names
+    if (
+      term &&
+      searchType === SearchType.LastName &&
+      searchSubType === SearchSubType.ByDiscipleLastNames
+    ) {
+      const lastNames = term.replace(/\+/g, ' ');
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos con estos apellidos: ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Disciples by preacher last names
+    if (
+      term &&
+      searchType === SearchType.LastName &&
+      searchSubType === SearchSubType.DiscipleByPreacherLastNames
+    ) {
+      const lastNames = term.replace(/\+/g, ' ');
+
+      const preachers = await this.preacherRepository.find({
+        where: {
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const preacherId = preachers.map((preacher) => preacher.id);
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          theirPreacher: In(preacherId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos por los apellidos de su predicador: ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Disciples by supervisor last names
+    if (
+      term &&
+      searchType === SearchType.LastName &&
+      searchSubType === SearchSubType.DiscipleBySupervisorLastNames
+    ) {
+      const lastNames = term.replace(/\+/g, ' ');
+
+      const supervisors = await this.supervisorRepository.find({
+        where: {
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const supervisorsId = supervisors.map((supervisor) => supervisor.id);
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          theirSupervisor: In(supervisorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos por los apellidos de su supervisor: ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Disciples by co-pastor last names
+    if (
+      term &&
+      searchType === SearchType.LastName &&
+      searchSubType === SearchSubType.DiscipleByCopastorLastNames
+    ) {
+      const lastNames = term.replace(/\+/g, ' ');
+
+      const copastors = await this.copastorRepository.find({
+        where: {
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const copastorsId = copastors.map((copastor) => copastor.id);
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          theirCopastor: In(copastorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos por los apellidos de su co-pastor: ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Disciples by pastor last names
+    if (
+      term &&
+      searchType === SearchType.LastName &&
+      searchSubType === SearchSubType.DiscipleByPastorLastNames
+    ) {
+      const lastNames = term.replace(/\+/g, ' ');
+
+      const pastors = await this.pastorRepository.find({
+        where: {
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const pastorsId = pastors.map((pastor) => pastor.id);
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          theirPastor: In(pastorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos por los apellidos de su pastor: ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by full name --> Many
+    //* Disciples by full names
+    if (
+      term &&
+      searchType === SearchType.FullName &&
+      searchSubType === SearchSubType.ByDiscipleFullName
+    ) {
+      const firstNames = term.split('-')[0].replace(/\+/g, ' ');
+      const lastNames = term.split('-')[1].replace(/\+/g, ' ');
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos con estos nombres y apellidos: ${firstNames} ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Disciples by preacher full names
+    if (
+      term &&
+      searchType === SearchType.FullName &&
+      searchSubType === SearchSubType.DiscipleByPreacherFullName
+    ) {
+      const firstNames = term.split('-')[0].replace(/\+/g, ' ');
+      const lastNames = term.split('-')[1].replace(/\+/g, ' ');
+
+      const preachers = await this.preacherRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const preachersId = preachers.map((preacher) => preacher.id);
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          theirPreacher: In(preachersId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos por los nombres y apellidos de su supervisor: ${firstNames} ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Disciples by supervisor full names
+    if (
+      term &&
+      searchType === SearchType.FullName &&
+      searchSubType === SearchSubType.DiscipleBySupervisorFullName
+    ) {
+      const firstNames = term.split('-')[0].replace(/\+/g, ' ');
+      const lastNames = term.split('-')[1].replace(/\+/g, ' ');
+
+      const supervisors = await this.supervisorRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const supervisorsId = supervisors.map((supervisor) => supervisor.id);
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          theirSupervisor: In(supervisorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos por los nombres y apellidos de su supervisor: ${firstNames} ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Disciples by co-pastor full names
+    if (
+      term &&
+      searchType === SearchType.FullName &&
+      searchSubType === SearchSubType.DiscipleByCopastorFullName
+    ) {
+      const firstNames = term.split('-')[0].replace(/\+/g, ' ');
+      const lastNames = term.split('-')[1].replace(/\+/g, ' ');
+
+      const copastors = await this.copastorRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const copastorsId = copastors.map((copastor) => copastor.id);
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          theirCopastor: In(copastorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos por los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Disciples by pastor full names
+    if (
+      term &&
+      searchType === SearchType.FullName &&
+      searchSubType === SearchSubType.DiscipleByPastorFullName
+    ) {
+      const firstNames = term.split('-')[0].replace(/\+/g, ' ');
+      const lastNames = term.split('-')[1].replace(/\+/g, ' ');
+
+      const pastors = await this.pastorRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const pastorsId = pastors.map((pastor) => pastor.id);
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          theirPastor: In(pastorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos por los nombres y apellidos de su pastor: ${firstNames} ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by birth date --> Many
+    if (term && searchType === SearchType.BirthDate) {
+      const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
+
+      if (isNaN(fromTimestamp)) {
+        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      }
+
+      const fromDate = new Date(fromTimestamp);
+      const toDate = toTimestamp ? new Date(toTimestamp) : fromDate;
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          birthDate: Between(fromDate, toDate),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        const fromDate = formatToDDMMYYYY(fromTimestamp);
+        const toDate = formatToDDMMYYYY(toTimestamp);
+
+        throw new NotFoundException(
+          `No se encontraron discípulos con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by month birth --> Many
+    if (term && searchType === SearchType.BirthMonth) {
+      const disciples = await this.discipleRepository.find({
+        where: {
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const resultDisciples = getBirthDateByMonth({
+        month: term,
+        data: disciples,
+      });
+
+      if (resultDisciples.length === 0) {
+        const monthNames = {
+          january: 'Enero',
+          february: 'Febrero',
+          march: 'Marzo',
+          april: 'Abril',
+          may: 'Mayo',
+          june: 'Junio',
+          july: 'Julio',
+          august: 'Agosto',
+          september: 'Septiembre',
+          october: 'Octubre',
+          november: 'Noviembre',
+          december: 'Diciembre',
+        };
+
+        const monthInSpanish = monthNames[term.toLowerCase()] ?? term;
+
+        throw new NotFoundException(
+          `No se encontraron discípulos con este mes de nacimiento: ${monthInSpanish}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({
+          disciples: resultDisciples as Disciple[],
+        }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by family-group-code --> Many
+    if (term && searchType === SearchType.FamilyGroupCode) {
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          familyGroupCode: ILike(`%${term}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const familyGroupsId = familyGroups.map((familyGroup) => familyGroup.id);
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          theirFamilyGroup: In(familyGroupsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos con este código de grupo familiar: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by family-group-name --> Many
+    if (term && searchType === SearchType.FamilyGroupName) {
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          familyGroupName: ILike(`%${term}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const familyGroupsId = familyGroups.map((familyGroup) => familyGroup.id);
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          theirFamilyGroup: In(familyGroupsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos con este nombre de grupo familiar: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by zone --> Many
+    if (term && searchType === SearchType.Zone) {
+      const zones = await this.zoneRepository.find({
+        where: {
+          zoneName: ILike(`%${term}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const zonesId = zones.map((zone) => zone.id);
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          theirZone: In(zonesId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos con esta zona: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by gender --> Many
+    if (term && searchType === SearchType.Gender) {
+      const genderTerm = term.toLowerCase();
+      const validGenders = ['male', 'female'];
+
+      if (!validGenders.includes(genderTerm)) {
+        throw new BadRequestException(`Género no válido: ${term}`);
+      }
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          gender: genderTerm,
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
+
+        throw new NotFoundException(
+          `No se encontraron discípulos con este genero: ${genderInSpanish}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by marital status --> Many
+    if (term && searchType === SearchType.MaritalStatus) {
+      const maritalStatusTerm = term.toLowerCase();
+      const validMaritalStatus = [
+        'singles',
+        'married',
+        'widowed',
+        'divorced',
+        'other',
+      ];
+
+      if (!validMaritalStatus.includes(maritalStatusTerm)) {
+        throw new BadRequestException(`Estado Civil no válido: ${term}`);
+      }
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          maritalStatus: maritalStatusTerm,
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        const maritalStatusInSpanish =
+          MaritalStatusNames[term.toLowerCase()] ?? term;
+
+        throw new NotFoundException(
+          `No se encontraron discípulos con este estado civil: ${maritalStatusInSpanish}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by origin country --> Many
+    if (term && searchType === SearchType.OriginCountry) {
+      const disciples = await this.discipleRepository.find({
+        where: {
+          originCountry: ILike(`%${term}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos con este país de origen: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by department --> Many
+    if (term && searchType === SearchType.Department) {
+      const disciples = await this.discipleRepository.find({
+        where: {
+          department: ILike(`%${term}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos con este departamento: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by province --> Many
+    if (term && searchType === SearchType.Province) {
+      const disciples = await this.discipleRepository.find({
+        where: {
+          province: ILike(`%${term}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos con esta provincia: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by district --> Many
+    if (term && searchType === SearchType.District) {
+      const disciples = await this.discipleRepository.find({
+        where: {
+          district: ILike(`%${term}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos con este distrito: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by urban sector --> Many
+    if (term && searchType === SearchType.UrbanSector) {
+      const disciples = await this.discipleRepository.find({
+        where: {
+          urbanSector: ILike(`%${term}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos con este sector urbano: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by address --> Many
+    if (term && searchType === SearchType.Address) {
+      const disciples = await this.discipleRepository.find({
+        where: {
+          address: ILike(`%${term}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron discípulos con esta dirección: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by status --> Many
+    if (term && searchType === SearchType.RecordStatus) {
+      const recordStatusTerm = term.toLowerCase();
+      const validRecordStatus = ['active', 'inactive'];
+
+      if (!validRecordStatus.includes(recordStatusTerm)) {
+        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      }
+
+      const disciples = await this.discipleRepository.find({
+        where: {
+          recordStatus: recordStatusTerm,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (disciples.length === 0) {
+        const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
+
+        throw new NotFoundException(
+          `No se encontraron discípulos con este estado: ${value}`,
+        );
+      }
+
+      try {
+        return formatDataDisciple({ disciples }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //! General Exceptions
+    if (!searchType) {
+      throw new BadRequestException(`El tipo de búsqueda es obligatorio`);
+    }
+
+    if (term && !Object.values(SearchType).includes(searchType as SearchType)) {
+      throw new BadRequestException(
+        `Tipos de búsqueda no validos, solo son validos: ${Object.values(SearchType).join(', ')}`,
+      );
+    }
+
+    if (
+      term &&
+      (SearchType.FirstName || SearchType.LastName || SearchType.FullName)
+    ) {
+      throw new BadRequestException(
+        `Para buscar por nombres o apellidos el sub-tipo es requerido`,
+      );
+    }
   }
 
   //* UPDATE DISCIPLE
@@ -309,18 +1759,23 @@ export class DiscipleService {
     updateDiscipleDto: UpdateDiscipleDto,
     user: User,
   ): Promise<Disciple | Preacher> {
-    const { roles, status, theirSupervisor, theirFamilyGroup } =
-      updateDiscipleDto;
+    const {
+      roles,
+      recordStatus,
+      theirSupervisor,
+      theirFamilyGroup,
+      numberChildren,
+    } = updateDiscipleDto;
 
     // Validations
     if (!roles) {
       throw new BadRequestException(
-        `Required assign roles to update the disciple`,
+        `Los roles son requeridos para actualizar el Discípulo.`,
       );
     }
 
     if (!isUUID(id)) {
-      throw new BadRequestException(`Not valid UUID`);
+      throw new BadRequestException(`UUID no valido.`);
     }
 
     // Validation disciple
@@ -338,48 +1793,60 @@ export class DiscipleService {
     });
 
     if (!disciple) {
-      throw new NotFoundException(`Disciple not found with id: ${id}`);
+      throw new NotFoundException(`Discípulo con id: ${id} no fue encontrado.`);
     }
 
     if (!roles.some((role) => ['disciple'].includes(role))) {
-      throw new BadRequestException(`The roles should include "disciple"`);
+      throw new BadRequestException(`Los roles deben incluir "Discípulo"`);
     }
 
     if (
-      disciple.roles.includes(MemberRoles.Disciple) &&
-      !disciple.roles.includes(MemberRoles.Preacher) &&
-      !disciple.roles.includes(MemberRoles.Preacher) &&
-      !disciple.roles.includes(MemberRoles.Copastor) &&
-      !disciple.roles.includes(MemberRoles.Pastor) &&
-      !disciple.roles.includes(MemberRoles.Treasurer) &&
-      (roles.includes(MemberRoles.Copastor) ||
-        roles.includes(MemberRoles.Pastor) ||
-        roles.includes(MemberRoles.Supervisor))
+      (disciple.roles.includes(MemberRole.Disciple) &&
+        !disciple.roles.includes(MemberRole.Preacher) &&
+        !disciple.roles.includes(MemberRole.Preacher) &&
+        !disciple.roles.includes(MemberRole.Copastor) &&
+        !disciple.roles.includes(MemberRole.Pastor) &&
+        !disciple.roles.includes(MemberRole.Treasurer) &&
+        (roles.includes(MemberRole.Copastor) ||
+          roles.includes(MemberRole.Pastor) ||
+          roles.includes(MemberRole.Supervisor))) ||
+      (disciple.roles.includes(MemberRole.Disciple) &&
+        disciple.roles.includes(MemberRole.Treasurer) &&
+        !disciple.roles.includes(MemberRole.Preacher) &&
+        !disciple.roles.includes(MemberRole.Copastor) &&
+        !disciple.roles.includes(MemberRole.Pastor) &&
+        !disciple.roles.includes(MemberRole.Preacher) &&
+        (roles.includes(MemberRole.Copastor) ||
+          roles.includes(MemberRole.Pastor) ||
+          roles.includes(MemberRole.Supervisor)))
     ) {
       throw new BadRequestException(
-        `A higher role cannot be assigned without going through the hierarchy: [disciple, preacher, supervisor, co-pastor, pastor]`,
+        `No se puede asignar un rol superior sin pasar por la jerarquía: [discípulo, predicador, supervisor, copastor, pastor].`,
       );
     }
 
     //* Update info about Disciple
     if (
-      disciple.roles.includes(MemberRoles.Disciple) &&
-      !disciple.roles.includes(MemberRoles.Preacher) &&
-      !disciple.roles.includes(MemberRoles.Pastor) &&
-      !disciple.roles.includes(MemberRoles.Copastor) &&
-      !disciple.roles.includes(MemberRoles.Supervisor) &&
-      !disciple.roles.includes(MemberRoles.Treasurer) &&
-      roles.includes(MemberRoles.Disciple) &&
-      !roles.includes(MemberRoles.Preacher) &&
-      !roles.includes(MemberRoles.Pastor) &&
-      !roles.includes(MemberRoles.Copastor) &&
-      !roles.includes(MemberRoles.Supervisor) &&
-      !roles.includes(MemberRoles.Treasurer)
+      disciple.roles.includes(MemberRole.Disciple) &&
+      !disciple.roles.includes(MemberRole.Preacher) &&
+      !disciple.roles.includes(MemberRole.Pastor) &&
+      !disciple.roles.includes(MemberRole.Copastor) &&
+      !disciple.roles.includes(MemberRole.Supervisor) &&
+      !disciple.roles.includes(MemberRole.Treasurer) &&
+      roles.includes(MemberRole.Disciple) &&
+      !roles.includes(MemberRole.Preacher) &&
+      !roles.includes(MemberRole.Pastor) &&
+      !roles.includes(MemberRole.Copastor) &&
+      !roles.includes(MemberRole.Supervisor) &&
+      !roles.includes(MemberRole.Treasurer)
     ) {
       // Validations
-      if (disciple.status === Status.Active && status === Status.Inactive) {
+      if (
+        disciple.recordStatus === RecordStatus.Active &&
+        recordStatus === RecordStatus.Inactive
+      ) {
         throw new BadRequestException(
-          `You cannot update it to "inactive", you must delete the record`,
+          `No se puede actualizar un registro a "Inactivo", se debe eliminar.`,
         );
       }
 
@@ -388,7 +1855,7 @@ export class DiscipleService {
         //* Validate family house
         if (!theirFamilyGroup) {
           throw new NotFoundException(
-            `To update or change disciple enter an existing copastor id`,
+            `Para poder actualizar un Discípulo, se debe asignar un Grupo familiar.`,
           );
         }
 
@@ -406,20 +1873,20 @@ export class DiscipleService {
 
         if (!newFamilyGroup) {
           throw new NotFoundException(
-            `Family House not found with id ${theirFamilyGroup}`,
+            `Grupo familiar con id: ${theirFamilyGroup} no fue encontrado.`,
           );
         }
 
-        if (!newFamilyGroup.status) {
+        if (!newFamilyGroup.recordStatus) {
           throw new BadRequestException(
-            `The property status in Family House must be "active"`,
+            `La propiedad "Estado de registro" en Grupo Familiar debe ser "Activo".`,
           );
         }
 
         //* Validate Preacher according family house
         if (!newFamilyGroup?.theirPreacher) {
           throw new BadRequestException(
-            `Preacher was not found, verify that Family House has a preacher assigned`,
+            `No se encontró el Predicador, verifica que Grupo Familiar tenga una Predicador asignado.`,
           );
         }
 
@@ -427,16 +1894,16 @@ export class DiscipleService {
           where: { id: newFamilyGroup?.theirPreacher?.id },
         });
 
-        if (!newPreacher.status) {
+        if (!newPreacher.recordStatus) {
           throw new BadRequestException(
-            `The property status in Preacher must be "active"`,
+            `La propiedad "Estado de registro" en Predicador debe ser "Activo".`,
           );
         }
 
         //* Validate Supervisor according family house
         if (!newFamilyGroup?.theirSupervisor) {
           throw new BadRequestException(
-            `Supervisor was not found, verify that Family House has a supervisor assigned`,
+            `No se encontró el Supervisor, verifica que Grupo Familiar tenga una Supervisor asignado.`,
           );
         }
 
@@ -444,16 +1911,16 @@ export class DiscipleService {
           where: { id: newFamilyGroup?.theirSupervisor?.id },
         });
 
-        if (!newSupervisor.status) {
+        if (!newSupervisor.recordStatus) {
           throw new BadRequestException(
-            `The property status in Supervisor must be "active"`,
+            `La propiedad "Estado de registro" en Supervisor debe ser "Activo".`,
           );
         }
 
         //* Validate Zone according family house
         if (!newFamilyGroup?.theirZone) {
           throw new BadRequestException(
-            `Zone was not found, verify that Family House has a zone assigned`,
+            `No se encontró la Zona, verifica que Grupo Familiar tenga una Zona asignada.`,
           );
         }
 
@@ -461,16 +1928,16 @@ export class DiscipleService {
           where: { id: newFamilyGroup?.theirZone?.id },
         });
 
-        if (!newZone.status) {
+        if (!newZone.recordStatus) {
           throw new BadRequestException(
-            `The property status in Zone must be "active"`,
+            `La propiedad "Estado de registro" en Zona debe ser "Activo".`,
           );
         }
 
         //* Validate Copastor according family house
         if (!newFamilyGroup?.theirCopastor) {
           throw new BadRequestException(
-            `Copastor was not found, verify that Family House has a co-pastor assigned`,
+            `No se encontró el Co-Pastor, verifica que Grupo Familiar tenga un Co-Pastor asignado.`,
           );
         }
 
@@ -478,16 +1945,16 @@ export class DiscipleService {
           where: { id: newFamilyGroup?.theirCopastor?.id },
         });
 
-        if (!newCopastor.status) {
+        if (!newCopastor.recordStatus) {
           throw new BadRequestException(
-            `The property status in Copastor must be "active"`,
+            `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
           );
         }
 
         //* Validate Pastor according family house
         if (!newFamilyGroup?.theirPastor) {
           throw new BadRequestException(
-            `Pastor was not found, verify that Family House has a pastor assigned`,
+            `No se encontró el Pastor, verifica que Grupo Familiar tenga una Pastor asignado.`,
           );
         }
 
@@ -495,16 +1962,16 @@ export class DiscipleService {
           where: { id: newFamilyGroup?.theirPastor?.id },
         });
 
-        if (!newPastor.status) {
+        if (!newPastor.recordStatus) {
           throw new BadRequestException(
-            `The property status in Pastor must be "active"`,
+            `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
           );
         }
 
         //* Validate Church according family house
         if (!newFamilyGroup?.theirChurch) {
           throw new BadRequestException(
-            `Church was not found, verify that Family House has a church assigned`,
+            `No se encontró la Iglesia, verifica que Grupo Familiar tenga una Iglesia asignada.`,
           );
         }
 
@@ -512,9 +1979,9 @@ export class DiscipleService {
           where: { id: newFamilyGroup?.theirChurch?.id },
         });
 
-        if (!newChurch.status) {
+        if (!newChurch.recordStatus) {
           throw new BadRequestException(
-            `The property status in Church must be "active"`,
+            `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
           );
         }
 
@@ -522,6 +1989,7 @@ export class DiscipleService {
         const updatedDisciple = await this.discipleRepository.preload({
           id: disciple.id,
           ...updateDiscipleDto,
+          numberChildren: +numberChildren,
           theirChurch: newChurch,
           theirPastor: newPastor,
           theirCopastor: newCopastor,
@@ -530,11 +1998,11 @@ export class DiscipleService {
           theirFamilyGroup: newFamilyGroup,
           updatedAt: new Date(),
           updatedBy: user,
-          status: status,
+          recordStatus: recordStatus,
         });
 
         try {
-          return await this.preacherRepository.save(updatedDisciple);
+          return await this.discipleRepository.save(updatedDisciple);
         } catch (error) {
           this.handleDBExceptions(error);
         }
@@ -545,6 +2013,7 @@ export class DiscipleService {
         const updatedDisciple = await this.discipleRepository.preload({
           id: disciple.id,
           ...updateDiscipleDto,
+          numberChildren: +numberChildren,
           theirChurch: disciple.theirChurch,
           theirPastor: disciple.theirPastor,
           theirCopastor: disciple.theirCopastor,
@@ -554,7 +2023,7 @@ export class DiscipleService {
           theirFamilyGroup: disciple.theirFamilyGroup,
           updatedAt: new Date(),
           updatedBy: user,
-          status: status,
+          recordStatus: recordStatus,
         });
 
         try {
@@ -567,24 +2036,24 @@ export class DiscipleService {
 
     //* Raise Disciple level to Preacher
     if (
-      disciple.roles.includes(MemberRoles.Disciple) &&
-      !disciple.roles.includes(MemberRoles.Preacher) &&
-      !disciple.roles.includes(MemberRoles.Treasurer) &&
-      !disciple.roles.includes(MemberRoles.Copastor) &&
-      !disciple.roles.includes(MemberRoles.Supervisor) &&
-      !disciple.roles.includes(MemberRoles.Pastor) &&
-      roles.includes(MemberRoles.Disciple) &&
-      roles.includes(MemberRoles.Preacher) &&
-      !roles.includes(MemberRoles.Treasurer) &&
-      !roles.includes(MemberRoles.Copastor) &&
-      !roles.includes(MemberRoles.Pastor) &&
-      !roles.includes(MemberRoles.Supervisor) &&
-      status === Status.Active
+      disciple.roles.includes(MemberRole.Disciple) &&
+      !disciple.roles.includes(MemberRole.Preacher) &&
+      !disciple.roles.includes(MemberRole.Treasurer) &&
+      !disciple.roles.includes(MemberRole.Copastor) &&
+      !disciple.roles.includes(MemberRole.Supervisor) &&
+      !disciple.roles.includes(MemberRole.Pastor) &&
+      roles.includes(MemberRole.Disciple) &&
+      roles.includes(MemberRole.Preacher) &&
+      !roles.includes(MemberRole.Treasurer) &&
+      !roles.includes(MemberRole.Copastor) &&
+      !roles.includes(MemberRole.Pastor) &&
+      !roles.includes(MemberRole.Supervisor) &&
+      recordStatus === RecordStatus.Active
     ) {
       //* Validation new supervisor
       if (!theirSupervisor) {
         throw new NotFoundException(
-          `To upgrade from disciple to preacher assign an existing supervisor id`,
+          `Para subir de nivel de Discípulo a Predicador, se le debe asignar un Supervisor.`,
         );
       }
 
@@ -594,19 +2063,21 @@ export class DiscipleService {
       });
 
       if (!newSupervisor) {
-        throw new NotFoundException(`Supervisor not found with id: ${id}`);
+        throw new NotFoundException(
+          `Supervisor con id: ${id} no fue encontrado.`,
+        );
       }
 
-      if (newSupervisor.status === Status.Inactive) {
+      if (newSupervisor.recordStatus === RecordStatus.Inactive) {
         throw new NotFoundException(
-          `The property status in Supervisor must be a "active"`,
+          `La propiedad "Estado de registro" en Supervisor debe ser "Activo".`,
         );
       }
 
       //* Validation new zone according supervisor
       if (!newSupervisor?.theirZone) {
         throw new BadRequestException(
-          `Zone was not found, verify that Supervisor has a zone assigned`,
+          `No se encontró la Zona, verifica que Supervisor tenga una Zona asignada.`,
         );
       }
 
@@ -614,16 +2085,16 @@ export class DiscipleService {
         where: { id: newSupervisor?.theirZone?.id },
       });
 
-      if (newZone.status === Status.Inactive) {
+      if (newZone.recordStatus === RecordStatus.Inactive) {
         throw new NotFoundException(
-          `The property status in Zone must be a "active"`,
+          `La propiedad "Estado de registro" en Zona debe ser "Activo".`,
         );
       }
 
       //* Validation new copastor according supervisor
       if (!newSupervisor?.theirCopastor) {
         throw new BadRequestException(
-          `Copastor was not found, verify that Supervisor has a co-pastor assigned`,
+          `No se encontró el Co-Pastor, verifica que Supervisor tenga un Co-Pastor asignado.`,
         );
       }
 
@@ -631,16 +2102,16 @@ export class DiscipleService {
         where: { id: newSupervisor?.theirCopastor?.id },
       });
 
-      if (newCopastor.status === Status.Inactive) {
+      if (newCopastor.recordStatus === RecordStatus.Inactive) {
         throw new NotFoundException(
-          `The property status in Copastor must be a "active"`,
+          `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
         );
       }
 
       //* Validation new pastor according supervisor
       if (!newSupervisor?.theirPastor) {
         throw new BadRequestException(
-          `Church was not found, verify that Supervisor has a church assigned`,
+          `No se encontró el Pastor, verifica que Supervisor tenga un Pastor asignado.`,
         );
       }
 
@@ -648,16 +2119,16 @@ export class DiscipleService {
         where: { id: newSupervisor?.theirPastor?.id },
       });
 
-      if (newPastor.status === Status.Inactive) {
+      if (newPastor.recordStatus === RecordStatus.Inactive) {
         throw new NotFoundException(
-          `The property status in Pastor must be a "active"`,
+          `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
         );
       }
 
       //* Validation new church according supervisor
       if (!newSupervisor?.theirChurch) {
         throw new BadRequestException(
-          `Church was not found, verify that Supervisor has a church assigned`,
+          `No se encontró la Iglesia, verifica que Supervisor tenga una Iglesia asignada.`,
         );
       }
 
@@ -665,9 +2136,9 @@ export class DiscipleService {
         where: { id: newSupervisor?.theirChurch?.id },
       });
 
-      if (newChurch.status === Status.Inactive) {
+      if (newChurch.recordStatus === RecordStatus.Inactive) {
         throw new NotFoundException(
-          `The property status in Church must be a "active"`,
+          `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
         );
       }
 
@@ -675,12 +2146,13 @@ export class DiscipleService {
       try {
         const newPreacher = this.preacherRepository.create({
           ...updateDiscipleDto,
+          numberChildren: +numberChildren,
           theirChurch: newChurch,
           theirPastor: newPastor,
           theirCopastor: newCopastor,
+          theirZone: newZone,
           theirSupervisor: newSupervisor,
           theirFamilyGroup: null,
-          theirZone: newZone,
           createdAt: new Date(),
           createdBy: user,
         });
@@ -694,7 +2166,7 @@ export class DiscipleService {
       }
     } else {
       throw new BadRequestException(
-        `You cannot level up, you must have the registry in "active" mode and the appropriate roles, review and update the registry.`,
+        `No se puede subir de nivel este registro, el modo debe ser "Activo", el rol solo debe ser ["discípulo"], revisar y actualizar el registro.`,
       );
     }
   }
@@ -703,13 +2175,13 @@ export class DiscipleService {
   async remove(id: string, user: User): Promise<void> {
     // Validations
     if (!isUUID(id)) {
-      throw new BadRequestException(`Not valid UUID`);
+      throw new BadRequestException(`UUID no valido.`);
     }
 
     const disciple = await this.discipleRepository.findOneBy({ id });
 
     if (!disciple) {
-      throw new NotFoundException(`Disciple with id: ${id} not exits`);
+      throw new NotFoundException(`Discípulo con id: ${id} no fue encontrado.`);
     }
 
     //* Update and set in Inactive on Preacher
@@ -721,9 +2193,10 @@ export class DiscipleService {
       theirSupervisor: null,
       theirZone: null,
       theirFamilyGroup: null,
+      theirPreacher: null,
       updatedAt: new Date(),
       updatedBy: user,
-      status: Status.Inactive,
+      recordStatus: RecordStatus.Inactive,
     });
 
     // Update and save
@@ -737,11 +2210,18 @@ export class DiscipleService {
   //? PRIVATE METHODS
   // For future index errors or constrains with code.
   private handleDBExceptions(error: any): never {
-    if (error.code === '23505') throw new BadRequestException(error.detail);
+    if (error.code === '23505') {
+      const detail = error.detail;
+
+      if (detail.includes('email')) {
+        throw new BadRequestException('El correo electrónico ya está en uso.');
+      }
+    }
+
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Unexpected errors, check server logs',
+      'Sucedió un error inesperado, revise los registros de consola',
     );
   }
 }

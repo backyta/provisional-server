@@ -17,21 +17,22 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { PaginationDto } from '@/common/dtos';
+import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
 
-import { UserRoles } from '@/modules/auth/enums';
+import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
 
+import { User } from '@/modules/user/entities';
+import { Preacher } from '@/modules/preacher/entities';
+
+import { Disciple } from '@/modules/disciple/entities';
 import { DiscipleService } from '@/modules/disciple/disciple.service';
 import { CreateDiscipleDto, UpdateDiscipleDto } from '@/modules/disciple/dto';
-
-import { User } from '@/modules/user/entities';
-import { Disciple } from '@/modules/disciple/entities';
-import { Preacher } from '@/modules/preacher/entities';
 
 @ApiTags('Disciples')
 @ApiBearerAuth()
@@ -50,7 +51,7 @@ export class DiscipleController {
 
   //* Create
   @Post()
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiCreatedResponse({
     description: 'Disciple has been successfully created.',
   })
@@ -77,14 +78,30 @@ export class DiscipleController {
     return this.discipleService.findAll(paginationDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.discipleService.findOne(+id);
+  //* Find By Term
+  @Get(':term')
+  @Auth()
+  @ApiParam({
+    name: 'term',
+    description: 'Could be names, dates, districts, address, etc.',
+    example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
+  })
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found resource.',
+  })
+  findTerm(
+    @Param('term') term: string,
+    @Query() searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
+  ): Promise<Disciple | Disciple[]> {
+    return this.discipleService.findByTerm(term, searchTypeAndPaginationDto);
   }
 
   //* Update
   @Patch(':id')
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
     description: 'Successful operation',
   })
@@ -101,7 +118,7 @@ export class DiscipleController {
 
   //* Delete
   @Delete(':id')
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
     description: 'Successful operation.',
   })

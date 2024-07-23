@@ -11,7 +11,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { Status } from '@/common/enums';
+import { RecordStatus } from '@/common/enums';
 
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
@@ -21,13 +21,6 @@ import { Copastor } from '@/modules/copastor/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { FamilyGroup } from '@/modules/family-group/entities';
-
-// NOTE : los supervisores tmb se podrán ligar directamente al pastor, ya que si se crea un anexo
-// Habrán un pastor y no hay copastor los supervisores se encargaran de las casas, se podría mandar
-// un copastor como entrenamiento o apoyo a esa zona y este copastor apoyaría a los supervisores.
-// este copastor englobaría a los supervisores y al pastor y se enlaza directo al pastor.
-
-// TODO : hacer un valor true o false para poder asignar un theirPastor directo al supervisor
 
 @Entity({ name: 'supervisors' })
 @Index(['firstName', 'lastName'])
@@ -123,8 +116,11 @@ export class Supervisor {
   @JoinColumn({ name: 'updated_by' })
   updatedBy: User;
 
-  @Column('text', { name: 'status', default: Status.Active })
-  status: string;
+  @Column('text', {
+    name: 'record_status',
+    default: RecordStatus.Active,
+  })
+  recordStatus: string;
 
   //* Relations (Array)
   @OneToMany(() => Preacher, (preacher) => preacher.theirSupervisor)

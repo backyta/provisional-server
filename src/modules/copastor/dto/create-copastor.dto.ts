@@ -1,4 +1,9 @@
-import { MaritalStatus, MemberRoles, Gender, Status } from '@/common/enums';
+import {
+  MaritalStatus,
+  MemberRole,
+  Gender,
+  RecordStatus,
+} from '@/common/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
@@ -14,7 +19,7 @@ import {
 export class CreateCopastorDto {
   //* General and Personal info
   @ApiProperty({
-    example: 'John Martin',
+    example: 'Marcos Arturo',
   })
   @IsString()
   @IsNotEmpty()
@@ -23,7 +28,7 @@ export class CreateCopastorDto {
   firstName: string;
 
   @ApiProperty({
-    example: 'Rojas Castro',
+    example: 'Valdivia Fuerte',
   })
   @IsString()
   @IsNotEmpty()
@@ -32,13 +37,16 @@ export class CreateCopastorDto {
   lastName: string;
 
   @ApiProperty({
-    example: 'male',
+    example: Gender.Male,
   })
-  @IsEnum(Gender)
+  @IsEnum(Gender, {
+    message:
+      'El genero debe ser uno de los siguientes valores: Masculino o Femenino',
+  })
   gender: string;
 
   @ApiProperty({
-    example: 'single',
+    example: MaritalStatus.Single,
   })
   @IsEnum(MaritalStatus, {
     message:
@@ -48,7 +56,7 @@ export class CreateCopastorDto {
   maritalStatus: string;
 
   @ApiProperty({
-    example: 'Colombia',
+    example: 'Peru',
   })
   @IsString()
   @IsNotEmpty()
@@ -74,7 +82,7 @@ export class CreateCopastorDto {
   @IsOptional()
   conversionDate?: string | Date;
 
-  // Contact Info
+  //* Contact Info
   @ApiProperty({
     example: 'example@example.com',
   })
@@ -154,20 +162,27 @@ export class CreateCopastorDto {
 
   //* Roles and Status
   @ApiProperty({
-    example: ['disciple', 'copastor'],
+    example: [MemberRole.Disciple, MemberRole.Copastor],
   })
-  @IsEnum(MemberRoles, { each: true })
+  @IsEnum(MemberRole, {
+    each: true,
+    message:
+      'Los roles deben contener "Discípulo" y uno de los siguientes valores: Tesorero, Predicador, Supervisor, Co-Pastor, Pastor.',
+  })
   @IsArray()
   @IsNotEmpty()
   roles: string[];
 
   @ApiProperty({
-    example: 'active',
+    example: RecordStatus.Active,
   })
   @IsString()
-  @IsEnum(Status)
+  @IsEnum(RecordStatus, {
+    message:
+      'El estado de registro debe ser uno de los siguientes valores: Activo o Inactivo',
+  })
   @IsOptional()
-  status?: string;
+  recordStatus?: string;
 
   //* Relations
   @ApiProperty({

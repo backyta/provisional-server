@@ -5,13 +5,20 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Between, FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { isUUID } from 'class-validator';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Between, FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
 
-import { MemberRoles, SearchSubType, SearchType, Status } from '@/common/enums';
-import { PaginationDto, SearchTypeAndPaginationDto } from '@/common/dtos';
-import { formatToDDMMYYYY, getBirthdaysByMonth } from '@/common/helpers';
+import {
+  MemberRole,
+  SearchSubType,
+  SearchType,
+  RecordStatus,
+  GenderNames,
+  MaritalStatusNames,
+} from '@/common/enums';
+import { formatToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
+import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
 
 import { formatDataCopastor } from '@/modules/copastor/helpers';
 import { CreateCopastorDto, UpdateCopastorDto } from '@/modules/copastor/dto';
@@ -64,8 +71,8 @@ export class CopastorService {
 
     // Validations
     if (
-      !roles.includes(MemberRoles.Disciple) &&
-      !roles.includes(MemberRoles.Copastor)
+      !roles.includes(MemberRole.Disciple) &&
+      !roles.includes(MemberRole.Copastor)
     ) {
       throw new BadRequestException(
         `El rol "Discípulo" y "Co-Pastor" deben ser incluidos.`,
@@ -73,10 +80,10 @@ export class CopastorService {
     }
 
     if (
-      roles.includes(MemberRoles.Pastor) ||
-      roles.includes(MemberRoles.Supervisor) ||
-      roles.includes(MemberRoles.Preacher) ||
-      roles.includes(MemberRoles.Treasurer)
+      roles.includes(MemberRole.Pastor) ||
+      roles.includes(MemberRole.Supervisor) ||
+      roles.includes(MemberRole.Preacher) ||
+      roles.includes(MemberRole.Treasurer)
     ) {
       throw new BadRequestException(
         `Para crear un Co-Pastor, solo se requiere los roles: "Discípulo" y "Co-Pastor".`,
@@ -101,9 +108,9 @@ export class CopastorService {
       );
     }
 
-    if (pastor.status === Status.Inactive) {
+    if (pastor.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
-        `La propiedad "Estado" en Pastor debe ser "Activo".`,
+        `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
       );
     }
 
@@ -118,9 +125,9 @@ export class CopastorService {
       where: { id: pastor?.theirChurch?.id },
     });
 
-    if (church.status === Status.Inactive) {
+    if (church.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
-        `La propiedad "Estado" en Iglesia debe ser "Activo".`,
+        `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
       );
     }
 
@@ -143,10 +150,10 @@ export class CopastorService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit = 10, offset = 0, order = 'ASC' } = paginationDto;
+    const { limit, offset = 0, order = 'ASC' } = paginationDto;
 
     const copastors = await this.copastorRepository.find({
-      where: { status: Status.Active },
+      where: { recordStatus: RecordStatus.Active },
       take: limit,
       skip: offset,
       relations: [
@@ -170,12 +177,12 @@ export class CopastorService {
   //* FIND BY TERM
   async findByTerm(
     term: string,
-    searchTypeAndPaginationDto: SearchTypeAndPaginationDto,
+    searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
   ): Promise<Copastor | Copastor[]> {
     const {
       'search-type': searchType,
       'search-sub-type': searchSubType,
-      limit = 10,
+      limit,
       offset = 0,
       order,
     } = searchTypeAndPaginationDto;
@@ -192,7 +199,7 @@ export class CopastorService {
       const copastors = await this.copastorRepository.find({
         where: {
           firstName: ILike(`%${firstNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -237,7 +244,7 @@ export class CopastorService {
       const pastors = await this.pastorRepository.find({
         where: {
           firstName: ILike(`%${firstNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -247,7 +254,7 @@ export class CopastorService {
       const copastors = await this.copastorRepository.find({
         where: {
           theirPastor: In(pastorsId),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -293,7 +300,7 @@ export class CopastorService {
       const copastors = await this.copastorRepository.find({
         where: {
           lastName: ILike(`%${lastNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -338,7 +345,7 @@ export class CopastorService {
       const pastors = await this.pastorRepository.find({
         where: {
           lastName: ILike(`%${lastNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -348,7 +355,7 @@ export class CopastorService {
       const copastors = await this.copastorRepository.find({
         where: {
           theirPastor: In(pastorsId),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -396,7 +403,7 @@ export class CopastorService {
         where: {
           firstName: ILike(`%${firstNames}%`),
           lastName: ILike(`%${lastNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -443,7 +450,7 @@ export class CopastorService {
         where: {
           firstName: ILike(`%${firstNames}%`),
           lastName: ILike(`%${lastNames}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -453,7 +460,7 @@ export class CopastorService {
       const copastors = await this.copastorRepository.find({
         where: {
           theirPastor: In(pastorsId),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -501,7 +508,7 @@ export class CopastorService {
       const copastors = await this.copastorRepository.find({
         where: {
           birthDate: Between(fromDate, toDate),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -542,7 +549,7 @@ export class CopastorService {
     if (term && searchType === SearchType.BirthMonth) {
       const copastors = await this.copastorRepository.find({
         where: {
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -561,7 +568,7 @@ export class CopastorService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const resultCopastors = getBirthdaysByMonth({
+      const resultCopastors = getBirthDateByMonth({
         month: term,
         data: copastors,
       });
@@ -612,7 +619,7 @@ export class CopastorService {
       const copastors = await this.copastorRepository.find({
         where: {
           gender: genderTerm,
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -632,12 +639,7 @@ export class CopastorService {
       });
 
       if (copastors.length === 0) {
-        const genderNames = {
-          male: 'Masculino',
-          female: 'Femenino',
-        };
-
-        const genderInSpanish = genderNames[term.toLowerCase()] ?? term;
+        const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
 
         throw new NotFoundException(
           `No se encontraron co-pastores(as) con este genero: ${genderInSpanish}`,
@@ -671,7 +673,7 @@ export class CopastorService {
       const copastors = await this.copastorRepository.find({
         where: {
           maritalStatus: maritalStatusTerm,
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -691,16 +693,8 @@ export class CopastorService {
       });
 
       if (copastors.length === 0) {
-        const maritalStatusNames = {
-          single: 'Soltero(a)',
-          married: 'Casado(a)',
-          widowed: 'Viudo(a)',
-          divorced: 'Divorciado(a)',
-          other: 'Otro',
-        };
-
         const maritalStatusInSpanish =
-          maritalStatusNames[term.toLowerCase()] ?? term;
+          MaritalStatusNames[term.toLowerCase()] ?? term;
 
         throw new NotFoundException(
           `No se encontraron co-pastores(as) con este estado civil: ${maritalStatusInSpanish}`,
@@ -721,7 +715,7 @@ export class CopastorService {
       const copastors = await this.copastorRepository.find({
         where: {
           originCountry: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -760,7 +754,7 @@ export class CopastorService {
       const copastors = await this.copastorRepository.find({
         where: {
           department: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -799,7 +793,7 @@ export class CopastorService {
       const copastors = await this.copastorRepository.find({
         where: {
           province: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -838,7 +832,7 @@ export class CopastorService {
       const copastors = await this.copastorRepository.find({
         where: {
           district: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -877,7 +871,7 @@ export class CopastorService {
       const copastors = await this.copastorRepository.find({
         where: {
           urbanSector: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -916,7 +910,7 @@ export class CopastorService {
       const copastors = await this.copastorRepository.find({
         where: {
           address: ILike(`%${term}%`),
-          status: Status.Active,
+          recordStatus: RecordStatus.Active,
         },
         take: limit,
         skip: offset,
@@ -951,17 +945,17 @@ export class CopastorService {
     }
 
     //? Find by status --> Many
-    if (term && searchType === SearchType.Status) {
-      const statusTerm = term.toLowerCase();
-      const validStatus = ['active', 'inactive'];
+    if (term && searchType === SearchType.RecordStatus) {
+      const recordStatusTerm = term.toLowerCase();
+      const validRecordStatus = ['active', RecordStatus.Inactive];
 
-      if (!validStatus.includes(statusTerm)) {
-        throw new BadRequestException(`Estado no válido: ${term}`);
+      if (!validRecordStatus.includes(recordStatusTerm)) {
+        throw new BadRequestException(`Estado de registro no válido: ${term}`);
       }
 
       const copastors = await this.copastorRepository.find({
         where: {
-          status: statusTerm,
+          recordStatus: recordStatusTerm,
         },
         take: limit,
         skip: offset,
@@ -981,10 +975,10 @@ export class CopastorService {
       });
 
       if (copastors.length === 0) {
-        const value = term === 'inactive' ? 'Inactivo' : 'Activo';
+        const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
 
         throw new NotFoundException(
-          `No se encontraron co-pastores(as) con este estado: ${value}`,
+          `No se encontraron co-pastores(as) con este estado de registro: ${value}`,
         );
       }
 
@@ -1024,7 +1018,7 @@ export class CopastorService {
     updateCopastorDto: UpdateCopastorDto,
     user: User,
   ): Promise<Copastor | Pastor> {
-    const { roles, status, numberChildren, theirPastor, theirChurch } =
+    const { roles, recordStatus, numberChildren, theirPastor, theirChurch } =
       updateCopastorDto;
 
     // Validations
@@ -1055,15 +1049,15 @@ export class CopastorService {
     }
 
     if (
-      copastor.roles.includes(MemberRoles.Copastor) &&
-      copastor.roles.includes(MemberRoles.Disciple) &&
-      !copastor.roles.includes(MemberRoles.Preacher) &&
-      !copastor.roles.includes(MemberRoles.Supervisor) &&
-      !copastor.roles.includes(MemberRoles.Pastor) &&
-      !copastor.roles.includes(MemberRoles.Treasurer) &&
-      (roles.includes(MemberRoles.Supervisor) ||
-        roles.includes(MemberRoles.Preacher) ||
-        roles.includes(MemberRoles.Treasurer))
+      copastor.roles.includes(MemberRole.Copastor) &&
+      copastor.roles.includes(MemberRole.Disciple) &&
+      !copastor.roles.includes(MemberRole.Preacher) &&
+      !copastor.roles.includes(MemberRole.Supervisor) &&
+      !copastor.roles.includes(MemberRole.Pastor) &&
+      !copastor.roles.includes(MemberRole.Treasurer) &&
+      (roles.includes(MemberRole.Supervisor) ||
+        roles.includes(MemberRole.Preacher) ||
+        roles.includes(MemberRole.Treasurer))
     ) {
       throw new BadRequestException(
         `No se puede asignar un rol inferior sin pasar por la jerarquía: [discípulo, predicador, supervisor, copastor, pastor]`,
@@ -1072,20 +1066,23 @@ export class CopastorService {
 
     //* Update info about Copastor
     if (
-      copastor.roles.includes(MemberRoles.Disciple) &&
-      copastor.roles.includes(MemberRoles.Copastor) &&
-      !copastor.roles.includes(MemberRoles.Pastor) &&
-      !copastor.roles.includes(MemberRoles.Supervisor) &&
-      !copastor.roles.includes(MemberRoles.Preacher) &&
-      !copastor.roles.includes(MemberRoles.Treasurer) &&
-      roles.includes(MemberRoles.Disciple) &&
-      roles.includes(MemberRoles.Copastor) &&
-      !roles.includes(MemberRoles.Pastor) &&
-      !roles.includes(MemberRoles.Supervisor) &&
-      !roles.includes(MemberRoles.Preacher) &&
-      !roles.includes(MemberRoles.Treasurer)
+      copastor.roles.includes(MemberRole.Disciple) &&
+      copastor.roles.includes(MemberRole.Copastor) &&
+      !copastor.roles.includes(MemberRole.Pastor) &&
+      !copastor.roles.includes(MemberRole.Supervisor) &&
+      !copastor.roles.includes(MemberRole.Preacher) &&
+      !copastor.roles.includes(MemberRole.Treasurer) &&
+      roles.includes(MemberRole.Disciple) &&
+      roles.includes(MemberRole.Copastor) &&
+      !roles.includes(MemberRole.Pastor) &&
+      !roles.includes(MemberRole.Supervisor) &&
+      !roles.includes(MemberRole.Preacher) &&
+      !roles.includes(MemberRole.Treasurer)
     ) {
-      if (copastor.status === Status.Active && status === Status.Inactive) {
+      if (
+        copastor.recordStatus === RecordStatus.Active &&
+        recordStatus === RecordStatus.Inactive
+      ) {
         throw new BadRequestException(
           `No se puede actualizar un registro a "Inactivo", se debe eliminar.`,
         );
@@ -1111,9 +1108,9 @@ export class CopastorService {
           );
         }
 
-        if (newPastor.status === Status.Inactive) {
+        if (newPastor.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
-            `La propiedad "Estado" en Pastor debe ser "Activo".`,
+            `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
           );
         }
 
@@ -1129,9 +1126,9 @@ export class CopastorService {
           relations: ['theirMainChurch'],
         });
 
-        if (newChurch.status === Status.Inactive) {
+        if (newChurch.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
-            `La propiedad "Estado" en Iglesia debe ser "Activo".`,
+            `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
           );
         }
 
@@ -1144,7 +1141,7 @@ export class CopastorService {
           theirPastor: newPastor,
           updatedAt: new Date(),
           updatedBy: user,
-          status: status,
+          recordStatus: recordStatus,
         });
 
         let savedCopastor: Copastor;
@@ -1258,7 +1255,7 @@ export class CopastorService {
           theirPastor: copastor.theirPastor,
           updatedAt: new Date(),
           updatedBy: user,
-          status: status,
+          recordStatus: recordStatus,
         });
 
         try {
@@ -1271,24 +1268,24 @@ export class CopastorService {
 
     //* Raise Co-pastor level to Pastor
     if (
-      copastor.roles.includes(MemberRoles.Disciple) &&
-      copastor.roles.includes(MemberRoles.Copastor) &&
-      !copastor.roles.includes(MemberRoles.Treasurer) &&
-      !copastor.roles.includes(MemberRoles.Supervisor) &&
-      !copastor.roles.includes(MemberRoles.Preacher) &&
-      !copastor.roles.includes(MemberRoles.Pastor) &&
-      roles.includes(MemberRoles.Disciple) &&
-      roles.includes(MemberRoles.Pastor) &&
-      !roles.includes(MemberRoles.Treasurer) &&
-      !roles.includes(MemberRoles.Supervisor) &&
-      !roles.includes(MemberRoles.Copastor) &&
-      !roles.includes(MemberRoles.Preacher) &&
-      copastor.status === Status.Active
+      copastor.roles.includes(MemberRole.Disciple) &&
+      copastor.roles.includes(MemberRole.Copastor) &&
+      !copastor.roles.includes(MemberRole.Treasurer) &&
+      !copastor.roles.includes(MemberRole.Supervisor) &&
+      !copastor.roles.includes(MemberRole.Preacher) &&
+      !copastor.roles.includes(MemberRole.Pastor) &&
+      roles.includes(MemberRole.Disciple) &&
+      roles.includes(MemberRole.Pastor) &&
+      !roles.includes(MemberRole.Treasurer) &&
+      !roles.includes(MemberRole.Supervisor) &&
+      !roles.includes(MemberRole.Copastor) &&
+      !roles.includes(MemberRole.Preacher) &&
+      copastor.recordStatus === RecordStatus.Active
     ) {
       //* Validation new church
       if (!theirChurch) {
         throw new NotFoundException(
-          `Para promover de Co-Pastor a Pastor asigne una Iglesia existente.`,
+          `Para promover de Co-Pastor a Pastor se le debe asignar una Iglesia.`,
         );
       }
 
@@ -1301,13 +1298,12 @@ export class CopastorService {
         throw new NotFoundException(`Iglesia con id: ${id} no fue encontrada.`);
       }
 
-      if (newChurch.status == Status.Inactive) {
+      if (newChurch.recordStatus == RecordStatus.Inactive) {
         throw new NotFoundException(
-          `La propiedad "Estado" en Iglesia debe ser "Activa".`,
+          `La propiedad "Estado de registro" en Iglesia debe ser "Activa".`,
         );
       }
 
-      // NOTE : Se tiene que mandar todos los campos para crear a un nuevo pastor (front)
       try {
         const newPastor = this.pastorRepository.create({
           ...updateCopastorDto,
@@ -1351,7 +1347,7 @@ export class CopastorService {
       theirPastor: null,
       updatedAt: new Date(),
       updatedBy: user,
-      status: Status.Inactive,
+      recordStatus: RecordStatus.Inactive,
     });
 
     try {
@@ -1469,8 +1465,6 @@ export class CopastorService {
 
       if (detail.includes('email')) {
         throw new BadRequestException('El correo electrónico ya está en uso.');
-      } else if (detail.includes('church')) {
-        throw new BadRequestException('El nombre de iglesia ya está en uso.');
       }
     }
 

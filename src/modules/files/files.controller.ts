@@ -20,7 +20,7 @@ import {
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 import { Auth } from '@/modules/auth/decorators';
-import { UserRoles } from '@/modules/auth/enums';
+import { UserRole } from '@/modules/auth/enums';
 
 import { CloudinaryService } from '@/modules/cloudinary/cloudinary.service';
 
@@ -43,7 +43,7 @@ export class FilesController {
 
   //* Upload file to cloudinary
   @Post('upload')
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser, UserRoles.TreasurerUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser, UserRole.TreasurerUser)
   @ApiCreatedResponse({
     description: 'Offering file has been successfully uploaded.',
   })
