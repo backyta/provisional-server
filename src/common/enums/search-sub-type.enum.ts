@@ -59,7 +59,7 @@ export enum SearchSubType {
   FamilyGroupByPastorLastNames = 'family_group_by_pastor_last_names',
   FamilyGroupByPastorFullName = 'family_group_by_pastor_full_name',
   FamilyGroupByCopastorNames = 'family_group_by_copastor_names',
-  FamilyGroupByCopastorLastaNames = 'family_group_by_copastor_last_names',
+  FamilyGroupByCopastorLastNames = 'family_group_by_copastor_last_names',
   FamilyGroupByCopastorFullName = 'family_group_by_copastor_full_name',
   FamilyGroupBySupervisorNames = 'family_group_by_supervisor_names',
   FamilyGroupBySupervisorLastNames = 'family_group_by_supervisor_last_names',

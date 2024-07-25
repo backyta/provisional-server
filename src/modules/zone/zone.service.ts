@@ -208,10 +208,10 @@ export class ZoneService {
       familyGroups: data.familyGroups.map((familyGroup) => ({
         id: familyGroup.id,
         familyGroupName: familyGroup.familyGroupName,
-        zoneName: familyGroup.zoneName,
         familyGroupCode: familyGroup.familyGroupCode,
         district: familyGroup.district,
         urbanSector: familyGroup.urbanSector,
+        theirZone: familyGroup.theirZone,
       })),
       disciples: data.disciples.map((disciple) => ({
         id: disciple.id,
@@ -483,7 +483,7 @@ export class ZoneService {
               theirPastor: newPastor,
               theirCopastor: newCopastor,
               theirSupervisor: newSupervisor,
-              zoneName: savedZone.zoneName,
+              // zoneName: savedZone.zoneName,
               familyGroupCode: `${savedZone.zoneName}-${index + 1}`,
             });
           }),
@@ -540,7 +540,7 @@ export class ZoneService {
             theirPastor: zone.theirPastor,
             theirCopastor: zone.theirCopastor,
             theirSupervisor: zone.theirSupervisor,
-            zoneName: updateZoneDto.zoneName,
+            // zoneName: updateZoneDto.zoneName,
             familyGroupCode: `${updateZoneDto.zoneName}-${index + 1}`,
           });
         }),

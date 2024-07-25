@@ -40,10 +40,10 @@ export const formatDataSupervisor = ({ supervisors }: Options) => {
     familyGroups: supervisor?.familyGroups.map((familyGroup) => ({
       id: familyGroup?.id,
       familyGroupName: familyGroup?.familyGroupName,
-      zoneName: familyGroup?.zoneName,
       familyGroupCode: familyGroup?.familyGroupCode,
       district: familyGroup?.district,
       urbanSector: familyGroup?.urbanSector,
+      theirZone: familyGroup.theirZone,
     })),
     disciples: supervisor.disciples.map((disciple) => ({
       id: disciple?.id,

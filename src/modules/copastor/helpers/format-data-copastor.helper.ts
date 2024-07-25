@@ -37,10 +37,10 @@ export const formatDataCopastor = ({ copastors }: Options) => {
     familyGroups: copastor?.familyGroups.map((familyGroup) => ({
       id: familyGroup?.id,
       familyGroupName: familyGroup?.familyGroupName,
-      zoneName: familyGroup?.zoneName,
       familyGroupCode: familyGroup?.familyGroupCode,
       district: familyGroup?.district,
       urbanSector: familyGroup?.urbanSector,
+      theirZone: familyGroup.theirZone,
     })),
     disciples: copastor.disciples.map((disciple) => ({
       id: disciple?.id,

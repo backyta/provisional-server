@@ -5,12 +5,12 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { RecordStatus } from '@/common/enums';
-import { PaginationDto } from '@/common/dtos';
+import { RecordStatus, SearchSubType, SearchType } from '@/common/enums';
+import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
 
 import {
   CreateFamilyGroupDto,
@@ -26,6 +26,7 @@ import { Preacher } from '@/modules/preacher/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
+import { formatDataFamilyGroup } from './helpers';
 
 @Injectable()
 export class FamilyGroupService {
@@ -62,34 +63,34 @@ export class FamilyGroupService {
     createFamilyGroupDto: CreateFamilyGroupDto,
     user: User,
   ): Promise<FamilyGroup> {
-    const { theirPreacher, theirZone } = createFamilyGroupDto;
+    const { theirPreacher } = createFamilyGroupDto;
 
     //? Find and validate Zone
-    if (!theirZone) {
-      throw new NotFoundException(
-        `Para crear un nuevo grupo familiar, asigne un ID de Zona existente.`,
-      );
-    }
+    // if (!theirZone) {
+    //   throw new NotFoundException(
+    //     `Para crear un nuevo grupo familiar, asigne un ID de Zona existente.`,
+    //   );
+    // }
 
-    const zone = await this.zoneRepository.findOne({
-      where: { id: theirZone },
-      relations: [
-        'theirChurch',
-        'theirPastor',
-        'theirCopastor',
-        'theirSupervisor',
-      ],
-    });
+    // const zone = await this.zoneRepository.findOne({
+    //   where: { id: theirZone },
+    //   relations: [
+    //     'theirChurch',
+    //     'theirPastor',
+    //     'theirCopastor',
+    //     'theirSupervisor',
+    //   ],
+    // });
 
-    if (!zone) {
-      throw new NotFoundException(`Zona con id ${theirZone} no encontrada.`);
-    }
+    // if (!zone) {
+    //   throw new NotFoundException(`Zona con id ${theirZone} no encontrada.`);
+    // }
 
-    if (zone.recordStatus === RecordStatus.Inactive) {
-      throw new BadRequestException(
-        `La propiedad estado en Zona debe ser "Activo"`,
-      );
-    }
+    // if (zone.recordStatus === RecordStatus.Inactive) {
+    //   throw new BadRequestException(
+    //     `La propiedad estado en Zona debe ser "Activo"`,
+    //   );
+    // }
 
     //? Find and validate Preacher
     if (!theirPreacher) {
@@ -122,33 +123,33 @@ export class FamilyGroupService {
     }
 
     //! Relations between preacher and zone must be same
-    if (zone.theirSupervisor.id !== preacher.theirSupervisor.id) {
-      throw new BadRequestException(
-        `The zone supervisor and the preacher supervisor must be the same`,
-      );
-    }
+    // if (zone.theirSupervisor.id !== preacher.theirSupervisor.id) {
+    //   throw new BadRequestException(
+    //     `The zone supervisor and the preacher supervisor must be the same`,
+    //   );
+    // }
 
-    if (zone.theirCopastor.id !== preacher.theirCopastor.id) {
-      throw new BadRequestException(
-        `The zone co-pastor and the preacher's co-pastor must be the same`,
-      );
-    }
+    // if (zone.theirCopastor.id !== preacher.theirCopastor.id) {
+    //   throw new BadRequestException(
+    //     `The zone co-pastor and the preacher's co-pastor must be the same`,
+    //   );
+    // }
 
-    if (zone.theirPastor.id !== preacher.theirPastor.id) {
-      throw new BadRequestException(
-        `The zone pastor and the preacher's pastor must be the same.`,
-      );
-    }
+    // if (zone.theirPastor.id !== preacher.theirPastor.id) {
+    //   throw new BadRequestException(
+    //     `The zone pastor and the preacher's pastor must be the same.`,
+    //   );
+    // }
 
-    if (zone.theirChurch.id !== preacher.theirChurch.id) {
-      throw new BadRequestException(
-        `The zone church and the preacher's church must be the same`,
-      );
-    }
+    // if (zone.theirChurch.id !== preacher.theirChurch.id) {
+    //   throw new BadRequestException(
+    //     `The zone church and the preacher's church must be the same`,
+    //   );
+    // }
 
     //? Validation and assignment of other roles to the family group
     //* Validate and assign supervisor according preacher
-    if (!preacher.theirSupervisor) {
+    if (!preacher?.theirSupervisor) {
       throw new NotFoundException(
         `Supervisor was not found, verify that Preacher has a supervisor assigned`,
       );
@@ -161,6 +162,23 @@ export class FamilyGroupService {
     if (supervisor.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `The property status in Supervisor must be a "active"`,
+      );
+    }
+
+    //* Validate and assign supervisor according preacher
+    if (!preacher?.theirZone) {
+      throw new NotFoundException(
+        `Zone was not found, verify that Preacher has a Zona assigned`,
+      );
+    }
+
+    const zone = await this.zoneRepository.findOne({
+      where: { id: preacher?.theirZone?.id },
+    });
+
+    if (supervisor.recordStatus === RecordStatus.Inactive) {
+      throw new BadRequestException(
+        `The property status in Zone must be a "active"`,
       );
     }
 
@@ -225,18 +243,18 @@ export class FamilyGroupService {
 
     let familyGroupNumber: number;
     let familyGroupCode: string;
-    let zoneName: string;
+    // let zoneName: string;
 
     if (allFamilyGroupsByZone.length === 0) {
       familyGroupNumber = 1;
       familyGroupCode = `${zone.zoneName.toUpperCase()}-${familyGroupNumber}`;
-      zoneName = zone.zoneName;
+      // zoneName = zone.zoneName;
     }
 
     if (allFamilyGroupsByZone.length !== 0) {
       familyGroupNumber = allFamilyGroupsByZone.length + 1;
       familyGroupCode = `${zone.zoneName.toUpperCase()}-${familyGroupNumber}`;
-      zoneName = zone.zoneName;
+      // zoneName = zone.zoneName;
     }
 
     // Create new instance
@@ -244,7 +262,7 @@ export class FamilyGroupService {
       const newFamilyGroup = this.familyGroupRepository.create({
         ...createFamilyGroupDto,
         familyGroupNumber: familyGroupNumber,
-        zoneName: zoneName,
+        // zoneName: zoneName,
         familyGroupCode: familyGroupCode,
         theirChurch: church,
         theirPastor: pastor,
@@ -271,13 +289,15 @@ export class FamilyGroupService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit = 10, offset = 0 } = paginationDto;
+    const { limit, offset = 0, order = 'ASC' } = paginationDto;
 
-    const data = await this.familyGroupRepository.find({
+    const familyGroups = await this.familyGroupRepository.find({
       where: { recordStatus: RecordStatus.Active },
       take: limit,
       skip: offset,
       relations: [
+        'updatedBy',
+        'createdBy',
         'theirChurch',
         'theirPastor',
         'theirCopastor',
@@ -287,56 +307,1084 @@ export class FamilyGroupService {
         'disciples',
       ],
       relationLoadStrategy: 'query',
-      order: { createdAt: 'ASC' },
+      order: { createdAt: order as FindOptionsOrderValue },
     });
 
-    const result = data.map((data) => ({
-      ...data,
-      theirChurch: {
-        id: data.theirChurch?.id,
-        churchName: data.theirChurch?.churchName,
-      },
-      theirPastor: {
-        id: data.theirPastor?.id,
-        firstName: data.theirPastor?.firstName,
-        lastName: data.theirPastor?.lastName,
-        roles: data.theirPastor?.roles,
-      },
-      theirCopastor: {
-        id: data.theirCopastor?.id,
-        firstName: data.theirCopastor?.firstName,
-        lastName: data.theirCopastor?.lastName,
-        roles: data.theirCopastor?.roles,
-      },
-      theirSupervisor: {
-        id: data.theirSupervisor?.id,
-        firstName: data.theirSupervisor?.firstName,
-        lastName: data.theirSupervisor?.lastName,
-        roles: data.theirSupervisor?.roles,
-      },
-      theirZone: {
-        id: data.theirZone?.id,
-        zoneName: data.theirZone?.zoneName,
-        district: data.theirZone?.district,
-      },
-      theirPreacher: {
-        id: data.theirPreacher?.id,
-        firstName: data.theirPreacher?.firstName,
-        lastName: data.theirPreacher?.lastName,
-        roles: data.theirPreacher?.roles,
-      },
-      disciples: data.disciples.map((disciple) => ({
-        id: disciple?.id,
-        firstName: disciple?.firstName,
-        lastName: disciple?.lastName,
-      })),
-    }));
-
-    return result;
+    return formatDataFamilyGroup({ familyGroups }) as any;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} familyGroup`;
+  //* FIND BY TERM
+  async findByTerm(
+    term: string,
+    searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
+  ): Promise<FamilyGroup | FamilyGroup[]> {
+    const {
+      'search-type': searchType,
+      'search-sub-type': searchSubType,
+      limit,
+      offset = 0,
+      order,
+    } = searchTypeAndPaginationDto;
+
+    //? Find by first name () --> Many
+    //* FamilyGroups by preacher names
+    if (
+      term &&
+      searchType === SearchType.FirstName &&
+      searchSubType === SearchSubType.FamilyGroupByPreacherNames
+    ) {
+      const firstNames = term.replace(/\+/g, ' ');
+
+      const preachers = await this.preacherRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const preachersId = preachers.map((preacher) => preacher.id);
+
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          theirPreacher: In(preachersId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares por los nombres de su predicador: ${firstNames}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Family groups by supervisor names
+    if (
+      term &&
+      searchType === SearchType.FirstName &&
+      searchSubType === SearchSubType.FamilyGroupBySupervisorNames
+    ) {
+      const firstNames = term.replace(/\+/g, ' ');
+
+      const supervisors = await this.supervisorRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const supervisorsId = supervisors.map((supervisor) => supervisor.id);
+
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          theirSupervisor: In(supervisorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares por los nombres de su supervisor: ${firstNames}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Family groups by co-pastor names
+    if (
+      term &&
+      searchType === SearchType.FirstName &&
+      searchSubType === SearchSubType.FamilyGroupByCopastorNames
+    ) {
+      const firstNames = term.replace(/\+/g, ' ');
+
+      const copastors = await this.copastorRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const copastorsId = copastors.map((copastor) => copastor.id);
+
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          theirCopastor: In(copastorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares por los nombres de su co-pastor: ${firstNames}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Family groups by pastor names
+    if (
+      term &&
+      searchType === SearchType.FirstName &&
+      searchSubType === SearchSubType.FamilyGroupByPastorNames
+    ) {
+      const firstNames = term.replace(/\+/g, ' ');
+
+      const pastors = await this.pastorRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const pastorsId = pastors.map((pastor) => pastor.id);
+
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          theirPastor: In(pastorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares por los nombres de su pastor: ${firstNames}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by last name --> Many
+    //* Family Groups by preacher last names
+    if (
+      term &&
+      searchType === SearchType.LastName &&
+      searchSubType === SearchSubType.FamilyGroupByPreacherLastNames
+    ) {
+      const lastNames = term.replace(/\+/g, ' ');
+
+      const preachers = await this.preacherRepository.find({
+        where: {
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const preacherId = preachers.map((preacher) => preacher.id);
+
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          theirPreacher: In(preacherId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares por los apellidos de su predicador: ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Family groups by supervisor last names
+    if (
+      term &&
+      searchType === SearchType.LastName &&
+      searchSubType === SearchSubType.FamilyGroupBySupervisorLastNames
+    ) {
+      const lastNames = term.replace(/\+/g, ' ');
+
+      const supervisors = await this.supervisorRepository.find({
+        where: {
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const supervisorsId = supervisors.map((supervisor) => supervisor.id);
+
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          theirSupervisor: In(supervisorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares por los apellidos de su supervisor: ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Grupos familiares by co-pastor last names
+    if (
+      term &&
+      searchType === SearchType.LastName &&
+      searchSubType === SearchSubType.FamilyGroupByCopastorLastNames
+    ) {
+      const lastNames = term.replace(/\+/g, ' ');
+
+      const copastors = await this.copastorRepository.find({
+        where: {
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const copastorsId = copastors.map((copastor) => copastor.id);
+
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          theirCopastor: In(copastorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares por los apellidos de su co-pastor: ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Family groups by pastor last names
+    if (
+      term &&
+      searchType === SearchType.LastName &&
+      searchSubType === SearchSubType.FamilyGroupByPastorLastNames
+    ) {
+      const lastNames = term.replace(/\+/g, ' ');
+
+      const pastors = await this.pastorRepository.find({
+        where: {
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const pastorsId = pastors.map((pastor) => pastor.id);
+
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          theirPastor: In(pastorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares por los apellidos de su pastor: ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by full name --> Many
+    //* Family groups by preacher full names
+    if (
+      term &&
+      searchType === SearchType.FullName &&
+      searchSubType === SearchSubType.FamilyGroupByPreacherFullName
+    ) {
+      const firstNames = term.split('-')[0].replace(/\+/g, ' ');
+      const lastNames = term.split('-')[1].replace(/\+/g, ' ');
+
+      const preachers = await this.preacherRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const preachersId = preachers.map((preacher) => preacher.id);
+
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          theirPreacher: In(preachersId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares por los nombres y apellidos de su predicador: ${firstNames} ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Family groups by supervisor full names
+    if (
+      term &&
+      searchType === SearchType.FullName &&
+      searchSubType === SearchSubType.FamilyGroupBySupervisorFullName
+    ) {
+      const firstNames = term.split('-')[0].replace(/\+/g, ' ');
+      const lastNames = term.split('-')[1].replace(/\+/g, ' ');
+
+      const supervisors = await this.supervisorRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const supervisorsId = supervisors.map((supervisor) => supervisor.id);
+
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          theirSupervisor: In(supervisorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares por los nombres y apellidos de su supervisor: ${firstNames} ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Family groups by co-pastor full names
+    if (
+      term &&
+      searchType === SearchType.FullName &&
+      searchSubType === SearchSubType.FamilyGroupByCopastorFullName
+    ) {
+      const firstNames = term.split('-')[0].replace(/\+/g, ' ');
+      const lastNames = term.split('-')[1].replace(/\+/g, ' ');
+
+      const copastors = await this.copastorRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const copastorsId = copastors.map((copastor) => copastor.id);
+
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          theirCopastor: In(copastorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares por los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //* Family groups by pastor full names
+    if (
+      term &&
+      searchType === SearchType.FullName &&
+      searchSubType === SearchSubType.FamilyGroupByPastorFullName
+    ) {
+      const firstNames = term.split('-')[0].replace(/\+/g, ' ');
+      const lastNames = term.split('-')[1].replace(/\+/g, ' ');
+
+      const pastors = await this.pastorRepository.find({
+        where: {
+          firstName: ILike(`%${firstNames}%`),
+          lastName: ILike(`%${lastNames}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const pastorsId = pastors.map((pastor) => pastor.id);
+
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          theirPastor: In(pastorsId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares por los nombres y apellidos de su pastor: ${firstNames} ${lastNames}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by family-group-code --> Many
+    if (term && searchType === SearchType.FamilyGroupCode) {
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          familyGroupCode: ILike(`%${term}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares con este código: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by family-group-name --> Many
+    if (term && searchType === SearchType.FamilyGroupName) {
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          familyGroupName: ILike(`%${term}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares con este nombre: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by zone name --> Many
+    if (term && searchType === SearchType.ZoneName) {
+      const zones = await this.zoneRepository.find({
+        where: {
+          zoneName: ILike(`%${term}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const zonesId = zones.map((zone) => zone.id);
+
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          theirZone: In(zonesId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares con esta zona: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by department --> Many
+    if (term && searchType === SearchType.Department) {
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          department: ILike(`%${term}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares con este departamento: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by province --> Many
+    if (term && searchType === SearchType.Province) {
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          province: ILike(`%${term}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares con esta provincia: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by district --> Many
+    if (term && searchType === SearchType.District) {
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          district: ILike(`%${term}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares con este distrito: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by urban sector --> Many
+    if (term && searchType === SearchType.UrbanSector) {
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          urbanSector: ILike(`%${term}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares con este sector urbano: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by address --> Many
+    if (term && searchType === SearchType.Address) {
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          address: ILike(`%${term}%`),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares con esta dirección: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by status --> Many
+    if (term && searchType === SearchType.RecordStatus) {
+      const recordStatusTerm = term.toLowerCase();
+      const validRecordStatus = ['active', 'inactive'];
+
+      if (!validRecordStatus.includes(recordStatusTerm)) {
+        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      }
+
+      const familyGroups = await this.familyGroupRepository.find({
+        where: {
+          recordStatus: recordStatusTerm,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
+
+        throw new NotFoundException(
+          `No se encontraron grupos familiares con este estado: ${value}`,
+        );
+      }
+
+      try {
+        return formatDataFamilyGroup({ familyGroups }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //! General Exceptions
+    if (!searchType) {
+      throw new BadRequestException(`El tipo de búsqueda es obligatorio`);
+    }
+
+    if (term && !Object.values(SearchType).includes(searchType as SearchType)) {
+      throw new BadRequestException(
+        `Tipos de búsqueda no validos, solo son validos: ${Object.values(SearchType).join(', ')}`,
+      );
+    }
+
+    if (
+      term &&
+      (SearchType.FirstName || SearchType.LastName || SearchType.FullName)
+    ) {
+      throw new BadRequestException(
+        `Para buscar por nombres o apellidos el sub-tipo es requerido`,
+      );
+    }
   }
 
   //* UPDATE FAMILY HOUSE
@@ -574,25 +1622,25 @@ export class FamilyGroupService {
 
         let familyGroupNumber: number;
         let familyGroupCode: string;
-        let zoneName: string;
+        // let zoneName: string;
 
         if (allFamilyGroupsByZone.length === 0) {
           familyGroupNumber = 1;
           familyGroupCode = `${newZone.zoneName.toUpperCase()}-${familyGroupNumber}`;
-          zoneName = newZone.zoneName;
+          // zoneName = newZone.zoneName;
         }
 
         if (allFamilyGroupsByZone.length !== 0) {
           familyGroupNumber = allFamilyGroupsByZone.length + 1;
           familyGroupCode = `${newZone.zoneName.toUpperCase()}-${familyGroupNumber}`;
-          zoneName = newZone.zoneName;
+          // zoneName = newZone.zoneName;
         }
 
         // Update and save
         const updatedFamilyGroup = await this.familyGroupRepository.preload({
           id: familyGroup.id,
           ...updateFamilyGroupDto,
-          zoneName: zoneName,
+          // zoneName: zoneName,
           familyGroupNumber: familyGroupNumber,
           familyGroupCode: familyGroupCode,
           theirChurch: newChurch,
@@ -638,7 +1686,7 @@ export class FamilyGroupService {
             allResult.map(async (familyGroup, index) => {
               await this.familyGroupRepository.update(familyGroup.id, {
                 familyGroupNumber: index + 1,
-                familyGroupCode: `${familyGroup.zoneName.toUpperCase()}-${index + 1}`,
+                familyGroupCode: `${familyGroup.theirZone.zoneName.toUpperCase()}-${index + 1}`,
               });
             }),
           );

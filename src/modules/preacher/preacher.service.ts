@@ -7,7 +7,14 @@ import {
 } from '@nestjs/common';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
+import {
+  Between,
+  FindOptionsOrderValue,
+  ILike,
+  In,
+  IsNull,
+  Repository,
+} from 'typeorm';
 
 import { formatToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
 import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
@@ -1093,8 +1100,8 @@ export class PreacherService {
       }
     }
 
-    //? Find by zone --> Many
-    if (term && searchType === SearchType.Zone) {
+    //? Find by zone name --> Many
+    if (term && searchType === SearchType.ZoneName) {
       const zones = await this.zoneRepository.find({
         where: {
           zoneName: ILike(`%${term}%`),
@@ -1108,6 +1115,54 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           theirZone: In(zonesId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirFamilyGroup',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (preachers.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron predicadores(as) con esta zona: ${term}`,
+        );
+      }
+
+      try {
+        return formatDataPreacher({ preachers }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador`,
+        );
+      }
+    }
+
+    //? Find by zone id --> Many
+    if (term && searchType === SearchType.ZoneId) {
+      const zone = await this.zoneRepository.findOne({
+        where: {
+          id: term,
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const preachers = await this.preacherRepository.find({
+        where: {
+          theirZone: zone,
+          theirFamilyGroup: IsNull(),
           recordStatus: RecordStatus.Active,
         },
         take: limit,
@@ -1813,8 +1868,12 @@ export class PreacherService {
           relations: ['theirPreacher'],
         });
 
+        // NOTE : Aqui despues de cambiar el preacher de supervisor y zona se cambia su casa a la nueva zona
+        //NOTE : luego se aniade un numero el correlativo final y asi la casa pasa al nuevo supervisor y zona
+
+        //TODO : EN grupo familiar entonces una vez ya esta modificado todo solo se hace el intercambio, solo se podrá hacer con la misma zona y supervisor
         try {
-          //* Update in all family houses the new relations of the copastor that is updated.
+          //* Update in all family houses the new relations of the supervisor that is updated.
           const familyGroupsByPreacher = allFamilyGroups.filter(
             (familyGroup) => familyGroup.theirPreacher?.id === preacher?.id,
           );
@@ -1831,7 +1890,7 @@ export class PreacherService {
                 theirCopastor: newCopastor,
                 theirSupervisor: newSupervisor,
                 theirZone: newZone,
-                zoneName: newZone.zoneName,
+                // zoneName: newZone.zoneName,
                 familyGroupNumber:
                   allFamilyGroupsByZone.length === 0
                     ? 1
@@ -1875,7 +1934,7 @@ export class PreacherService {
             allResult.map(async (familyGroup, index) => {
               await this.familyGroupRepository.update(familyGroup.id, {
                 familyGroupNumber: index + 1,
-                familyGroupCode: `${familyGroup.zoneName.toUpperCase()}-${index + 1}`,
+                familyGroupCode: `${familyGroup.theirZone.zoneName.toUpperCase()}-${index + 1}`,
               });
             }),
           );

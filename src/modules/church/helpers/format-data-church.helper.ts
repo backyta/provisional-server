@@ -49,10 +49,11 @@ export const formatDataChurch = ({ churches }: Options) => {
     familyGroups: church?.familyGroups.map((familyGroup) => ({
       id: familyGroup?.id,
       familyGroupName: familyGroup?.familyGroupName,
-      zoneName: familyGroup?.zoneName,
+      // zoneName: familyGroup?.zoneName,
       familyGroupCode: familyGroup?.familyGroupCode,
       district: familyGroup?.district,
       urbanSector: familyGroup?.urbanSector,
+      theirZone: familyGroup.theirZone,
     })),
     disciples: church.disciples.map((disciple) => ({
       id: disciple?.id,

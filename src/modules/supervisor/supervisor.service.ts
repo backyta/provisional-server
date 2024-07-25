@@ -868,7 +868,7 @@ export class SupervisorService {
     }
 
     //? Find by zone --> Many
-    if (term && searchType === SearchType.Zone) {
+    if (term && searchType === SearchType.ZoneName) {
       const zones = await this.zoneRepository.find({
         where: {
           zoneName: ILike(`%${term}%`),

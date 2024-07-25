@@ -904,7 +904,7 @@ export class DiscipleService {
 
       if (disciples.length === 0) {
         throw new NotFoundException(
-          `No se encontraron discípulos por los nombres y apellidos de su supervisor: ${firstNames} ${lastNames}`,
+          `No se encontraron discípulos por los nombres y apellidos de su predicador: ${firstNames} ${lastNames}`,
         );
       }
 
@@ -1300,7 +1300,7 @@ export class DiscipleService {
     }
 
     //? Find by zone --> Many
-    if (term && searchType === SearchType.Zone) {
+    if (term && searchType === SearchType.ZoneName) {
       const zones = await this.zoneRepository.find({
         where: {
           zoneName: ILike(`%${term}%`),

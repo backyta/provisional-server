@@ -15,7 +15,8 @@ export enum SearchType {
   MaritalStatus = 'marital_status',
 
   //* Disciple, Supervisor, Preacher, Family House
-  Zone = 'zone',
+  ZoneName = 'zone_name',
+  ZoneId = 'zone_id',
 
   //* Disciple, Supervisor, Preacher, Fam. House,
   FamilyGroupCode = 'family_group_code',
