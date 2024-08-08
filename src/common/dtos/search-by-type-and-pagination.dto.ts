@@ -50,4 +50,14 @@ export class SearchByTypeAndPaginationDto {
   @IsString()
   @Type(() => String)
   order?: string;
+
+  //* For preacher module when search by zone id and return preacher with family groups or not
+  @ApiProperty({
+    default: 'ASC',
+    description: 'Do you want null relationships to be returned?',
+  })
+  @IsOptional()
+  @IsString()
+  @Type(() => String)
+  isNull?: string;
 }

@@ -16,11 +16,12 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { PaginationDto } from '@/common/dtos';
+import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
 
 import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
@@ -75,9 +76,25 @@ export class ZoneController {
     return this.zoneService.findAll(paginationDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.zoneService.findOne(+id);
+  //* Find By Term
+  @Get(':term')
+  @Auth()
+  @ApiParam({
+    name: 'term',
+    description: 'Could be name church, dates, department, address, etc.',
+    example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
+  })
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found resource.',
+  })
+  findTerm(
+    @Param('term') term: string,
+    @Query() searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
+  ): Promise<Zone | Zone[]> {
+    return this.zoneService.findByTerm(term, searchTypeAndPaginationDto);
   }
 
   //* Update
@@ -98,18 +115,4 @@ export class ZoneController {
   }
 
   //* Delete
-  /*  @Delete(':id')
-  @Auth(UserRoles.SuperUser, UserRoles.AdminUser)
-  @ApiOkResponse({
-    description: 'Successful operation.',
-  })
-  @ApiForbiddenResponse({
-    description: 'Forbidden.',
-  })
-  remove(
-    @Param('id', ParseUUIDPipe) id: string,
-    @GetUser() user: User,
-  ): Promise<void> {
-    return this.zoneService.remove(id, user);
-  } */
 }

@@ -13,8 +13,8 @@ import { Church } from '@/modules/church/entities';
 import { formatDataChurch } from '@/modules/church/helpers';
 import { CreateChurchDto, UpdateChurchDto } from '@/modules/church/dto';
 
-import { SearchType, RecordStatus } from '@/common/enums';
 import { formatToDDMMYYYY } from '@/common/helpers';
+import { SearchType, RecordStatus } from '@/common/enums';
 import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
 
 import { User } from '@/modules/user/entities';
@@ -150,8 +150,8 @@ export class ChurchService {
       take: limit,
       skip: offset,
       relations: [
-        'createdBy',
         'updatedBy',
+        'createdBy',
         'anexes',
         'pastors',
         'copastors',
@@ -165,7 +165,15 @@ export class ChurchService {
       order: { createdAt: order as FindOptionsOrderValue },
     });
 
-    return formatDataChurch({ churches }) as any;
+    console.log(churches);
+
+    const mainChurch = await this.churchRepository.findOne({
+      where: { isAnexe: false, recordStatus: RecordStatus.Active },
+    });
+
+    console.log(mainChurch);
+
+    return formatDataChurch({ churches, mainChurch }) as any;
   }
 
   //* FIND BY TERM
@@ -190,6 +198,8 @@ export class ChurchService {
         take: limit,
         skip: offset,
         relations: [
+          'updatedBy',
+          'createdBy',
           'anexes',
           'pastors',
           'copastors',
@@ -203,6 +213,10 @@ export class ChurchService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
+      const mainChurch = await this.churchRepository.findOne({
+        where: { isAnexe: false, recordStatus: RecordStatus.Active },
+      });
+
       if (churches.length === 0) {
         throw new NotFoundException(
           `No se encontraron iglesias con este nombre: ${term}`,
@@ -210,7 +224,7 @@ export class ChurchService {
       }
 
       try {
-        return formatDataChurch({ churches }) as any;
+        return formatDataChurch({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -237,6 +251,8 @@ export class ChurchService {
         take: limit,
         skip: offset,
         relations: [
+          'updatedBy',
+          'createdBy',
           'anexes',
           'pastors',
           'copastors',
@@ -250,6 +266,10 @@ export class ChurchService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
+      const mainChurch = await this.churchRepository.findOne({
+        where: { isAnexe: false, recordStatus: RecordStatus.Active },
+      });
+
       if (churches.length === 0) {
         const fromDate = formatToDDMMYYYY(fromTimestamp);
         const toDate = formatToDDMMYYYY(toTimestamp);
@@ -260,7 +280,7 @@ export class ChurchService {
       }
 
       try {
-        return formatDataChurch({ churches }) as any;
+        return formatDataChurch({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -278,6 +298,8 @@ export class ChurchService {
         take: limit,
         skip: offset,
         relations: [
+          'updatedBy',
+          'createdBy',
           'anexes',
           'pastors',
           'copastors',
@@ -291,6 +313,10 @@ export class ChurchService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
+      const mainChurch = await this.churchRepository.findOne({
+        where: { isAnexe: false, recordStatus: RecordStatus.Active },
+      });
+
       if (churches.length === 0) {
         throw new NotFoundException(
           `No se encontraron iglesias con este departamento: ${term}`,
@@ -298,7 +324,7 @@ export class ChurchService {
       }
 
       try {
-        return formatDataChurch({ churches }) as any;
+        return formatDataChurch({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -316,6 +342,8 @@ export class ChurchService {
         take: limit,
         skip: offset,
         relations: [
+          'updatedBy',
+          'createdBy',
           'anexes',
           'pastors',
           'copastors',
@@ -329,6 +357,10 @@ export class ChurchService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
+      const mainChurch = await this.churchRepository.findOne({
+        where: { isAnexe: false, recordStatus: RecordStatus.Active },
+      });
+
       if (churches.length === 0) {
         throw new NotFoundException(
           `No se encontraron iglesias con esta provincia: ${term}`,
@@ -336,7 +368,7 @@ export class ChurchService {
       }
 
       try {
-        return formatDataChurch({ churches }) as any;
+        return formatDataChurch({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -354,6 +386,8 @@ export class ChurchService {
         take: limit,
         skip: offset,
         relations: [
+          'updatedBy',
+          'createdBy',
           'anexes',
           'pastors',
           'copastors',
@@ -367,6 +401,10 @@ export class ChurchService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
+      const mainChurch = await this.churchRepository.findOne({
+        where: { isAnexe: false, recordStatus: RecordStatus.Active },
+      });
+
       if (churches.length === 0) {
         throw new NotFoundException(
           `No se encontraron iglesias con este distrito: ${term}`,
@@ -374,7 +412,7 @@ export class ChurchService {
       }
 
       try {
-        return formatDataChurch({ churches }) as any;
+        return formatDataChurch({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -392,6 +430,8 @@ export class ChurchService {
         take: limit,
         skip: offset,
         relations: [
+          'updatedBy',
+          'createdBy',
           'anexes',
           'pastors',
           'copastors',
@@ -405,6 +445,10 @@ export class ChurchService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
+      const mainChurch = await this.churchRepository.findOne({
+        where: { isAnexe: false, recordStatus: RecordStatus.Active },
+      });
+
       if (churches.length === 0) {
         throw new NotFoundException(
           `No se encontraron iglesias con este sector urbano: ${term}`,
@@ -412,7 +456,7 @@ export class ChurchService {
       }
 
       try {
-        return formatDataChurch({ churches }) as any;
+        return formatDataChurch({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -430,6 +474,8 @@ export class ChurchService {
         take: limit,
         skip: offset,
         relations: [
+          'updatedBy',
+          'createdBy',
           'anexes',
           'pastors',
           'copastors',
@@ -443,6 +489,10 @@ export class ChurchService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
+      const mainChurch = await this.churchRepository.findOne({
+        where: { isAnexe: false, recordStatus: RecordStatus.Active },
+      });
+
       if (churches.length === 0) {
         throw new NotFoundException(
           `No se encontraron iglesias con esta dirección: ${term}`,
@@ -450,7 +500,7 @@ export class ChurchService {
       }
 
       try {
-        return formatDataChurch({ churches }) as any;
+        return formatDataChurch({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -474,6 +524,8 @@ export class ChurchService {
         take: limit,
         skip: offset,
         relations: [
+          'updatedBy',
+          'createdBy',
           'anexes',
           'pastors',
           'copastors',
@@ -524,7 +576,7 @@ export class ChurchService {
   ): Promise<Church> {
     const { recordStatus, theirMainChurch } = updateChurchDto;
 
-    // Validations
+    //* Validations
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido`);
     }
@@ -565,7 +617,7 @@ export class ChurchService {
       theirMainChurch &&
       church?.theirMainChurch?.id !== theirMainChurch
     ) {
-      // Validate new main church
+      //* Validate new main church
       const newMainChurch = await this.churchRepository.findOne({
         where: { id: theirMainChurch },
         relations: [
@@ -599,7 +651,7 @@ export class ChurchService {
         );
       }
 
-      // Update and save
+      //* Update and save
       const updatedChurch = await this.churchRepository.preload({
         id: church.id,
         ...updateChurchDto,
@@ -637,7 +689,7 @@ export class ChurchService {
 
   //! DELETE CHURCH
   async remove(id: string, user: User) {
-    // Validations
+    //* Validations
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido.`);
     }

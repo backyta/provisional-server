@@ -65,7 +65,7 @@ export class ChurchController {
   }
 
   //* Find Main Church
-  @Get('/main-church')
+  @Get('main-church')
   @Auth()
   @ApiOkResponse({
     description: 'Successful operation.',

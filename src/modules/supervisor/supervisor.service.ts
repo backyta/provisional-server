@@ -7,7 +7,14 @@ import {
 } from '@nestjs/common';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
+import {
+  Between,
+  FindOptionsOrderValue,
+  ILike,
+  In,
+  IsNull,
+  Repository,
+} from 'typeorm';
 
 import {
   CreateSupervisorDto,
@@ -243,10 +250,13 @@ export class SupervisorService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit, offset = 0, order = 'ASC' } = paginationDto;
+    const { limit, offset = 0, order = 'ASC', isNull } = paginationDto;
 
     const supervisors = await this.supervisorRepository.find({
-      where: { recordStatus: RecordStatus.Active },
+      where: {
+        recordStatus: RecordStatus.Active,
+        theirZone: isNull === 'true' ? IsNull() : null,
+      },
       take: limit,
       skip: offset,
       relations: [
@@ -1336,7 +1346,6 @@ export class SupervisorService {
       numberChildren,
     } = updateSupervisorDto;
 
-    // Validations
     if (!roles) {
       throw new BadRequestException(
         `Los roles son requeridos para actualizar el Supervisor.`,
@@ -1347,7 +1356,7 @@ export class SupervisorService {
       throw new BadRequestException(`UUID no valido.`);
     }
 
-    // Validation supervisor
+    //* Validation supervisor
     const supervisor = await this.supervisorRepository.findOne({
       where: { id: id },
       relations: ['theirCopastor', 'theirPastor', 'theirChurch'],
@@ -1512,7 +1521,7 @@ export class SupervisorService {
           );
         }
 
-        // Update and save
+        //* Update and save
         const updatedSupervisor = await this.supervisorRepository.preload({
           id: supervisor.id,
           ...updateSupervisorDto,

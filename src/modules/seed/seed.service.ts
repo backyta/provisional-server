@@ -360,8 +360,6 @@ export class SeedService {
     if (error.code === '23505') throw new BadRequestException(error.detail);
     this.logger.error(error);
 
-    console.log(error);
-
     throw new InternalServerErrorException(
       'Unexpected errors, check server logs',
     );

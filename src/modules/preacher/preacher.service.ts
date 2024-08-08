@@ -246,6 +246,7 @@ export class PreacherService {
       limit,
       offset = 0,
       order,
+      isNull = 'false',
     } = searchTypeAndPaginationDto;
 
     //? Find by first name () --> Many
@@ -1162,7 +1163,7 @@ export class PreacherService {
       const preachers = await this.preacherRepository.find({
         where: {
           theirZone: zone,
-          theirFamilyGroup: IsNull(),
+          theirFamilyGroup: isNull === 'true' ? IsNull() : null,
           recordStatus: RecordStatus.Active,
         },
         take: limit,
@@ -1618,7 +1619,6 @@ export class PreacherService {
       isDirectRelationToPastor,
     } = updatePreacherDto;
 
-    // Validations
     if (!roles) {
       throw new BadRequestException(
         `Los roles son requeridos para actualizar el Predicador.`,
@@ -1629,7 +1629,7 @@ export class PreacherService {
       throw new BadRequestException(`UUID no valido.`);
     }
 
-    // Validation preacher
+    //* Validation preacher
     const preacher = await this.preacherRepository.findOne({
       where: { id: id },
       relations: [
@@ -1727,7 +1727,7 @@ export class PreacherService {
         !roles.includes(MemberRole.Copastor) &&
         !roles.includes(MemberRole.Supervisor))
     ) {
-      // Validations
+      //* Validations
       if (
         preacher.recordStatus === RecordStatus.Active &&
         recordStatus === RecordStatus.Inactive
@@ -1868,18 +1868,14 @@ export class PreacherService {
           relations: ['theirPreacher'],
         });
 
-        // NOTE : Aqui despues de cambiar el preacher de supervisor y zona se cambia su casa a la nueva zona
-        //NOTE : luego se aniade un numero el correlativo final y asi la casa pasa al nuevo supervisor y zona
-
-        //TODO : EN grupo familiar entonces una vez ya esta modificado todo solo se hace el intercambio, solo se podrá hacer con la misma zona y supervisor
+        //* Update in all family houses the new relations.
         try {
-          //* Update in all family houses the new relations of the supervisor that is updated.
           const familyGroupsByPreacher = allFamilyGroups.filter(
             (familyGroup) => familyGroup.theirPreacher?.id === preacher?.id,
           );
 
-          const allFamilyGroupsByZone = allFamilyGroups.filter(
-            (house) => house.theirZone?.id === newZone?.id,
+          const familyGroupsByNewZone = allFamilyGroups.filter(
+            (familyGroup) => familyGroup.theirZone?.id === newZone?.id,
           );
 
           await Promise.all(
@@ -1890,20 +1886,21 @@ export class PreacherService {
                 theirCopastor: newCopastor,
                 theirSupervisor: newSupervisor,
                 theirZone: newZone,
-                // zoneName: newZone.zoneName,
                 familyGroupNumber:
-                  allFamilyGroupsByZone.length === 0
+                  familyGroupsByNewZone.length === 0
                     ? 1
-                    : allFamilyGroupsByZone.length + 1,
+                    : familyGroupsByNewZone.length + 1,
                 familyGroupCode:
-                  allFamilyGroupsByZone.length === 0
+                  familyGroupsByNewZone.length === 0
                     ? `${newZone.zoneName.toUpperCase()}-${1}`
-                    : `${newZone.zoneName.toUpperCase()}-${allFamilyGroupsByZone.length + 1}`,
+                    : `${newZone.zoneName.toUpperCase()}-${familyGroupsByNewZone.length + 1}`,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
 
-          //* Update in all disciples the new relations of the copastor that is updated.
+          //* Update in all disciples the new relations.
           const disciplesByPreacher = allDisciples.filter(
             (disciple) => disciple.theirPreacher?.id === preacher?.id,
           );
@@ -1916,25 +1913,30 @@ export class PreacherService {
                 theirCopastor: newCopastor,
                 theirSupervisor: newSupervisor,
                 theirZone: newZone,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
 
-          //* Reorder family house numbers and code in the old zone
-          const allFamilyGroupsByOrder = await this.familyGroupRepository.find({
+          //* Reorder family group numbers and codes in the old zone
+          const familyGroupsByOrder = await this.familyGroupRepository.find({
             relations: ['theirZone'],
             order: { familyGroupNumber: 'ASC' },
           });
 
-          const allResult = allFamilyGroupsByOrder.filter(
-            (house) => house.theirZone?.id === preacher.theirZone?.id,
+          const familyGroupsByOrderFiltered = familyGroupsByOrder.filter(
+            (familyGroup) =>
+              familyGroup.theirZone?.id === preacher.theirZone?.id,
           );
 
           await Promise.all(
-            allResult.map(async (familyGroup, index) => {
+            familyGroupsByOrderFiltered.map(async (familyGroup, index) => {
               await this.familyGroupRepository.update(familyGroup.id, {
                 familyGroupNumber: index + 1,
                 familyGroupCode: `${familyGroup.theirZone.zoneName.toUpperCase()}-${index + 1}`,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -1945,7 +1947,7 @@ export class PreacherService {
         return savedPreacher;
       }
 
-      //? Update and save if is same Copastor
+      //? Update and save if is same Supervisor
       if (preacher.theirSupervisor?.id === theirSupervisor) {
         const updatedPreacher = await this.preacherRepository.preload({
           id: preacher.id,
@@ -2126,7 +2128,7 @@ export class PreacherService {
           );
         }
 
-        // Create new instance Supervisor and delete old preacher
+        //! Create new instance Supervisor and delete old preacher
         try {
           const newSupervisor = this.supervisorRepository.create({
             ...updatePreacherDto,

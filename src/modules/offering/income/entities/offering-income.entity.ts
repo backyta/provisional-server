@@ -18,11 +18,9 @@ import { Preacher } from '@/modules/preacher/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
 import { FamilyGroup } from '@/modules/family-group/entities';
 
-//TODO : seguir con la semilla , revisar antes si al crear se setea en los [] de las relaciones opuestas
-// NOTE : Al momento hacer la consultas ver los indices agregar
 @Entity({ name: 'offerings_income' })
 @Index(['type', 'subType'])
-export class Income {
+export class OfferingIncome {
   //* General data
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -34,27 +32,27 @@ export class Income {
   @Column('text', { name: 'sub_type', nullable: true })
   subType: string;
 
-  @Column('int')
+  @Column('decimal')
   amount: number;
 
   @Column('text')
   currency: string;
 
-  @Column('text', { nullable: true })
+  @Column('text', { name: 'comments', nullable: true })
   comments: string;
 
   @Index()
   @Column('date', { name: 'date' })
   date: Date;
 
-  @Column('text', { name: 'url_files', nullable: true })
-  urlFiles: string;
-
-  @Column('text', { name: 'reason_elimination', nullable: true })
-  reasonElimination: string;
+  @Column('text', { name: 'image_urls', array: true })
+  imageUrls: string[];
 
   @Column('text', { name: 'shift', nullable: true })
   shift: string;
+
+  @Column('text', { name: 'reason_elimination', nullable: true })
+  reasonElimination: string;
 
   //* Info register and update date
   @Column('timestamp', { name: 'created_at', nullable: true })
@@ -77,37 +75,60 @@ export class Income {
   })
   recordStatus: string;
 
+  @Column('text', { name: 'member_type', nullable: true })
+  memberType: string;
+
   //* Relations (FK)
-  // NOTE : la casa no se elimina solo se desactiva por el momento y se actualiza su info
   // Family House
   @ManyToOne(() => FamilyGroup, {
     nullable: true,
-    eager: true,
     onDelete: 'SET NULL',
-    // onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'their_family_group_id' })
-  theirFamilyGroup: FamilyGroup;
+  @JoinColumn({ name: 'family_group_id' })
+  familyGroup: FamilyGroup;
 
-  // Tithe or special or ground church
+  // Member
   // NOTE : agregar en cada entidad que al subir de nivel se elimina pero se coloca el nuevo en todos los registros que tenia el anterior ID.
+  @ManyToOne(() => Pastor, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'pastor_id' })
+  pastor: Pastor;
+
+  @ManyToOne(() => Copastor, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'copastor_id' })
+  copastor: Copastor;
+
+  @ManyToOne(() => Supervisor, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'supervisor_id' })
+  supervisor: Supervisor;
+
+  @ManyToOne(() => Preacher, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'preacher_id' })
+  preacher: Preacher;
+
   @ManyToOne(() => Disciple, {
     nullable: true,
-    eager: true,
     onDelete: 'SET NULL',
-    // onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'their_contributor_id' })
-  theirContributor: Disciple | Preacher | Supervisor | Copastor | Pastor;
+  @JoinColumn({ name: 'disciple_id' })
+  disciple: Disciple;
 
-  // Income ayuno zonal or vigil zonal (zone)
-  // NOTE : la zona no se debe eliminar ni desactivar, solo actualizar el nombre o super o distrito o hasta provincia (ver)
+  // Zone
   @ManyToOne(() => Zone, {
     nullable: true,
-    eager: true,
     onDelete: 'SET NULL',
-    // onUpdate: 'CASCADE',
   })
-  @JoinColumn({ name: 'their_zone_id' })
-  theirZone: Zone;
+  @JoinColumn({ name: 'zone_id' })
+  zone: Zone;
 }

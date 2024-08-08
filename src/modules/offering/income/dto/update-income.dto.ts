@@ -1,4 +1,6 @@
 import { PartialType } from '@nestjs/swagger';
-import { CreateIncomeDto } from '@/modules/offering/income/dto';
+import { CreateOfferingIncomeDto } from '@/modules/offering/income/dto';
 
-export class UpdateIncomeDto extends PartialType(CreateIncomeDto) {}
+export class UpdateOfferingIncomeDto extends PartialType(
+  CreateOfferingIncomeDto,
+) {}

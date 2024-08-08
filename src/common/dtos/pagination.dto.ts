@@ -29,4 +29,14 @@ export class PaginationDto {
   @IsString()
   @Type(() => String)
   order?: string;
+
+  //* For zone module when search supervisors and return supervisors with zone or not
+  @ApiProperty({
+    default: 'ASC',
+    description: 'Do you want null relationships to be returned?',
+  })
+  @IsOptional()
+  @IsString()
+  @Type(() => String)
+  isNull?: string;
 }

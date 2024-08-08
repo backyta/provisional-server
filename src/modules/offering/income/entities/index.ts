@@ -1,1 +1,1 @@
-export * from './income.entity';
+export * from './offering-income.entity';

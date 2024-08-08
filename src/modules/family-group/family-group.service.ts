@@ -5,9 +5,9 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
+import { FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
 
 import { RecordStatus, SearchSubType, SearchType } from '@/common/enums';
 import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
@@ -17,6 +17,7 @@ import {
   UpdateFamilyGroupDto,
 } from '@/modules/family-group/dto';
 import { FamilyGroup } from '@/modules/family-group/entities';
+import { formatDataFamilyGroup } from '@/modules/family-group/helpers';
 
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
@@ -26,7 +27,6 @@ import { Preacher } from '@/modules/preacher/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
-import { formatDataFamilyGroup } from './helpers';
 
 @Injectable()
 export class FamilyGroupService {
@@ -65,37 +65,10 @@ export class FamilyGroupService {
   ): Promise<FamilyGroup> {
     const { theirPreacher } = createFamilyGroupDto;
 
-    //? Find and validate Zone
-    // if (!theirZone) {
-    //   throw new NotFoundException(
-    //     `Para crear un nuevo grupo familiar, asigne un ID de Zona existente.`,
-    //   );
-    // }
-
-    // const zone = await this.zoneRepository.findOne({
-    //   where: { id: theirZone },
-    //   relations: [
-    //     'theirChurch',
-    //     'theirPastor',
-    //     'theirCopastor',
-    //     'theirSupervisor',
-    //   ],
-    // });
-
-    // if (!zone) {
-    //   throw new NotFoundException(`Zona con id ${theirZone} no encontrada.`);
-    // }
-
-    // if (zone.recordStatus === RecordStatus.Inactive) {
-    //   throw new BadRequestException(
-    //     `La propiedad estado en Zona debe ser "Activo"`,
-    //   );
-    // }
-
     //? Find and validate Preacher
     if (!theirPreacher) {
       throw new NotFoundException(
-        `Para crear un nuevo grupo familiar, asigne un ID de Predicador existente.`,
+        `Para crear un nuevo grupo familiar, se debe asignar un Predicador.`,
       );
     }
 
@@ -112,46 +85,21 @@ export class FamilyGroupService {
 
     if (!preacher) {
       throw new NotFoundException(
-        `Predicador con id ${theirPreacher} no encontrado.`,
+        `Predicador con id: ${theirPreacher} no fue encontrado.`,
       );
     }
 
     if (preacher.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
-        `La propiedad estado en Predicador debe ser "Activo"`,
+        `La propiedad "Estado de registro" en Predicador debe ser "Activo".`,
       );
     }
 
-    //! Relations between preacher and zone must be same
-    // if (zone.theirSupervisor.id !== preacher.theirSupervisor.id) {
-    //   throw new BadRequestException(
-    //     `The zone supervisor and the preacher supervisor must be the same`,
-    //   );
-    // }
-
-    // if (zone.theirCopastor.id !== preacher.theirCopastor.id) {
-    //   throw new BadRequestException(
-    //     `The zone co-pastor and the preacher's co-pastor must be the same`,
-    //   );
-    // }
-
-    // if (zone.theirPastor.id !== preacher.theirPastor.id) {
-    //   throw new BadRequestException(
-    //     `The zone pastor and the preacher's pastor must be the same.`,
-    //   );
-    // }
-
-    // if (zone.theirChurch.id !== preacher.theirChurch.id) {
-    //   throw new BadRequestException(
-    //     `The zone church and the preacher's church must be the same`,
-    //   );
-    // }
-
-    //? Validation and assignment of other roles to the family group
-    //* Validate and assign supervisor according preacher
+    //* Validation if relationships exist
+    // Supervisor
     if (!preacher?.theirSupervisor) {
       throw new NotFoundException(
-        `Supervisor was not found, verify that Preacher has a supervisor assigned`,
+        `Supervisor no fue encontrado, verifica que Predicador tenga un Supervisor asignado.`,
       );
     }
 
@@ -161,14 +109,14 @@ export class FamilyGroupService {
 
     if (supervisor.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
-        `The property status in Supervisor must be a "active"`,
+        `La propiedad "Estado de Registro" en Supervisor debe ser "Activo".`,
       );
     }
 
-    //* Validate and assign supervisor according preacher
+    // Zone
     if (!preacher?.theirZone) {
       throw new NotFoundException(
-        `Zone was not found, verify that Preacher has a Zona assigned`,
+        `Zona no fue encontrada, verifica que Predicador tenga una Zona asignada.`,
       );
     }
 
@@ -178,14 +126,14 @@ export class FamilyGroupService {
 
     if (supervisor.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
-        `The property status in Zone must be a "active"`,
+        `La propiedad "Estado de Registro" en Zona debe ser "Activo".`,
       );
     }
 
-    //* Validate and assign copastor according preacher
+    // Copastor
     if (!preacher?.theirCopastor) {
       throw new NotFoundException(
-        `Copastor was not found, verify that Preacher has a co-pastor assigned`,
+        `Co-Pastor no fue encontrado, verifica que Predicador tenga un Co-Pastor asignado.`,
       );
     }
 
@@ -195,14 +143,14 @@ export class FamilyGroupService {
 
     if (copastor.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
-        `The property status in Copastor must be a "active"`,
+        `La propiedad "Estado de Registro" en Co-Pastor debe ser "Activo".`,
       );
     }
 
-    //* Validate and assign pastor according preacher
+    // Pastor
     if (!preacher?.theirPastor) {
       throw new NotFoundException(
-        `Pastor was not found, verify that Preacher has a pastor assigned`,
+        `Pastor no fue encontrado, verifica que Predicador tenga un Pastor asignado.`,
       );
     }
 
@@ -212,14 +160,14 @@ export class FamilyGroupService {
 
     if (pastor.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
-        `The property status in Pastor must be a "active"`,
+        `La propiedad "Estado de Registro" en Pastor debe ser "Activo".`,
       );
     }
 
-    //* Validate and assign church according preacher
+    // Church
     if (!preacher.theirChurch) {
       throw new NotFoundException(
-        `Church was not found, verify that Preacher has a church assigned`,
+        `Iglesia no fue encontrada, verifica que Predicador tenga una Iglesia asignada.`,
       );
     }
 
@@ -229,7 +177,7 @@ export class FamilyGroupService {
 
     if (church.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
-        `The property status in Church must be a "active"`,
+        `La propiedad "Estado de Registro" en Iglesia debe ser "Activo".`,
       );
     }
 
@@ -243,26 +191,22 @@ export class FamilyGroupService {
 
     let familyGroupNumber: number;
     let familyGroupCode: string;
-    // let zoneName: string;
 
     if (allFamilyGroupsByZone.length === 0) {
       familyGroupNumber = 1;
       familyGroupCode = `${zone.zoneName.toUpperCase()}-${familyGroupNumber}`;
-      // zoneName = zone.zoneName;
     }
 
     if (allFamilyGroupsByZone.length !== 0) {
       familyGroupNumber = allFamilyGroupsByZone.length + 1;
       familyGroupCode = `${zone.zoneName.toUpperCase()}-${familyGroupNumber}`;
-      // zoneName = zone.zoneName;
     }
 
-    // Create new instance
+    //* Create new instance
     try {
       const newFamilyGroup = this.familyGroupRepository.create({
         ...createFamilyGroupDto,
         familyGroupNumber: familyGroupNumber,
-        // zoneName: zoneName,
         familyGroupCode: familyGroupCode,
         theirChurch: church,
         theirPastor: pastor,
@@ -277,8 +221,8 @@ export class FamilyGroupService {
       const savedFamilyGroup =
         await this.familyGroupRepository.save(newFamilyGroup);
 
+      // Set relationship in preacher according their family group
       preacher.theirFamilyGroup = savedFamilyGroup;
-
       await this.preacherRepository.save(preacher);
 
       return savedFamilyGroup;
@@ -310,7 +254,17 @@ export class FamilyGroupService {
       order: { createdAt: order as FindOptionsOrderValue },
     });
 
-    return formatDataFamilyGroup({ familyGroups }) as any;
+    if (familyGroups.length === 0) {
+      throw new NotFoundException(`No se encontraron grupos familiares`);
+    }
+
+    try {
+      return formatDataFamilyGroup({ familyGroups }) as any;
+    } catch (error) {
+      throw new BadRequestException(
+        `Ocurrió un error, habla con el administrador`,
+      );
+    }
   }
 
   //* FIND BY TERM
@@ -1393,14 +1347,15 @@ export class FamilyGroupService {
     updateFamilyGroupDto: UpdateFamilyGroupDto,
     user: User,
   ): Promise<FamilyGroup> {
-    const { recordStatus, theirPreacher } = updateFamilyGroupDto;
+    const { recordStatus, newTheirPreacher } = updateFamilyGroupDto;
 
-    // Validations
     if (!isUUID(id)) {
-      throw new BadRequestException(`Not valid UUID`);
+      throw new BadRequestException(`UUID no valido.`);
     }
 
-    // Validation zone
+    // TODO : hacer esta validacion dentro del new preacher porque si quiero volver a activar una casa
+    // TODO : chocara con estas validaciones (revisar), lo mismo para zona
+    //* Validation current family group
     const familyGroup = await this.familyGroupRepository.findOne({
       where: { id: id },
       relations: [
@@ -1410,11 +1365,14 @@ export class FamilyGroupService {
         'theirSupervisor',
         'theirZone',
         'theirPreacher',
+        'disciples',
       ],
     });
 
     if (!familyGroup) {
-      throw new NotFoundException(`Family Group not found with id: ${id}`);
+      throw new NotFoundException(
+        `Grupo Familiar con id: ${id} no fue encontrado`,
+      );
     }
 
     if (
@@ -1422,48 +1380,163 @@ export class FamilyGroupService {
       recordStatus === RecordStatus.Inactive
     ) {
       throw new BadRequestException(
-        `You cannot update it to "inactive", you must delete the record`,
+        `No se puede actualizar un registro a "Inactivo", se debe eliminar.`,
       );
     }
 
-    //? Update if their Preacher and their Zone is different
-    if (familyGroup.theirPreacher.id !== theirPreacher) {
-      //* Find and validate Preacher
-      if (!theirPreacher) {
+    //* Validation relation exists in current Family group
+    // Preacher
+    if (!familyGroup?.theirPreacher) {
+      throw new BadRequestException(
+        `1Predicador no fue encontrado, verifica que el Grupo Familiar actual tenga un Predicador asignado.`,
+      );
+    }
+
+    if (familyGroup?.theirPreacher?.recordStatus === RecordStatus.Inactive) {
+      throw new BadRequestException(
+        `La propiedad "Estado de Registro" en la relación de Predicador del Grupo Familiar actual debe ser "Activo".`,
+      );
+    }
+
+    // Supervisor
+    if (!familyGroup?.theirSupervisor) {
+      throw new BadRequestException(
+        `Supervisor no fue encontrado, verifica que el Grupo Familiar actual tenga un Supervisor asignado.`,
+      );
+    }
+
+    if (familyGroup?.theirSupervisor?.recordStatus === RecordStatus.Inactive) {
+      throw new BadRequestException(
+        `La propiedad "Estado de Registro" en la relación de Supervisor del Grupo Familiar actual debe ser "Activo".`,
+      );
+    }
+
+    // Zone
+    if (!familyGroup?.theirZone) {
+      throw new BadRequestException(
+        `Zona no fue encontrada, verifica que el Grupo Familiar actual tenga una Zona asignada.`,
+      );
+    }
+
+    if (familyGroup?.theirZone?.recordStatus === RecordStatus.Inactive) {
+      throw new BadRequestException(
+        `La propiedad "Estado de Registro" en la relación de Zona del Grupo Familiar actual debe ser "Activo".`,
+      );
+    }
+
+    // Co-Pastor
+    if (!familyGroup?.theirCopastor) {
+      throw new BadRequestException(
+        `Co-Pastor no fue encontrado, verifica que el Grupo Familiar actual tenga un Co-Pastor asignado.`,
+      );
+    }
+
+    if (familyGroup?.theirCopastor?.recordStatus === RecordStatus.Inactive) {
+      throw new BadRequestException(
+        `La propiedad "Estado de Registro" en la relación de Co-Pastor del Grupo Familiar actual debe ser "Activo".`,
+      );
+    }
+
+    // Pastor
+    if (!familyGroup?.theirPastor) {
+      throw new BadRequestException(
+        `Pastor no fue encontrado, verifica que el Grupo Familiar actual tenga un Pastor asignado.`,
+      );
+    }
+
+    if (familyGroup?.theirPastor?.recordStatus === RecordStatus.Inactive) {
+      throw new BadRequestException(
+        `La propiedad "Estado de Registro" en la relación de Pastor del Grupo Familiar actual debe ser "Activo".`,
+      );
+    }
+
+    // Church
+    if (!familyGroup?.theirChurch) {
+      throw new BadRequestException(
+        `Iglesia no fue encontrada, verifica que el Grupo Familiar actual tenga una Iglesia asignada.`,
+      );
+    }
+
+    if (familyGroup?.theirChurch?.recordStatus === RecordStatus.Inactive) {
+      throw new BadRequestException(
+        `La propiedad "Estado de Registro" en la relación de Iglesia del Grupo Familiar actual debe ser "Activo".`,
+      );
+    }
+
+    //* Validation new preacher
+    const newPreacher = await this.preacherRepository.findOne({
+      where: { id: newTheirPreacher },
+      relations: [
+        'theirChurch',
+        'theirPastor',
+        'theirCopastor',
+        'theirSupervisor',
+        'theirZone',
+        'theirFamilyGroup',
+      ],
+    });
+
+    if (!newPreacher) {
+      throw new NotFoundException(
+        `Predicador con id: ${newTheirPreacher} no fue encontrado.`,
+      );
+    }
+
+    if (!newPreacher.recordStatus) {
+      throw new BadRequestException(
+        `La propiedad "Estado de Registro" en Predicador debe ser "Activo".`,
+      );
+    }
+
+    //* Validation same relations
+    if (familyGroup.theirZone?.id !== newPreacher.theirZone?.id) {
+      throw new BadRequestException(
+        `Para actualizar de Predicador este Grupo Familiar, la zona del nuevo Predicador debe ser la misma que la del Grupo Familiar.`,
+      );
+    }
+
+    if (familyGroup.theirSupervisor?.id !== newPreacher.theirSupervisor?.id) {
+      throw new BadRequestException(
+        `Para actualizar de Predicador este Grupo Familiar, el supervisor del nuevo Predicador debe ser el mismo que la del Grupo Familiar.`,
+      );
+    }
+
+    if (familyGroup.theirCopastor?.id !== newPreacher.theirCopastor?.id) {
+      throw new BadRequestException(
+        `Para actualizar de Predicador este Grupo Familiar, el co-pastor del nuevo Predicador debe ser el mismo que la del Grupo Familiar.`,
+      );
+    }
+
+    if (familyGroup.theirPastor?.id !== newPreacher.theirPastor?.id) {
+      throw new BadRequestException(
+        `Para actualizar de Predicador este Grupo Familiar, el pastor del nuevo Predicador debe ser el mismo que la del Grupo Familiar.`,
+      );
+    }
+
+    if (familyGroup.theirChurch?.id !== newPreacher.theirChurch?.id) {
+      throw new BadRequestException(
+        `Para actualizar de Predicador este Grupo Familiar, la iglesia del nuevo Predicador debe ser la misma que la del Grupo Familiar.`,
+      );
+    }
+
+    //? Update if new preacher exits and is different but zone is same
+    if (
+      newTheirPreacher &&
+      familyGroup.theirPreacher.id !== newPreacher.id &&
+      familyGroup.theirZone.id === newPreacher.theirZone.id
+    ) {
+      //* Validate Preacher
+      if (!newTheirPreacher) {
         throw new NotFoundException(
-          `To create a new family home assign an existing preacher id`,
+          `Para poder actualizar un Grupo Familiar, se debe asignar un Predicador.`,
         );
       }
 
-      const newPreacher = await this.preacherRepository.findOne({
-        where: { id: theirPreacher },
-        relations: [
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirFamilyGroup',
-        ],
-      });
-
-      if (!newPreacher) {
-        throw new NotFoundException(
-          `Not found preacher with id ${theirPreacher}`,
-        );
-      }
-
-      if (!newPreacher.recordStatus) {
-        throw new BadRequestException(
-          `The property status in Preacher must be a "active"`,
-        );
-      }
-
-      //? Validation and assignment of other roles to the family group
-      //* Validate and assign supervisor according preacher
+      //* Validation relation exists in new Preacher
+      // Supervisor
       if (!newPreacher?.theirSupervisor) {
         throw new NotFoundException(
-          `Supervisor was not found, verify that Preacher has a supervisor assigned`,
+          `Supervisor no fue encontrado, verifica que el nuevo Predicador tenga un Supervisor asignado.`,
         );
       }
 
@@ -1471,16 +1544,16 @@ export class FamilyGroupService {
         where: { id: newPreacher?.theirSupervisor?.id },
       });
 
-      if (!newSupervisor.recordStatus) {
+      if (newSupervisor.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
-          `The property status in Supervisor must be a "active"`,
+          `La propiedad "Estado de Registro" en el nuevo Supervisor debe ser "Activo".`,
         );
       }
 
-      //* Validate and assign zone according preacher
+      // Zone
       if (!newPreacher?.theirZone) {
         throw new NotFoundException(
-          `Zone was not found, verify that Preacher has a zone assigned`,
+          `Zona no fue encontrada, verifica que el nuevo Predicador tenga una Zona asignada.`,
         );
       }
 
@@ -1488,16 +1561,16 @@ export class FamilyGroupService {
         where: { id: newPreacher?.theirZone?.id },
       });
 
-      if (!newZone.recordStatus) {
+      if (newZone.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
-          `The property status in Zone must be a "active"`,
+          `La propiedad "Estado de Registro" en la nueva Zona debe ser "Activo".`,
         );
       }
 
-      //* Validate and assign copastor according preacher
+      // Copastor
       if (!newPreacher?.theirCopastor) {
         throw new NotFoundException(
-          `Copastor was not found, verify that Preacher has a co-pastor assigned`,
+          `Co-Pastor no fue encontrado, verifica que el nuevo Predicador tenga un Co-Pastor asignado.`,
         );
       }
 
@@ -1505,16 +1578,16 @@ export class FamilyGroupService {
         where: { id: newPreacher?.theirCopastor?.id },
       });
 
-      if (!newCopastor.recordStatus) {
+      if (newCopastor.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
-          `The property status in Copastor must be a "active"`,
+          `La propiedad "Estado de Registro" en el nuevo Co-Pastor debe ser "Activo".`,
         );
       }
 
-      //* Validate and assign pastor according preacher
+      // Pastor
       if (!newPreacher?.theirPastor) {
         throw new NotFoundException(
-          `Pastor was not found, verify that Preacher has a pastor assigned`,
+          `Pastor no fue encontrado, verifica que el nuevo Predicador tenga un Pastor asignado.`,
         );
       }
 
@@ -1522,16 +1595,16 @@ export class FamilyGroupService {
         where: { id: newPreacher?.theirPastor?.id },
       });
 
-      if (!newPastor.recordStatus) {
+      if (newPastor.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
-          `The property status in Pastor must be a "active"`,
+          `La propiedad "Estado de Registro" en el nuevo Pastor debe ser "Activo".`,
         );
       }
 
-      //* Validate and assign church according preacher
+      // Church
       if (!newPreacher?.theirChurch) {
         throw new NotFoundException(
-          `Church was not found, verify that Preacher has a church assigned`,
+          `Iglesia no fue encontrada, verifica que el nuevo Predicador tenga una Iglesia asignada.`,
         );
       }
 
@@ -1539,69 +1612,168 @@ export class FamilyGroupService {
         where: { id: newPreacher?.theirChurch?.id },
       });
 
-      if (!newChurch.recordStatus) {
+      if (newChurch.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
-          `The property status in Church must be a "active"`,
+          `La propiedad "Estado de Registro" en la nueva Iglesia debe ser "Activo".`,
         );
       }
 
-      //? Update in subordinate relations
-      const allDisciples = await this.discipleRepository.find({
-        relations: ['theirFamilyGroup'],
+      //! Exchange of preachers and disciples between family groups
+      //* Current Values
+      const currentFamilyGroupPreacher = familyGroup?.theirPreacher;
+      const currentFamilyGroupDisciples = familyGroup?.disciples?.map(
+        (disciple) => disciple,
+      );
+
+      //* New values
+      if (!newPreacher?.theirFamilyGroup) {
+        throw new BadRequestException(
+          `Ese necesario tener un grupo familiar asignado en el nuevo predicador, para poder intercambiarlos.`,
+        );
+      }
+
+      const newFamilyGroup = await this.familyGroupRepository.findOne({
+        where: { id: newPreacher?.theirFamilyGroup?.id },
+        relations: [
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
       });
 
-      //! Eliminar relaciones de family group y preacher (independiente)
-      //* Setear a null el family house en el antiguo preacher
-      if (familyGroup?.theirPreacher?.id) {
-        const updateOldPreacher = await this.preacherRepository.preload({
+      if (!newFamilyGroup) {
+        throw new BadRequestException(
+          `Grupo Familiar con id: ${newPreacher?.theirFamilyGroup?.id} no fue encontrado`,
+        );
+      }
+
+      if (newFamilyGroup.recordStatus === RecordStatus.Inactive) {
+        throw new BadRequestException(
+          `La propiedad "Estado de Registro" en el nuevo Grupo Familiar debe ser "Activo".`,
+        );
+      }
+
+      const newFamilyGroupPreacher = newPreacher;
+      const newFamilyGroupDisciples = newFamilyGroup?.disciples?.map(
+        (disciple) => disciple,
+      );
+
+      //! Remove relationships from current family group and preacher
+      //* Preacher
+      try {
+        const updateCurrentPreacher = await this.preacherRepository.preload({
           id: familyGroup?.theirPreacher?.id,
           theirFamilyGroup: null,
           updatedAt: new Date(),
           updatedBy: user,
-          recordStatus: recordStatus,
         });
 
-        await this.preacherRepository.save(updateOldPreacher);
+        await this.preacherRepository.save(updateCurrentPreacher);
+      } catch (error) {
+        this.handleDBExceptions(error);
       }
 
-      //* Setear a null el preacher en el antiguo family house
-      if (familyGroup?.id) {
-        const updateOldFamilyGroup = await this.familyGroupRepository.preload({
-          id: familyGroup?.id,
-          theirPreacher: null,
-          updatedAt: new Date(),
-          updatedBy: user,
-          recordStatus: recordStatus,
-        });
-
-        await this.familyGroupRepository.save(updateOldFamilyGroup);
-      }
-
-      //* Setear a null el preacher de family house del nuevo preacher
-      if (newPreacher?.theirFamilyGroup?.id) {
-        const updatedNewFamilyGroup = await this.familyGroupRepository.preload({
-          id: newPreacher?.theirFamilyGroup?.id,
-          theirPreacher: null,
-          updatedAt: new Date(),
-          updatedBy: user,
-          recordStatus: recordStatus,
-        });
-
-        await this.familyGroupRepository.save(updatedNewFamilyGroup);
-      }
-
-      //! Quitamos del nuevo preacher todas sus relaciones subordinadas porque pertenecerá a otra family house
+      //* Family Group
       try {
-        //* Update and set to null relationships in Disciple
-        const disciplesByNewZone = allDisciples.filter(
-          (disciple) =>
-            disciple.theirFamilyGroup?.id === newPreacher?.theirFamilyGroup?.id,
-        );
+        const updateCurrentFamilyGroup =
+          await this.familyGroupRepository.preload({
+            id: familyGroup?.id,
+            theirPreacher: null,
+            updatedAt: new Date(),
+            updatedBy: user,
+          });
+        await this.familyGroupRepository.save(updateCurrentFamilyGroup);
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
 
+      //! Remove relationships from new family group and preacher
+      //* Preacher
+      try {
+        const updateNewPreacher = await this.preacherRepository.preload({
+          id: newFamilyGroup?.theirPreacher?.id,
+          theirFamilyGroup: null,
+          updatedAt: new Date(),
+          updatedBy: user,
+        });
+        await this.preacherRepository.save(updateNewPreacher);
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
+
+      //* Family Group
+      try {
+        const updateNewFamilyGroup = await this.familyGroupRepository.preload({
+          id: newFamilyGroup?.id,
+          theirPreacher: null,
+          updatedAt: new Date(),
+          updatedBy: user,
+        });
+        await this.familyGroupRepository.save(updateNewFamilyGroup);
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
+
+      //? Set the new preacher and family group to the current values
+      try {
+        const updateCurrentFamilyGroup =
+          await this.familyGroupRepository.preload({
+            id: familyGroup?.id,
+            theirPreacher: newFamilyGroupPreacher,
+            updatedAt: new Date(),
+            updatedBy: user,
+          });
+
+        await this.familyGroupRepository.save(updateCurrentFamilyGroup);
+
+        const updateCurrentPreacher = await this.preacherRepository.preload({
+          id: familyGroup?.theirPreacher?.id,
+          theirFamilyGroup: newFamilyGroup,
+          updatedAt: new Date(),
+          updatedBy: user,
+        });
+
+        await this.preacherRepository.save(updateCurrentPreacher);
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
+
+      //? Set the current preacher and family group to the new values
+      try {
+        const updateNewFamilyGroup = await this.familyGroupRepository.preload({
+          id: newFamilyGroup?.id,
+          theirPreacher: currentFamilyGroupPreacher,
+          updatedAt: new Date(),
+          updatedBy: user,
+        });
+
+        await this.familyGroupRepository.save(updateNewFamilyGroup);
+
+        const updateNewPreacher = await this.preacherRepository.preload({
+          id: newFamilyGroup?.theirPreacher?.id,
+          theirFamilyGroup: familyGroup,
+          updatedAt: new Date(),
+          updatedBy: user,
+        });
+
+        await this.preacherRepository.save(updateNewPreacher);
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
+
+      //* Update relationships and set disciples up for their new family group
+      try {
         await Promise.all(
-          disciplesByNewZone.map(async (disciple) => {
+          newFamilyGroupDisciples?.map(async (disciple) => {
             await this.discipleRepository.update(disciple.id, {
-              theirPreacher: null,
+              theirFamilyGroup: familyGroup,
+              theirPreacher: currentFamilyGroupPreacher,
+              updatedAt: new Date(),
+              updatedBy: user,
             });
           }),
         );
@@ -1609,172 +1781,28 @@ export class FamilyGroupService {
         this.handleDBExceptions(error);
       }
 
-      //? Si la zona es diferente cambia todo su info por una nueva, según preacher
-      if (familyGroup.theirZone.id !== newZone.id) {
-        //* Assignment of number and code to the family home
-        const allFamilyGroups = await this.familyGroupRepository.find({
-          relations: ['theirZone'],
-        });
-
-        const allFamilyGroupsByZone = allFamilyGroups.filter(
-          (familyGroup) => familyGroup.theirZone?.id === newZone?.id,
+      try {
+        await Promise.all(
+          currentFamilyGroupDisciples?.map(async (disciple) => {
+            await this.discipleRepository.update(disciple.id, {
+              theirFamilyGroup: newFamilyGroup,
+              theirPreacher: newFamilyGroupPreacher,
+              updatedAt: new Date(),
+              updatedBy: user,
+            });
+          }),
         );
-
-        let familyGroupNumber: number;
-        let familyGroupCode: string;
-        // let zoneName: string;
-
-        if (allFamilyGroupsByZone.length === 0) {
-          familyGroupNumber = 1;
-          familyGroupCode = `${newZone.zoneName.toUpperCase()}-${familyGroupNumber}`;
-          // zoneName = newZone.zoneName;
-        }
-
-        if (allFamilyGroupsByZone.length !== 0) {
-          familyGroupNumber = allFamilyGroupsByZone.length + 1;
-          familyGroupCode = `${newZone.zoneName.toUpperCase()}-${familyGroupNumber}`;
-          // zoneName = newZone.zoneName;
-        }
-
-        // Update and save
-        const updatedFamilyGroup = await this.familyGroupRepository.preload({
-          id: familyGroup.id,
-          ...updateFamilyGroupDto,
-          // zoneName: zoneName,
-          familyGroupNumber: familyGroupNumber,
-          familyGroupCode: familyGroupCode,
-          theirChurch: newChurch,
-          theirPastor: newPastor,
-          theirCopastor: newCopastor,
-          theirSupervisor: newSupervisor,
-          theirZone: newZone,
-          theirPreacher: newPreacher,
-          updatedAt: new Date(),
-          updatedBy: user,
-          recordStatus: recordStatus,
-        });
-
-        let savedFamilyGroup: FamilyGroup;
-        try {
-          newPreacher.theirFamilyGroup = null;
-          await this.preacherRepository.save(newPreacher);
-
-          savedFamilyGroup =
-            await this.familyGroupRepository.save(updatedFamilyGroup);
-
-          newPreacher.theirFamilyGroup = savedFamilyGroup;
-          newPreacher.updatedAt = new Date();
-          newPreacher.updatedBy = user;
-
-          await this.preacherRepository.save(newPreacher);
-        } catch (error) {
-          this.handleDBExceptions(error);
-        }
-
-        try {
-          //* Reorder family house numbers and code in the old zone
-          const allFamilyGroupsByOrder = await this.familyGroupRepository.find({
-            relations: ['theirZone'],
-            order: { familyGroupNumber: 'ASC' },
-          });
-
-          const allResult = allFamilyGroupsByOrder.filter(
-            (house) => house.theirZone?.id === familyGroup.theirZone?.id,
-          );
-
-          await Promise.all(
-            allResult.map(async (familyGroup, index) => {
-              await this.familyGroupRepository.update(familyGroup.id, {
-                familyGroupNumber: index + 1,
-                familyGroupCode: `${familyGroup.theirZone.zoneName.toUpperCase()}-${index + 1}`,
-              });
-            }),
-          );
-
-          //* Update and set new relationships in Disciple
-          const disciplesByFamilyGroup = allDisciples.filter(
-            (disciple) => disciple.theirFamilyGroup?.id === familyGroup?.id,
-          );
-
-          await Promise.all(
-            disciplesByFamilyGroup.map(async (disciple) => {
-              await this.discipleRepository.update(disciple.id, {
-                theirChurch: newChurch,
-                theirPastor: newPastor,
-                theirCopastor: newCopastor,
-                theirSupervisor: newSupervisor,
-                theirZone: newZone,
-                theirPreacher: newPreacher,
-              });
-            }),
-          );
-        } catch (error) {
-          this.handleDBExceptions(error);
-        }
-        return savedFamilyGroup;
-      }
-
-      //? Si la zona es la misma, se mantiene los mismo datos, solo cambia el preacher
-      if (familyGroup.theirZone.id === newZone.id) {
-        // Update and save
-        const updatedFamilyGroup = await this.familyGroupRepository.preload({
-          id: familyGroup.id,
-          ...updateFamilyGroupDto,
-          theirChurch: familyGroup.theirChurch,
-          theirPastor: familyGroup.theirPastor,
-          theirCopastor: familyGroup.theirCopastor,
-          theirSupervisor: familyGroup.theirSupervisor,
-          theirZone: familyGroup.theirZone,
-          theirPreacher: newPreacher,
-          updatedAt: new Date(),
-          updatedBy: user,
-          recordStatus: recordStatus,
-        });
-
-        let savedFamilyGroup: FamilyGroup;
-        try {
-          newPreacher.theirFamilyGroup = null;
-          await this.preacherRepository.save(newPreacher);
-
-          savedFamilyGroup =
-            await this.familyGroupRepository.save(updatedFamilyGroup);
-
-          newPreacher.theirFamilyGroup = savedFamilyGroup;
-          newPreacher.updatedAt = new Date();
-          newPreacher.updatedBy = user;
-
-          await this.preacherRepository.save(newPreacher);
-        } catch (error) {
-          this.handleDBExceptions(error);
-        }
-
-        try {
-          //* Update and set new relationships in Disciple
-          const disciplesByFamilyGroup = allDisciples.filter(
-            (disciple) => disciple.theirFamilyGroup?.id === familyGroup?.id,
-          );
-
-          await Promise.all(
-            disciplesByFamilyGroup.map(async (disciple) => {
-              await this.discipleRepository.update(disciple.id, {
-                theirChurch: familyGroup.theirChurch,
-                theirPastor: familyGroup.theirPastor,
-                theirCopastor: familyGroup.theirCopastor,
-                theirSupervisor: familyGroup.theirSupervisor,
-                theirZone: familyGroup.theirZone,
-                theirPreacher: newPreacher,
-              });
-            }),
-          );
-        } catch (error) {
-          this.handleDBExceptions(error);
-        }
-        return savedFamilyGroup;
+      } catch (error) {
+        this.handleDBExceptions(error);
       }
     }
 
     //? Update and save if is same Preacher and Zone
-    if (familyGroup.theirPreacher.id === theirPreacher) {
+    if (
+      !newTheirPreacher &&
+      updateFamilyGroupDto.theirPreacher === familyGroup.theirPreacher.id &&
+      updateFamilyGroupDto.theirZone === familyGroup.theirZone.id
+    ) {
       const updatedFamilyGroup = await this.familyGroupRepository.preload({
         id: familyGroup.id,
         ...updateFamilyGroupDto,
@@ -1797,19 +1825,24 @@ export class FamilyGroupService {
     }
   }
 
-  //! DELETE FAMILY HOUSE
+  //! DELETE FAMILY GROUP
   async remove(id: string, user: User): Promise<void> {
-    // Validations
     if (!isUUID(id)) {
       throw new BadRequestException(`Not valid UUID`);
     }
 
-    const familyGroup = await this.familyGroupRepository.findOneBy({ id });
+    const familyGroup = await this.familyGroupRepository.findOne({
+      where: { id: id },
+      relations: ['theirZone'],
+    });
 
     if (!familyGroup) {
       throw new NotFoundException(`Family Group with id: ${id} not exits`);
     }
 
+    // TODO : tmb tendria que eliminar la familygroup del predicador para que lo libere. (si se elimina pero problema en actualizar porque esta campo bloqueado, liberar predicador para poder tener uno disponible)
+    // TODO : y setearlo en la actualizacion de arriba
+    // TODO : en el update form hacer condicional la busqueda y no bloeuqar
     //* Update and set in Inactive on Family House
     const updatedFamilyGroup = await this.familyGroupRepository.preload({
       id: familyGroup.id,
@@ -1817,7 +1850,10 @@ export class FamilyGroupService {
       theirPastor: null,
       theirCopastor: null,
       theirSupervisor: null,
+      theirZone: null,
       theirPreacher: null,
+      familyGroupCode: null,
+      familyGroupNumber: null,
       updatedAt: new Date(),
       updatedBy: user,
       recordStatus: RecordStatus.Inactive,
@@ -1852,6 +1888,28 @@ export class FamilyGroupService {
     } catch (error) {
       this.handleDBExceptions(error);
     }
+
+    //* Reorder family group numbers and codes in the zone
+    const familyGroupsByOrder = await this.familyGroupRepository.find({
+      relations: ['theirZone'],
+      where: { recordStatus: RecordStatus.Active },
+      order: { familyGroupNumber: 'ASC' },
+    });
+
+    const familyGroupsByOrderFiltered = familyGroupsByOrder.filter(
+      (group) => group.theirZone?.id === familyGroup.theirZone?.id,
+    );
+
+    await Promise.all(
+      familyGroupsByOrderFiltered.map(async (familyGroup, index) => {
+        await this.familyGroupRepository.update(familyGroup.id, {
+          familyGroupNumber: index + 1,
+          familyGroupCode: `${familyGroup.theirZone?.zoneName?.toUpperCase()}-${index + 1}`,
+          updatedAt: new Date(),
+          updatedBy: user,
+        });
+      }),
+    );
   }
 
   //? PRIVATE METHODS

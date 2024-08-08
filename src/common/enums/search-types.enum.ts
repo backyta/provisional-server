@@ -29,6 +29,7 @@ export enum SearchType {
   OriginCountry = 'origin_country',
 
   //* Disciple, Pastor, Copastor, Supervisor, Preacher, Family House
+  Country = 'country',
   Department = 'department',
   Province = 'province',
   District = 'district',

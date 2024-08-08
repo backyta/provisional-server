@@ -1,2 +1,2 @@
-export * from './sub-types-offering-income.enum';
-export * from './types-offering-income.enum';
+export * from './offering-income-create-sub-type.enum';
+export * from './offering-income-create-type.enum';

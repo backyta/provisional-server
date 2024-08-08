@@ -2,17 +2,18 @@ import { Church } from '@/modules/church/entities';
 
 export interface Options {
   churches: Church[];
+  mainChurch?: Church;
 }
 
-export const formatDataChurch = ({ churches }: Options) => {
+export const formatDataChurch = ({ churches, mainChurch }: Options) => {
   return churches.map((church) => ({
     ...church,
     theirMainChurch: church.isAnexe
       ? {
-          id: church.theirMainChurch?.id,
-          churchName: church.theirMainChurch?.churchName,
-          district: church.theirMainChurch?.district,
-          urbanSector: church.theirMainChurch?.urbanSector,
+          id: mainChurch?.id,
+          churchName: mainChurch?.churchName,
+          district: mainChurch?.district,
+          urbanSector: mainChurch?.urbanSector,
         }
       : null,
     anexes: church.anexes.map((anexe) => ({
@@ -49,7 +50,6 @@ export const formatDataChurch = ({ churches }: Options) => {
     familyGroups: church?.familyGroups.map((familyGroup) => ({
       id: familyGroup?.id,
       familyGroupName: familyGroup?.familyGroupName,
-      // zoneName: familyGroup?.zoneName,
       familyGroupCode: familyGroup?.familyGroupCode,
       district: familyGroup?.district,
       urbanSector: familyGroup?.urbanSector,

@@ -7,6 +7,7 @@ import {
   FileTypeValidator,
   ParseFilePipe,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -22,10 +23,8 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { Auth } from '@/modules/auth/decorators';
 import { UserRole } from '@/modules/auth/enums';
 
+import { CreateFileDto } from '@/modules/files/dto';
 import { CloudinaryService } from '@/modules/cloudinary/cloudinary.service';
-
-// NOTE : Al subir als imágenes se llama este endpoint, se obtienen la secure_url en un array de las imágenes y se
-// NOTE : ponen al objeto del formulario en secure urls , que sera enviado al backend para guardar
 
 @Controller('files')
 @ApiBearerAuth()
@@ -53,6 +52,7 @@ export class FilesController {
   @UseInterceptors(AnyFilesInterceptor())
   @ApiConsumes('multipart/form-data')
   async uploadImages(
+    @Query() createFileDto: CreateFileDto,
     @UploadedFiles(
       new ParseFilePipe({
         validators: [
@@ -68,9 +68,12 @@ export class FilesController {
     }
 
     const uploadedFilesPromises = files.map((file) =>
-      this.cloudinaryService.uploadFile(file),
+      this.cloudinaryService.uploadFile(file, createFileDto),
     );
+
     const result = await Promise.all(uploadedFilesPromises);
-    return result.map((res) => res.secure_url);
+
+    const imageUrls = result.map((res) => res.secure_url);
+    return { imageUrls };
   }
 }

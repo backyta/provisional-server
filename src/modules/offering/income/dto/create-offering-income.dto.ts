@@ -1,11 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsArray,
   IsEnum,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
-  IsUUID,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -13,36 +12,40 @@ import {
 import { CurrencyType } from '@/modules/offering/shared/enums';
 
 import {
-  SubTypesOfferingIncome,
-  TypesOfferingIncome,
+  OfferingIncomeCreateSubType,
+  OfferingIncomeCreateType,
 } from '@/modules/offering/income/enums';
 
-export class CreateIncomeDto {
+export class CreateOfferingIncomeDto {
   //* General data
   @ApiProperty({
-    example: 'offering',
+    example: OfferingIncomeCreateType.Offering,
   })
-  @IsEnum(TypesOfferingIncome)
+  @IsEnum(OfferingIncomeCreateType)
   type: string;
 
   @ApiProperty({
-    enum: SubTypesOfferingIncome,
+    example: OfferingIncomeCreateSubType.FamilyGroup,
   })
-  @IsEnum(SubTypesOfferingIncome)
+  @IsEnum(OfferingIncomeCreateSubType)
   @IsOptional()
   subType?: string;
 
   @ApiProperty({
-    example: 50,
+    example: 'tarde',
   })
-  @IsNumber()
-  @IsNotEmpty()
-  amount: number;
+  @IsString()
+  shift: string;
 
   @ApiProperty({
-    enum: CurrencyType,
+    example: '50',
   })
-  @IsEnum(CurrencyType)
+  @IsNotEmpty()
+  amount: string | number;
+
+  @ApiProperty({
+    example: CurrencyType.Sol,
+  })
   @IsNotEmpty()
   currency: string;
 
@@ -54,20 +57,22 @@ export class CreateIncomeDto {
   date: string | Date;
 
   @ApiProperty({
-    example: 'Comments .....',
+    example: 'Comments.....',
   })
   @IsString()
   @IsOptional()
-  @MinLength(1)
-  @MaxLength(100)
+  @MaxLength(120)
   comments?: string;
 
   @ApiProperty({
-    example: 'http://... url created whit file service',
+    example: [
+      'http://... url created whit file service',
+      'http://... url created whit file service',
+    ],
   })
-  @IsString()
+  @IsArray()
   @IsOptional()
-  urlFiles?: string;
+  imageUrls?: string[];
 
   @ApiProperty({
     example: 'Reason is .....',
@@ -78,28 +83,32 @@ export class CreateIncomeDto {
   @IsOptional()
   reasonElimination?: string;
 
+  @ApiProperty({
+    example: 'Pastor',
+  })
+  @IsString()
+  @IsOptional()
+  memberType?: string;
+
   //* Relations
   @ApiProperty({
     example: '0b46eb7e-7730-4cbb-8c61-3ccdfa6da391',
   })
   @IsString()
-  @IsUUID()
   @IsOptional()
-  theirFamilyGroup?: string;
+  familyGroupId?: string;
 
   @ApiProperty({
     example: '0b46eb7e-7730-4cbb-8c61-3ccdfa6da391',
   })
   @IsString()
-  @IsUUID()
   @IsOptional()
-  theirContributor?: string;
+  memberId?: string;
 
   @ApiProperty({
     example: '0b46eb7e-7730-4cbb-8c61-3ccdfa6da391',
   })
   @IsString()
-  @IsUUID()
   @IsOptional()
-  theirZone?: string;
+  zoneId?: string;
 }

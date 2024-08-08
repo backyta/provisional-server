@@ -30,15 +30,11 @@ export class FamilyGroup {
   @Column('text', { name: 'family_group_name', unique: true })
   familyGroupName: string;
 
-  // @Column('text', { name: 'zone_name' })
-  // zoneName: string;
-  // Todo : modificar no deberia existir sacar del theirZone
-
-  @Column('int', { name: 'family_group_number' })
+  @Column('int', { name: 'family_group_number', nullable: true })
   familyGroupNumber: number;
 
   @Index()
-  @Column('text', { name: 'family_group_code' })
+  @Column('text', { name: 'family_group_code', nullable: true })
   familyGroupCode: string;
 
   @Column('text', { name: 'worship_time' })
