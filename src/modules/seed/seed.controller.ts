@@ -1,16 +1,16 @@
 import { BadRequestException, Controller, Get } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  ApiTags,
+  ApiOkResponse,
   ApiBearerAuth,
   ApiForbiddenResponse,
-  ApiInternalServerErrorResponse,
-  ApiOkResponse,
-  ApiTags,
   ApiUnauthorizedResponse,
+  ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 
-import { Auth } from '@/modules/auth/decorators';
 import { UserRole } from '@/modules/auth/enums';
+import { Auth } from '@/modules/auth/decorators';
 
 import { SeedService } from '@/modules/seed/seed.service';
 

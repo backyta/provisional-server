@@ -1,10 +1,10 @@
 import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
   Logger,
+  Injectable,
   NotFoundException,
+  BadRequestException,
   UnauthorizedException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,16 +14,12 @@ import * as bcrypt from 'bcrypt';
 
 import { UserRole } from '@/modules/auth/enums';
 
-import {
-  GenderNames,
-  MemberRoleNames,
-  RecordStatus,
-  SearchType,
-} from '@/common/enums';
-import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
+import { GenderNames, RecordStatus, MemberRoleNames } from '@/common/enums';
+import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 import { User } from '@/modules/user/entities';
 import { CreateUserDto, UpdateUserDto } from '@/modules/user/dto';
+import { UserSearchType, UserSearchTypeNames } from '@/modules/user/enums';
 
 @Injectable()
 export class UserService {
@@ -72,7 +68,7 @@ export class UserService {
   //* FIND BY TERM
   async findByTerm(
     term: string,
-    searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
+    searchTypeAndPaginationDto: SearchAndPaginationDto,
   ): Promise<User | User[]> {
     const {
       'search-type': searchType,
@@ -81,8 +77,16 @@ export class UserService {
       order,
     } = searchTypeAndPaginationDto;
 
+    if (!term) {
+      throw new BadRequestException(`El termino de búsqueda es requerido.`);
+    }
+
+    if (!searchType) {
+      throw new BadRequestException(`El tipo de búsqueda es requerido.`);
+    }
+
     //? Find by first name --> Many
-    if (term && searchType === SearchType.FirstName) {
+    if (term && searchType === UserSearchType.FirstName) {
       const firstNames = term.replace(/\+/g, ' ');
 
       const users = await this.userRepository.find({
@@ -106,7 +110,7 @@ export class UserService {
     }
 
     //? Find by last name --> Many
-    if (term && searchType === SearchType.LastName) {
+    if (term && searchType === UserSearchType.LastName) {
       const lastNames = term.replace(/\+/g, ' ');
 
       const users = await this.userRepository.find({
@@ -130,7 +134,7 @@ export class UserService {
     }
 
     //? Find by full name --> Many
-    if (term && searchType === SearchType.FullName) {
+    if (term && searchType === UserSearchType.FullName) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
@@ -156,7 +160,7 @@ export class UserService {
     }
 
     //? Find by roles --> Many
-    if (term && searchType === SearchType.Roles) {
+    if (term && searchType === UserSearchType.Roles) {
       const rolesArray = term.split('+');
 
       const users = await this.userRepository.find({
@@ -186,7 +190,7 @@ export class UserService {
     }
 
     //? Find by gender --> Many
-    if (term && searchType === SearchType.Gender) {
+    if (term && searchType === UserSearchType.Gender) {
       const genderTerm = term.toLowerCase();
       const validGenders = ['male', 'female'];
 
@@ -209,7 +213,7 @@ export class UserService {
         const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
 
         throw new NotFoundException(
-          `No se encontraron usuarios con este genero: ${genderInSpanish}`,
+          `No se encontraron usuarios con este género: ${genderInSpanish}`,
         );
       }
 
@@ -217,7 +221,7 @@ export class UserService {
     }
 
     //? Find by status --> Many
-    if (term && searchType === SearchType.RecordStatus) {
+    if (term && searchType === UserSearchType.RecordStatus) {
       const recordStatusTerm = term.toLowerCase();
       const validRecordStatus = ['active', 'inactive'];
 
@@ -247,13 +251,12 @@ export class UserService {
     }
 
     //! General Exceptions
-    if (!searchType) {
-      throw new BadRequestException(`El tipo de búsqueda es obligatorio`);
-    }
-
-    if (term && !Object.values(SearchType).includes(searchType as SearchType)) {
+    if (
+      term &&
+      !Object.values(UserSearchType).includes(searchType as UserSearchType)
+    ) {
       throw new BadRequestException(
-        `Tipos de búsqueda no validos, solo son validos: ${Object.values(SearchType).join(', ')}`,
+        `Tipos de búsqueda no validos, solo son validos: ${Object.values(UserSearchTypeNames).join(', ')}`,
       );
     }
   }
@@ -398,8 +401,6 @@ export class UserService {
 
       if (detail.includes('email')) {
         throw new BadRequestException('El correo electrónico ya está en uso.');
-      } else if (detail.includes('church')) {
-        throw new BadRequestException('El nombre de iglesia ya está en uso.');
       }
     }
 

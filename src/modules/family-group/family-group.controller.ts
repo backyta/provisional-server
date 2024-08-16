@@ -11,19 +11,19 @@ import {
 } from '@nestjs/common';
 
 import {
-  ApiBadRequestResponse,
-  ApiBearerAuth,
-  ApiCreatedResponse,
-  ApiForbiddenResponse,
-  ApiInternalServerErrorResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiParam,
   ApiTags,
+  ApiParam,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiForbiddenResponse,
+  ApiBadRequestResponse,
   ApiUnauthorizedResponse,
+  ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 
-import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
+import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 import { User } from '@/modules/user/entities';
 
@@ -87,7 +87,6 @@ export class FamilyGroupController {
   @ApiParam({
     name: 'term',
     description: 'Could be names, zones, districts, address, etc.',
-    example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
   })
   @ApiOkResponse({
     description: 'Successful operation.',
@@ -97,7 +96,7 @@ export class FamilyGroupController {
   })
   findTerm(
     @Param('term') term: string,
-    @Query() searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
+    @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
   ): Promise<FamilyGroup | FamilyGroup[]> {
     return this.familyGroupService.findByTerm(term, searchTypeAndPaginationDto);
   }

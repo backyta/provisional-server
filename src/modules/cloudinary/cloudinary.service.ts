@@ -17,7 +17,9 @@ export class CloudinaryService {
 
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          folder: `${action}/${type}/${subType}`,
+          folder: subType
+            ? `${action}/${type}/${subType}`
+            : `${action}/${type}`,
         },
         (error, result) => {
           console.log(error);

@@ -1,12 +1,12 @@
 import { RecordStatus } from '@/common/enums';
 import {
-  BeforeInsert,
-  BeforeUpdate,
   Column,
   Entity,
   Index,
-  JoinColumn,
   ManyToOne,
+  JoinColumn,
+  BeforeUpdate,
+  BeforeInsert,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 

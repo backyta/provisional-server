@@ -1,23 +1,28 @@
 import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
   Logger,
+  Injectable,
   NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
 
-import { RecordStatus, SearchSubType, SearchType } from '@/common/enums';
-import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
+import { RecordStatus } from '@/common/enums';
+import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 import {
   CreateFamilyGroupDto,
   UpdateFamilyGroupDto,
 } from '@/modules/family-group/dto';
+import {
+  FamilyGroupSearchType,
+  FamilyGroupSearchSubType,
+  FamilyGroupSearchTypeNames,
+} from '@/modules/family-group/enums';
 import { FamilyGroup } from '@/modules/family-group/entities';
-import { formatDataFamilyGroup } from '@/modules/family-group/helpers';
+import { familyGroupDataFormatter } from '@/modules/family-group/helpers';
 
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
@@ -89,7 +94,7 @@ export class FamilyGroupService {
       );
     }
 
-    if (preacher.recordStatus === RecordStatus.Inactive) {
+    if (preacher?.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `La propiedad "Estado de registro" en Predicador debe ser "Activo".`,
       );
@@ -107,7 +112,7 @@ export class FamilyGroupService {
       where: { id: preacher?.theirSupervisor?.id },
     });
 
-    if (supervisor.recordStatus === RecordStatus.Inactive) {
+    if (supervisor?.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `La propiedad "Estado de Registro" en Supervisor debe ser "Activo".`,
       );
@@ -124,7 +129,7 @@ export class FamilyGroupService {
       where: { id: preacher?.theirZone?.id },
     });
 
-    if (supervisor.recordStatus === RecordStatus.Inactive) {
+    if (supervisor?.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `La propiedad "Estado de Registro" en Zona debe ser "Activo".`,
       );
@@ -141,7 +146,7 @@ export class FamilyGroupService {
       where: { id: preacher?.theirCopastor?.id },
     });
 
-    if (copastor.recordStatus === RecordStatus.Inactive) {
+    if (copastor?.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `La propiedad "Estado de Registro" en Co-Pastor debe ser "Activo".`,
       );
@@ -158,14 +163,14 @@ export class FamilyGroupService {
       where: { id: preacher?.theirPastor?.id },
     });
 
-    if (pastor.recordStatus === RecordStatus.Inactive) {
+    if (pastor?.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `La propiedad "Estado de Registro" en Pastor debe ser "Activo".`,
       );
     }
 
     // Church
-    if (!preacher.theirChurch) {
+    if (!preacher?.theirChurch) {
       throw new NotFoundException(
         `Iglesia no fue encontrada, verifica que Predicador tenga una Iglesia asignada.`,
       );
@@ -175,7 +180,7 @@ export class FamilyGroupService {
       where: { id: preacher?.theirChurch?.id },
     });
 
-    if (church.recordStatus === RecordStatus.Inactive) {
+    if (church?.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `La propiedad "Estado de Registro" en Iglesia debe ser "Activo".`,
       );
@@ -186,7 +191,7 @@ export class FamilyGroupService {
       relations: ['theirZone'],
     });
     const allFamilyGroupsByZone = allFamilyGroups.filter(
-      (familyGroup) => familyGroup.theirZone?.id === zone?.id,
+      (familyGroup) => familyGroup?.theirZone?.id === zone?.id,
     );
 
     let familyGroupNumber: number;
@@ -259,7 +264,7 @@ export class FamilyGroupService {
     }
 
     try {
-      return formatDataFamilyGroup({ familyGroups }) as any;
+      return familyGroupDataFormatter({ familyGroups }) as any;
     } catch (error) {
       throw new BadRequestException(
         `Ocurrió un error, habla con el administrador`,
@@ -270,7 +275,7 @@ export class FamilyGroupService {
   //* FIND BY TERM
   async findByTerm(
     term: string,
-    searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
+    searchTypeAndPaginationDto: SearchAndPaginationDto,
   ): Promise<FamilyGroup | FamilyGroup[]> {
     const {
       'search-type': searchType,
@@ -280,12 +285,20 @@ export class FamilyGroupService {
       order,
     } = searchTypeAndPaginationDto;
 
+    if (!term) {
+      throw new BadRequestException(`El termino de búsqueda es requerido.`);
+    }
+
+    if (!searchType) {
+      throw new BadRequestException(`El tipo de búsqueda es requerido.`);
+    }
+
     //? Find by first name () --> Many
     //* FamilyGroups by preacher names
     if (
       term &&
-      searchType === SearchType.FirstName &&
-      searchSubType === SearchSubType.FamilyGroupByPreacherNames
+      searchType === FamilyGroupSearchType.FirstName &&
+      searchSubType === FamilyGroupSearchSubType.FamilyGroupByPreacherNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -297,7 +310,7 @@ export class FamilyGroupService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const preachersId = preachers.map((preacher) => preacher.id);
+      const preachersId = preachers.map((preacher) => preacher?.id);
 
       const familyGroups = await this.familyGroupRepository.find({
         where: {
@@ -328,7 +341,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -339,8 +352,8 @@ export class FamilyGroupService {
     //* Family groups by supervisor names
     if (
       term &&
-      searchType === SearchType.FirstName &&
-      searchSubType === SearchSubType.FamilyGroupBySupervisorNames
+      searchType === FamilyGroupSearchType.FirstName &&
+      searchSubType === FamilyGroupSearchSubType.FamilyGroupBySupervisorNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -352,7 +365,7 @@ export class FamilyGroupService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const supervisorsId = supervisors.map((supervisor) => supervisor.id);
+      const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
 
       const familyGroups = await this.familyGroupRepository.find({
         where: {
@@ -383,7 +396,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -394,8 +407,8 @@ export class FamilyGroupService {
     //* Family groups by co-pastor names
     if (
       term &&
-      searchType === SearchType.FirstName &&
-      searchSubType === SearchSubType.FamilyGroupByCopastorNames
+      searchType === FamilyGroupSearchType.FirstName &&
+      searchSubType === FamilyGroupSearchSubType.FamilyGroupByCopastorNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -407,7 +420,7 @@ export class FamilyGroupService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const copastorsId = copastors.map((copastor) => copastor.id);
+      const copastorsId = copastors.map((copastor) => copastor?.id);
 
       const familyGroups = await this.familyGroupRepository.find({
         where: {
@@ -438,7 +451,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -449,8 +462,8 @@ export class FamilyGroupService {
     //* Family groups by pastor names
     if (
       term &&
-      searchType === SearchType.FirstName &&
-      searchSubType === SearchSubType.FamilyGroupByPastorNames
+      searchType === FamilyGroupSearchType.FirstName &&
+      searchSubType === FamilyGroupSearchSubType.FamilyGroupByPastorNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -462,7 +475,7 @@ export class FamilyGroupService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const pastorsId = pastors.map((pastor) => pastor.id);
+      const pastorsId = pastors.map((pastor) => pastor?.id);
 
       const familyGroups = await this.familyGroupRepository.find({
         where: {
@@ -493,7 +506,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -505,8 +518,8 @@ export class FamilyGroupService {
     //* Family Groups by preacher last names
     if (
       term &&
-      searchType === SearchType.LastName &&
-      searchSubType === SearchSubType.FamilyGroupByPreacherLastNames
+      searchType === FamilyGroupSearchType.LastName &&
+      searchSubType === FamilyGroupSearchSubType.FamilyGroupByPreacherLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
@@ -518,7 +531,7 @@ export class FamilyGroupService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const preacherId = preachers.map((preacher) => preacher.id);
+      const preacherId = preachers.map((preacher) => preacher?.id);
 
       const familyGroups = await this.familyGroupRepository.find({
         where: {
@@ -549,7 +562,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -560,8 +573,9 @@ export class FamilyGroupService {
     //* Family groups by supervisor last names
     if (
       term &&
-      searchType === SearchType.LastName &&
-      searchSubType === SearchSubType.FamilyGroupBySupervisorLastNames
+      searchType === FamilyGroupSearchType.LastName &&
+      searchSubType ===
+        FamilyGroupSearchSubType.FamilyGroupBySupervisorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
@@ -573,7 +587,7 @@ export class FamilyGroupService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const supervisorsId = supervisors.map((supervisor) => supervisor.id);
+      const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
 
       const familyGroups = await this.familyGroupRepository.find({
         where: {
@@ -604,7 +618,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -615,8 +629,8 @@ export class FamilyGroupService {
     //* Grupos familiares by co-pastor last names
     if (
       term &&
-      searchType === SearchType.LastName &&
-      searchSubType === SearchSubType.FamilyGroupByCopastorLastNames
+      searchType === FamilyGroupSearchType.LastName &&
+      searchSubType === FamilyGroupSearchSubType.FamilyGroupByCopastorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
@@ -628,7 +642,7 @@ export class FamilyGroupService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const copastorsId = copastors.map((copastor) => copastor.id);
+      const copastorsId = copastors.map((copastor) => copastor?.id);
 
       const familyGroups = await this.familyGroupRepository.find({
         where: {
@@ -659,7 +673,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -670,8 +684,8 @@ export class FamilyGroupService {
     //* Family groups by pastor last names
     if (
       term &&
-      searchType === SearchType.LastName &&
-      searchSubType === SearchSubType.FamilyGroupByPastorLastNames
+      searchType === FamilyGroupSearchType.LastName &&
+      searchSubType === FamilyGroupSearchSubType.FamilyGroupByPastorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
@@ -683,7 +697,7 @@ export class FamilyGroupService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const pastorsId = pastors.map((pastor) => pastor.id);
+      const pastorsId = pastors.map((pastor) => pastor?.id);
 
       const familyGroups = await this.familyGroupRepository.find({
         where: {
@@ -714,7 +728,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -726,8 +740,8 @@ export class FamilyGroupService {
     //* Family groups by preacher full names
     if (
       term &&
-      searchType === SearchType.FullName &&
-      searchSubType === SearchSubType.FamilyGroupByPreacherFullName
+      searchType === FamilyGroupSearchType.FullName &&
+      searchSubType === FamilyGroupSearchSubType.FamilyGroupByPreacherFullName
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -741,7 +755,7 @@ export class FamilyGroupService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const preachersId = preachers.map((preacher) => preacher.id);
+      const preachersId = preachers.map((preacher) => preacher?.id);
 
       const familyGroups = await this.familyGroupRepository.find({
         where: {
@@ -772,7 +786,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -783,8 +797,8 @@ export class FamilyGroupService {
     //* Family groups by supervisor full names
     if (
       term &&
-      searchType === SearchType.FullName &&
-      searchSubType === SearchSubType.FamilyGroupBySupervisorFullName
+      searchType === FamilyGroupSearchType.FullName &&
+      searchSubType === FamilyGroupSearchSubType.FamilyGroupBySupervisorFullName
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -798,7 +812,7 @@ export class FamilyGroupService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const supervisorsId = supervisors.map((supervisor) => supervisor.id);
+      const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
 
       const familyGroups = await this.familyGroupRepository.find({
         where: {
@@ -829,7 +843,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -840,8 +854,8 @@ export class FamilyGroupService {
     //* Family groups by co-pastor full names
     if (
       term &&
-      searchType === SearchType.FullName &&
-      searchSubType === SearchSubType.FamilyGroupByCopastorFullName
+      searchType === FamilyGroupSearchType.FullName &&
+      searchSubType === FamilyGroupSearchSubType.FamilyGroupByCopastorFullName
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -855,7 +869,7 @@ export class FamilyGroupService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const copastorsId = copastors.map((copastor) => copastor.id);
+      const copastorsId = copastors.map((copastor) => copastor?.id);
 
       const familyGroups = await this.familyGroupRepository.find({
         where: {
@@ -886,7 +900,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -897,8 +911,8 @@ export class FamilyGroupService {
     //* Family groups by pastor full names
     if (
       term &&
-      searchType === SearchType.FullName &&
-      searchSubType === SearchSubType.FamilyGroupByPastorFullName
+      searchType === FamilyGroupSearchType.FullName &&
+      searchSubType === FamilyGroupSearchSubType.FamilyGroupByPastorFullName
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -912,7 +926,7 @@ export class FamilyGroupService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const pastorsId = pastors.map((pastor) => pastor.id);
+      const pastorsId = pastors.map((pastor) => pastor?.id);
 
       const familyGroups = await this.familyGroupRepository.find({
         where: {
@@ -943,7 +957,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -952,7 +966,7 @@ export class FamilyGroupService {
     }
 
     //? Find by family-group-code --> Many
-    if (term && searchType === SearchType.FamilyGroupCode) {
+    if (term && searchType === FamilyGroupSearchType.FamilyGroupCode) {
       const familyGroups = await this.familyGroupRepository.find({
         where: {
           familyGroupCode: ILike(`%${term}%`),
@@ -982,7 +996,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -991,7 +1005,7 @@ export class FamilyGroupService {
     }
 
     //? Find by family-group-name --> Many
-    if (term && searchType === SearchType.FamilyGroupName) {
+    if (term && searchType === FamilyGroupSearchType.FamilyGroupName) {
       const familyGroups = await this.familyGroupRepository.find({
         where: {
           familyGroupName: ILike(`%${term}%`),
@@ -1021,7 +1035,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1030,7 +1044,7 @@ export class FamilyGroupService {
     }
 
     //? Find by zone name --> Many
-    if (term && searchType === SearchType.ZoneName) {
+    if (term && searchType === FamilyGroupSearchType.ZoneName) {
       const zones = await this.zoneRepository.find({
         where: {
           zoneName: ILike(`%${term}%`),
@@ -1039,7 +1053,7 @@ export class FamilyGroupService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const zonesId = zones.map((zone) => zone.id);
+      const zonesId = zones.map((zone) => zone?.id);
 
       const familyGroups = await this.familyGroupRepository.find({
         where: {
@@ -1065,12 +1079,12 @@ export class FamilyGroupService {
 
       if (familyGroups.length === 0) {
         throw new NotFoundException(
-          `No se encontraron grupos familiares con esta zona: ${term}`,
+          `No se encontraron grupos familiares con este nombre zona: ${term}`,
         );
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1079,7 +1093,7 @@ export class FamilyGroupService {
     }
 
     //? Find by department --> Many
-    if (term && searchType === SearchType.Department) {
+    if (term && searchType === FamilyGroupSearchType.Department) {
       const familyGroups = await this.familyGroupRepository.find({
         where: {
           department: ILike(`%${term}%`),
@@ -1109,7 +1123,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1118,7 +1132,7 @@ export class FamilyGroupService {
     }
 
     //? Find by province --> Many
-    if (term && searchType === SearchType.Province) {
+    if (term && searchType === FamilyGroupSearchType.Province) {
       const familyGroups = await this.familyGroupRepository.find({
         where: {
           province: ILike(`%${term}%`),
@@ -1148,7 +1162,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1157,7 +1171,7 @@ export class FamilyGroupService {
     }
 
     //? Find by district --> Many
-    if (term && searchType === SearchType.District) {
+    if (term && searchType === FamilyGroupSearchType.District) {
       const familyGroups = await this.familyGroupRepository.find({
         where: {
           district: ILike(`%${term}%`),
@@ -1187,7 +1201,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1196,7 +1210,7 @@ export class FamilyGroupService {
     }
 
     //? Find by urban sector --> Many
-    if (term && searchType === SearchType.UrbanSector) {
+    if (term && searchType === FamilyGroupSearchType.UrbanSector) {
       const familyGroups = await this.familyGroupRepository.find({
         where: {
           urbanSector: ILike(`%${term}%`),
@@ -1226,7 +1240,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1235,7 +1249,7 @@ export class FamilyGroupService {
     }
 
     //? Find by address --> Many
-    if (term && searchType === SearchType.Address) {
+    if (term && searchType === FamilyGroupSearchType.Address) {
       const familyGroups = await this.familyGroupRepository.find({
         where: {
           address: ILike(`%${term}%`),
@@ -1265,7 +1279,7 @@ export class FamilyGroupService {
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1274,7 +1288,7 @@ export class FamilyGroupService {
     }
 
     //? Find by status --> Many
-    if (term && searchType === SearchType.RecordStatus) {
+    if (term && searchType === FamilyGroupSearchType.RecordStatus) {
       const recordStatusTerm = term.toLowerCase();
       const validRecordStatus = ['active', 'inactive'];
 
@@ -1307,12 +1321,12 @@ export class FamilyGroupService {
         const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
 
         throw new NotFoundException(
-          `No se encontraron grupos familiares con este estado: ${value}`,
+          `No se encontraron grupos familiares con este estado de registro: ${value}`,
         );
       }
 
       try {
-        return formatDataFamilyGroup({ familyGroups }) as any;
+        return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1321,27 +1335,31 @@ export class FamilyGroupService {
     }
 
     //! General Exceptions
-    if (!searchType) {
-      throw new BadRequestException(`El tipo de búsqueda es obligatorio`);
-    }
-
-    if (term && !Object.values(SearchType).includes(searchType as SearchType)) {
+    if (
+      term &&
+      !Object.values(FamilyGroupSearchType).includes(
+        searchType as FamilyGroupSearchType,
+      )
+    ) {
       throw new BadRequestException(
-        `Tipos de búsqueda no validos, solo son validos: ${Object.values(SearchType).join(', ')}`,
+        `Tipos de búsqueda no validos, solo son validos: ${Object.values(FamilyGroupSearchTypeNames).join(', ')}`,
       );
     }
 
     if (
       term &&
-      (SearchType.FirstName || SearchType.LastName || SearchType.FullName)
+      (FamilyGroupSearchType.FirstName ||
+        FamilyGroupSearchType.LastName ||
+        FamilyGroupSearchType.FullName) &&
+      !searchSubType
     ) {
       throw new BadRequestException(
-        `Para buscar por nombres o apellidos el sub-tipo es requerido`,
+        `Para buscar por nombres o apellidos el sub-tipo es requerido.`,
       );
     }
   }
 
-  //* UPDATE FAMILY HOUSE
+  //* UPDATE FAMILY GROUP
   async update(
     id: string,
     updateFamilyGroupDto: UpdateFamilyGroupDto,
@@ -1376,7 +1394,7 @@ export class FamilyGroupService {
     }
 
     if (
-      familyGroup.recordStatus === RecordStatus.Active &&
+      familyGroup?.recordStatus === RecordStatus.Active &&
       recordStatus === RecordStatus.Inactive
     ) {
       throw new BadRequestException(
@@ -1482,38 +1500,38 @@ export class FamilyGroupService {
       );
     }
 
-    if (!newPreacher.recordStatus) {
+    if (!newPreacher?.recordStatus) {
       throw new BadRequestException(
         `La propiedad "Estado de Registro" en Predicador debe ser "Activo".`,
       );
     }
 
     //* Validation same relations
-    if (familyGroup.theirZone?.id !== newPreacher.theirZone?.id) {
+    if (familyGroup?.theirZone?.id !== newPreacher.theirZone?.id) {
       throw new BadRequestException(
         `Para actualizar de Predicador este Grupo Familiar, la zona del nuevo Predicador debe ser la misma que la del Grupo Familiar.`,
       );
     }
 
-    if (familyGroup.theirSupervisor?.id !== newPreacher.theirSupervisor?.id) {
+    if (familyGroup?.theirSupervisor?.id !== newPreacher.theirSupervisor?.id) {
       throw new BadRequestException(
         `Para actualizar de Predicador este Grupo Familiar, el supervisor del nuevo Predicador debe ser el mismo que la del Grupo Familiar.`,
       );
     }
 
-    if (familyGroup.theirCopastor?.id !== newPreacher.theirCopastor?.id) {
+    if (familyGroup?.theirCopastor?.id !== newPreacher.theirCopastor?.id) {
       throw new BadRequestException(
         `Para actualizar de Predicador este Grupo Familiar, el co-pastor del nuevo Predicador debe ser el mismo que la del Grupo Familiar.`,
       );
     }
 
-    if (familyGroup.theirPastor?.id !== newPreacher.theirPastor?.id) {
+    if (familyGroup?.theirPastor?.id !== newPreacher.theirPastor?.id) {
       throw new BadRequestException(
         `Para actualizar de Predicador este Grupo Familiar, el pastor del nuevo Predicador debe ser el mismo que la del Grupo Familiar.`,
       );
     }
 
-    if (familyGroup.theirChurch?.id !== newPreacher.theirChurch?.id) {
+    if (familyGroup?.theirChurch?.id !== newPreacher.theirChurch?.id) {
       throw new BadRequestException(
         `Para actualizar de Predicador este Grupo Familiar, la iglesia del nuevo Predicador debe ser la misma que la del Grupo Familiar.`,
       );
@@ -1522,8 +1540,8 @@ export class FamilyGroupService {
     //? Update if new preacher exits and is different but zone is same
     if (
       newTheirPreacher &&
-      familyGroup.theirPreacher.id !== newPreacher.id &&
-      familyGroup.theirZone.id === newPreacher.theirZone.id
+      familyGroup?.theirPreacher?.id !== newPreacher?.id &&
+      familyGroup?.theirZone?.id === newPreacher?.theirZone?.id
     ) {
       //* Validate Preacher
       if (!newTheirPreacher) {
@@ -1544,7 +1562,7 @@ export class FamilyGroupService {
         where: { id: newPreacher?.theirSupervisor?.id },
       });
 
-      if (newSupervisor.recordStatus === RecordStatus.Inactive) {
+      if (newSupervisor?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de Registro" en el nuevo Supervisor debe ser "Activo".`,
         );
@@ -1561,7 +1579,7 @@ export class FamilyGroupService {
         where: { id: newPreacher?.theirZone?.id },
       });
 
-      if (newZone.recordStatus === RecordStatus.Inactive) {
+      if (newZone?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de Registro" en la nueva Zona debe ser "Activo".`,
         );
@@ -1578,7 +1596,7 @@ export class FamilyGroupService {
         where: { id: newPreacher?.theirCopastor?.id },
       });
 
-      if (newCopastor.recordStatus === RecordStatus.Inactive) {
+      if (newCopastor?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de Registro" en el nuevo Co-Pastor debe ser "Activo".`,
         );
@@ -1595,7 +1613,7 @@ export class FamilyGroupService {
         where: { id: newPreacher?.theirPastor?.id },
       });
 
-      if (newPastor.recordStatus === RecordStatus.Inactive) {
+      if (newPastor?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de Registro" en el nuevo Pastor debe ser "Activo".`,
         );
@@ -1612,7 +1630,7 @@ export class FamilyGroupService {
         where: { id: newPreacher?.theirChurch?.id },
       });
 
-      if (newChurch.recordStatus === RecordStatus.Inactive) {
+      if (newChurch?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de Registro" en la nueva Iglesia debe ser "Activo".`,
         );
@@ -1651,7 +1669,7 @@ export class FamilyGroupService {
         );
       }
 
-      if (newFamilyGroup.recordStatus === RecordStatus.Inactive) {
+      if (newFamilyGroup?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de Registro" en el nuevo Grupo Familiar debe ser "Activo".`,
         );
@@ -1769,7 +1787,7 @@ export class FamilyGroupService {
       try {
         await Promise.all(
           newFamilyGroupDisciples?.map(async (disciple) => {
-            await this.discipleRepository.update(disciple.id, {
+            await this.discipleRepository.update(disciple?.id, {
               theirFamilyGroup: familyGroup,
               theirPreacher: currentFamilyGroupPreacher,
               updatedAt: new Date(),
@@ -1784,7 +1802,7 @@ export class FamilyGroupService {
       try {
         await Promise.all(
           currentFamilyGroupDisciples?.map(async (disciple) => {
-            await this.discipleRepository.update(disciple.id, {
+            await this.discipleRepository.update(disciple?.id, {
               theirFamilyGroup: newFamilyGroup,
               theirPreacher: newFamilyGroupPreacher,
               updatedAt: new Date(),
@@ -1800,11 +1818,11 @@ export class FamilyGroupService {
     //? Update and save if is same Preacher and Zone
     if (
       !newTheirPreacher &&
-      updateFamilyGroupDto.theirPreacher === familyGroup.theirPreacher.id &&
-      updateFamilyGroupDto.theirZone === familyGroup.theirZone.id
+      updateFamilyGroupDto?.theirPreacher === familyGroup.theirPreacher?.id &&
+      updateFamilyGroupDto?.theirZone === familyGroup.theirZone?.id
     ) {
       const updatedFamilyGroup = await this.familyGroupRepository.preload({
-        id: familyGroup.id,
+        id: familyGroup?.id,
         ...updateFamilyGroupDto,
         theirChurch: familyGroup.theirChurch,
         theirPastor: familyGroup.theirPastor,

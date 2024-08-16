@@ -1,1 +1,1 @@
-export * from './format-data-supervisor.helper';
+export * from './supervisor-data-formatter.helper';

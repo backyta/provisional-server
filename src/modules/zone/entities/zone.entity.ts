@@ -2,10 +2,10 @@ import {
   Column,
   Entity,
   Index,
-  JoinColumn,
+  OneToOne,
   ManyToOne,
   OneToMany,
-  OneToOne,
+  JoinColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -43,7 +43,7 @@ export class Zone {
   @Column('text', { name: 'district' })
   district: string;
 
-  // Info register and update date
+  //* Info register and update date
   @Column('timestamp', { name: 'created_at', nullable: true })
   createdAt: string | Date;
 

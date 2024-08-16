@@ -1,1 +1,1 @@
-export * from './format-data-copastor.helper';
+export * from './copastor-data-formatter.helper';

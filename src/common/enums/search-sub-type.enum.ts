@@ -83,15 +83,15 @@ export enum SearchSubType {
 
   //* Sunday Worship, youngs, school sunday
   OfferingByShift = 'offering_by_shift',
-  OfferingByDateShift = 'offering_by_date_shift',
+  OfferingByShiftDate = 'offering_by_shift_date',
 
   //* Family House, Fasting Zonal, Vigil Zonal
   OfferingByZone = 'offering_by_zone',
-  OfferingByDateZone = 'offering_by_date_zone',
+  OfferingByZoneDate = 'offering_by_zone_date',
 
   //* Offering Family House
-  OfferingByDateCodeHouse = 'offering_by_date_code_house',
-  OfferingByCodeHouse = 'offering_by_code_house',
+  OfferingByGroupCode = 'offering_by_group_code',
+  OfferingByGroupCodeDate = 'offering_by_group_code_date',
   OfferingByPreacherNames = 'offering_by_preacher_names',
   OfferingByPreacherLastNames = 'offering_by_preacher_last_names',
   OfferingByPreacherFullName = 'offering_by_preacher_full_name',
@@ -102,9 +102,9 @@ export enum SearchSubType {
   OfferingBySupervisorFullName = 'offering_by_supervisor_full_name',
 
   //* Offering Ground Church and Special
-  OfferingByNames = 'offering_by_names',
-  OfferingByLastNames = 'offering_by_last_names',
-  OfferingByFullName = 'offering_by_full_name',
+  OfferingByContributorNames = 'offering_by_contributor_names',
+  OfferingByContributorLastNames = 'offering_by_contributor_last_names',
+  OfferingByContributorFullName = 'offering_by_contributor_full_name',
 
   // ! Offering Expenses
   //* Operational Expenses

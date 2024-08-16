@@ -1,12 +1,12 @@
 import {
-  BeforeInsert,
-  BeforeUpdate,
   Column,
   Entity,
   Index,
-  JoinColumn,
   ManyToOne,
   OneToMany,
+  JoinColumn,
+  BeforeUpdate,
+  BeforeInsert,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 

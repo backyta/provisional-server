@@ -6,8 +6,15 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
-import { ApiCreatedResponse, ApiForbiddenResponse } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiParam,
+} from '@nestjs/swagger';
 
 import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
@@ -20,6 +27,7 @@ import {
 } from '@/modules/offering/income/dto';
 import { OfferingIncome } from '@/modules/offering/income/entities';
 import { OfferingIncomeService } from '@/modules/offering/income/offering-income.service';
+import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 @Controller('offerings-income')
 export class OfferingIncomeController {
@@ -41,14 +49,41 @@ export class OfferingIncomeController {
     return this.offeringIncomeService.create(createIncomeDto, user);
   }
 
+  //* Find All
   @Get()
-  findAll() {
-    return this.offeringIncomeService.findAll();
+  @Auth()
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found resource.',
+  })
+  findAll(@Query() paginationDto: PaginationDto): Promise<OfferingIncome[]> {
+    return this.offeringIncomeService.findAll(paginationDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.offeringIncomeService.findOne(+id);
+  //* Find By Term
+  @Get(':term')
+  @Auth()
+  @ApiParam({
+    name: 'term',
+    description: 'Could be names, dates, districts, address, etc.',
+    example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
+  })
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not found resource.',
+  })
+  findTerm(
+    @Param('term') term: string,
+    @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
+  ): Promise<OfferingIncome | OfferingIncome[]> {
+    return this.offeringIncomeService.findByTerm(
+      term,
+      searchTypeAndPaginationDto,
+    );
   }
 
   @Patch(':id')

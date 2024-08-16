@@ -1,28 +1,28 @@
 import {
-  Controller,
   Get,
+  Post,
   Body,
   Patch,
   Param,
-  Delete,
   Query,
+  Delete,
+  Controller,
   ParseUUIDPipe,
-  Post,
 } from '@nestjs/common';
 import {
-  ApiBadRequestResponse,
-  ApiBearerAuth,
-  ApiCreatedResponse,
-  ApiForbiddenResponse,
-  ApiInternalServerErrorResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiParam,
   ApiTags,
+  ApiParam,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiForbiddenResponse,
+  ApiBadRequestResponse,
   ApiUnauthorizedResponse,
+  ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 
-import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
+import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
@@ -78,8 +78,7 @@ export class UserController {
   @Auth()
   @ApiParam({
     name: 'term',
-    description: 'Could be names, last names, roles, etc.',
-    example: 'cf5a9ee3-cad7-4b73-a331-a5f3f76f6661',
+    description: 'Could be names, last names, roles, gender, etc.',
   })
   @ApiOkResponse({
     description: 'Successful operation.',
@@ -89,7 +88,7 @@ export class UserController {
   })
   findTerm(
     @Param('term') term: string,
-    @Query() searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
+    @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
   ): Promise<User | User[]> {
     return this.userService.findByTerm(term, searchTypeAndPaginationDto);
   }

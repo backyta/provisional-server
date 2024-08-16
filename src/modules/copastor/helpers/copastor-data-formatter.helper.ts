@@ -4,7 +4,7 @@ interface Options {
   copastors: Copastor[];
 }
 
-export const formatDataCopastor = ({ copastors }: Options) => {
+export const copastorDataFormatter = ({ copastors }: Options) => {
   return copastors.map((copastor) => ({
     ...copastor,
     theirChurch: {

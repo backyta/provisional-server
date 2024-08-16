@@ -12,22 +12,22 @@ import {
 import { CurrencyType } from '@/modules/offering/shared/enums';
 
 import {
-  OfferingIncomeCreateSubType,
-  OfferingIncomeCreateType,
+  OfferingIncomeCreationSubType,
+  OfferingIncomeCreationType,
 } from '@/modules/offering/income/enums';
 
 export class CreateOfferingIncomeDto {
   //* General data
   @ApiProperty({
-    example: OfferingIncomeCreateType.Offering,
+    example: OfferingIncomeCreationType.Offering,
   })
-  @IsEnum(OfferingIncomeCreateType)
+  @IsEnum(OfferingIncomeCreationType)
   type: string;
 
   @ApiProperty({
-    example: OfferingIncomeCreateSubType.FamilyGroup,
+    example: OfferingIncomeCreationSubType.FamilyGroup,
   })
-  @IsEnum(OfferingIncomeCreateSubType)
+  @IsEnum(OfferingIncomeCreationSubType)
   @IsOptional()
   subType?: string;
 

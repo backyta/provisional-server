@@ -4,7 +4,7 @@ interface Options {
   disciples: Disciple[];
 }
 
-export const formatDataDisciple = ({ disciples }: Options) => {
+export const discipleDataFormatter = ({ disciples }: Options) => {
   return disciples.map((disciple) => ({
     ...disciple,
     theirChurch: {

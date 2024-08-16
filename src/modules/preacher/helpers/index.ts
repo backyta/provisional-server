@@ -1,1 +1,1 @@
-export * from './format-data-preacher.helper';
+export * from './preacher-data-formatter.helper';

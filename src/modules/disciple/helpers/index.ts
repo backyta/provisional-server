@@ -1,1 +1,1 @@
-export * from './format-data-disciple.helper';
+export * from './disciple-data-formatter.helper';

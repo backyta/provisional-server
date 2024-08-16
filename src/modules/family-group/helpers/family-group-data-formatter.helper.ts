@@ -4,7 +4,7 @@ interface Options {
   familyGroups: FamilyGroup[];
 }
 
-export const formatDataFamilyGroup = ({ familyGroups }: Options) => {
+export const familyGroupDataFormatter = ({ familyGroups }: Options) => {
   return familyGroups.map((familyGroup) => ({
     ...familyGroup,
     theirChurch: {

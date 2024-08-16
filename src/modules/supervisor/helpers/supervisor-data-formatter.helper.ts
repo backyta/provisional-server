@@ -4,7 +4,7 @@ interface Options {
   supervisors: Supervisor[];
 }
 
-export const formatDataSupervisor = ({ supervisors }: Options) => {
+export const supervisorDataFormatter = ({ supervisors }: Options) => {
   return supervisors.map((supervisor) => ({
     ...supervisor,
     theirChurch: {

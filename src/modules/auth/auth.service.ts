@@ -71,7 +71,7 @@ export class AuthService {
   }
 
   //* Check auth status (regenerate token)
-  async checkStatus(user: User) {
+  async checkAuthStatus(user: User) {
     return {
       ...user,
       token: this.getJwtToken({ id: user.id }),

@@ -1,35 +1,38 @@
 import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
   Logger,
+  Injectable,
   NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
+import {
+  In,
+  ILike,
+  IsNull,
+  Between,
+  Repository,
+  FindOptionsOrderValue,
+} from 'typeorm';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  Between,
-  FindOptionsOrderValue,
-  ILike,
-  In,
-  IsNull,
-  Repository,
-} from 'typeorm';
 
-import { formatToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
-import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
+import {
+  PreacherSearchType,
+  PreacherSearchSubType,
+  PreacherSearchTypeNames,
+} from '@/modules/preacher/enums';
+import { Preacher } from '@/modules/preacher/entities';
+import { preacherDataFormatter } from '@/modules/preacher/helpers';
+import { CreatePreacherDto, UpdatePreacherDto } from '@/modules/preacher/dto';
+
 import {
   MemberRole,
-  SearchSubType,
-  SearchType,
   RecordStatus,
   GenderNames,
   MaritalStatusNames,
 } from '@/common/enums';
-
-import { Preacher } from '@/modules/preacher/entities';
-import { formatDataPreacher } from '@/modules/preacher/helpers';
-import { CreatePreacherDto, UpdatePreacherDto } from '@/modules/preacher/dto';
+import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import { dateFormatterToDDMMYYY, getBirthDateByMonth } from '@/common/helpers';
 
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
@@ -77,7 +80,6 @@ export class PreacherService {
   ): Promise<Preacher> {
     const { roles, theirSupervisor, numberChildren } = createPreacherDto;
 
-    // Validations
     if (
       !roles.includes(MemberRole.Disciple) &&
       !roles.includes(MemberRole.Preacher)
@@ -115,7 +117,7 @@ export class PreacherService {
       );
     }
 
-    if (supervisor.recordStatus === RecordStatus.Inactive) {
+    if (supervisor?.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `La propiedad "Estado de registro" en Supervisor debe ser "Activo".`,
       );
@@ -132,7 +134,7 @@ export class PreacherService {
       where: { id: supervisor?.theirZone?.id },
     });
 
-    if (zone.recordStatus === RecordStatus.Inactive) {
+    if (zone?.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `La propiedad "Estado de registro" en Zona debe ser "Activo".`,
       );
@@ -149,7 +151,7 @@ export class PreacherService {
       where: { id: supervisor?.theirCopastor?.id },
     });
 
-    if (copastor.recordStatus === RecordStatus.Inactive) {
+    if (copastor?.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
       );
@@ -166,7 +168,7 @@ export class PreacherService {
       where: { id: supervisor?.theirPastor?.id },
     });
 
-    if (pastor.recordStatus === RecordStatus.Inactive) {
+    if (pastor?.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
       );
@@ -183,7 +185,7 @@ export class PreacherService {
       where: { id: supervisor?.theirChurch?.id },
     });
 
-    if (church.recordStatus === RecordStatus.Inactive) {
+    if (church?.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
       );
@@ -232,13 +234,13 @@ export class PreacherService {
       order: { createdAt: order as FindOptionsOrderValue },
     });
 
-    return formatDataPreacher({ preachers }) as any;
+    return preacherDataFormatter({ preachers }) as any;
   }
 
   //* FIND BY TERM
   async findByTerm(
     term: string,
-    searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
+    searchTypeAndPaginationDto: SearchAndPaginationDto,
   ): Promise<Preacher | Preacher[]> {
     const {
       'search-type': searchType,
@@ -249,12 +251,20 @@ export class PreacherService {
       isNull = 'false',
     } = searchTypeAndPaginationDto;
 
+    if (!term) {
+      throw new BadRequestException(`El termino de búsqueda es requerido.`);
+    }
+
+    if (!searchType) {
+      throw new BadRequestException(`El tipo de búsqueda es requerido.`);
+    }
+
     //? Find by first name () --> Many
     //* Preacher by preacher names
     if (
       term &&
-      searchType === SearchType.FirstName &&
-      searchSubType === SearchSubType.ByPreacherNames
+      searchType === PreacherSearchType.FirstName &&
+      searchSubType === PreacherSearchSubType.ByPreacherNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -287,7 +297,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -298,8 +308,8 @@ export class PreacherService {
     //* Preachers by supervisor names
     if (
       term &&
-      searchType === SearchType.FirstName &&
-      searchSubType === SearchSubType.PreacherBySupervisorNames
+      searchType === PreacherSearchType.FirstName &&
+      searchSubType === PreacherSearchSubType.PreacherBySupervisorNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -311,7 +321,7 @@ export class PreacherService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const supervisorsId = supervisors.map((supervisor) => supervisor.id);
+      const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
 
       const preachers = await this.preacherRepository.find({
         where: {
@@ -342,7 +352,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -353,8 +363,8 @@ export class PreacherService {
     //* Preachers by co-pastor names
     if (
       term &&
-      searchType === SearchType.FirstName &&
-      searchSubType === SearchSubType.PreacherByCopastorNames
+      searchType === PreacherSearchType.FirstName &&
+      searchSubType === PreacherSearchSubType.PreacherByCopastorNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -366,7 +376,7 @@ export class PreacherService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const copastorsId = copastors.map((copastor) => copastor.id);
+      const copastorsId = copastors.map((copastor) => copastor?.id);
 
       const preachers = await this.preacherRepository.find({
         where: {
@@ -397,7 +407,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -408,8 +418,8 @@ export class PreacherService {
     //* Preachers by pastor names
     if (
       term &&
-      searchType === SearchType.FirstName &&
-      searchSubType === SearchSubType.PreacherByPastorNames
+      searchType === PreacherSearchType.FirstName &&
+      searchSubType === PreacherSearchSubType.PreacherByPastorNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -421,7 +431,7 @@ export class PreacherService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const pastorsId = pastors.map((pastor) => pastor.id);
+      const pastorsId = pastors.map((pastor) => pastor?.id);
 
       const preachers = await this.preacherRepository.find({
         where: {
@@ -452,7 +462,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -464,8 +474,8 @@ export class PreacherService {
     //* Preachers by last names
     if (
       term &&
-      searchType === SearchType.LastName &&
-      searchSubType === SearchSubType.ByPreacherLastNames
+      searchType === PreacherSearchType.LastName &&
+      searchSubType === PreacherSearchSubType.ByPreacherLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
@@ -498,7 +508,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -509,8 +519,8 @@ export class PreacherService {
     //* Preachers by supervisor last names
     if (
       term &&
-      searchType === SearchType.LastName &&
-      searchSubType === SearchSubType.PreacherBySupervisorLastNames
+      searchType === PreacherSearchType.LastName &&
+      searchSubType === PreacherSearchSubType.PreacherBySupervisorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
@@ -522,7 +532,7 @@ export class PreacherService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const supervisorsId = supervisors.map((supervisor) => supervisor.id);
+      const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
 
       const preachers = await this.preacherRepository.find({
         where: {
@@ -553,7 +563,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -564,8 +574,8 @@ export class PreacherService {
     //* Preachers by co-pastor last names
     if (
       term &&
-      searchType === SearchType.LastName &&
-      searchSubType === SearchSubType.PreacherByCopastorLastNames
+      searchType === PreacherSearchType.LastName &&
+      searchSubType === PreacherSearchSubType.PreacherByCopastorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
@@ -577,7 +587,7 @@ export class PreacherService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const copastorsId = copastors.map((copastor) => copastor.id);
+      const copastorsId = copastors.map((copastor) => copastor?.id);
 
       const preachers = await this.preacherRepository.find({
         where: {
@@ -608,7 +618,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -619,8 +629,8 @@ export class PreacherService {
     //* Preachers by pastor last names
     if (
       term &&
-      searchType === SearchType.LastName &&
-      searchSubType === SearchSubType.PreacherByPastorLastNames
+      searchType === PreacherSearchType.LastName &&
+      searchSubType === PreacherSearchSubType.PreacherByPastorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
@@ -632,7 +642,7 @@ export class PreacherService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const pastorsId = pastors.map((pastor) => pastor.id);
+      const pastorsId = pastors.map((pastor) => pastor?.id);
 
       const preachers = await this.preacherRepository.find({
         where: {
@@ -663,7 +673,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -675,8 +685,8 @@ export class PreacherService {
     //* Preachers by full names
     if (
       term &&
-      searchType === SearchType.FullName &&
-      searchSubType === SearchSubType.ByPreacherFullName
+      searchType === PreacherSearchType.FullName &&
+      searchSubType === PreacherSearchSubType.ByPreacherFullName
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -711,7 +721,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -722,8 +732,8 @@ export class PreacherService {
     //* Preachers by supervisor full names
     if (
       term &&
-      searchType === SearchType.FullName &&
-      searchSubType === SearchSubType.PreacherBySupervisorFullName
+      searchType === PreacherSearchType.FullName &&
+      searchSubType === PreacherSearchSubType.PreacherBySupervisorFullName
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -737,7 +747,7 @@ export class PreacherService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const supervisorsId = supervisors.map((supervisor) => supervisor.id);
+      const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
 
       const preachers = await this.preacherRepository.find({
         where: {
@@ -768,7 +778,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -779,8 +789,8 @@ export class PreacherService {
     //* Preachers by co-pastor full names
     if (
       term &&
-      searchType === SearchType.FullName &&
-      searchSubType === SearchSubType.PreacherByCopastorFullName
+      searchType === PreacherSearchType.FullName &&
+      searchSubType === PreacherSearchSubType.PreacherByCopastorFullName
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -794,7 +804,7 @@ export class PreacherService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const copastorsId = copastors.map((copastor) => copastor.id);
+      const copastorsId = copastors.map((copastor) => copastor?.id);
 
       const preachers = await this.preacherRepository.find({
         where: {
@@ -825,7 +835,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -836,8 +846,8 @@ export class PreacherService {
     //* Preachers by pastor full names
     if (
       term &&
-      searchType === SearchType.FullName &&
-      searchSubType === SearchSubType.PreacherByPastorFullName
+      searchType === PreacherSearchType.FullName &&
+      searchSubType === PreacherSearchSubType.PreacherByPastorFullName
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -851,7 +861,7 @@ export class PreacherService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const pastorsId = pastors.map((pastor) => pastor.id);
+      const pastorsId = pastors.map((pastor) => pastor?.id);
 
       const preachers = await this.preacherRepository.find({
         where: {
@@ -882,7 +892,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -891,7 +901,7 @@ export class PreacherService {
     }
 
     //? Find by birth date --> Many
-    if (term && searchType === SearchType.BirthDate) {
+    if (term && searchType === PreacherSearchType.BirthDate) {
       const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
 
       if (isNaN(fromTimestamp)) {
@@ -924,8 +934,8 @@ export class PreacherService {
       });
 
       if (preachers.length === 0) {
-        const fromDate = formatToDDMMYYYY(fromTimestamp);
-        const toDate = formatToDDMMYYYY(toTimestamp);
+        const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
+        const toDate = dateFormatterToDDMMYYY(toTimestamp);
 
         throw new NotFoundException(
           `No se encontraron predicadores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
@@ -933,7 +943,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -942,7 +952,7 @@ export class PreacherService {
     }
 
     //? Find by month birth --> Many
-    if (term && searchType === SearchType.BirthMonth) {
+    if (term && searchType === PreacherSearchType.BirthMonth) {
       const preachers = await this.preacherRepository.find({
         where: {
           recordStatus: RecordStatus.Active,
@@ -993,7 +1003,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({
+        return preacherDataFormatter({
           preachers: resultPreachers as Preacher[],
         }) as any;
       } catch (error) {
@@ -1004,7 +1014,7 @@ export class PreacherService {
     }
 
     //? Find by family-group-code --> Many
-    if (term && searchType === SearchType.FamilyGroupCode) {
+    if (term && searchType === PreacherSearchType.FamilyGroupCode) {
       const familyGroups = await this.familyGroupRepository.find({
         where: {
           familyGroupCode: ILike(`%${term}%`),
@@ -1013,7 +1023,7 @@ export class PreacherService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const familyGroupsId = familyGroups.map((familyGroup) => familyGroup.id);
+      const familyGroupsId = familyGroups.map((familyGroup) => familyGroup?.id);
 
       const preachers = await this.preacherRepository.find({
         where: {
@@ -1044,7 +1054,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1053,7 +1063,7 @@ export class PreacherService {
     }
 
     //? Find by family-group-name --> Many
-    if (term && searchType === SearchType.FamilyGroupName) {
+    if (term && searchType === PreacherSearchType.FamilyGroupName) {
       const familyGroups = await this.familyGroupRepository.find({
         where: {
           familyGroupName: ILike(`%${term}%`),
@@ -1062,7 +1072,7 @@ export class PreacherService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const familyGroupsId = familyGroups.map((familyGroup) => familyGroup.id);
+      const familyGroupsId = familyGroups.map((familyGroup) => familyGroup?.id);
 
       const preachers = await this.preacherRepository.find({
         where: {
@@ -1093,7 +1103,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1102,7 +1112,7 @@ export class PreacherService {
     }
 
     //? Find by zone name --> Many
-    if (term && searchType === SearchType.ZoneName) {
+    if (term && searchType === PreacherSearchType.ZoneName) {
       const zones = await this.zoneRepository.find({
         where: {
           zoneName: ILike(`%${term}%`),
@@ -1111,7 +1121,7 @@ export class PreacherService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const zonesId = zones.map((zone) => zone.id);
+      const zonesId = zones.map((zone) => zone?.id);
 
       const preachers = await this.preacherRepository.find({
         where: {
@@ -1137,12 +1147,12 @@ export class PreacherService {
 
       if (preachers.length === 0) {
         throw new NotFoundException(
-          `No se encontraron predicadores(as) con esta zona: ${term}`,
+          `No se encontraron predicadores(as) con este nombre de zona: ${term}`,
         );
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1151,7 +1161,7 @@ export class PreacherService {
     }
 
     //? Find by zone id --> Many
-    if (term && searchType === SearchType.ZoneId) {
+    if (term && searchType === PreacherSearchType.ZoneId) {
       const zone = await this.zoneRepository.findOne({
         where: {
           id: term,
@@ -1185,12 +1195,12 @@ export class PreacherService {
 
       if (preachers.length === 0) {
         throw new NotFoundException(
-          `No se encontraron predicadores(as) con esta zona: ${term}`,
+          `No se encontraron predicadores(as) con este ID de zona: ${term}`,
         );
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1199,7 +1209,7 @@ export class PreacherService {
     }
 
     //? Find by gender --> Many
-    if (term && searchType === SearchType.Gender) {
+    if (term && searchType === PreacherSearchType.Gender) {
       const genderTerm = term.toLowerCase();
       const validGenders = ['male', 'female'];
 
@@ -1233,12 +1243,12 @@ export class PreacherService {
         const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
 
         throw new NotFoundException(
-          `No se encontraron predicadores(as) con este genero: ${genderInSpanish}`,
+          `No se encontraron predicadores(as) con este género: ${genderInSpanish}`,
         );
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1247,10 +1257,10 @@ export class PreacherService {
     }
 
     //? Find by marital status --> Many
-    if (term && searchType === SearchType.MaritalStatus) {
+    if (term && searchType === PreacherSearchType.MaritalStatus) {
       const maritalStatusTerm = term.toLowerCase();
       const validMaritalStatus = [
-        'singles',
+        'single',
         'married',
         'widowed',
         'divorced',
@@ -1293,7 +1303,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1302,7 +1312,7 @@ export class PreacherService {
     }
 
     //? Find by origin country --> Many
-    if (term && searchType === SearchType.OriginCountry) {
+    if (term && searchType === PreacherSearchType.OriginCountry) {
       const preachers = await this.preacherRepository.find({
         where: {
           originCountry: ILike(`%${term}%`),
@@ -1332,7 +1342,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1341,7 +1351,7 @@ export class PreacherService {
     }
 
     //? Find by department --> Many
-    if (term && searchType === SearchType.Department) {
+    if (term && searchType === PreacherSearchType.Department) {
       const preachers = await this.preacherRepository.find({
         where: {
           department: ILike(`%${term}%`),
@@ -1371,7 +1381,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1380,7 +1390,7 @@ export class PreacherService {
     }
 
     //? Find by province --> Many
-    if (term && searchType === SearchType.Province) {
+    if (term && searchType === PreacherSearchType.Province) {
       const preachers = await this.preacherRepository.find({
         where: {
           province: ILike(`%${term}%`),
@@ -1410,7 +1420,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1419,7 +1429,7 @@ export class PreacherService {
     }
 
     //? Find by district --> Many
-    if (term && searchType === SearchType.District) {
+    if (term && searchType === PreacherSearchType.District) {
       const preachers = await this.preacherRepository.find({
         where: {
           district: ILike(`%${term}%`),
@@ -1449,7 +1459,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1458,7 +1468,7 @@ export class PreacherService {
     }
 
     //? Find by urban sector --> Many
-    if (term && searchType === SearchType.UrbanSector) {
+    if (term && searchType === PreacherSearchType.UrbanSector) {
       const preachers = await this.preacherRepository.find({
         where: {
           urbanSector: ILike(`%${term}%`),
@@ -1488,7 +1498,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1497,7 +1507,7 @@ export class PreacherService {
     }
 
     //? Find by address --> Many
-    if (term && searchType === SearchType.Address) {
+    if (term && searchType === PreacherSearchType.Address) {
       const preachers = await this.preacherRepository.find({
         where: {
           address: ILike(`%${term}%`),
@@ -1527,7 +1537,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1536,7 +1546,7 @@ export class PreacherService {
     }
 
     //? Find by status --> Many
-    if (term && searchType === SearchType.RecordStatus) {
+    if (term && searchType === PreacherSearchType.RecordStatus) {
       const recordStatusTerm = term.toLowerCase();
       const validRecordStatus = ['active', 'inactive'];
 
@@ -1574,7 +1584,7 @@ export class PreacherService {
       }
 
       try {
-        return formatDataPreacher({ preachers }) as any;
+        return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1583,22 +1593,27 @@ export class PreacherService {
     }
 
     //! General Exceptions
-    if (!searchType) {
-      throw new BadRequestException(`El tipo de búsqueda es obligatorio`);
-    }
 
-    if (term && !Object.values(SearchType).includes(searchType as SearchType)) {
+    if (
+      term &&
+      !Object.values(PreacherSearchType).includes(
+        searchType as PreacherSearchType,
+      )
+    ) {
       throw new BadRequestException(
-        `Tipos de búsqueda no validos, solo son validos: ${Object.values(SearchType).join(', ')}`,
+        `Tipos de búsqueda no validos, solo son validos: ${Object.values(PreacherSearchTypeNames).join(', ')}`,
       );
     }
 
     if (
       term &&
-      (SearchType.FirstName || SearchType.LastName || SearchType.FullName)
+      (PreacherSearchType.FirstName ||
+        PreacherSearchType.LastName ||
+        PreacherSearchType.FullName) &&
+      !searchSubType
     ) {
       throw new BadRequestException(
-        `Para buscar por nombres o apellidos el sub-tipo es requerido`,
+        `Para buscar por nombres o apellidos el sub-tipo es requerido.`,
       );
     }
   }
@@ -1729,7 +1744,7 @@ export class PreacherService {
     ) {
       //* Validations
       if (
-        preacher.recordStatus === RecordStatus.Active &&
+        preacher?.recordStatus === RecordStatus.Active &&
         recordStatus === RecordStatus.Inactive
       ) {
         throw new BadRequestException(
@@ -1738,7 +1753,7 @@ export class PreacherService {
       }
 
       //? Update if their Supervisor is different
-      if (preacher.theirSupervisor?.id !== theirSupervisor) {
+      if (preacher?.theirSupervisor?.id !== theirSupervisor) {
         //* Validate supervisor
         if (!theirSupervisor) {
           throw new NotFoundException(
@@ -1762,7 +1777,7 @@ export class PreacherService {
           );
         }
 
-        if (newSupervisor.recordStatus === RecordStatus.Inactive) {
+        if (newSupervisor?.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
             `La propiedad "Estado de registro" en Supervisor debe ser "Activo".`,
           );
@@ -1779,7 +1794,7 @@ export class PreacherService {
           where: { id: newSupervisor?.theirZone?.id },
         });
 
-        if (newZone.recordStatus === RecordStatus.Inactive) {
+        if (newZone?.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
             `La propiedad "Estado de registro" en Zona debe ser "Activo".`,
           );
@@ -1796,7 +1811,7 @@ export class PreacherService {
           where: { id: newSupervisor?.theirCopastor?.id },
         });
 
-        if (newCopastor.recordStatus === RecordStatus.Inactive) {
+        if (newCopastor?.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
             `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
           );
@@ -1813,7 +1828,7 @@ export class PreacherService {
           where: { id: newSupervisor?.theirPastor?.id },
         });
 
-        if (newPastor.recordStatus === RecordStatus.Inactive) {
+        if (newPastor?.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
             `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
           );
@@ -1830,7 +1845,7 @@ export class PreacherService {
           where: { id: newSupervisor?.theirChurch?.id },
         });
 
-        if (newChurch.recordStatus === RecordStatus.Inactive) {
+        if (newChurch?.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
             `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
           );
@@ -1868,19 +1883,19 @@ export class PreacherService {
           relations: ['theirPreacher'],
         });
 
-        //* Update in all family houses the new relations.
+        //* Update in all family groups the new relations.
         try {
           const familyGroupsByPreacher = allFamilyGroups.filter(
-            (familyGroup) => familyGroup.theirPreacher?.id === preacher?.id,
+            (familyGroup) => familyGroup?.theirPreacher?.id === preacher?.id,
           );
 
           const familyGroupsByNewZone = allFamilyGroups.filter(
-            (familyGroup) => familyGroup.theirZone?.id === newZone?.id,
+            (familyGroup) => familyGroup?.theirZone?.id === newZone?.id,
           );
 
           await Promise.all(
             familyGroupsByPreacher.map(async (familyGroup) => {
-              await this.familyGroupRepository.update(familyGroup.id, {
+              await this.familyGroupRepository.update(familyGroup?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: newCopastor,
@@ -1902,12 +1917,12 @@ export class PreacherService {
 
           //* Update in all disciples the new relations.
           const disciplesByPreacher = allDisciples.filter(
-            (disciple) => disciple.theirPreacher?.id === preacher?.id,
+            (disciple) => disciple?.theirPreacher?.id === preacher?.id,
           );
 
           await Promise.all(
             disciplesByPreacher.map(async (disciple) => {
-              await this.discipleRepository.update(disciple.id, {
+              await this.discipleRepository.update(disciple?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: newCopastor,
@@ -1927,7 +1942,7 @@ export class PreacherService {
 
           const familyGroupsByOrderFiltered = familyGroupsByOrder.filter(
             (familyGroup) =>
-              familyGroup.theirZone?.id === preacher.theirZone?.id,
+              familyGroup?.theirZone?.id === preacher?.theirZone?.id,
           );
 
           await Promise.all(
@@ -1948,7 +1963,7 @@ export class PreacherService {
       }
 
       //? Update and save if is same Supervisor
-      if (preacher.theirSupervisor?.id === theirSupervisor) {
+      if (preacher?.theirSupervisor?.id === theirSupervisor) {
         const updatedPreacher = await this.preacherRepository.preload({
           id: preacher.id,
           ...updatePreacherDto,
@@ -2020,7 +2035,7 @@ export class PreacherService {
           );
         }
 
-        if (newCopastor.recordStatus === RecordStatus.Inactive) {
+        if (newCopastor?.recordStatus === RecordStatus.Inactive) {
           throw new NotFoundException(
             `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
           );
@@ -2038,7 +2053,7 @@ export class PreacherService {
           relations: ['theirChurch'],
         });
 
-        if (newPastor.recordStatus === RecordStatus.Inactive) {
+        if (newPastor?.recordStatus === RecordStatus.Inactive) {
           throw new NotFoundException(
             `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
           );
@@ -2056,13 +2071,13 @@ export class PreacherService {
           relations: ['theirMainChurch'],
         });
 
-        if (newChurch.recordStatus === RecordStatus.Inactive) {
+        if (newChurch?.recordStatus === RecordStatus.Inactive) {
           throw new NotFoundException(
             `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
           );
         }
 
-        // Create new instance Supervisor and delete old preacher
+        //! Create new instance Supervisor and delete old preacher
         try {
           const newSupervisor = this.supervisorRepository.create({
             ...updatePreacherDto,
@@ -2104,7 +2119,7 @@ export class PreacherService {
           );
         }
 
-        if (newPastor.recordStatus === RecordStatus.Inactive) {
+        if (newPastor?.recordStatus === RecordStatus.Inactive) {
           throw new NotFoundException(
             `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
           );
@@ -2122,7 +2137,7 @@ export class PreacherService {
           relations: ['theirMainChurch'],
         });
 
-        if (newChurch.recordStatus === RecordStatus.Inactive) {
+        if (newChurch?.recordStatus === RecordStatus.Inactive) {
           throw new NotFoundException(
             `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
           );
@@ -2159,7 +2174,6 @@ export class PreacherService {
 
   //! DELETE PREACHER
   async remove(id: string, user: User): Promise<void> {
-    // Validations
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido.`);
     }
@@ -2204,12 +2218,12 @@ export class PreacherService {
     try {
       //* Update and set to null relationships in Family House
       const familyGroupsByPreacher = allFamilyGroups.filter(
-        (familyGroup) => familyGroup.theirPreacher?.id === preacher?.id,
+        (familyGroup) => familyGroup?.theirPreacher?.id === preacher?.id,
       );
 
       await Promise.all(
         familyGroupsByPreacher.map(async (familyGroup) => {
-          await this.familyGroupRepository.update(familyGroup.id, {
+          await this.familyGroupRepository.update(familyGroup?.id, {
             theirPreacher: null,
             updatedAt: new Date(),
             updatedBy: user,
@@ -2219,7 +2233,7 @@ export class PreacherService {
 
       //* Update and set to null relationships in Disciples
       const disciplesByPreacher = allDisciples.filter(
-        (disciple) => disciple.theirPreacher?.id === preacher.id,
+        (disciple) => disciple?.theirPreacher?.id === preacher?.id,
       );
 
       await Promise.all(

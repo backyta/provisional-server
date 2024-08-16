@@ -41,9 +41,7 @@ export enum SearchType {
   //* Disciple, User
   Roles = 'roles',
 
-  //TODO : renombrar anteponer offering para mas claridad
   //* Offering Income (tithe and offering)
-  Tithe = 'tithe',
   SundayWorship = 'sunday_worship',
   FamilyGroup = 'family_group',
   GeneralFasting = 'general_fasting',
@@ -67,3 +65,60 @@ export enum SearchType {
   ActivitiesAndEventsExpenses = 'activities_and_events_expenses',
   ExpensesAdjustment = 'expenses_adjustment',
 }
+
+export const SearchTypeNames: Record<SearchType, string> = {
+  [SearchType.ChurchName]: 'Nombre de Iglesia',
+  [SearchType.FoundingDate]: 'Fecha de Fundación',
+
+  [SearchType.FirstName]: 'Nombres',
+  [SearchType.LastName]: 'Apellidos',
+  [SearchType.FullName]: 'Nombre Completo',
+
+  [SearchType.BirthDate]: 'Fecha de Nacimiento',
+  [SearchType.BirthMonth]: 'Mes de Nacimiento',
+  [SearchType.Gender]: 'Género',
+  [SearchType.MaritalStatus]: 'Estado Civil',
+
+  [SearchType.ZoneName]: 'Nombre de Zona',
+  [SearchType.ZoneId]: 'ID de Zona',
+
+  [SearchType.FamilyGroupCode]: 'Código de Grupo Familiar',
+  [SearchType.FamilyGroupName]: 'Nombre de Grupo Familiar',
+
+  [SearchType.Address]: 'Dirección',
+
+  [SearchType.OriginCountry]: 'País de Origen',
+
+  [SearchType.Country]: 'País',
+  [SearchType.Department]: 'Departamento',
+  [SearchType.Province]: 'Provincia',
+  [SearchType.District]: 'Distrito',
+  [SearchType.UrbanSector]: 'Sector Urbano',
+
+  [SearchType.RecordStatus]: 'Estado del Registro',
+
+  [SearchType.Roles]: 'Roles',
+
+  [SearchType.SundayWorship]: 'Culto Dominical',
+  [SearchType.FamilyGroup]: 'Grupo Familiar',
+  [SearchType.GeneralFasting]: 'Ayuno General',
+  [SearchType.GeneralVigil]: 'Vigilia General',
+  [SearchType.ZonalFasting]: 'Ayuno Zonal',
+  [SearchType.ZonalVigil]: 'Vigilia Zonal',
+  [SearchType.SundaySchool]: 'Escuela Dominical',
+  [SearchType.YouthWorship]: 'Culto Jóvenes',
+  [SearchType.UnitedWorship]: 'Culto Unido',
+  [SearchType.Activities]: 'Actividades',
+  [SearchType.ChurchGround]: 'Terreno Iglesia',
+  [SearchType.Special]: 'Especial',
+  [SearchType.IncomeAdjustment]: 'Ajuste por Ingresos',
+
+  [SearchType.OperationalExpenses]: 'Gastos Operativos',
+  [SearchType.MaintenanceAndRepairExpenses]:
+    'Gastos de Mantenimiento y Reparación',
+  [SearchType.DecorationExpenses]: 'Gastos de Decoración',
+  [SearchType.EquipmentAndTechnologyExpenses]: 'Gastos de Equipos y Tecnología',
+  [SearchType.SuppliesExpenses]: 'Gastos de Suministros',
+  [SearchType.ActivitiesAndEventsExpenses]: 'Gastos de Actividades y Eventos',
+  [SearchType.ExpensesAdjustment]: 'Ajuste de Gastos',
+};

@@ -1,10 +1,10 @@
 import {
+  Index,
   Column,
   Entity,
-  Index,
-  JoinColumn,
   ManyToOne,
   OneToMany,
+  JoinColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 

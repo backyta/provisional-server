@@ -88,7 +88,7 @@ export class OfferingIncome {
   familyGroup: FamilyGroup;
 
   // Member
-  // NOTE : agregar en cada entidad que al subir de nivel se elimina pero se coloca el nuevo en todos los registros que tenia el anterior ID.
+  // NOTE : agregar en cada entidad que al subir de nivel se elimina pero se coloca el nuevo id en todos los registros que tenia el anterior ID.
   @ManyToOne(() => Pastor, {
     nullable: true,
     onDelete: 'SET NULL',

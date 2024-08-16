@@ -1,37 +1,40 @@
 import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
   Logger,
+  Injectable,
   NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
+import {
+  In,
+  ILike,
+  IsNull,
+  Between,
+  Repository,
+  FindOptionsOrderValue,
+} from 'typeorm';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  Between,
-  FindOptionsOrderValue,
-  ILike,
-  In,
-  IsNull,
-  Repository,
-} from 'typeorm';
 
 import {
   CreateSupervisorDto,
   UpdateSupervisorDto,
 } from '@/modules/supervisor/dto';
-import { formatDataSupervisor } from '@/modules/supervisor/helpers';
+import {
+  SupervisorSearchType,
+  SupervisorSearchSubType,
+  SupervisorSearchTypeNames,
+} from '@/modules/supervisor/enums';
+import { supervisorDataFormatter } from '@/modules/supervisor/helpers';
 
-import { formatToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
-import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
 import {
   MemberRole,
-  SearchSubType,
-  SearchType,
   RecordStatus,
   GenderNames,
   MaritalStatusNames,
 } from '@/common/enums';
+import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import { dateFormatterToDDMMYYY, getBirthDateByMonth } from '@/common/helpers';
 
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
@@ -86,7 +89,6 @@ export class SupervisorService {
       numberChildren,
     } = createSupervisorDto;
 
-    // Validations
     if (
       !roles.includes(MemberRole.Disciple) &&
       !roles.includes(MemberRole.Supervisor)
@@ -127,7 +129,7 @@ export class SupervisorService {
         );
       }
 
-      if (copastor.recordStatus === RecordStatus.Inactive) {
+      if (copastor?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
         );
@@ -144,7 +146,7 @@ export class SupervisorService {
         where: { id: copastor?.theirPastor?.id },
       });
 
-      if (pastor.recordStatus === RecordStatus.Inactive) {
+      if (pastor?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
         );
@@ -161,7 +163,7 @@ export class SupervisorService {
         where: { id: copastor?.theirChurch?.id },
       });
 
-      if (church.recordStatus === RecordStatus.Inactive) {
+      if (church?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de registro" en la Iglesia debe ser "Activo"`,
         );
@@ -206,7 +208,7 @@ export class SupervisorService {
         );
       }
 
-      if (pastor.recordStatus === RecordStatus.Inactive) {
+      if (pastor?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo"`,
         );
@@ -223,7 +225,7 @@ export class SupervisorService {
         where: { id: pastor?.theirChurch?.id },
       });
 
-      if (pastor.recordStatus === RecordStatus.Inactive) {
+      if (pastor?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
         );
@@ -274,13 +276,13 @@ export class SupervisorService {
       order: { createdAt: order as FindOptionsOrderValue },
     });
 
-    return formatDataSupervisor({ supervisors }) as any;
+    return supervisorDataFormatter({ supervisors }) as any;
   }
 
   //* FIND BY TERM
   async findByTerm(
     term: string,
-    searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
+    searchTypeAndPaginationDto: SearchAndPaginationDto,
   ): Promise<Supervisor | Supervisor[]> {
     const {
       'search-type': searchType,
@@ -290,12 +292,20 @@ export class SupervisorService {
       order,
     } = searchTypeAndPaginationDto;
 
+    if (!term) {
+      throw new BadRequestException(`El termino de búsqueda es requerido.`);
+    }
+
+    if (!searchType) {
+      throw new BadRequestException(`El tipo de búsqueda es requerido.`);
+    }
+
     //? Find by first name () --> Many
     //* Supervisors by supervisor names
     if (
       term &&
-      searchType === SearchType.FirstName &&
-      searchSubType === SearchSubType.BySupervisorNames
+      searchType === SupervisorSearchType.FirstName &&
+      searchSubType === SupervisorSearchSubType.BySupervisorNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -328,7 +338,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -339,8 +349,8 @@ export class SupervisorService {
     //* Supervisors by co-pastor names
     if (
       term &&
-      searchType === SearchType.FirstName &&
-      searchSubType === SearchSubType.SupervisorByCopastorNames
+      searchType === SupervisorSearchType.FirstName &&
+      searchSubType === SupervisorSearchSubType.SupervisorByCopastorNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -352,7 +362,7 @@ export class SupervisorService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const copastorsId = copastors.map((copastor) => copastor.id);
+      const copastorsId = copastors.map((copastor) => copastor?.id);
 
       const supervisors = await this.supervisorRepository.find({
         where: {
@@ -383,7 +393,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -394,8 +404,8 @@ export class SupervisorService {
     //* Supervisors by pastor names
     if (
       term &&
-      searchType === SearchType.FirstName &&
-      searchSubType === SearchSubType.SupervisorByPastorNames
+      searchType === SupervisorSearchType.FirstName &&
+      searchSubType === SupervisorSearchSubType.SupervisorByPastorNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -407,7 +417,7 @@ export class SupervisorService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const pastorsId = pastors.map((pastor) => pastor.id);
+      const pastorsId = pastors.map((pastor) => pastor?.id);
 
       const supervisors = await this.supervisorRepository.find({
         where: {
@@ -438,7 +448,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -450,8 +460,8 @@ export class SupervisorService {
     //* Supervisors by last names
     if (
       term &&
-      searchType === SearchType.LastName &&
-      searchSubType === SearchSubType.BySupervisorLastNames
+      searchType === SupervisorSearchType.LastName &&
+      searchSubType === SupervisorSearchSubType.BySupervisorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
@@ -484,7 +494,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -495,8 +505,8 @@ export class SupervisorService {
     //* Supervisors by co-pastor last names
     if (
       term &&
-      searchType === SearchType.LastName &&
-      searchSubType === SearchSubType.SupervisorByCopastorLastNames
+      searchType === SupervisorSearchType.LastName &&
+      searchSubType === SupervisorSearchSubType.SupervisorByCopastorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
@@ -508,7 +518,7 @@ export class SupervisorService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const copastorsId = copastors.map((copastor) => copastor.id);
+      const copastorsId = copastors.map((copastor) => copastor?.id);
 
       const supervisors = await this.supervisorRepository.find({
         where: {
@@ -539,7 +549,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -550,8 +560,8 @@ export class SupervisorService {
     //* Supervisors by pastor last names
     if (
       term &&
-      searchType === SearchType.LastName &&
-      searchSubType === SearchSubType.SupervisorByPastorLastNames
+      searchType === SupervisorSearchType.LastName &&
+      searchSubType === SupervisorSearchSubType.SupervisorByPastorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
@@ -563,7 +573,7 @@ export class SupervisorService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const pastorsId = pastors.map((pastor) => pastor.id);
+      const pastorsId = pastors.map((pastor) => pastor?.id);
 
       const supervisors = await this.supervisorRepository.find({
         where: {
@@ -594,7 +604,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -606,8 +616,8 @@ export class SupervisorService {
     //* Supervisors by full names
     if (
       term &&
-      searchType === SearchType.FullName &&
-      searchSubType === SearchSubType.BySupervisorFullName
+      searchType === SupervisorSearchType.FullName &&
+      searchSubType === SupervisorSearchSubType.BySupervisorFullName
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -642,7 +652,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -653,8 +663,8 @@ export class SupervisorService {
     //* Supervisors by co-pastor full names
     if (
       term &&
-      searchType === SearchType.FullName &&
-      searchSubType === SearchSubType.SupervisorByCopastorFullName
+      searchType === SupervisorSearchType.FullName &&
+      searchSubType === SupervisorSearchSubType.SupervisorByCopastorFullName
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -668,7 +678,7 @@ export class SupervisorService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const copastorsId = copastors.map((copastor) => copastor.id);
+      const copastorsId = copastors.map((copastor) => copastor?.id);
 
       const supervisors = await this.supervisorRepository.find({
         where: {
@@ -699,7 +709,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -710,8 +720,8 @@ export class SupervisorService {
     //* Supervisors by pastor full names
     if (
       term &&
-      searchType === SearchType.FullName &&
-      searchSubType === SearchSubType.SupervisorByPastorFullName
+      searchType === SupervisorSearchType.FullName &&
+      searchSubType === SupervisorSearchSubType.SupervisorByPastorFullName
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -725,7 +735,7 @@ export class SupervisorService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const pastorsId = pastors.map((pastor) => pastor.id);
+      const pastorsId = pastors.map((pastor) => pastor?.id);
 
       const supervisors = await this.supervisorRepository.find({
         where: {
@@ -756,7 +766,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -765,7 +775,7 @@ export class SupervisorService {
     }
 
     //? Find by birth date --> Many
-    if (term && searchType === SearchType.BirthDate) {
+    if (term && searchType === SupervisorSearchType.BirthDate) {
       const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
 
       if (isNaN(fromTimestamp)) {
@@ -798,8 +808,8 @@ export class SupervisorService {
       });
 
       if (supervisors.length === 0) {
-        const fromDate = formatToDDMMYYYY(fromTimestamp);
-        const toDate = formatToDDMMYYYY(toTimestamp);
+        const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
+        const toDate = dateFormatterToDDMMYYY(toTimestamp);
 
         throw new NotFoundException(
           `No se encontraron supervisores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
@@ -807,7 +817,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -816,7 +826,7 @@ export class SupervisorService {
     }
 
     //? Find by month birth --> Many
-    if (term && searchType === SearchType.BirthMonth) {
+    if (term && searchType === SupervisorSearchType.BirthMonth) {
       const supervisors = await this.supervisorRepository.find({
         where: {
           recordStatus: RecordStatus.Active,
@@ -867,7 +877,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({
+        return supervisorDataFormatter({
           supervisors: resultSupervisors as Supervisor[],
         }) as any;
       } catch (error) {
@@ -877,8 +887,8 @@ export class SupervisorService {
       }
     }
 
-    //? Find by zone --> Many
-    if (term && searchType === SearchType.ZoneName) {
+    //? Find by zone name --> Many
+    if (term && searchType === SupervisorSearchType.ZoneName) {
       const zones = await this.zoneRepository.find({
         where: {
           zoneName: ILike(`%${term}%`),
@@ -887,7 +897,7 @@ export class SupervisorService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const zonesId = zones.map((zone) => zone.id);
+      const zonesId = zones.map((zone) => zone?.id);
 
       const supervisors = await this.supervisorRepository.find({
         where: {
@@ -913,12 +923,12 @@ export class SupervisorService {
 
       if (supervisors.length === 0) {
         throw new NotFoundException(
-          `No se encontraron supervisores(as) con este genero: ${term}`,
+          `No se encontraron supervisores(as) con este nombre de zona: ${term}`,
         );
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -927,7 +937,7 @@ export class SupervisorService {
     }
 
     //? Find by gender --> Many
-    if (term && searchType === SearchType.Gender) {
+    if (term && searchType === SupervisorSearchType.Gender) {
       const genderTerm = term.toLowerCase();
       const validGenders = ['male', 'female'];
 
@@ -961,12 +971,12 @@ export class SupervisorService {
         const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
 
         throw new NotFoundException(
-          `No se encontraron supervisores(as) con este genero: ${genderInSpanish}`,
+          `No se encontraron supervisores(as) con este género: ${genderInSpanish}`,
         );
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -975,10 +985,10 @@ export class SupervisorService {
     }
 
     //? Find by marital status --> Many
-    if (term && searchType === SearchType.MaritalStatus) {
+    if (term && searchType === SupervisorSearchType.MaritalStatus) {
       const maritalStatusTerm = term.toLowerCase();
       const validMaritalStatus = [
-        'singles',
+        'single',
         'married',
         'widowed',
         'divorced',
@@ -1021,7 +1031,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1030,7 +1040,7 @@ export class SupervisorService {
     }
 
     //? Find by origin country --> Many
-    if (term && searchType === SearchType.OriginCountry) {
+    if (term && searchType === SupervisorSearchType.OriginCountry) {
       const supervisors = await this.supervisorRepository.find({
         where: {
           originCountry: ILike(`%${term}%`),
@@ -1060,7 +1070,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1069,7 +1079,7 @@ export class SupervisorService {
     }
 
     //? Find by department --> Many
-    if (term && searchType === SearchType.Department) {
+    if (term && searchType === SupervisorSearchType.Department) {
       const supervisors = await this.supervisorRepository.find({
         where: {
           department: ILike(`%${term}%`),
@@ -1099,7 +1109,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1108,7 +1118,7 @@ export class SupervisorService {
     }
 
     //? Find by province --> Many
-    if (term && searchType === SearchType.Province) {
+    if (term && searchType === SupervisorSearchType.Province) {
       const supervisors = await this.supervisorRepository.find({
         where: {
           province: ILike(`%${term}%`),
@@ -1138,7 +1148,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1147,7 +1157,7 @@ export class SupervisorService {
     }
 
     //? Find by district --> Many
-    if (term && searchType === SearchType.District) {
+    if (term && searchType === SupervisorSearchType.District) {
       const supervisors = await this.supervisorRepository.find({
         where: {
           district: ILike(`%${term}%`),
@@ -1177,7 +1187,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1186,7 +1196,7 @@ export class SupervisorService {
     }
 
     //? Find by urban sector --> Many
-    if (term && searchType === SearchType.UrbanSector) {
+    if (term && searchType === SupervisorSearchType.UrbanSector) {
       const supervisors = await this.supervisorRepository.find({
         where: {
           urbanSector: ILike(`%${term}%`),
@@ -1216,7 +1226,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1225,7 +1235,7 @@ export class SupervisorService {
     }
 
     //? Find by address --> Many
-    if (term && searchType === SearchType.Address) {
+    if (term && searchType === SupervisorSearchType.Address) {
       const supervisors = await this.supervisorRepository.find({
         where: {
           address: ILike(`%${term}%`),
@@ -1255,7 +1265,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1264,7 +1274,7 @@ export class SupervisorService {
     }
 
     //? Find by status --> Many
-    if (term && searchType === SearchType.RecordStatus) {
+    if (term && searchType === SupervisorSearchType.RecordStatus) {
       const recordStatusTerm = term.toLowerCase();
       const validRecordStatus = ['active', 'inactive'];
 
@@ -1302,7 +1312,7 @@ export class SupervisorService {
       }
 
       try {
-        return formatDataSupervisor({ supervisors }) as any;
+        return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -1311,22 +1321,27 @@ export class SupervisorService {
     }
 
     //! General Exceptions
-    if (!searchType) {
-      throw new BadRequestException(`El tipo de búsqueda es obligatorio`);
-    }
 
-    if (term && !Object.values(SearchType).includes(searchType as SearchType)) {
+    if (
+      term &&
+      !Object.values(SupervisorSearchType).includes(
+        searchType as SupervisorSearchType,
+      )
+    ) {
       throw new BadRequestException(
-        `Tipos de búsqueda no validos, solo son validos: ${Object.values(SearchType).join(', ')}`,
+        `Tipos de búsqueda no validos, solo son validos: ${Object.values(SupervisorSearchTypeNames).join(', ')}`,
       );
     }
 
     if (
       term &&
-      (SearchType.FirstName || SearchType.LastName || SearchType.FullName)
+      (SupervisorSearchType.FirstName ||
+        SupervisorSearchType.LastName ||
+        SupervisorSearchType.FullName) &&
+      !searchSubType
     ) {
       throw new BadRequestException(
-        `Para buscar por nombres o apellidos el sub-tipo es requerido`,
+        `Para buscar por nombres o apellidos el sub-tipo es requerido.`,
       );
     }
   }
@@ -1448,9 +1463,8 @@ export class SupervisorService {
         !roles.includes(MemberRole.Copastor) &&
         !roles.includes(MemberRole.Preacher))
     ) {
-      // Validations
       if (
-        supervisor.recordStatus === RecordStatus.Active &&
+        supervisor?.recordStatus === RecordStatus.Active &&
         recordStatus === RecordStatus.Inactive
       ) {
         throw new BadRequestException(
@@ -1460,7 +1474,7 @@ export class SupervisorService {
 
       //? Update if their Copastor is different and id direct relation to pastor is false (means require copastor)
       if (
-        supervisor.theirCopastor?.id !== theirCopastor &&
+        supervisor?.theirCopastor?.id !== theirCopastor &&
         !isDirectRelationToPastor
       ) {
         //* Validate copastor
@@ -1481,7 +1495,7 @@ export class SupervisorService {
           );
         }
 
-        if (newCopastor.recordStatus === RecordStatus.Inactive) {
+        if (newCopastor?.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
             `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
           );
@@ -1498,7 +1512,7 @@ export class SupervisorService {
           where: { id: newCopastor?.theirPastor?.id },
         });
 
-        if (newPastor.recordStatus === RecordStatus.Inactive) {
+        if (newPastor?.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
             `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
           );
@@ -1515,7 +1529,7 @@ export class SupervisorService {
           where: { id: newCopastor?.theirChurch?.id },
         });
 
-        if (newChurch.recordStatus === RecordStatus.Inactive) {
+        if (newChurch?.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
             `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
           );
@@ -1563,12 +1577,12 @@ export class SupervisorService {
         try {
           //* Update and set new relationships in Zone
           const zonesBySupervisor = allZones.filter(
-            (zone) => zone.theirSupervisor?.id === supervisor?.id,
+            (zone) => zone?.theirSupervisor?.id === supervisor?.id,
           );
 
           await Promise.all(
             zonesBySupervisor.map(async (zone) => {
-              await this.zoneRepository.update(zone.id, {
+              await this.zoneRepository.update(zone?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: newCopastor,
@@ -1578,12 +1592,12 @@ export class SupervisorService {
 
           //* Update and set new relationships in Preacher
           const preachersBySupervisor = allPreachers.filter(
-            (preacher) => preacher.theirSupervisor?.id === supervisor?.id,
+            (preacher) => preacher?.theirSupervisor?.id === supervisor?.id,
           );
 
           await Promise.all(
             preachersBySupervisor.map(async (preacher) => {
-              await this.preacherRepository.update(preacher.id, {
+              await this.preacherRepository.update(preacher?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: newCopastor,
@@ -1591,14 +1605,15 @@ export class SupervisorService {
             }),
           );
 
-          //* Update and set new relationships in Family House
+          //* Update and set new relationships in Family Group
           const familyGroupsBySupervisor = allFamilyGroups.filter(
-            (familyGroup) => familyGroup.theirSupervisor?.id === supervisor?.id,
+            (familyGroup) =>
+              familyGroup?.theirSupervisor?.id === supervisor?.id,
           );
 
           await Promise.all(
             familyGroupsBySupervisor.map(async (familyGroup) => {
-              await this.familyGroupRepository.update(familyGroup.id, {
+              await this.familyGroupRepository.update(familyGroup?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: newCopastor,
@@ -1608,12 +1623,12 @@ export class SupervisorService {
 
           //* Update and set new relationships in Disciple
           const disciplesBySupervisor = allDisciples.filter(
-            (disciple) => disciple.theirSupervisor?.id === supervisor?.id,
+            (disciple) => disciple?.theirSupervisor?.id === supervisor?.id,
           );
 
           await Promise.all(
             disciplesBySupervisor.map(async (disciple) => {
-              await this.discipleRepository.update(disciple.id, {
+              await this.discipleRepository.update(disciple?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: newCopastor,
@@ -1646,7 +1661,7 @@ export class SupervisorService {
           );
         }
 
-        if (newPastor.recordStatus === RecordStatus.Inactive) {
+        if (newPastor?.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
             `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
           );
@@ -1663,7 +1678,7 @@ export class SupervisorService {
           where: { id: newPastor?.theirChurch?.id },
         });
 
-        if (newChurch.recordStatus === RecordStatus.Inactive) {
+        if (newChurch?.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
             `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
           );
@@ -1710,12 +1725,12 @@ export class SupervisorService {
         try {
           //* Update and set mew relationships and null copastor in Zone
           const zonesBySupervisor = allZones.filter(
-            (zone) => zone.theirSupervisor?.id === supervisor?.id,
+            (zone) => zone?.theirSupervisor?.id === supervisor?.id,
           );
 
           await Promise.all(
             zonesBySupervisor.map(async (zone) => {
-              await this.zoneRepository.update(zone.id, {
+              await this.zoneRepository.update(zone?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: null,
@@ -1725,12 +1740,12 @@ export class SupervisorService {
 
           //* Update and set mew relationships and null copastor in Preacher
           const preachersBySupervisor = allPreachers.filter(
-            (preacher) => preacher.theirSupervisor?.id === supervisor?.id,
+            (preacher) => preacher?.theirSupervisor?.id === supervisor?.id,
           );
 
           await Promise.all(
             preachersBySupervisor.map(async (preacher) => {
-              await this.preacherRepository.update(preacher.id, {
+              await this.preacherRepository.update(preacher?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: null,
@@ -1738,14 +1753,15 @@ export class SupervisorService {
             }),
           );
 
-          //* Update and set mew relationships and null copastor in Family House
+          //* Update and set mew relationships and null copastor in Family Group
           const familyGroupsBySupervisor = allFamilyGroups.filter(
-            (familyGroup) => familyGroup.theirSupervisor?.id === supervisor?.id,
+            (familyGroup) =>
+              familyGroup?.theirSupervisor?.id === supervisor?.id,
           );
 
           await Promise.all(
             familyGroupsBySupervisor.map(async (familyGroup) => {
-              await this.familyGroupRepository.update(familyGroup.id, {
+              await this.familyGroupRepository.update(familyGroup?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: null,
@@ -1755,12 +1771,12 @@ export class SupervisorService {
 
           //* Update and set mew relationships and null copastor in Disciple
           const disciplesBySupervisor = allDisciples.filter(
-            (disciple) => disciple.theirSupervisor?.id === supervisor?.id,
+            (disciple) => disciple?.theirSupervisor?.id === supervisor?.id,
           );
 
           await Promise.all(
             disciplesBySupervisor.map(async (disciple) => {
-              await this.discipleRepository.update(disciple.id, {
+              await this.discipleRepository.update(disciple?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: null,
@@ -1775,7 +1791,7 @@ export class SupervisorService {
 
       //? Update and save if is same Copastor
       if (
-        supervisor.theirCopastor?.id === theirCopastor &&
+        supervisor?.theirCopastor?.id === theirCopastor &&
         !isDirectRelationToPastor
       ) {
         const updatedSupervisor = await this.supervisorRepository.preload({
@@ -1843,7 +1859,7 @@ export class SupervisorService {
         throw new NotFoundException(`Pastor con id: ${id} no fue encontrado.`);
       }
 
-      if (newPastor.recordStatus === RecordStatus.Inactive) {
+      if (newPastor?.recordStatus === RecordStatus.Inactive) {
         throw new NotFoundException(
           `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
         );
@@ -1861,7 +1877,7 @@ export class SupervisorService {
         relations: ['theirMainChurch'],
       });
 
-      if (newChurch.recordStatus === RecordStatus.Inactive) {
+      if (newChurch?.recordStatus === RecordStatus.Inactive) {
         throw new NotFoundException(
           `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
         );
@@ -1888,14 +1904,13 @@ export class SupervisorService {
       }
     } else {
       throw new BadRequestException(
-        `No se puede subir de nivel este registro, el modo debe ser "Activo", los roles ["discípulo", "supervisor"], revisar y actualizar el registro.`,
+        `No se puede subir de nivel este registro, el modo debe ser "Activo" y los roles: ["discípulo", "supervisor"], revisar y actualizar el registro.`,
       );
     }
   }
 
   //! DELETE SUPERVISOR
   async remove(id: string, user: User): Promise<void> {
-    // Validations
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido.`);
     }
@@ -1946,7 +1961,7 @@ export class SupervisorService {
     try {
       //* Update and set to null relationships in Zone
       const zonesBySupervisor = allZones.filter(
-        (zone) => zone.theirSupervisor?.id === supervisor?.id,
+        (zone) => zone?.theirSupervisor?.id === supervisor?.id,
       );
 
       await Promise.all(
@@ -1961,7 +1976,7 @@ export class SupervisorService {
 
       //* Update and set to null relationships in Preacher
       const preachersBySupervisor = allPreachers.filter(
-        (preacher) => preacher.theirSupervisor?.id === supervisor?.id,
+        (preacher) => preacher?.theirSupervisor?.id === supervisor?.id,
       );
 
       await Promise.all(
@@ -1974,14 +1989,14 @@ export class SupervisorService {
         }),
       );
 
-      //* Update and set to null relationships in Family House
+      //* Update and set to null relationships in Family Group
       const familyGroupsBySupervisor = allFamilyGroup.filter(
-        (familyGroup) => familyGroup.theirSupervisor?.id === supervisor?.id,
+        (familyGroup) => familyGroup?.theirSupervisor?.id === supervisor?.id,
       );
 
       await Promise.all(
         familyGroupsBySupervisor.map(async (familyGroup) => {
-          await this.familyGroupRepository.update(familyGroup.id, {
+          await this.familyGroupRepository.update(familyGroup?.id, {
             theirSupervisor: null,
             updatedAt: new Date(),
             updatedBy: user,
@@ -1991,7 +2006,7 @@ export class SupervisorService {
 
       //* Update and set to null relationships in Disciple
       const disciplesBySupervisor = allDisciples.filter(
-        (disciple) => disciple.theirSupervisor?.id === supervisor.id,
+        (disciple) => disciple?.theirSupervisor?.id === supervisor?.id,
       );
 
       await Promise.all(

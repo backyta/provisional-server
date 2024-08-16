@@ -1,16 +1,5 @@
 import {
-  ApiBadRequestResponse,
-  ApiBearerAuth,
-  ApiCreatedResponse,
-  ApiForbiddenResponse,
-  ApiInternalServerErrorResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiParam,
-  ApiTags,
-  ApiUnauthorizedResponse,
-} from '@nestjs/swagger';
-import {
+  Query,
   Controller,
   Get,
   Post,
@@ -19,10 +8,21 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
-  Query,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiParam,
+  ApiOkResponse,
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiForbiddenResponse,
+  ApiBadRequestResponse,
+  ApiUnauthorizedResponse,
+  ApiInternalServerErrorResponse,
+} from '@nestjs/swagger';
 
-import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
+import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
@@ -106,7 +106,7 @@ export class ChurchController {
   })
   findTerm(
     @Param('term') term: string,
-    @Query() searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
+    @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
   ): Promise<Church | Church[]> {
     return this.churchService.findByTerm(term, searchTypeAndPaginationDto);
   }

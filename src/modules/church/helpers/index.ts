@@ -1,1 +1,1 @@
-export * from './format-data-church.helper';
+export * from './church-data-formatter.helper';

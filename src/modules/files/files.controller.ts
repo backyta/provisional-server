@@ -1,27 +1,27 @@
 import {
-  Controller,
   Post,
-  UseInterceptors,
-  UploadedFiles,
-  MaxFileSizeValidator,
-  FileTypeValidator,
-  ParseFilePipe,
-  BadRequestException,
   Query,
+  Controller,
+  UploadedFiles,
+  ParseFilePipe,
+  UseInterceptors,
+  FileTypeValidator,
+  BadRequestException,
+  MaxFileSizeValidator,
 } from '@nestjs/common';
 import {
-  ApiBadRequestResponse,
-  ApiBearerAuth,
   ApiConsumes,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiForbiddenResponse,
-  ApiInternalServerErrorResponse,
+  ApiBadRequestResponse,
   ApiUnauthorizedResponse,
+  ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
-import { Auth } from '@/modules/auth/decorators';
 import { UserRole } from '@/modules/auth/enums';
+import { Auth } from '@/modules/auth/decorators';
 
 import { CreateFileDto } from '@/modules/files/dto';
 import { CloudinaryService } from '@/modules/cloudinary/cloudinary.service';

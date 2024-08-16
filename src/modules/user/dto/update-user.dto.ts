@@ -1,10 +1,11 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { CreateUserDto } from '@/modules/user/dto';
 import { IsOptional, Matches, MaxLength, MinLength } from 'class-validator';
+
+import { CreateUserDto } from '@/modules/user/dto';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @ApiProperty({
-    example: 'Abcd12345',
+    example: 'Abcd1234$',
   })
   @IsOptional()
   @MinLength(6)
@@ -16,7 +17,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   currentPassword?: string;
 
   @ApiProperty({
-    example: 'Abcd12345',
+    example: 'Abcd1234$',
   })
   @IsOptional()
   @MinLength(6)

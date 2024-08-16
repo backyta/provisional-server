@@ -42,7 +42,7 @@ export class CreatePastorDto {
   })
   @IsEnum(Gender, {
     message:
-      'El genero debe ser uno de los siguientes valores: Masculino o Femenino',
+      'El género debe ser uno de los siguientes valores: Masculino o Femenino',
   })
   gender: string;
 

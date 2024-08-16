@@ -1,1 +1,1 @@
-export * from './format-data-family-group.helper';
+export * from './family-group-data-formatter.helper';

@@ -5,14 +5,14 @@ import { IsEnum, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
 
 import { SearchType, SearchSubType } from '@/common/enums';
 
-export class SearchByTypeAndPaginationDto {
+export class SearchAndPaginationDto {
   @ApiProperty({
     enum: SearchType,
     description:
       'Choose one of types, to search for types (different entities).',
   })
   @IsEnum(SearchType)
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'El tipo de búsqueda es requerido.' })
   @IsString()
   'search-type': string;
 

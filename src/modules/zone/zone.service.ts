@@ -1,18 +1,19 @@
 import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
   Logger,
+  Injectable,
   NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
-import { FindOptionsOrderValue, ILike, Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
+import { FindOptionsOrderValue, ILike, Repository } from 'typeorm';
 
-import { RecordStatus, SearchType } from '@/common/enums';
-import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
+import { RecordStatus } from '@/common/enums';
+import { ZoneSearchType, ZoneSearchTypeNames } from '@/modules/zone/enums';
+import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
-import { formatDataZone } from '@/modules/zone/helpers';
+import { zoneDataFormatter } from '@/modules/zone/helpers';
 import { CreateZoneDto, UpdateZoneDto } from '@/modules/zone/dto';
 
 import { User } from '@/modules/user/entities';
@@ -76,7 +77,7 @@ export class ZoneService {
       );
     }
 
-    if (supervisor.recordStatus === RecordStatus.Inactive) {
+    if (supervisor?.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `La propiedad "Estado de registro" en Supervisor debe ser "Activo".`,
       );
@@ -127,7 +128,7 @@ export class ZoneService {
       where: { id: supervisor?.theirChurch?.id },
     });
 
-    if (church.recordStatus === RecordStatus.Inactive) {
+    if (church?.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
       );
@@ -184,7 +185,7 @@ export class ZoneService {
     }
 
     try {
-      return formatDataZone({ zones }) as any;
+      return zoneDataFormatter({ zones }) as any;
     } catch (error) {
       throw new BadRequestException(
         `Ocurrió un error, habla con el administrador`,
@@ -195,7 +196,7 @@ export class ZoneService {
   //* FIND BY TERM
   async findByTerm(
     term: string,
-    searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
+    searchTypeAndPaginationDto: SearchAndPaginationDto,
   ): Promise<Zone | Zone[]> {
     const {
       'search-type': searchType,
@@ -204,8 +205,16 @@ export class ZoneService {
       order,
     } = searchTypeAndPaginationDto;
 
+    if (!term) {
+      throw new BadRequestException(`El termino de búsqueda es requerido.`);
+    }
+
+    if (!searchType) {
+      throw new BadRequestException(`El tipo de búsqueda es requerido.`);
+    }
+
     //? Find by zone name --> Many
-    if (term && searchType === SearchType.ZoneName) {
+    if (term && searchType === ZoneSearchType.ZoneName) {
       const zones = await this.zoneRepository.find({
         where: {
           zoneName: ILike(`%${term}%`),
@@ -235,7 +244,7 @@ export class ZoneService {
       }
 
       try {
-        return formatDataZone({ zones }) as any;
+        return zoneDataFormatter({ zones }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -244,7 +253,7 @@ export class ZoneService {
     }
 
     //? Find by country --> Many
-    if (term && searchType === SearchType.Country) {
+    if (term && searchType === ZoneSearchType.Country) {
       const zones = await this.zoneRepository.find({
         where: {
           country: ILike(`%${term}%`),
@@ -274,7 +283,7 @@ export class ZoneService {
       }
 
       try {
-        return formatDataZone({ zones }) as any;
+        return zoneDataFormatter({ zones }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -283,7 +292,7 @@ export class ZoneService {
     }
 
     //? Find by department --> Many
-    if (term && searchType === SearchType.Department) {
+    if (term && searchType === ZoneSearchType.Department) {
       const zones = await this.zoneRepository.find({
         where: {
           department: ILike(`%${term}%`),
@@ -313,7 +322,7 @@ export class ZoneService {
       }
 
       try {
-        return formatDataZone({ zones }) as any;
+        return zoneDataFormatter({ zones }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -322,7 +331,7 @@ export class ZoneService {
     }
 
     //? Find by province --> Many
-    if (term && searchType === SearchType.Province) {
+    if (term && searchType === ZoneSearchType.Province) {
       const zones = await this.zoneRepository.find({
         where: {
           province: ILike(`%${term}%`),
@@ -352,7 +361,7 @@ export class ZoneService {
       }
 
       try {
-        return formatDataZone({ zones }) as any;
+        return zoneDataFormatter({ zones }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -361,7 +370,7 @@ export class ZoneService {
     }
 
     //? Find by district --> Many
-    if (term && searchType === SearchType.District) {
+    if (term && searchType === ZoneSearchType.District) {
       const zones = await this.zoneRepository.find({
         where: {
           district: ILike(`%${term}%`),
@@ -391,7 +400,7 @@ export class ZoneService {
       }
 
       try {
-        return formatDataZone({ zones }) as any;
+        return zoneDataFormatter({ zones }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -400,7 +409,7 @@ export class ZoneService {
     }
 
     //? Find by status --> Many
-    if (term && searchType === SearchType.RecordStatus) {
+    if (term && searchType === ZoneSearchType.RecordStatus) {
       const recordStatusTerm = term.toLowerCase();
       const validRecordStatus = ['active', 'inactive'];
 
@@ -438,7 +447,7 @@ export class ZoneService {
       }
 
       try {
-        return formatDataZone({ zones }) as any;
+        return zoneDataFormatter({ zones }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -447,13 +456,12 @@ export class ZoneService {
     }
 
     //! General Exceptions
-    if (!searchType) {
-      throw new BadRequestException(`El tipo de búsqueda es obligatorio`);
-    }
-
-    if (term && !Object.values(SearchType).includes(searchType as SearchType)) {
+    if (
+      term &&
+      !Object.values(ZoneSearchType).includes(searchType as ZoneSearchType)
+    ) {
       throw new BadRequestException(
-        `Tipos de búsqueda no validos, solo son validos: ${Object.values(SearchType).join(', ')}`,
+        `Tipos de búsqueda no validos, solo son validos: ${Object.values(ZoneSearchTypeNames).join(', ')}`,
       );
     }
   }
@@ -489,16 +497,16 @@ export class ZoneService {
     }
 
     if (
-      zone.recordStatus === RecordStatus.Active &&
+      zone?.recordStatus === RecordStatus.Active &&
       recordStatus === RecordStatus.Inactive
     ) {
       throw new BadRequestException(
-        `You cannot update it to "inactive", you must delete the record`,
+        `No se puede actualizar un registro a "Inactivo", se debe eliminar.`,
       );
     }
 
-    //* Validation relation exists in current zone
-    // Supervisor
+    //? Validation relation exists in current zone
+    //* Supervisor
     if (!zone?.theirSupervisor) {
       throw new BadRequestException(
         `Supervisor no fue encontrado, verifica que la Zona actual tenga un Supervisor asignado.`,
@@ -516,7 +524,7 @@ export class ZoneService {
       );
     }
 
-    // Co-Pastor
+    //* Co-Pastor
     if (!zone?.theirCopastor) {
       throw new BadRequestException(
         `Co-Pastor no fue encontrado, verifica que la Zona actual tenga un Co-Pastor asignado.`,
@@ -533,7 +541,7 @@ export class ZoneService {
       );
     }
 
-    // Pastor
+    //* Pastor
     if (!zone?.theirPastor) {
       throw new BadRequestException(
         `Pastor no fue encontrado, verifica que la Zona actual tenga un Pastor asignado.`,
@@ -550,7 +558,7 @@ export class ZoneService {
       );
     }
 
-    // Church
+    //* Church
     if (!zone?.theirChurch) {
       throw new BadRequestException(
         `Iglesia no fue encontrada, verifica que la Zona actual tenga una Iglesia asignada.`,
@@ -587,7 +595,7 @@ export class ZoneService {
         );
       }
 
-      if (newSupervisor.recordStatus === RecordStatus.Inactive) {
+      if (newSupervisor?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de registro" en Supervisor debe ser "Activo".`,
         );
@@ -604,7 +612,7 @@ export class ZoneService {
         where: { id: newSupervisor?.theirCopastor?.id },
       });
 
-      if (newCopastor.recordStatus === RecordStatus.Inactive) {
+      if (newCopastor?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
         );
@@ -621,7 +629,7 @@ export class ZoneService {
         where: { id: newSupervisor?.theirPastor?.id },
       });
 
-      if (newPastor.recordStatus === RecordStatus.Inactive) {
+      if (newPastor?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
         );
@@ -638,7 +646,7 @@ export class ZoneService {
         where: { id: newSupervisor?.theirChurch?.id },
       });
 
-      if (newChurch.recordStatus === RecordStatus.Inactive) {
+      if (newChurch?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
         );
@@ -673,13 +681,15 @@ export class ZoneService {
         ],
       });
 
+      // TODO : revisar aqui si es necesario el query para la búsqueda.
+
       if (!newZone) {
         throw new BadRequestException(
           `Zona con id: ${newSupervisor?.theirZone?.id} no fue encontrado`,
         );
       }
 
-      if (zone.recordStatus === RecordStatus.Inactive) {
+      if (zone?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de Registro" en la nueva zona debe ser "Activo".`,
         );
@@ -817,13 +827,13 @@ export class ZoneService {
         this.handleDBExceptions(error);
       }
 
-      //* exchange
+      //* Exchange
       //? Update relationships subordinate in zone
       //* Preacher
       try {
         await Promise.all(
           newZonePreachers?.map(async (preacher) => {
-            await this.preacherRepository.update(preacher.id, {
+            await this.preacherRepository.update(preacher?.id, {
               theirZone: zone,
               theirSupervisor: newZoneSupervisor,
               theirCopastor: copastor,
@@ -838,13 +848,12 @@ export class ZoneService {
         this.handleDBExceptions(error);
       }
 
-      // NOTE : su supervisor se mantiene porque solo pasan con todo y se modifica sus superiores
       try {
         await Promise.all(
           currentZonePreachers?.map(async (preacher) => {
-            await this.preacherRepository.update(preacher.id, {
+            await this.preacherRepository.update(preacher?.id, {
               theirZone: newZone,
-              theirSupervisor: currentZoneSupervisor,
+              theirSupervisor: currentZoneSupervisor, // Se mantiene su supervisor solo cambia sus superiores
               theirCopastor: newCopastor,
               theirPastor: newPastor,
               theirChurch: newChurch,
@@ -857,13 +866,13 @@ export class ZoneService {
         this.handleDBExceptions(error);
       }
 
-      //* Family group
+      //* Family groups
       try {
         await Promise.all(
           newZoneFamilyGroups?.map(async (familyGroup) => {
             const number = familyGroup.familyGroupCode.split('-')[1];
 
-            await this.familyGroupRepository.update(familyGroup.id, {
+            await this.familyGroupRepository.update(familyGroup?.id, {
               theirZone: zone,
               theirSupervisor: newZoneSupervisor,
               theirCopastor: copastor,
@@ -884,7 +893,7 @@ export class ZoneService {
           currentZoneFamilyGroups?.map(async (familyGroup) => {
             const number = familyGroup.familyGroupCode.split('-')[1];
 
-            await this.familyGroupRepository.update(familyGroup.id, {
+            await this.familyGroupRepository.update(familyGroup?.id, {
               theirZone: newZone,
               theirSupervisor: currentZoneSupervisor,
               theirCopastor: newCopastor,
@@ -904,7 +913,7 @@ export class ZoneService {
       try {
         await Promise.all(
           newZoneDisciples?.map(async (disciple) => {
-            await this.discipleRepository.update(disciple.id, {
+            await this.discipleRepository.update(disciple?.id, {
               theirZone: zone,
               theirSupervisor: newZoneSupervisor,
               theirCopastor: copastor,
@@ -922,7 +931,7 @@ export class ZoneService {
       try {
         await Promise.all(
           currentZoneDisciples?.map(async (disciple) => {
-            await this.discipleRepository.update(disciple.id, {
+            await this.discipleRepository.update(disciple?.id, {
               theirZone: newZone,
               theirSupervisor: currentZoneSupervisor,
               theirCopastor: newCopastor,
@@ -941,7 +950,7 @@ export class ZoneService {
     //? Update and save if is same supervisor and zone
     if (
       !newTheirSupervisor &&
-      updateZoneDto.theirSupervisor === zone.theirSupervisor.id
+      updateZoneDto?.theirSupervisor === zone.theirSupervisor?.id
     ) {
       const updatedZone = await this.zoneRepository.preload({
         id: zone.id,
@@ -961,14 +970,14 @@ export class ZoneService {
 
       //* Update and set new zone name and code in Family House
       const familyGroupsByZone = allFamilyGroups.filter(
-        (familyGroup) => familyGroup.theirZone?.id === zone?.id,
+        (familyGroup) => familyGroup?.theirZone?.id === zone?.id,
       );
 
       await Promise.all(
         familyGroupsByZone.map(async (familyGroup) => {
           const number = familyGroup.familyGroupCode.split('-')[1];
 
-          await this.familyGroupRepository.update(familyGroup.id, {
+          await this.familyGroupRepository.update(familyGroup?.id, {
             theirChurch: zone.theirChurch,
             theirPastor: zone.theirPastor,
             theirCopastor: zone.theirCopastor,
@@ -990,7 +999,9 @@ export class ZoneService {
   }
 
   //! DELETE ZONE (No se eliminara o se pondrá inactiva la zona ara que no afecte relaciones en otras tablas)
-
+  // TODO : si se inactiva no se encontrara esta zona al crear una ofrenda pero no se eliminara solo se inactiva.
+  // TODO : igual que el grupo familiar, se mantiene pero se oculta al crear ofrenda porque esta inactivo
+  // TODO : en members si se eliminaria al subir dee nivel si ese id conincide con el de la ofrenda segun su member type se cambia y se actyaliza todos los registros.
   //? PRIVATE METHODS
   // For future index errors or constrains with code.
   private handleDBExceptions(error: any): never {

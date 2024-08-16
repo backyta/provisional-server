@@ -5,7 +5,7 @@ import { CreateFamilyGroupDto } from '@/modules/family-group/dto';
 
 export class UpdateFamilyGroupDto extends PartialType(CreateFamilyGroupDto) {
   @ApiProperty({
-    example: 'Abcd12345',
+    example: '38137648-cf88-4010-a0fd-10e3648440d3',
   })
   @IsOptional()
   @IsString()

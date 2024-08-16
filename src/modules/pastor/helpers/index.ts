@@ -1,1 +1,1 @@
-export * from './format-data-pastor.helper';
+export * from './pastor-data-formatter.helper';

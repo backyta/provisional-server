@@ -5,7 +5,7 @@ export interface Options {
   mainChurch?: Church;
 }
 
-export const formatDataChurch = ({ churches, mainChurch }: Options) => {
+export const churchDataFormatter = ({ churches, mainChurch }: Options) => {
   return churches.map((church) => ({
     ...church,
     theirMainChurch: church.isAnexe

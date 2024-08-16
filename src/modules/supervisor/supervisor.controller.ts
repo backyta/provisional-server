@@ -10,19 +10,19 @@ import {
   Query,
 } from '@nestjs/common';
 import {
-  ApiBadRequestResponse,
+  ApiTags,
+  ApiParam,
+  ApiOkResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
-  ApiForbiddenResponse,
-  ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiParam,
-  ApiTags,
+  ApiForbiddenResponse,
+  ApiBadRequestResponse,
   ApiUnauthorizedResponse,
+  ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 
-import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
+import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
@@ -97,7 +97,7 @@ export class SupervisorController {
   })
   findTerm(
     @Param('term') term: string,
-    @Query() searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
+    @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
   ): Promise<Supervisor | Supervisor[]> {
     return this.supervisorService.findByTerm(term, searchTypeAndPaginationDto);
   }

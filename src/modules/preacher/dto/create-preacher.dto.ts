@@ -10,7 +10,6 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-
 import {
   MaritalStatus,
   MemberRole,
@@ -43,7 +42,7 @@ export class CreatePreacherDto {
   })
   @IsEnum(Gender, {
     message:
-      'El genero debe ser uno de los siguientes valores: Masculino o Femenino',
+      'El género debe ser uno de los siguientes valores: Masculino o Femenino',
   })
   gender: string;
 

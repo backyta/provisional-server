@@ -4,7 +4,7 @@ interface Options {
   zones: Zone[];
 }
 
-export const formatDataZone = ({ zones }: Options) => {
+export const zoneDataFormatter = ({ zones }: Options) => {
   return zones.map((zone) => ({
     ...zone,
     theirChurch: {

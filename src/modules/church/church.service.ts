@@ -1,21 +1,25 @@
 import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
   Logger,
+  Injectable,
   NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, FindOptionsOrderValue, ILike, Repository } from 'typeorm';
 
 import { Church } from '@/modules/church/entities';
-import { formatDataChurch } from '@/modules/church/helpers';
+import { churchDataFormatter } from '@/modules/church/helpers';
 import { CreateChurchDto, UpdateChurchDto } from '@/modules/church/dto';
+import {
+  ChurchSearchType,
+  ChurchSearchTypeNames,
+} from '@/modules/church/enums';
 
-import { formatToDDMMYYYY } from '@/common/helpers';
-import { SearchType, RecordStatus } from '@/common/enums';
-import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
+import { RecordStatus } from '@/common/enums';
+import { dateFormatterToDDMMYYY } from '@/common/helpers';
+import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 import { User } from '@/modules/user/entities';
 import { Zone } from '@/modules/zone/entities';
@@ -83,13 +87,13 @@ export class ChurchService {
         );
       }
 
-      if (mainChurch.isAnexe) {
+      if (mainChurch?.isAnexe) {
         throw new BadRequestException(
           `No puedes asignar una Iglesia anexo como Iglesia principal.`,
         );
       }
 
-      if (mainChurch.recordStatus === RecordStatus.Inactive) {
+      if (mainChurch?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de registro" en Iglesia Principal debe ser "Activo"`,
         );
@@ -165,21 +169,17 @@ export class ChurchService {
       order: { createdAt: order as FindOptionsOrderValue },
     });
 
-    console.log(churches);
-
     const mainChurch = await this.churchRepository.findOne({
       where: { isAnexe: false, recordStatus: RecordStatus.Active },
     });
 
-    console.log(mainChurch);
-
-    return formatDataChurch({ churches, mainChurch }) as any;
+    return churchDataFormatter({ churches, mainChurch }) as any;
   }
 
   //* FIND BY TERM
   async findByTerm(
     term: string,
-    searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
+    searchTypeAndPaginationDto: SearchAndPaginationDto,
   ): Promise<Church | Church[]> {
     const {
       'search-type': searchType,
@@ -188,8 +188,16 @@ export class ChurchService {
       order,
     } = searchTypeAndPaginationDto;
 
+    if (!term) {
+      throw new BadRequestException(`El termino de búsqueda es requerido.`);
+    }
+
+    if (!searchType) {
+      throw new BadRequestException(`El tipo de búsqueda es requerido.`);
+    }
+
     //? Find by church name --> Many
-    if (term && searchType === SearchType.ChurchName) {
+    if (term && searchType === ChurchSearchType.ChurchName) {
       const churches = await this.churchRepository.find({
         where: {
           churchName: ILike(`%${term}%`),
@@ -224,7 +232,7 @@ export class ChurchService {
       }
 
       try {
-        return formatDataChurch({ churches, mainChurch }) as any;
+        return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -233,7 +241,7 @@ export class ChurchService {
     }
 
     //? Find by founding date --> Many
-    if (term && searchType === SearchType.FoundingDate) {
+    if (term && searchType === ChurchSearchType.FoundingDate) {
       const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
 
       if (isNaN(fromTimestamp)) {
@@ -271,8 +279,8 @@ export class ChurchService {
       });
 
       if (churches.length === 0) {
-        const fromDate = formatToDDMMYYYY(fromTimestamp);
-        const toDate = formatToDDMMYYYY(toTimestamp);
+        const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
+        const toDate = dateFormatterToDDMMYYY(toTimestamp);
 
         throw new NotFoundException(
           `No se encontraron iglesias con este rango de fechas: ${fromDate} - ${toDate}`,
@@ -280,7 +288,7 @@ export class ChurchService {
       }
 
       try {
-        return formatDataChurch({ churches, mainChurch }) as any;
+        return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -289,7 +297,7 @@ export class ChurchService {
     }
 
     //? Find by department --> Many
-    if (term && searchType === SearchType.Department) {
+    if (term && searchType === ChurchSearchType.Department) {
       const churches = await this.churchRepository.find({
         where: {
           department: ILike(`%${term}%`),
@@ -324,7 +332,7 @@ export class ChurchService {
       }
 
       try {
-        return formatDataChurch({ churches, mainChurch }) as any;
+        return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -333,7 +341,7 @@ export class ChurchService {
     }
 
     //? Find by province --> Many
-    if (term && searchType === SearchType.Province) {
+    if (term && searchType === ChurchSearchType.Province) {
       const churches = await this.churchRepository.find({
         where: {
           province: ILike(`%${term}%`),
@@ -368,7 +376,7 @@ export class ChurchService {
       }
 
       try {
-        return formatDataChurch({ churches, mainChurch }) as any;
+        return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -377,7 +385,7 @@ export class ChurchService {
     }
 
     //? Find by district --> Many
-    if (term && searchType === SearchType.District) {
+    if (term && searchType === ChurchSearchType.District) {
       const churches = await this.churchRepository.find({
         where: {
           district: ILike(`%${term}%`),
@@ -412,7 +420,7 @@ export class ChurchService {
       }
 
       try {
-        return formatDataChurch({ churches, mainChurch }) as any;
+        return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -421,7 +429,7 @@ export class ChurchService {
     }
 
     //? Find by urban sector --> Many
-    if (term && searchType === SearchType.UrbanSector) {
+    if (term && searchType === ChurchSearchType.UrbanSector) {
       const churches = await this.churchRepository.find({
         where: {
           urbanSector: ILike(`%${term}%`),
@@ -456,7 +464,7 @@ export class ChurchService {
       }
 
       try {
-        return formatDataChurch({ churches, mainChurch }) as any;
+        return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -465,7 +473,7 @@ export class ChurchService {
     }
 
     //? Find by address --> Many
-    if (term && searchType === SearchType.Address) {
+    if (term && searchType === ChurchSearchType.Address) {
       const churches = await this.churchRepository.find({
         where: {
           address: ILike(`%${term}%`),
@@ -500,7 +508,7 @@ export class ChurchService {
       }
 
       try {
-        return formatDataChurch({ churches, mainChurch }) as any;
+        return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -509,7 +517,7 @@ export class ChurchService {
     }
 
     //? Find by status --> Many
-    if (term && searchType === SearchType.RecordStatus) {
+    if (term && searchType === ChurchSearchType.RecordStatus) {
       const recordStatusTerm = term.toLowerCase();
       const validRecordStatus = ['active', 'inactive'];
 
@@ -548,7 +556,7 @@ export class ChurchService {
       }
 
       try {
-        return formatDataChurch({ churches }) as any;
+        return churchDataFormatter({ churches }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -557,13 +565,12 @@ export class ChurchService {
     }
 
     //! General Exceptions
-    if (!searchType) {
-      throw new BadRequestException(`El tipo de búsqueda es obligatorio`);
-    }
-
-    if (term && !Object.values(SearchType).includes(searchType as SearchType)) {
+    if (
+      term &&
+      !Object.values(ChurchSearchType).includes(searchType as ChurchSearchType)
+    ) {
       throw new BadRequestException(
-        `Tipos de búsqueda no validos, solo son validos: ${Object.values(SearchType).join(', ')}`,
+        `Tipos de búsqueda no validos, solo son validos: ${Object.values(ChurchSearchTypeNames).join(', ')}`,
       );
     }
   }
@@ -590,20 +597,14 @@ export class ChurchService {
       throw new NotFoundException(`No se encontró iglesia con id: ${id}`);
     }
 
-    if (!church.isAnexe && theirMainChurch) {
-      throw new BadRequestException(
-        `No se puede asignar una iglesia principal a la iglesia principal.`,
-      );
-    }
-
-    if (!church.isAnexe && church.isAnexe) {
+    if (!church?.isAnexe && theirMainChurch) {
       throw new BadRequestException(
         `No se puede cambiar la iglesia principal a un anexo.`,
       );
     }
 
     if (
-      church.recordStatus === RecordStatus.Active &&
+      church?.recordStatus === RecordStatus.Active &&
       recordStatus === RecordStatus.Inactive
     ) {
       throw new BadRequestException(
@@ -639,13 +640,13 @@ export class ChurchService {
         );
       }
 
-      if (newMainChurch.isAnexe) {
+      if (newMainChurch?.isAnexe) {
         throw new NotFoundException(
           `No se puede asignar una Iglesia anexo como Iglesia principal`,
         );
       }
 
-      if (newMainChurch.recordStatus === RecordStatus.Inactive) {
+      if (newMainChurch?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
           `La propiedad "Estado de registro" en Iglesia principal debe ser "Activo"`,
         );
@@ -703,7 +704,7 @@ export class ChurchService {
       throw new NotFoundException(`Iglesia con: ${id} no fue encontrado.`);
     }
 
-    if (!church.isAnexe) {
+    if (!church?.isAnexe) {
       throw new NotFoundException(
         `La iglesia principal no puede ser eliminada.`,
       );
@@ -756,7 +757,7 @@ export class ChurchService {
     try {
       //* Update and set to null relationships in Pastor
       const pastorsByChurch = allPastors.filter(
-        (pastor) => pastor.theirChurch?.id === church?.id,
+        (pastor) => pastor?.theirChurch?.id === church?.id,
       );
 
       await Promise.all(
@@ -771,7 +772,7 @@ export class ChurchService {
 
       //* Update and set to null relationships in Copastor
       const copastorsByChurch = allCopastors.filter(
-        (copastor) => copastor.theirChurch?.id === church?.id,
+        (copastor) => copastor?.theirChurch?.id === church?.id,
       );
 
       await Promise.all(
@@ -786,7 +787,7 @@ export class ChurchService {
 
       //* Update and set to null relationships in Supervisor
       const supervisorsByPastor = allSupervisors.filter(
-        (supervisor) => supervisor.theirChurch?.id === church?.id,
+        (supervisor) => supervisor?.theirChurch?.id === church?.id,
       );
 
       await Promise.all(
@@ -801,7 +802,7 @@ export class ChurchService {
 
       //* Update and set to null relationships in Zone
       const zonesByPastor = allZones.filter(
-        (zone) => zone.theirChurch?.id === church?.id,
+        (zone) => zone?.theirChurch?.id === church?.id,
       );
 
       await Promise.all(
@@ -816,7 +817,7 @@ export class ChurchService {
 
       //* Update and set to null relationships in Preacher
       const preachersByPastor = allPreachers.filter(
-        (preacher) => preacher.theirChurch?.id === church?.id,
+        (preacher) => preacher?.theirChurch?.id === church?.id,
       );
 
       await Promise.all(
@@ -831,7 +832,7 @@ export class ChurchService {
 
       //* Update and set to null relationships in Family group
       const familyGroupsByPastor = allFamilyGroups.filter(
-        (familyGroup) => familyGroup.theirChurch?.id === church?.id,
+        (familyGroup) => familyGroup?.theirChurch?.id === church?.id,
       );
 
       await Promise.all(
@@ -846,7 +847,7 @@ export class ChurchService {
 
       //* Update and set to null relationships in Disciple
       const disciplesByPastor = allDisciples.filter(
-        (disciple) => disciple.theirChurch?.id === church?.id,
+        (disciple) => disciple?.theirChurch?.id === church?.id,
       );
 
       await Promise.all(

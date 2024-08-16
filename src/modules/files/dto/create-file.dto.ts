@@ -1,8 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 import {
-  OfferingIncomeCreateSubType,
-  OfferingIncomeCreateType,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
+import {
+  OfferingIncomeCreationSubType,
+  OfferingIncomeCreationType,
 } from '@/modules/offering/income/enums';
 
 export class CreateFileDto {
@@ -16,7 +22,7 @@ export class CreateFileDto {
   action: string;
 
   @ApiProperty({
-    example: OfferingIncomeCreateType.Offering,
+    example: OfferingIncomeCreationType.Offering,
   })
   @IsString()
   @IsNotEmpty()
@@ -25,11 +31,12 @@ export class CreateFileDto {
   type: string;
 
   @ApiProperty({
-    example: OfferingIncomeCreateSubType.ChurchGround,
+    example: OfferingIncomeCreationSubType.ChurchGround,
   })
   @IsString()
+  @IsOptional()
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(40)
-  subType: string;
+  subType?: string;
 }

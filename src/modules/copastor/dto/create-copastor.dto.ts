@@ -1,9 +1,3 @@
-import {
-  MaritalStatus,
-  MemberRole,
-  Gender,
-  RecordStatus,
-} from '@/common/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
@@ -15,6 +9,12 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import {
+  Gender,
+  MemberRole,
+  RecordStatus,
+  MaritalStatus,
+} from '@/common/enums';
 
 export class CreateCopastorDto {
   //* General and Personal info
@@ -41,7 +41,7 @@ export class CreateCopastorDto {
   })
   @IsEnum(Gender, {
     message:
-      'El genero debe ser uno de los siguientes valores: Masculino o Femenino',
+      'El género debe ser uno de los siguientes valores: Masculino o Femenino',
   })
   gender: string;
 
@@ -152,7 +152,7 @@ export class CreateCopastorDto {
   address: string;
 
   @ApiProperty({
-    example: 'A una cuadra del hospital central',
+    example: 'A una cuadra del hospital central.',
   })
   @IsString()
   @IsNotEmpty()

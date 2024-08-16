@@ -1,4 +1,4 @@
-export enum OfferingIncomeCreateSubType {
+export enum OfferingIncomeCreationSubType {
   SundayWorship = 'sunday_worship',
   GeneralFasting = 'general_fasting',
   GeneralVigil = 'general_vigil',
@@ -13,8 +13,8 @@ export enum OfferingIncomeCreateSubType {
   ChurchGround = 'church_ground',
 }
 
-export const OfferingIncomeSubTypeNames: Record<
-  OfferingIncomeCreateSubType,
+export const OfferingIncomeCreationSubTypeNames: Record<
+  OfferingIncomeCreationSubType,
   string
 > = {
   sunday_worship: 'Culto Dominical',

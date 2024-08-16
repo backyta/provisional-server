@@ -1,27 +1,30 @@
 import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
   Logger,
+  Injectable,
   NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
 
 import {
+  CopastorSearchType,
+  CopastorSearchSubType,
+  CopastorSearchTypeNames,
+} from '@/modules/copastor/enums';
+import { copastorDataFormatter } from '@/modules/copastor/helpers';
+import { CreateCopastorDto, UpdateCopastorDto } from '@/modules/copastor/dto';
+
+import {
   MemberRole,
-  SearchSubType,
-  SearchType,
-  RecordStatus,
   GenderNames,
+  RecordStatus,
   MaritalStatusNames,
 } from '@/common/enums';
-import { formatToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
-import { PaginationDto, SearchByTypeAndPaginationDto } from '@/common/dtos';
-
-import { formatDataCopastor } from '@/modules/copastor/helpers';
-import { CreateCopastorDto, UpdateCopastorDto } from '@/modules/copastor/dto';
+import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import { dateFormatterToDDMMYYY, getBirthDateByMonth } from '@/common/helpers';
 
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
@@ -69,7 +72,6 @@ export class CopastorService {
   ): Promise<Copastor> {
     const { roles, theirPastor, numberChildren } = createCopastorDto;
 
-    // Validations
     if (
       !roles.includes(MemberRole.Disciple) &&
       !roles.includes(MemberRole.Copastor)
@@ -108,7 +110,7 @@ export class CopastorService {
       );
     }
 
-    if (pastor.recordStatus === RecordStatus.Inactive) {
+    if (pastor?.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
       );
@@ -125,7 +127,7 @@ export class CopastorService {
       where: { id: pastor?.theirChurch?.id },
     });
 
-    if (church.recordStatus === RecordStatus.Inactive) {
+    if (church?.recordStatus === RecordStatus.Inactive) {
       throw new BadRequestException(
         `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
       );
@@ -171,13 +173,13 @@ export class CopastorService {
       order: { createdAt: order as FindOptionsOrderValue },
     });
 
-    return formatDataCopastor({ copastors }) as any;
+    return copastorDataFormatter({ copastors }) as any;
   }
 
   //* FIND BY TERM
   async findByTerm(
     term: string,
-    searchTypeAndPaginationDto: SearchByTypeAndPaginationDto,
+    searchTypeAndPaginationDto: SearchAndPaginationDto,
   ): Promise<Copastor | Copastor[]> {
     const {
       'search-type': searchType,
@@ -187,12 +189,20 @@ export class CopastorService {
       order,
     } = searchTypeAndPaginationDto;
 
+    if (!term) {
+      throw new BadRequestException(`El termino de búsqueda es requerido.`);
+    }
+
+    if (!searchType) {
+      throw new BadRequestException(`El tipo de búsqueda es requerido.`);
+    }
+
     //? Find by first name () --> Many
     //* Copastors by copastor names
     if (
       term &&
-      searchType === SearchType.FirstName &&
-      searchSubType === SearchSubType.ByCopastorNames
+      searchType === CopastorSearchType.FirstName &&
+      searchSubType === CopastorSearchSubType.ByCopastorNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -225,7 +235,7 @@ export class CopastorService {
       }
 
       try {
-        return formatDataCopastor({ copastors }) as any;
+        return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -236,8 +246,8 @@ export class CopastorService {
     //* Copastors by pastor names
     if (
       term &&
-      searchType === SearchType.FirstName &&
-      searchSubType === SearchSubType.CopastorByPastorNames
+      searchType === CopastorSearchType.FirstName &&
+      searchSubType === CopastorSearchSubType.CopastorByPastorNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -249,7 +259,7 @@ export class CopastorService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const pastorsId = pastors.map((pastor) => pastor.id);
+      const pastorsId = pastors.map((pastor) => pastor?.id);
 
       const copastors = await this.copastorRepository.find({
         where: {
@@ -280,7 +290,7 @@ export class CopastorService {
       }
 
       try {
-        return formatDataCopastor({ copastors }) as any;
+        return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -292,8 +302,8 @@ export class CopastorService {
     //* Copastors by last names
     if (
       term &&
-      searchType === SearchType.LastName &&
-      searchSubType === SearchSubType.ByCopastorLastNames
+      searchType === CopastorSearchType.LastName &&
+      searchSubType === CopastorSearchSubType.ByCopastorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
@@ -326,7 +336,7 @@ export class CopastorService {
       }
 
       try {
-        return formatDataCopastor({ copastors }) as any;
+        return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -337,8 +347,8 @@ export class CopastorService {
     //* Copastors by pastor last names
     if (
       term &&
-      searchType === SearchType.LastName &&
-      searchSubType === SearchSubType.CopastorByPastorLastNames
+      searchType === CopastorSearchType.LastName &&
+      searchSubType === CopastorSearchSubType.CopastorByPastorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
@@ -350,7 +360,7 @@ export class CopastorService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const pastorsId = pastors.map((pastor) => pastor.id);
+      const pastorsId = pastors.map((pastor) => pastor?.id);
 
       const copastors = await this.copastorRepository.find({
         where: {
@@ -381,7 +391,7 @@ export class CopastorService {
       }
 
       try {
-        return formatDataCopastor({ copastors }) as any;
+        return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -393,8 +403,8 @@ export class CopastorService {
     //* Copastors by full names
     if (
       term &&
-      searchType === SearchType.FullName &&
-      searchSubType === SearchSubType.ByCopastorFullName
+      searchType === CopastorSearchType.FullName &&
+      searchSubType === CopastorSearchSubType.ByCopastorFullName
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -429,7 +439,7 @@ export class CopastorService {
       }
 
       try {
-        return formatDataCopastor({ copastors }) as any;
+        return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -440,8 +450,8 @@ export class CopastorService {
     //* Copastors by pastor full names
     if (
       term &&
-      searchType === SearchType.FullName &&
-      searchSubType === SearchSubType.CopastorByPastorFullName
+      searchType === CopastorSearchType.FullName &&
+      searchSubType === CopastorSearchSubType.CopastorByPastorFullName
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -455,7 +465,7 @@ export class CopastorService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const pastorsId = pastors.map((pastor) => pastor.id);
+      const pastorsId = pastors.map((pastor) => pastor?.id);
 
       const copastors = await this.copastorRepository.find({
         where: {
@@ -486,7 +496,7 @@ export class CopastorService {
       }
 
       try {
-        return formatDataCopastor({ copastors }) as any;
+        return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -495,7 +505,7 @@ export class CopastorService {
     }
 
     //? Find by birth date --> Many
-    if (term && searchType === SearchType.BirthDate) {
+    if (term && searchType === CopastorSearchType.BirthDate) {
       const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
 
       if (isNaN(fromTimestamp)) {
@@ -528,8 +538,8 @@ export class CopastorService {
       });
 
       if (copastors.length === 0) {
-        const fromDate = formatToDDMMYYYY(fromTimestamp);
-        const toDate = formatToDDMMYYYY(toTimestamp);
+        const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
+        const toDate = dateFormatterToDDMMYYY(toTimestamp);
 
         throw new NotFoundException(
           `No se encontraron co-pastores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
@@ -537,7 +547,7 @@ export class CopastorService {
       }
 
       try {
-        return formatDataCopastor({ copastors }) as any;
+        return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -546,7 +556,7 @@ export class CopastorService {
     }
 
     //? Find by month birth --> Many
-    if (term && searchType === SearchType.BirthMonth) {
+    if (term && searchType === CopastorSearchType.BirthMonth) {
       const copastors = await this.copastorRepository.find({
         where: {
           recordStatus: RecordStatus.Active,
@@ -597,7 +607,7 @@ export class CopastorService {
       }
 
       try {
-        return formatDataCopastor({
+        return copastorDataFormatter({
           copastors: resultCopastors as Copastor[],
         }) as any;
       } catch (error) {
@@ -608,7 +618,7 @@ export class CopastorService {
     }
 
     //? Find by gender --> Many
-    if (term && searchType === SearchType.Gender) {
+    if (term && searchType === CopastorSearchType.Gender) {
       const genderTerm = term.toLowerCase();
       const validGenders = ['male', 'female'];
 
@@ -642,12 +652,12 @@ export class CopastorService {
         const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
 
         throw new NotFoundException(
-          `No se encontraron co-pastores(as) con este genero: ${genderInSpanish}`,
+          `No se encontraron co-pastores(as) con este género: ${genderInSpanish}`,
         );
       }
 
       try {
-        return formatDataCopastor({ copastors }) as any;
+        return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -656,10 +666,10 @@ export class CopastorService {
     }
 
     //? Find by marital status --> Many
-    if (term && searchType === SearchType.MaritalStatus) {
+    if (term && searchType === CopastorSearchType.MaritalStatus) {
       const maritalStatusTerm = term.toLowerCase();
       const validMaritalStatus = [
-        'singles',
+        'single',
         'married',
         'widowed',
         'divorced',
@@ -702,7 +712,7 @@ export class CopastorService {
       }
 
       try {
-        return formatDataCopastor({ copastors }) as any;
+        return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -711,7 +721,7 @@ export class CopastorService {
     }
 
     //? Find by origin country --> Many
-    if (term && searchType === SearchType.OriginCountry) {
+    if (term && searchType === CopastorSearchType.OriginCountry) {
       const copastors = await this.copastorRepository.find({
         where: {
           originCountry: ILike(`%${term}%`),
@@ -741,7 +751,7 @@ export class CopastorService {
       }
 
       try {
-        return formatDataCopastor({ copastors }) as any;
+        return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -750,7 +760,7 @@ export class CopastorService {
     }
 
     //? Find by department --> Many
-    if (term && searchType === SearchType.Department) {
+    if (term && searchType === CopastorSearchType.Department) {
       const copastors = await this.copastorRepository.find({
         where: {
           department: ILike(`%${term}%`),
@@ -780,7 +790,7 @@ export class CopastorService {
       }
 
       try {
-        return formatDataCopastor({ copastors }) as any;
+        return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -789,7 +799,7 @@ export class CopastorService {
     }
 
     //? Find by province --> Many
-    if (term && searchType === SearchType.Province) {
+    if (term && searchType === CopastorSearchType.Province) {
       const copastors = await this.copastorRepository.find({
         where: {
           province: ILike(`%${term}%`),
@@ -819,7 +829,7 @@ export class CopastorService {
       }
 
       try {
-        return formatDataCopastor({ copastors }) as any;
+        return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -828,7 +838,7 @@ export class CopastorService {
     }
 
     //? Find by district --> Many
-    if (term && searchType === SearchType.District) {
+    if (term && searchType === CopastorSearchType.District) {
       const copastors = await this.copastorRepository.find({
         where: {
           district: ILike(`%${term}%`),
@@ -858,7 +868,7 @@ export class CopastorService {
       }
 
       try {
-        return formatDataCopastor({ copastors }) as any;
+        return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -867,7 +877,7 @@ export class CopastorService {
     }
 
     //? Find by urban sector --> Many
-    if (term && searchType === SearchType.UrbanSector) {
+    if (term && searchType === CopastorSearchType.UrbanSector) {
       const copastors = await this.copastorRepository.find({
         where: {
           urbanSector: ILike(`%${term}%`),
@@ -897,7 +907,7 @@ export class CopastorService {
       }
 
       try {
-        return formatDataCopastor({ copastors }) as any;
+        return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -906,7 +916,7 @@ export class CopastorService {
     }
 
     //? Find by address --> Many
-    if (term && searchType === SearchType.Address) {
+    if (term && searchType === CopastorSearchType.Address) {
       const copastors = await this.copastorRepository.find({
         where: {
           address: ILike(`%${term}%`),
@@ -936,7 +946,7 @@ export class CopastorService {
       }
 
       try {
-        return formatDataCopastor({ copastors }) as any;
+        return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -945,7 +955,7 @@ export class CopastorService {
     }
 
     //? Find by status --> Many
-    if (term && searchType === SearchType.RecordStatus) {
+    if (term && searchType === CopastorSearchType.RecordStatus) {
       const recordStatusTerm = term.toLowerCase();
       const validRecordStatus = ['active', RecordStatus.Inactive];
 
@@ -983,7 +993,7 @@ export class CopastorService {
       }
 
       try {
-        return formatDataCopastor({ copastors }) as any;
+        return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
           `Ocurrió un error, habla con el administrador`,
@@ -992,22 +1002,26 @@ export class CopastorService {
     }
 
     //! General Exceptions
-    if (!searchType) {
-      throw new BadRequestException(`El tipo de búsqueda es obligatorio`);
-    }
-
-    if (term && !Object.values(SearchType).includes(searchType as SearchType)) {
+    if (
+      term &&
+      !Object.values(CopastorSearchType).includes(
+        searchType as CopastorSearchType,
+      )
+    ) {
       throw new BadRequestException(
-        `Tipos de búsqueda no validos, solo son validos: ${Object.values(SearchType).join(', ')}`,
+        `Tipos de búsqueda no validos, solo son validos: ${Object.values(CopastorSearchTypeNames).join(', ')}`,
       );
     }
 
     if (
       term &&
-      (SearchType.FirstName || SearchType.LastName || SearchType.FullName)
+      (CopastorSearchType.FirstName ||
+        CopastorSearchType.LastName ||
+        CopastorSearchType.FullName) &&
+      !searchSubType
     ) {
       throw new BadRequestException(
-        `Para buscar por nombres o apellidos el sub-tipo es requerido`,
+        `Para buscar por nombres o apellidos el sub-tipo es requerido.`,
       );
     }
   }
@@ -1021,7 +1035,6 @@ export class CopastorService {
     const { roles, recordStatus, numberChildren, theirPastor, theirChurch } =
       updateCopastorDto;
 
-    // Validations
     if (!roles) {
       throw new BadRequestException(
         `Los roles son requeridos para actualizar un Co-Pastor.`,
@@ -1032,7 +1045,6 @@ export class CopastorService {
       throw new BadRequestException(`UUID no valido.`);
     }
 
-    // Validation copastor
     const copastor = await this.copastorRepository.findOne({
       where: { id: id },
       relations: ['theirPastor', 'theirChurch'],
@@ -1080,7 +1092,7 @@ export class CopastorService {
       !roles.includes(MemberRole.Treasurer)
     ) {
       if (
-        copastor.recordStatus === RecordStatus.Active &&
+        copastor?.recordStatus === RecordStatus.Active &&
         recordStatus === RecordStatus.Inactive
       ) {
         throw new BadRequestException(
@@ -1089,7 +1101,7 @@ export class CopastorService {
       }
 
       //? Update if their Pastor is different
-      if (copastor.theirPastor?.id !== theirPastor) {
+      if (copastor?.theirPastor?.id !== theirPastor) {
         //* Validate pastor
         if (!theirPastor) {
           throw new NotFoundException(
@@ -1108,7 +1120,7 @@ export class CopastorService {
           );
         }
 
-        if (newPastor.recordStatus === RecordStatus.Inactive) {
+        if (newPastor?.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
             `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
           );
@@ -1126,7 +1138,7 @@ export class CopastorService {
           relations: ['theirMainChurch'],
         });
 
-        if (newChurch.recordStatus === RecordStatus.Inactive) {
+        if (newChurch?.recordStatus === RecordStatus.Inactive) {
           throw new BadRequestException(
             `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
           );
@@ -1171,12 +1183,12 @@ export class CopastorService {
         try {
           //* Update and set to null relationships in Supervisor
           const supervisorsByCopastor = allSupervisors.filter(
-            (supervisor) => supervisor.theirCopastor?.id === copastor?.id,
+            (supervisor) => supervisor?.theirCopastor?.id === copastor?.id,
           );
 
           await Promise.all(
             supervisorsByCopastor.map(async (supervisor) => {
-              await this.supervisorRepository.update(supervisor.id, {
+              await this.supervisorRepository.update(supervisor?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
               });
@@ -1185,12 +1197,12 @@ export class CopastorService {
 
           //* Update and set to null relationships in Zone
           const zonesByCopastor = allZones.filter(
-            (zone) => zone.theirCopastor?.id === copastor?.id,
+            (zone) => zone?.theirCopastor?.id === copastor?.id,
           );
 
           await Promise.all(
             zonesByCopastor.map(async (zone) => {
-              await this.zoneRepository.update(zone.id, {
+              await this.zoneRepository.update(zone?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
               });
@@ -1199,26 +1211,26 @@ export class CopastorService {
 
           //* Update and set to null relationships in Preacher
           const preachersByCopastor = allPreachers.filter(
-            (preacher) => preacher.theirCopastor?.id === copastor?.id,
+            (preacher) => preacher?.theirCopastor?.id === copastor?.id,
           );
 
           await Promise.all(
             preachersByCopastor.map(async (preacher) => {
-              await this.preacherRepository.update(preacher.id, {
+              await this.preacherRepository.update(preacher?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
               });
             }),
           );
 
-          //* Update and set to null relationships in Family House
+          //* Update and set to null relationships in Family group
           const familyGroupsByCopastor = allFamilyGroups.filter(
-            (familyGroup) => familyGroup.theirCopastor?.id === copastor?.id,
+            (familyGroup) => familyGroup?.theirCopastor?.id === copastor?.id,
           );
 
           await Promise.all(
             familyGroupsByCopastor.map(async (familyGroup) => {
-              await this.familyGroupRepository.update(familyGroup.id, {
+              await this.familyGroupRepository.update(familyGroup?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
               });
@@ -1227,12 +1239,12 @@ export class CopastorService {
 
           //* Update and set to null relationships in Disciple
           const disciplesByCopastor = allDisciples.filter(
-            (disciple) => disciple.theirCopastor?.id === copastor?.id,
+            (disciple) => disciple?.theirCopastor?.id === copastor?.id,
           );
 
           await Promise.all(
             disciplesByCopastor.map(async (disciple) => {
-              await this.discipleRepository.update(disciple.id, {
+              await this.discipleRepository.update(disciple?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
               });
@@ -1245,8 +1257,8 @@ export class CopastorService {
         return savedCopastor;
       }
 
-      if (copastor.theirPastor?.id === theirPastor) {
-        //? Update and save if is same Pastor
+      //? Update and save if is same Pastor
+      if (copastor?.theirPastor?.id === theirPastor) {
         const updatedCopastor = await this.copastorRepository.preload({
           id: copastor.id,
           ...updateCopastorDto,
@@ -1298,7 +1310,7 @@ export class CopastorService {
         throw new NotFoundException(`Iglesia con id: ${id} no fue encontrada.`);
       }
 
-      if (newChurch.recordStatus == RecordStatus.Inactive) {
+      if (newChurch?.recordStatus == RecordStatus.Inactive) {
         throw new NotFoundException(
           `La propiedad "Estado de registro" en Iglesia debe ser "Activa".`,
         );
@@ -1322,14 +1334,13 @@ export class CopastorService {
       }
     } else {
       throw new BadRequestException(
-        `No se puede subir de nivel este registro, el modo debe ser "Activo", los roles ["discípulo", "pastor"], revisar y actualizar el registro.`,
+        `No se puede subir de nivel este registro, el modo debe ser "Activo", y los roles: ["discípulo", "pastor"], revisar y actualizar el registro.`,
       );
     }
   }
 
   //! DELETE COPASTOR
   async remove(id: string, user: User): Promise<void> {
-    // Validations
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido.`);
     }
@@ -1380,7 +1391,7 @@ export class CopastorService {
     try {
       //* Update and set to null relationships in Supervisor
       const supervisorsByCopastor = allSupervisors.filter(
-        (supervisor) => supervisor.theirCopastor?.id === copastor?.id,
+        (supervisor) => supervisor?.theirCopastor?.id === copastor?.id,
       );
 
       await Promise.all(
@@ -1395,7 +1406,7 @@ export class CopastorService {
 
       //* Update and set to null relationships in Zone
       const zonesByCopastor = allZones.filter(
-        (zone) => zone.theirCopastor?.id === copastor?.id,
+        (zone) => zone?.theirCopastor?.id === copastor?.id,
       );
 
       await Promise.all(
@@ -1410,7 +1421,7 @@ export class CopastorService {
 
       //* Update and set to null relationships in Preacher
       const preachersByCopastor = allPreachers.filter(
-        (preacher) => preacher.theirCopastor?.id === copastor?.id,
+        (preacher) => preacher?.theirCopastor?.id === copastor?.id,
       );
 
       await Promise.all(
@@ -1423,14 +1434,14 @@ export class CopastorService {
         }),
       );
 
-      //* Update and set to null relationships in Family House
+      //* Update and set to null relationships in Family Group
       const familyGroupsByCopastor = allFamilyGroups.filter(
-        (familyGroup) => familyGroup.theirCopastor?.id === copastor?.id,
+        (familyGroup) => familyGroup?.theirCopastor?.id === copastor?.id,
       );
 
       await Promise.all(
         familyGroupsByCopastor.map(async (familyGroup) => {
-          await this.familyGroupRepository.update(familyGroup.id, {
+          await this.familyGroupRepository.update(familyGroup?.id, {
             theirCopastor: null,
             updatedAt: new Date(),
             updatedBy: user,
@@ -1440,7 +1451,7 @@ export class CopastorService {
 
       //* Update and set to null relationships in Disciple
       const disciplesByCopastor = allDisciples.filter(
-        (disciple) => disciple.theirCopastor?.id === copastor?.id,
+        (disciple) => disciple?.theirCopastor?.id === copastor?.id,
       );
 
       await Promise.all(

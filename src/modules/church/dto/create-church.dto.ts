@@ -114,7 +114,7 @@ export class CreateChurchDto {
   address: string;
 
   @ApiProperty({
-    example: 'A una cuadra del hospital central',
+    example: 'A una cuadra del hospital central.',
   })
   @IsString()
   @IsNotEmpty()

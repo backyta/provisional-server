@@ -1,10 +1,10 @@
-export enum OfferingIncomeCreateType {
+export enum OfferingIncomeCreationType {
   Offering = 'offering',
   IncomeAdjustment = 'income_adjustment',
 }
 
-export const OfferingIncomeCreateTypeNames: Record<
-  OfferingIncomeCreateType,
+export const OfferingIncomeCreationTypeNames: Record<
+  OfferingIncomeCreationType,
   string
 > = {
   offering: 'Ofrenda',

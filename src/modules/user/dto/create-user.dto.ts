@@ -11,8 +11,8 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { Gender, RecordStatus } from '@/common/enums';
 import { UserRole } from '@/modules/auth/enums';
+import { Gender, RecordStatus } from '@/common/enums';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -53,7 +53,7 @@ export class CreateUserDto {
   })
   @IsEnum(Gender, {
     message:
-      'El genero debe ser uno de los siguientes valores: Masculino o Femenino',
+      'El género debe ser uno de los siguientes valores: Masculino o Femenino',
   })
   gender: string;
 

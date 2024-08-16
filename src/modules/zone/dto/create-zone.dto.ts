@@ -57,7 +57,10 @@ export class CreateZoneDto {
     example: 'active',
   })
   @IsString()
-  @IsEnum(RecordStatus)
+  @IsEnum(RecordStatus, {
+    message:
+      'El estado de registro debe ser uno de los siguientes valores: Activo o Inactivo',
+  })
   @IsOptional()
   recordStatus?: string;
 

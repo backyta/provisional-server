@@ -1,1 +1,1 @@
-export * from './format-data-zone.helper';
+export * from './zone-data-formatter.helper';
