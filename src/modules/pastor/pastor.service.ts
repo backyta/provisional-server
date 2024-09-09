@@ -210,7 +210,7 @@ export class PastorService {
         return pastorDataFormatter({ pastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -251,7 +251,7 @@ export class PastorService {
         return pastorDataFormatter({ pastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -294,7 +294,7 @@ export class PastorService {
         return pastorDataFormatter({ pastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -345,7 +345,7 @@ export class PastorService {
         return pastorDataFormatter({ pastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -404,7 +404,7 @@ export class PastorService {
         }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -452,7 +452,7 @@ export class PastorService {
         return pastorDataFormatter({ pastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -507,7 +507,7 @@ export class PastorService {
         return pastorDataFormatter({ pastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -546,7 +546,7 @@ export class PastorService {
         return pastorDataFormatter({ pastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -585,7 +585,7 @@ export class PastorService {
         return pastorDataFormatter({ pastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -624,7 +624,7 @@ export class PastorService {
         return pastorDataFormatter({ pastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -663,7 +663,7 @@ export class PastorService {
         return pastorDataFormatter({ pastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -702,7 +702,7 @@ export class PastorService {
         return pastorDataFormatter({ pastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -741,7 +741,7 @@ export class PastorService {
         return pastorDataFormatter({ pastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -788,7 +788,7 @@ export class PastorService {
         return pastorDataFormatter({ pastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -881,7 +881,7 @@ export class PastorService {
 
       //? Update if their Church is different
       if (pastor?.theirChurch?.id !== theirChurch) {
-        //* Validate church
+        //* Validate new church
         if (!theirChurch) {
           throw new NotFoundException(
             `Para poder actualizar un Pastor, se le ebe asignar una Iglesia.`,
@@ -926,23 +926,18 @@ export class PastorService {
         const allCopastors = await this.copastorRepository.find({
           relations: ['theirPastor'],
         });
-
         const allSupervisors = await this.supervisorRepository.find({
           relations: ['theirPastor'],
         });
-
         const allZones = await this.zoneRepository.find({
           relations: ['theirPastor'],
         });
-
         const allPreachers = await this.preacherRepository.find({
           relations: ['theirPastor'],
         });
-
         const allFamilyGroups = await this.familyGroupRepository.find({
           relations: ['theirPastor'],
         });
-
         const allDisciples = await this.discipleRepository.find({
           relations: ['theirPastor'],
         });
@@ -1062,7 +1057,7 @@ export class PastorService {
     const pastor = await this.pastorRepository.findOneBy({ id });
 
     if (!pastor) {
-      throw new NotFoundException(`Pastor con id: ${id} no existe.`);
+      throw new NotFoundException(`Pastor con id: ${id} no fue encontrado.`);
     }
 
     //* Update and set in Inactive on Pastor
@@ -1084,23 +1079,18 @@ export class PastorService {
     const allCopastores = await this.copastorRepository.find({
       relations: ['theirPastor'],
     });
-
     const allSupervisors = await this.supervisorRepository.find({
       relations: ['theirPastor'],
     });
-
     const allZones = await this.zoneRepository.find({
       relations: ['theirPastor'],
     });
-
     const allPreachers = await this.preacherRepository.find({
       relations: ['theirPastor'],
     });
-
     const allFamilyGroups = await this.familyGroupRepository.find({
       relations: ['theirPastor'],
     });
-
     const allDisciples = await this.discipleRepository.find({
       relations: ['theirPastor'],
     });
@@ -1214,7 +1204,7 @@ export class PastorService {
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, revise los registros de consola',
+      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
     );
   }
 }

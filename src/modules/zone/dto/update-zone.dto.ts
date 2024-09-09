@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { CreateZoneDto } from '@/modules/zone/dto';
 import { IsOptional, IsString } from 'class-validator';
+import { CreateZoneDto } from '@/modules/zone/dto';
 
 export class UpdateZoneDto extends PartialType(CreateZoneDto) {
   @ApiProperty({

@@ -1,16 +1,25 @@
-import { Between, FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
   Logger,
+  Injectable,
   NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Between, FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
+import { format } from 'date-fns';
+import { isUUID } from 'class-validator';
+import { toZonedTime } from 'date-fns-tz';
 
-import { RecordStatus, SearchTypeNames } from '@/common/enums';
+import {
+  RecordStatus,
+  SearchTypeNames,
+  DashboardSearchType,
+} from '@/common/enums';
 import { dateFormatterToDDMMYYY } from '@/common/helpers';
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+
+import { DeleteOfferingDto } from '@/modules/offering/shared/dto';
 
 import {
   MemberType,
@@ -20,6 +29,7 @@ import {
   OfferingIncomeSearchSubType,
   OfferingIncomeSearchTypeNames,
   OfferingIncomeCreationSubType,
+  OfferingIncomeCreationSubTypeNames,
   OfferingIncomeCreationShiftTypeNames,
 } from '@/modules/offering/income/enums';
 import {
@@ -39,6 +49,11 @@ import { Disciple } from '@/modules/disciple/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
 import { FamilyGroup } from '@/modules/family-group/entities';
 import { OfferingIncome } from '@/modules/offering/income/entities';
+
+import {
+  OfferingReasonEliminationType,
+  OfferingReasonEliminationTypeNames,
+} from '@/modules/offering/shared/enums';
 
 @Injectable()
 export class OfferingIncomeService {
@@ -79,15 +94,16 @@ export class OfferingIncomeService {
     user: User,
   ): Promise<OfferingIncome> {
     const {
-      memberId,
-      zoneId,
-      familyGroupId,
-      memberType,
       type,
-      subType,
-      imageUrls,
-      amount,
       shift,
+      zoneId,
+      amount,
+      subType,
+      memberId,
+      churchId,
+      imageUrls,
+      memberType,
+      familyGroupId,
     } = createOfferingIncomeDto;
 
     //* Validations
@@ -122,10 +138,31 @@ export class OfferingIncomeService {
           );
         }
 
+        //* Validate if exists record already
+        const offeringsIncome = await this.offeringIncomeRepository.find({
+          where: {
+            subType: subType,
+            familyGroup: familyGroup,
+            date: new Date(createOfferingIncomeDto.date),
+            recordStatus: RecordStatus.Active,
+          },
+        });
+
+        if (offeringsIncome.length > 0) {
+          const newDate = dateFormatterToDDMMYYY(
+            new Date(createOfferingIncomeDto.date).getTime(),
+          );
+
+          throw new NotFoundException(
+            `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]} y fecha: ${newDate}`,
+          );
+        }
+
         try {
           const newOfferingIncome = this.offeringIncomeRepository.create({
             ...createOfferingIncomeDto,
             amount: +amount,
+            church: null,
             disciple: null,
             preacher: null,
             supervisor: null,
@@ -151,6 +188,48 @@ export class OfferingIncomeService {
         subType === OfferingIncomeCreationSubType.SundaySchool ||
         subType === OfferingIncomeCreationSubType.SundayWorship
       ) {
+        if (!churchId) {
+          throw new NotFoundException(`La iglesia es requerida.`);
+        }
+
+        const church = await this.churchRepository.findOne({
+          where: { id: churchId },
+          relations: ['theirMainChurch'],
+        });
+
+        if (!church) {
+          throw new NotFoundException(
+            `Iglesia con id: ${churchId}, no fue encontrado.`,
+          );
+        }
+
+        if (!church?.recordStatus) {
+          throw new BadRequestException(
+            `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
+          );
+        }
+
+        //* Validate if exists record already
+        const offeringsIncome = await this.offeringIncomeRepository.find({
+          where: {
+            subType: subType,
+            church: church,
+            shift: shift,
+            date: new Date(createOfferingIncomeDto.date),
+            recordStatus: RecordStatus.Active,
+          },
+        });
+
+        if (offeringsIncome.length > 0) {
+          const newDate = dateFormatterToDDMMYYY(
+            new Date(createOfferingIncomeDto.date).getTime(),
+          );
+
+          throw new NotFoundException(
+            `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, turno: ${OfferingIncomeCreationShiftTypeNames[shift]} y fecha: ${newDate}`,
+          );
+        }
+
         if (!shift) {
           throw new NotFoundException(`El turno es requerido.`);
         }
@@ -167,6 +246,7 @@ export class OfferingIncomeService {
           const newOfferingIncome = this.offeringIncomeRepository.create({
             ...createOfferingIncomeDto,
             amount: +amount,
+            church: church,
             disciple: null,
             preacher: null,
             supervisor: null,
@@ -218,10 +298,31 @@ export class OfferingIncomeService {
           );
         }
 
+        //* Validate if exists record already
+        const offeringsIncome = await this.offeringIncomeRepository.find({
+          where: {
+            subType: subType,
+            zone: zone,
+            date: new Date(createOfferingIncomeDto.date),
+            recordStatus: RecordStatus.Active,
+          },
+        });
+
+        if (offeringsIncome.length > 0) {
+          const newDate = dateFormatterToDDMMYYY(
+            new Date(createOfferingIncomeDto.date).getTime(),
+          );
+
+          throw new NotFoundException(
+            `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]} y fecha: ${newDate}`,
+          );
+        }
+
         try {
           const newOfferingIncome = this.offeringIncomeRepository.create({
             ...createOfferingIncomeDto,
             amount: +amount,
+            church: null,
             disciple: null,
             preacher: null,
             supervisor: null,
@@ -250,10 +351,40 @@ export class OfferingIncomeService {
         subType === OfferingIncomeCreationSubType.UnitedWorship ||
         subType === OfferingIncomeCreationSubType.Activities
       ) {
+        if (!churchId) {
+          throw new NotFoundException(`La iglesia es requerida.`);
+        }
+
+        const church = await this.churchRepository.findOne({
+          where: { id: churchId },
+          relations: ['theirMainChurch'],
+        });
+
+        //* Validate if exists record already
+        const offeringsIncome = await this.offeringIncomeRepository.find({
+          where: {
+            subType: subType,
+            church: church,
+            date: new Date(createOfferingIncomeDto.date),
+            recordStatus: RecordStatus.Active,
+          },
+        });
+
+        if (offeringsIncome.length > 0) {
+          const newDate = dateFormatterToDDMMYYY(
+            new Date(createOfferingIncomeDto.date).getTime(),
+          );
+
+          throw new NotFoundException(
+            `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]} y fecha: ${newDate}`,
+          );
+        }
+
         try {
           const newOfferingIncome = this.offeringIncomeRepository.create({
             ...createOfferingIncomeDto,
             amount: +amount,
+            church: church,
             disciple: null,
             preacher: null,
             supervisor: null,
@@ -308,11 +439,33 @@ export class OfferingIncomeService {
             );
           }
 
+          //* Validate if exists record already
+          const offeringsIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: subType,
+              memberType: memberType,
+              pastor: pastor,
+              date: new Date(createOfferingIncomeDto.date),
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (offeringsIncome.length > 0) {
+            const newDate = dateFormatterToDDMMYYY(
+              new Date(createOfferingIncomeDto.date).getTime(),
+            );
+
+            throw new NotFoundException(
+              `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, tipo de miembro: ${MemberTypeNames[memberType]} y fecha: ${newDate}`,
+            );
+          }
+
           try {
             const newOfferingIncome = this.offeringIncomeRepository.create({
               ...createOfferingIncomeDto,
               amount: +amount,
               memberType: memberType,
+              church: null,
               disciple: null,
               preacher: null,
               supervisor: null,
@@ -351,11 +504,33 @@ export class OfferingIncomeService {
             );
           }
 
+          //* Validate if exists record already
+          const offeringsIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: subType,
+              memberType: memberType,
+              copastor: copastor,
+              date: new Date(createOfferingIncomeDto.date),
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (offeringsIncome.length > 0) {
+            const newDate = dateFormatterToDDMMYYY(
+              new Date(createOfferingIncomeDto.date).getTime(),
+            );
+
+            throw new NotFoundException(
+              `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, tipo de miembro: ${MemberTypeNames[memberType]} y fecha: ${newDate}`,
+            );
+          }
+
           try {
             const newOfferingIncome = this.offeringIncomeRepository.create({
               ...createOfferingIncomeDto,
               amount: +amount,
               memberType: memberType,
+              church: null,
               disciple: null,
               preacher: null,
               supervisor: null,
@@ -399,9 +574,31 @@ export class OfferingIncomeService {
             );
           }
 
+          //* Validate if exists record already
+          const offeringsIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: subType,
+              memberType: memberType,
+              supervisor: supervisor,
+              date: new Date(createOfferingIncomeDto.date),
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (offeringsIncome.length > 0) {
+            const newDate = dateFormatterToDDMMYYY(
+              new Date(createOfferingIncomeDto.date).getTime(),
+            );
+
+            throw new NotFoundException(
+              `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, tipo de miembro: ${MemberTypeNames[memberType]} y fecha: ${newDate}`,
+            );
+          }
+
           try {
             const newOfferingIncome = this.offeringIncomeRepository.create({
               ...createOfferingIncomeDto,
+              church: null,
               amount: +amount,
               memberType: memberType,
               disciple: null,
@@ -449,11 +646,33 @@ export class OfferingIncomeService {
             );
           }
 
+          //* Validate if exists record already
+          const offeringsIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: subType,
+              memberType: memberType,
+              preacher: preacher,
+              date: new Date(createOfferingIncomeDto.date),
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (offeringsIncome.length > 0) {
+            const newDate = dateFormatterToDDMMYYY(
+              new Date(createOfferingIncomeDto.date).getTime(),
+            );
+
+            throw new NotFoundException(
+              `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, tipo de miembro: ${MemberTypeNames[memberType]} y fecha: ${newDate}`,
+            );
+          }
+
           try {
             const newOfferingIncome = this.offeringIncomeRepository.create({
               ...createOfferingIncomeDto,
               amount: +amount,
               memberType: memberType,
+              church: null,
               disciple: null,
               preacher: preacher,
               supervisor: null,
@@ -500,11 +719,33 @@ export class OfferingIncomeService {
             );
           }
 
+          //* Validate if exists record already
+          const offeringsIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: subType,
+              memberType: memberType,
+              disciple: disciple,
+              date: new Date(createOfferingIncomeDto.date),
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (offeringsIncome.length > 0) {
+            const newDate = dateFormatterToDDMMYYY(
+              new Date(createOfferingIncomeDto.date).getTime(),
+            );
+
+            throw new NotFoundException(
+              `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, tipo de miembro: ${MemberTypeNames[memberType]} y fecha: ${newDate}`,
+            );
+          }
+
           try {
             const newOfferingIncome = this.offeringIncomeRepository.create({
               ...createOfferingIncomeDto,
               amount: +amount,
               memberType: memberType,
+              church: null,
               disciple: disciple,
               preacher: null,
               supervisor: null,
@@ -528,10 +769,33 @@ export class OfferingIncomeService {
 
     //? Income adjustment
     if (type === OfferingIncomeCreationType.IncomeAdjustment) {
+      if (!churchId) {
+        throw new NotFoundException(`La iglesia es requerida.`);
+      }
+
+      const church = await this.churchRepository.findOne({
+        where: { id: churchId },
+        relations: ['theirMainChurch'],
+      });
+
+      if (!church) {
+        throw new NotFoundException(
+          `Iglesia con id: ${churchId}, no fue encontrado.`,
+        );
+      }
+
+      if (!church?.recordStatus) {
+        throw new BadRequestException(
+          `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
+        );
+      }
+
       try {
         const newOfferingIncome = this.offeringIncomeRepository.create({
           ...createOfferingIncomeDto,
           amount: +amount,
+          subType: null,
+          church: church,
           disciple: null,
           preacher: null,
           supervisor: null,
@@ -564,6 +828,7 @@ export class OfferingIncomeService {
       relations: [
         'updatedBy',
         'createdBy',
+        'church',
         'pastor',
         'copastor',
         'supervisor',
@@ -627,27 +892,56 @@ export class OfferingIncomeService {
       const fromDate = new Date(fromTimestamp);
       const toDate = toTimestamp ? new Date(toTimestamp) : fromDate;
 
-      const offeringsIncome = await this.offeringIncomeRepository.find({
-        where: {
-          subType: searchType,
-          date: Between(fromDate, toDate),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'familyGroup',
-          'zone',
-          'pastor',
-          'copastor',
-          'supervisor',
-          'preacher',
-          'disciple',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
+      let offeringsIncome: OfferingIncome[];
+      if (searchType !== OfferingIncomeSearchType.IncomeAdjustment) {
+        offeringsIncome = await this.offeringIncomeRepository.find({
+          where: {
+            subType: searchType,
+            date: Between(fromDate, toDate),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'familyGroup',
+            'church',
+            'zone',
+            'pastor',
+            'copastor',
+            'supervisor',
+            'preacher',
+            'disciple',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+      }
+
+      if (searchType === OfferingIncomeSearchType.IncomeAdjustment) {
+        offeringsIncome = await this.offeringIncomeRepository.find({
+          where: {
+            type: searchType,
+            date: Between(fromDate, toDate),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'familyGroup',
+            'church',
+            'zone',
+            'pastor',
+            'copastor',
+            'supervisor',
+            'preacher',
+            'disciple',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+      }
 
       if (offeringsIncome.length === 0) {
         const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
@@ -659,10 +953,215 @@ export class OfferingIncomeService {
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
+        );
+      }
+    }
+
+    //? Offerings others --> Many
+    //* By church
+    if (
+      term &&
+      (searchType === OfferingIncomeSearchType.SundayWorship ||
+        searchType === OfferingIncomeSearchType.SundaySchool ||
+        searchType === OfferingIncomeSearchType.GeneralFasting ||
+        searchType === OfferingIncomeSearchType.GeneralVigil ||
+        searchType === OfferingIncomeSearchType.YouthWorship ||
+        searchType === OfferingIncomeSearchType.UnitedWorship ||
+        searchType === OfferingIncomeSearchType.Activities ||
+        searchType === OfferingIncomeSearchType.IncomeAdjustment) &&
+      searchSubType === OfferingIncomeSearchSubType.OfferingByChurch
+    ) {
+      const church = await this.churchRepository.findOne({
+        where: {
+          id: term,
+        },
+      });
+
+      if (!church) {
+        throw new NotFoundException(
+          `No se encontró ninguna iglesia con este ID: ${term}.`,
+        );
+      }
+
+      let offeringsIncome: OfferingIncome[];
+      if (searchType !== OfferingIncomeSearchType.IncomeAdjustment) {
+        offeringsIncome = await this.offeringIncomeRepository.find({
+          where: {
+            subType: searchType,
+            church: church,
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'familyGroup',
+            'church',
+            'zone',
+            'pastor',
+            'copastor',
+            'supervisor',
+            'preacher',
+            'disciple',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+      }
+
+      if (searchType === OfferingIncomeSearchType.IncomeAdjustment) {
+        offeringsIncome = await this.offeringIncomeRepository.find({
+          where: {
+            type: searchType,
+            church: church,
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'familyGroup',
+            'church',
+            'zone',
+            'pastor',
+            'copastor',
+            'supervisor',
+            'preacher',
+            'disciple',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+      }
+
+      if (offeringsIncome.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron ingresos de ofrendas (${SearchTypeNames[searchType]}) con esta iglesia: ${church?.churchName}`,
+        );
+      }
+
+      try {
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador.`,
+        );
+      }
+    }
+
+    //* By church and date
+    if (
+      term &&
+      (searchType === OfferingIncomeSearchType.SundayWorship ||
+        searchType === OfferingIncomeSearchType.SundaySchool ||
+        searchType === OfferingIncomeSearchType.GeneralFasting ||
+        searchType === OfferingIncomeSearchType.GeneralVigil ||
+        searchType === OfferingIncomeSearchType.YouthWorship ||
+        searchType === OfferingIncomeSearchType.UnitedWorship ||
+        searchType === OfferingIncomeSearchType.Activities ||
+        searchType === OfferingIncomeSearchType.IncomeAdjustment) &&
+      searchSubType === OfferingIncomeSearchSubType.OfferingByChurchDate
+    ) {
+      const [churchId, date] = term.split('&');
+
+      const church = await this.churchRepository.findOne({
+        where: {
+          id: churchId,
+        },
+      });
+
+      if (!church) {
+        throw new NotFoundException(
+          `No se encontró ninguna iglesia con este Id.`,
+        );
+      }
+
+      const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
+
+      if (isNaN(fromTimestamp)) {
+        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      }
+
+      const fromDate = new Date(fromTimestamp);
+      const toDate = toTimestamp ? new Date(toTimestamp) : fromDate;
+
+      let offeringsIncome: OfferingIncome[];
+      if (searchType !== OfferingIncomeSearchType.IncomeAdjustment) {
+        offeringsIncome = await this.offeringIncomeRepository.find({
+          where: {
+            subType: searchType,
+            church: church,
+            date: Between(fromDate, toDate),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'familyGroup',
+            'church',
+            'zone',
+            'pastor',
+            'copastor',
+            'supervisor',
+            'preacher',
+            'disciple',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+      }
+
+      if (searchType === OfferingIncomeSearchType.IncomeAdjustment) {
+        offeringsIncome = await this.offeringIncomeRepository.find({
+          where: {
+            type: searchType,
+            church: church,
+            date: Between(fromDate, toDate),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'familyGroup',
+            'church',
+            'zone',
+            'pastor',
+            'copastor',
+            'supervisor',
+            'preacher',
+            'disciple',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+      }
+
+      if (offeringsIncome.length === 0) {
+        const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
+        const toDate = dateFormatterToDDMMYYY(toTimestamp);
+
+        throw new NotFoundException(
+          `No se encontraron ingresos de ofrendas (${SearchTypeNames[searchType]}) con esta iglesia: ${church?.churchName} y con este rango de fechas: ${fromDate} - ${toDate}`,
+        );
+      }
+
+      try {
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -694,6 +1193,7 @@ export class OfferingIncomeService {
           'updatedBy',
           'createdBy',
           'familyGroup',
+          'church',
           'zone',
           'pastor',
           'copastor',
@@ -714,10 +1214,12 @@ export class OfferingIncomeService {
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -760,6 +1262,7 @@ export class OfferingIncomeService {
           'updatedBy',
           'createdBy',
           'familyGroup',
+          'church',
           'zone',
           'pastor',
           'copastor',
@@ -783,10 +1286,12 @@ export class OfferingIncomeService {
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -801,22 +1306,20 @@ export class OfferingIncomeService {
       const zones = await this.zoneRepository.find({
         where: {
           zoneName: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
         },
         relations: ['familyGroups'],
-        order: { createdAt: order as FindOptionsOrderValue },
       });
 
       const familyGroupsByZone = zones.map((zone) => zone.familyGroups).flat();
 
-      const familyGroupId = familyGroupsByZone.map(
-        (familyGroup) => familyGroup.id,
+      const familyGroupsId = familyGroupsByZone.map(
+        (familyGroup) => familyGroup?.id,
       );
 
       const offeringsIncome = await this.offeringIncomeRepository.find({
         where: {
           subType: searchType,
-          familyGroup: In(familyGroupId),
+          familyGroup: In(familyGroupsId),
           recordStatus: RecordStatus.Active,
         },
         take: limit,
@@ -825,6 +1328,7 @@ export class OfferingIncomeService {
           'updatedBy',
           'createdBy',
           'familyGroup',
+          'church',
           'zone',
           'pastor',
           'copastor',
@@ -842,10 +1346,12 @@ export class OfferingIncomeService {
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -870,15 +1376,13 @@ export class OfferingIncomeService {
       const zones = await this.zoneRepository.find({
         where: {
           zoneName: ILike(`%${zone}%`),
-          recordStatus: RecordStatus.Active,
         },
         relations: ['familyGroups'],
-        order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const familyGroupsByZone = zones.map((zone) => zone.familyGroups).flat();
+      const familyGroupsByZone = zones.map((zone) => zone?.familyGroups).flat();
 
-      const familyGroupId = familyGroupsByZone.map(
+      const familyGroupsId = familyGroupsByZone.map(
         (familyGroup) => familyGroup.id,
       );
 
@@ -886,7 +1390,7 @@ export class OfferingIncomeService {
         where: {
           subType: searchType,
           date: Between(fromDate, toDate),
-          familyGroup: In(familyGroupId),
+          familyGroup: In(familyGroupsId),
           recordStatus: RecordStatus.Active,
         },
         take: limit,
@@ -895,6 +1399,7 @@ export class OfferingIncomeService {
           'updatedBy',
           'createdBy',
           'familyGroup',
+          'church',
           'zone',
           'pastor',
           'copastor',
@@ -915,10 +1420,12 @@ export class OfferingIncomeService {
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -929,18 +1436,18 @@ export class OfferingIncomeService {
       searchType === OfferingIncomeSearchType.FamilyGroup &&
       searchSubType === OfferingIncomeSearchSubType.OfferingByGroupCode
     ) {
-      const familyGroup = await this.familyGroupRepository.findOne({
+      const familyGroups = await this.familyGroupRepository.find({
         where: {
           familyGroupCode: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
         },
-        order: { createdAt: order as FindOptionsOrderValue },
       });
+
+      const familyGroupsId = familyGroups.map((familyGroup) => familyGroup?.id);
 
       const offeringsIncome = await this.offeringIncomeRepository.find({
         where: {
           subType: searchType,
-          familyGroup: familyGroup,
+          familyGroup: In(familyGroupsId),
           recordStatus: RecordStatus.Active,
         },
         take: limit,
@@ -949,6 +1456,7 @@ export class OfferingIncomeService {
           'updatedBy',
           'createdBy',
           'familyGroup',
+          'church',
           'zone',
           'pastor',
           'copastor',
@@ -966,10 +1474,12 @@ export class OfferingIncomeService {
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -991,19 +1501,19 @@ export class OfferingIncomeService {
       const fromDate = new Date(fromTimestamp);
       const toDate = toTimestamp ? new Date(toTimestamp) : fromDate;
 
-      const familyGroup = await this.familyGroupRepository.findOne({
+      const familyGroups = await this.familyGroupRepository.find({
         where: {
           familyGroupCode: ILike(`%${code}%`),
-          recordStatus: RecordStatus.Active,
         },
-        order: { createdAt: order as FindOptionsOrderValue },
       });
+
+      const familyGroupsId = familyGroups.map((familyGroup) => familyGroup?.id);
 
       const offeringsIncome = await this.offeringIncomeRepository.find({
         where: {
           subType: searchType,
           date: Between(fromDate, toDate),
-          familyGroup: familyGroup,
+          familyGroup: In(familyGroupsId),
           recordStatus: RecordStatus.Active,
         },
         take: limit,
@@ -1012,6 +1522,7 @@ export class OfferingIncomeService {
           'updatedBy',
           'createdBy',
           'familyGroup',
+          'church',
           'zone',
           'pastor',
           'copastor',
@@ -1032,10 +1543,12 @@ export class OfferingIncomeService {
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1051,17 +1564,13 @@ export class OfferingIncomeService {
       const preachers = await this.preacherRepository.find({
         where: {
           firstName: ILike(`%${firstNames}%`),
-          recordStatus: RecordStatus.Active,
         },
         relations: ['theirFamilyGroup'],
-        order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const familyGroups = preachers.map(
-        (preacher) => preacher.theirFamilyGroup,
+      const familyGroupsId = preachers.map(
+        (preacher) => preacher?.theirFamilyGroup?.id,
       );
-
-      const familyGroupsId = familyGroups.map((familyGroup) => familyGroup.id);
 
       const offeringsIncome = await this.offeringIncomeRepository.find({
         where: {
@@ -1075,6 +1584,7 @@ export class OfferingIncomeService {
           'updatedBy',
           'createdBy',
           'familyGroup',
+          'church',
           'zone',
           'pastor',
           'copastor',
@@ -1092,10 +1602,12 @@ export class OfferingIncomeService {
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1111,17 +1623,13 @@ export class OfferingIncomeService {
       const preachers = await this.preacherRepository.find({
         where: {
           lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
         },
         relations: ['theirFamilyGroup'],
-        order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const familyGroups = preachers.map(
-        (preacher) => preacher.theirFamilyGroup,
+      const familyGroupsId = preachers.map(
+        (preacher) => preacher?.theirFamilyGroup?.id,
       );
-
-      const familyGroupsId = familyGroups.map((familyGroup) => familyGroup.id);
 
       const offeringsIncome = await this.offeringIncomeRepository.find({
         where: {
@@ -1135,6 +1643,7 @@ export class OfferingIncomeService {
           'updatedBy',
           'createdBy',
           'familyGroup',
+          'church',
           'zone',
           'pastor',
           'copastor',
@@ -1152,10 +1661,12 @@ export class OfferingIncomeService {
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1173,17 +1684,11 @@ export class OfferingIncomeService {
         where: {
           firstName: ILike(`%${firstNames}%`),
           lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
         },
         relations: ['theirFamilyGroup'],
-        order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const familyGroups = preachers.map(
-        (preacher) => preacher.theirFamilyGroup,
-      );
-
-      const familyGroupsId = familyGroups.map((familyGroup) => familyGroup.id);
+      const familyGroupsId = preachers.map((preacher) => preacher?.id);
 
       const offeringsIncome = await this.offeringIncomeRepository.find({
         where: {
@@ -1197,6 +1702,7 @@ export class OfferingIncomeService {
           'updatedBy',
           'createdBy',
           'familyGroup',
+          'church',
           'zone',
           'pastor',
           'copastor',
@@ -1214,10 +1720,12 @@ export class OfferingIncomeService {
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1233,12 +1741,10 @@ export class OfferingIncomeService {
       const zones = await this.zoneRepository.find({
         where: {
           zoneName: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
         },
-        order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const zonesId = zones.map((zone) => zone.id);
+      const zonesId = zones.map((zone) => zone?.id);
 
       const offeringsIncome = await this.offeringIncomeRepository.find({
         where: {
@@ -1252,6 +1758,7 @@ export class OfferingIncomeService {
           'updatedBy',
           'createdBy',
           'familyGroup',
+          'church',
           'zone',
           'pastor',
           'copastor',
@@ -1259,7 +1766,6 @@ export class OfferingIncomeService {
           'preacher',
           'disciple',
         ],
-        order: { createdAt: order as FindOptionsOrderValue },
       });
 
       if (offeringsIncome.length === 0) {
@@ -1269,10 +1775,12 @@ export class OfferingIncomeService {
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1298,12 +1806,10 @@ export class OfferingIncomeService {
       const zones = await this.zoneRepository.find({
         where: {
           zoneName: ILike(`%${zone}%`),
-          recordStatus: RecordStatus.Active,
         },
-        order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const zonesId = zones.map((zone) => zone.id);
+      const zonesId = zones.map((zone) => zone?.id);
 
       const offeringsIncome = await this.offeringIncomeRepository.find({
         where: {
@@ -1318,6 +1824,7 @@ export class OfferingIncomeService {
           'updatedBy',
           'createdBy',
           'familyGroup',
+          'church',
           'zone',
           'pastor',
           'copastor',
@@ -1338,10 +1845,12 @@ export class OfferingIncomeService {
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1358,68 +1867,8 @@ export class OfferingIncomeService {
       const supervisors = await this.supervisorRepository.find({
         where: {
           firstName: ILike(`%${firstNames}%`),
-          recordStatus: RecordStatus.Active,
         },
         relations: ['theirZone'],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const zonesId = supervisors.map((supervisor) => supervisor.theirZone?.id);
-
-      const offeringsIncome = await this.offeringIncomeRepository.find({
-        where: {
-          subType: searchType,
-          zone: In(zonesId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'familyGroup',
-          'zone',
-          'pastor',
-          'copastor',
-          'supervisor',
-          'preacher',
-          'disciple',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (offeringsIncome.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron ingresos de ofrendas (${SearchTypeNames[searchType]}) con estos  nombres de supervisor: ${firstNames}`,
-        );
-      }
-
-      try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
-      } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
-        );
-      }
-    }
-
-    //* By Supervisor last names
-    if (
-      term &&
-      (searchType === OfferingIncomeSearchType.ZonalFasting ||
-        searchType === OfferingIncomeSearchType.ZonalVigil) &&
-      searchSubType ===
-        OfferingIncomeSearchSubType.OfferingBySupervisorLastNames
-    ) {
-      const lastNames = term.replace(/\+/g, ' ');
-
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        relations: ['theirZone'],
-        order: { createdAt: order as FindOptionsOrderValue },
       });
 
       const zonesId = supervisors.map(
@@ -1438,6 +1887,68 @@ export class OfferingIncomeService {
           'updatedBy',
           'createdBy',
           'familyGroup',
+          'church',
+          'zone',
+          'pastor',
+          'copastor',
+          'supervisor',
+          'preacher',
+          'disciple',
+        ],
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (offeringsIncome.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron ingresos de ofrendas (${SearchTypeNames[searchType]}) con estos  nombres de supervisor: ${firstNames}`,
+        );
+      }
+
+      try {
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador.`,
+        );
+      }
+    }
+
+    //* By Supervisor last names
+    if (
+      term &&
+      (searchType === OfferingIncomeSearchType.ZonalFasting ||
+        searchType === OfferingIncomeSearchType.ZonalVigil) &&
+      searchSubType ===
+        OfferingIncomeSearchSubType.OfferingBySupervisorLastNames
+    ) {
+      const lastNames = term.replace(/\+/g, ' ');
+
+      const supervisors = await this.supervisorRepository.find({
+        where: {
+          lastName: ILike(`%${lastNames}%`),
+        },
+        relations: ['theirZone'],
+      });
+
+      const zonesId = supervisors.map(
+        (supervisor) => supervisor?.theirZone?.id,
+      );
+
+      const offeringsIncome = await this.offeringIncomeRepository.find({
+        where: {
+          subType: searchType,
+          zone: In(zonesId),
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'familyGroup',
+          'church',
           'zone',
           'pastor',
           'copastor',
@@ -1455,15 +1966,17 @@ export class OfferingIncomeService {
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
 
-    //* By Preacher full names
+    //* By Supervisor full names
     if (
       term &&
       (searchType === OfferingIncomeSearchType.ZonalFasting ||
@@ -1477,13 +1990,11 @@ export class OfferingIncomeService {
         where: {
           firstName: ILike(`%${firstNames}%`),
           lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
         },
         relations: ['theirZone'],
-        order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      const zonesId = supervisors.map((preacher) => preacher?.theirZone?.id);
+      const zonesId = supervisors.map((supervisor) => supervisor?.id);
 
       const offeringsIncome = await this.offeringIncomeRepository.find({
         where: {
@@ -1497,6 +2008,7 @@ export class OfferingIncomeService {
           'updatedBy',
           'createdBy',
           'familyGroup',
+          'church',
           'zone',
           'pastor',
           'copastor',
@@ -1514,10 +2026,12 @@ export class OfferingIncomeService {
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1555,7 +2069,6 @@ export class OfferingIncomeService {
       const members = await repository.find({
         where: {
           firstName: ILike(`%${names}%`),
-          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -1577,6 +2090,7 @@ export class OfferingIncomeService {
           'updatedBy',
           'createdBy',
           'familyGroup',
+          'church',
           'zone',
           'pastor',
           'copastor',
@@ -1596,15 +2110,17 @@ export class OfferingIncomeService {
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
 
-    //* By Supervisor last names
+    //* By contributor last names
     if (
       term &&
       (searchType === OfferingIncomeSearchType.Special ||
@@ -1637,7 +2153,6 @@ export class OfferingIncomeService {
       const members = await repository.find({
         where: {
           lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -1659,6 +2174,7 @@ export class OfferingIncomeService {
           'updatedBy',
           'createdBy',
           'familyGroup',
+          'church',
           'zone',
           'pastor',
           'copastor',
@@ -1678,15 +2194,17 @@ export class OfferingIncomeService {
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
 
-    //* By Preacher full names
+    //* By contributor full names
     if (
       term &&
       (searchType === OfferingIncomeSearchType.Special ||
@@ -1721,7 +2239,6 @@ export class OfferingIncomeService {
         where: {
           firstName: ILike(`%${firstNames}%`),
           lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
         },
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -1743,6 +2260,7 @@ export class OfferingIncomeService {
           'updatedBy',
           'createdBy',
           'familyGroup',
+          'church',
           'zone',
           'pastor',
           'copastor',
@@ -1763,10 +2281,12 @@ export class OfferingIncomeService {
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1790,6 +2310,7 @@ export class OfferingIncomeService {
           'updatedBy',
           'createdBy',
           'familyGroup',
+          'church',
           'zone',
           'pastor',
           'copastor',
@@ -1804,15 +2325,160 @@ export class OfferingIncomeService {
         const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
 
         throw new NotFoundException(
-          `No se encontraron ingresos de ofrendas (${SearchTypeNames[searchType]}) con este estado: ${value}`,
+          `No se encontraron ingresos de ofrendas (${SearchTypeNames[searchType]}) con este estado de registro: ${value}`,
         );
       }
 
       try {
-        return formatDataOfferingIncome({ offeringsIncome }) as any;
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
+        );
+      }
+    }
+
+    //? BAR CHARTS OFFERINGS
+    //* Latest Sunday Offerings
+    if (term && searchType === DashboardSearchType.LatestSundayOfferings) {
+      const [dateTerm, churchId] = term.split('&');
+
+      const church = await this.churchRepository.findOne({
+        where: {
+          id: churchId,
+          recordStatus: RecordStatus.Active,
+        },
+      });
+
+      if (!church) {
+        throw new NotFoundException(
+          `No se encontró ninguna iglesia con este ID ${term}.`,
+        );
+      }
+
+      const timeZone = 'America/Lima';
+      const sundays = [];
+      const newDate = new Date(dateTerm);
+      const zonedDate = toZonedTime(newDate, timeZone);
+
+      zonedDate.setDate(
+        newDate.getDay() === 6
+          ? zonedDate.getDate()
+          : zonedDate.getDate() - (zonedDate.getDay() + 1),
+      ); // Domingo mas cercano
+
+      for (let i = 0; i < 14; i++) {
+        sundays.push(zonedDate.toISOString().split('T')[0]);
+        zonedDate.setDate(zonedDate.getDate() - 7);
+      }
+
+      const offeringsIncome = await this.offeringIncomeRepository.find({
+        where: {
+          subType: OfferingIncomeSearchType.SundayWorship,
+          date: In(sundays),
+          church: church,
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'familyGroup',
+          'zone',
+          'church',
+          'pastor',
+          'copastor',
+          'supervisor',
+          'preacher',
+          'disciple',
+        ],
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      try {
+        return formatDataOfferingIncome({
+          offeringsIncome,
+        }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador.`,
+        );
+      }
+    }
+
+    //* Top Family groups Offerings
+    if (term && searchType === DashboardSearchType.TopFamilyGroupOfferings) {
+      const [year, churchId] = term.split('&');
+
+      const currentYear = year;
+      const church = await this.churchRepository.findOne({
+        where: {
+          id: churchId,
+          recordStatus: RecordStatus.Active,
+        },
+      });
+
+      if (!church) {
+        throw new NotFoundException(
+          `No se encontró ninguna iglesia con este Id.`,
+        );
+      }
+
+      // NOTE : aca tmb mandar el currency para identificar y calcular total según moneda
+      // NOTE : solo mandar cantidad de discipulos, necesarios , hacer nuevo formatter
+      const offeringsIncome = await this.offeringIncomeRepository.find({
+        where: {
+          subType: OfferingIncomeSearchType.FamilyGroup,
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'familyGroup',
+          'familyGroup.theirChurch',
+          'familyGroup.theirPreacher',
+          'familyGroup.disciples',
+          'zone',
+          'church',
+          'pastor',
+          'copastor',
+          'supervisor',
+          'preacher',
+          'disciple',
+        ],
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      try {
+        const filteredOfferingsByRecordStatus = offeringsIncome.filter(
+          (offeringIncome) =>
+            offeringIncome.familyGroup?.recordStatus === RecordStatus.Active,
+        );
+
+        const filteredOfferingsByChurch =
+          filteredOfferingsByRecordStatus.filter(
+            (offeringIncome) =>
+              offeringIncome.familyGroup?.theirChurch?.id === church?.id,
+          );
+
+        const filteredOfferingsIncome = filteredOfferingsByChurch.filter(
+          (offeringIncome) => {
+            const year = new Date(offeringIncome.date).getFullYear();
+            return year === +currentYear;
+          },
+        );
+
+        return formatDataOfferingIncome({
+          offeringsIncome: filteredOfferingsIncome,
+        }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1852,12 +2518,219 @@ export class OfferingIncomeService {
     }
   }
 
-  update(id: number, updateIncomeDto: UpdateOfferingIncomeDto) {
-    return `This action updates a #${id} income`;
+  //* UPDATE OFFERING INCOME
+  async update(
+    id: string,
+    updateOfferingIncomeDto: UpdateOfferingIncomeDto,
+    user: User,
+  ) {
+    const {
+      type,
+      shift,
+      amount,
+      zoneId,
+      subType,
+      churchId,
+      memberId,
+      imageUrls,
+      memberType,
+      recordStatus,
+      familyGroupId,
+    } = updateOfferingIncomeDto;
+
+    if (!isUUID(id)) {
+      throw new BadRequestException(`UUID no valido.`);
+    }
+
+    //* Validations
+    const offeringIncome = await this.offeringIncomeRepository.findOne({
+      where: { id: id },
+      relations: [
+        'church',
+        'zone',
+        'familyGroup',
+        'pastor',
+        'copastor',
+        'supervisor',
+        'preacher',
+        'disciple',
+      ],
+    });
+
+    if (!offeringIncome) {
+      throw new NotFoundException(
+        `Ingreso de Ofrenda con id: ${id} no fue encontrado`,
+      );
+    }
+
+    if (
+      offeringIncome?.recordStatus === RecordStatus.Active &&
+      recordStatus === RecordStatus.Inactive
+    ) {
+      throw new BadRequestException(
+        `No se puede actualizar un registro a "Inactivo", se debe eliminar.`,
+      );
+    }
+
+    if (type && type !== offeringIncome?.type) {
+      throw new BadRequestException(
+        `No se puede actualizar el tipo de este registro.`,
+      );
+    }
+
+    if (subType && subType !== offeringIncome?.subType) {
+      throw new BadRequestException(
+        `No se puede actualizar el sub-tipo de este registro.`,
+      );
+    }
+
+    if (shift && shift !== offeringIncome?.shift) {
+      throw new BadRequestException(
+        `No se puede actualizar el turno de este registro.`,
+      );
+    }
+
+    if (memberType && memberType !== offeringIncome?.memberType) {
+      throw new BadRequestException(
+        `No se puede actualizar el tipo de miembro de este registro.`,
+      );
+    }
+
+    if (churchId && churchId !== offeringIncome?.church?.id) {
+      throw new BadRequestException(
+        `No se puede actualizar la Iglesia a la que pertenece este registro.`,
+      );
+    }
+
+    if (familyGroupId && familyGroupId !== offeringIncome?.familyGroup?.id) {
+      throw new BadRequestException(
+        `No se puede actualizar el Grupo Familiar al que pertenece este registro.`,
+      );
+    }
+
+    if (zoneId && zoneId !== offeringIncome?.zone?.id) {
+      throw new BadRequestException(
+        `No se puede actualizar la Zona al  que pertenece este registro.`,
+      );
+    }
+
+    if (
+      memberType === MemberType.Disciple &&
+      memberId !== offeringIncome?.disciple?.id
+    ) {
+      throw new BadRequestException(
+        `No se puede actualizar el Discípulo que pertenece este registro.`,
+      );
+    }
+
+    if (
+      memberType === MemberType.Pastor &&
+      memberId !== offeringIncome?.pastor?.id
+    ) {
+      throw new BadRequestException(
+        `No se puede actualizar el Pastor que pertenece este registro.`,
+      );
+    }
+
+    if (
+      memberType === MemberType.Copastor &&
+      memberId !== offeringIncome?.copastor?.id
+    ) {
+      throw new BadRequestException(
+        `No se puede actualizar el Co-Pastor que pertenece este registro.`,
+      );
+    }
+
+    if (
+      memberType === MemberType.Supervisor &&
+      memberId !== offeringIncome?.supervisor?.id
+    ) {
+      throw new BadRequestException(
+        `No se puede actualizar el Supervisor que pertenece este registro.`,
+      );
+    }
+
+    if (
+      memberType === MemberType.Preacher &&
+      memberId !== offeringIncome?.preacher?.id
+    ) {
+      throw new BadRequestException(
+        `No se puede actualizar el Predicador que pertenece este registro.`,
+      );
+    }
+
+    const updatedOfferingIncome = await this.offeringIncomeRepository.preload({
+      id: offeringIncome?.id,
+      ...updateOfferingIncomeDto,
+      shift: shift === '' ? null : shift,
+      memberType: !memberType ? null : memberType,
+      amount: +amount,
+      imageUrls: [...offeringIncome.imageUrls, ...imageUrls],
+      updatedAt: new Date(),
+      updatedBy: user,
+      recordStatus: recordStatus,
+    });
+
+    try {
+      return await this.offeringIncomeRepository.save(updatedOfferingIncome);
+    } catch (error) {
+      this.handleDBExceptions(error);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} income`;
+  //! DELETE OFFERING INCOME
+  async remove(
+    id: string,
+    deleteOfferingIncomeDto: DeleteOfferingDto,
+    user: User,
+  ): Promise<void> {
+    const { reasonEliminationType } = deleteOfferingIncomeDto;
+
+    if (!isUUID(id)) {
+      throw new BadRequestException(`UUID no valido.`);
+    }
+
+    const offeringIncome = await this.offeringIncomeRepository.findOne({
+      where: { id: id },
+      relations: [
+        'church',
+        'zone',
+        'familyGroup',
+        'pastor',
+        'copastor',
+        'supervisor',
+        'preacher',
+        'disciple',
+      ],
+    });
+
+    if (!offeringIncome) {
+      throw new NotFoundException(
+        `Ingreso de Ofrenda con id: ${id} no fue encontrado.`,
+      );
+    }
+
+    const existingComments = offeringIncome.comments || '';
+    const newComments: string = `Fecha de eliminación: ${format(new Date(), 'dd/MM/yyyy')} \nMotivo de eliminación: ${OfferingReasonEliminationTypeNames[reasonEliminationType as OfferingReasonEliminationType]}\nUsuario: ${user.firstName} ${user.lastName}  `;
+    const updatedComments = `${existingComments}\n${newComments}`;
+
+    //* Update and set in Inactive on Offering Income
+    const updatedOfferingIncome = await this.offeringIncomeRepository.preload({
+      id: offeringIncome.id,
+      comments: updatedComments,
+      reasonElimination: reasonEliminationType,
+      updatedAt: new Date(),
+      updatedBy: user,
+      recordStatus: RecordStatus.Inactive,
+    });
+
+    try {
+      await this.offeringIncomeRepository.save(updatedOfferingIncome);
+    } catch (error) {
+      this.handleDBExceptions(error);
+    }
+
+    return;
   }
 
   //? PRIVATE METHODS
@@ -1874,7 +2747,7 @@ export class OfferingIncomeService {
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, revise los registros de consola',
+      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
     );
   }
 }

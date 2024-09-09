@@ -89,16 +89,23 @@ export class UserService {
     if (term && searchType === UserSearchType.FirstName) {
       const firstNames = term.replace(/\+/g, ' ');
 
-      const users = await this.userRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: ['updatedBy', 'createdBy'],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
+      let users: User[];
+      try {
+        users = await this.userRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: ['updatedBy', 'createdBy'],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador.`,
+        );
+      }
 
       if (users.length === 0) {
         throw new NotFoundException(
@@ -113,16 +120,23 @@ export class UserService {
     if (term && searchType === UserSearchType.LastName) {
       const lastNames = term.replace(/\+/g, ' ');
 
-      const users = await this.userRepository.find({
-        where: {
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: ['updatedBy', 'createdBy'],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
+      let users: User[];
+      try {
+        users = await this.userRepository.find({
+          where: {
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: ['updatedBy', 'createdBy'],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador.`,
+        );
+      }
 
       if (users.length === 0) {
         throw new NotFoundException(
@@ -138,17 +152,24 @@ export class UserService {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
-      const users = await this.userRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: ['updatedBy', 'createdBy'],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
+      let users: User[];
+      try {
+        users = await this.userRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: ['updatedBy', 'createdBy'],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador.`,
+        );
+      }
 
       if (users.length === 0) {
         throw new NotFoundException(
@@ -163,18 +184,25 @@ export class UserService {
     if (term && searchType === UserSearchType.Roles) {
       const rolesArray = term.split('+');
 
-      const users = await this.userRepository.find({
-        where: {
-          roles: Raw((alias) => `ARRAY[:...rolesArray]::text[] && ${alias}`, {
-            rolesArray,
-          }),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: ['updatedBy', 'createdBy'],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
+      let users: User[];
+      try {
+        users = await this.userRepository.find({
+          where: {
+            roles: Raw((alias) => `ARRAY[:...rolesArray]::text[] && ${alias}`, {
+              rolesArray,
+            }),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: ['updatedBy', 'createdBy'],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador.`,
+        );
+      }
 
       if (users.length === 0) {
         const rolesInSpanish = rolesArray
@@ -198,16 +226,23 @@ export class UserService {
         throw new BadRequestException(`Género no válido: ${term}`);
       }
 
-      const users = await this.userRepository.find({
-        where: {
-          gender: genderTerm,
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: ['updatedBy', 'createdBy'],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
+      let users: User[];
+      try {
+        users = await this.userRepository.find({
+          where: {
+            gender: genderTerm,
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: ['updatedBy', 'createdBy'],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador.`,
+        );
+      }
 
       if (users.length === 0) {
         const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
@@ -229,15 +264,22 @@ export class UserService {
         throw new BadRequestException(`Estado de registro no válido: ${term}`);
       }
 
-      const users = await this.userRepository.find({
-        where: {
-          recordStatus: recordStatusTerm,
-        },
-        take: limit,
-        skip: offset,
-        relations: ['updatedBy', 'createdBy'],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
+      let users: User[];
+      try {
+        users = await this.userRepository.find({
+          where: {
+            recordStatus: recordStatusTerm,
+          },
+          take: limit,
+          skip: offset,
+          relations: ['updatedBy', 'createdBy'],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador.`,
+        );
+      }
 
       if (users.length === 0) {
         const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
@@ -407,7 +449,7 @@ export class UserService {
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, revise los registros de consola',
+      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
     );
   }
 }

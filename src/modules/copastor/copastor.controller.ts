@@ -1,12 +1,12 @@
 import {
-  Controller,
   Get,
   Post,
   Body,
+  Query,
   Patch,
   Param,
   Delete,
-  Query,
+  Controller,
   ParseUUIDPipe,
 } from '@nestjs/common';
 import {
@@ -65,7 +65,7 @@ export class CopastorController {
     return this.copastorService.create(createCopastorDto, user);
   }
 
-  //* Find All
+  //* FIND ALL
   @Get()
   @Auth()
   @ApiOkResponse({
@@ -78,7 +78,7 @@ export class CopastorController {
     return this.copastorService.findAll(paginationDto);
   }
 
-  //* Find By Term
+  //* FIND BY TERM
   @Get(':term')
   @Auth()
   @ApiParam({

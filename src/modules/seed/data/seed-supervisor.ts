@@ -4,11 +4,11 @@ interface SeedSupervisor {
   lastName: string;
   gender: string;
   originCountry: string;
-  birthDate: string | Date;
+  birthDate: Date;
   age?: number;
   maritalStatus: string;
   numberChildren?: number;
-  conversionDate?: string | Date;
+  conversionDate?: Date;
   isDirectRelationToPastor: boolean;
 
   //* Contact Info
@@ -41,10 +41,10 @@ export const dataSupervisors: SeedDataSupervisors = {
       lastName: 'Fernandez Torres',
       gender: 'female',
       originCountry: 'Peru',
-      birthDate: '1989-09-03',
+      birthDate: new Date('1989-09-03'),
       maritalStatus: 'married',
       numberChildren: 3,
-      conversionDate: '2007-11-20',
+      conversionDate: new Date('2007-11-20'),
       email: 'gabriela.fernandez@google.com',
       phoneNumber: '+1-234-5678',
       district: 'Independencia',
@@ -59,10 +59,10 @@ export const dataSupervisors: SeedDataSupervisors = {
       lastName: 'Lopez Martinez',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1984-05-16',
+      birthDate: new Date('1984-05-16'),
       maritalStatus: 'single',
       numberChildren: 0,
-      conversionDate: '2005-08-30',
+      conversionDate: new Date('2005-08-30'),
       email: 'juan.lopez@google.com',
       phoneNumber: '+1-678-9012',
       district: 'Independencia',
@@ -77,10 +77,10 @@ export const dataSupervisors: SeedDataSupervisors = {
       lastName: 'Ramirez Silva',
       gender: 'female',
       originCountry: 'Peru',
-      birthDate: '1993-02-12',
+      birthDate: new Date('1993-02-12'),
       maritalStatus: 'divorced',
       numberChildren: 1,
-      conversionDate: '2011-03-25',
+      conversionDate: new Date('2011-03-25'),
       email: 'sandra.ramirez@google.com',
       phoneNumber: '+1-890-1234',
       district: 'Independencia',
@@ -95,10 +95,10 @@ export const dataSupervisors: SeedDataSupervisors = {
       lastName: 'Gomez Diaz',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1981-07-30',
+      birthDate: new Date('1981-07-30'),
       maritalStatus: 'married',
       numberChildren: 2,
-      conversionDate: '2002-12-15',
+      conversionDate: new Date('2002-12-15'),
       email: 'ricardo.gomez@google.com',
       phoneNumber: '+1-345-6789',
       district: 'Independencia',
@@ -113,10 +113,10 @@ export const dataSupervisors: SeedDataSupervisors = {
       lastName: 'Perez Rodriguez',
       gender: 'female',
       originCountry: 'Peru',
-      birthDate: '1990-11-25',
+      birthDate: new Date('1990-11-25'),
       maritalStatus: 'widowed',
       numberChildren: 4,
-      conversionDate: '2008-06-20',
+      conversionDate: new Date('2008-06-20'),
       email: 'maria.perez@google.com',
       phoneNumber: '+1-901-2345',
       district: 'Independencia',
@@ -131,10 +131,10 @@ export const dataSupervisors: SeedDataSupervisors = {
       lastName: 'Castro Alvarez',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1987-04-20',
+      birthDate: new Date('1987-04-20'),
       maritalStatus: 'single',
       numberChildren: 0,
-      conversionDate: '2006-10-10',
+      conversionDate: new Date('2006-10-10'),
       email: 'diego.castro@google.com',
       phoneNumber: '+1-012-3456',
       district: 'Independencia',

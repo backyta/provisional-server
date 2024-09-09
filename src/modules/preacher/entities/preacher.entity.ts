@@ -1,7 +1,7 @@
 import {
+  Index,
   Column,
   Entity,
-  Index,
   OneToOne,
   ManyToOne,
   OneToMany,
@@ -47,7 +47,7 @@ export class Preacher {
   @Column('date', { name: 'birth_date' })
   birthDate: Date;
 
-  @Column('int', { name: 'age' })
+  @Column('int', { nullable: true, name: 'age' })
   age: number;
 
   @Index()
@@ -96,15 +96,15 @@ export class Preacher {
   roles: string[];
 
   //* Info register and update date
-  @Column('timestamp', { name: 'created_at', nullable: true })
-  createdAt: string | Date;
+  @Column('timestamptz', { name: 'created_at', nullable: true })
+  createdAt: Date;
 
   @ManyToOne(() => User, { eager: true, nullable: true })
   @JoinColumn({ name: 'created_by' })
   createdBy: User;
 
-  @Column('timestamp', { name: 'updated_at', nullable: true })
-  updatedAt: string | Date;
+  @Column('timestamptz', { name: 'updated_at', nullable: true })
+  updatedAt: Date;
 
   @ManyToOne(() => User, { eager: true, nullable: true })
   @JoinColumn({ name: 'updated_by' })
@@ -151,7 +151,7 @@ export class Preacher {
   @JoinColumn({ name: 'their_family_group_id' })
   theirFamilyGroup: FamilyGroup;
 
-  // Internal Functions
+  //? Internal Functions
   @BeforeInsert()
   @BeforeUpdate()
   transformToDates() {

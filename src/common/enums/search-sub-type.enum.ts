@@ -68,18 +68,11 @@ export enum SearchSubType {
   FamilyGroupByPreacherLastNames = 'family_group_by_preacher_last_names',
   FamilyGroupByPreacherFullName = 'family_group_by_preacher_full_name',
 
-  //* Tithe
-  TitheByNames = 'tithe_by_names',
-  TitheByLastNames = 'tithe_by_last_names',
-  TitheByFullName = 'tithe_by_full_name',
-  TitheByDate = 'tithe_by_date',
-  TitheByDateNames = 'tithe_by_date_names',
-  TitheByDateLastNames = 'tithe_by_date_last_names',
-  TitheByDateFullName = 'tithe_by_date_full_name',
-
   // ! Offering Income
   //* Family House, Fasting Zonal, Fasting General, Vigil Zonal, vigilia General, Ground Church, Activities, Youngs
   OfferingByDate = 'offering_by_date',
+  OfferingByChurch = 'offering_by_church',
+  OfferingByChurchDate = 'offering_by_church_date',
 
   //* Sunday Worship, youngs, school sunday
   OfferingByShift = 'offering_by_shift',

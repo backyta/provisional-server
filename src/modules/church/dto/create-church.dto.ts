@@ -13,14 +13,14 @@ import {
 } from 'class-validator';
 
 export class CreateChurchDto {
-  //* General and Personal info
+  //* General info
   @ApiProperty({
     example: 'Iglesia Cristiana Fortaleza - Agua Viva',
   })
   @IsString()
   @IsNotEmpty()
   @MinLength(1)
-  @MaxLength(80)
+  @MaxLength(100)
   churchName: string;
 
   @ApiProperty({
@@ -42,7 +42,7 @@ export class CreateChurchDto {
   })
   @IsString()
   @IsNotEmpty()
-  foundingDate: string | Date;
+  foundingDate: Date;
 
   //* Contact Info
   @ApiProperty({

@@ -1,13 +1,13 @@
 import {
-  Controller,
   Get,
   Post,
   Body,
+  Query,
   Patch,
   Param,
   Delete,
+  Controller,
   ParseUUIDPipe,
-  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -49,7 +49,7 @@ import { CreatePreacherDto, UpdatePreacherDto } from '@/modules/preacher/dto';
 export class PreacherController {
   constructor(private readonly preacherService: PreacherService) {}
 
-  //* Create
+  //* CREATE
   @Post()
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiCreatedResponse({
@@ -65,7 +65,7 @@ export class PreacherController {
     return this.preacherService.create(createPreacherDto, user);
   }
 
-  //* Find All
+  //* FIND ALL
   @Get()
   @Auth()
   @ApiOkResponse({
@@ -78,7 +78,7 @@ export class PreacherController {
     return this.preacherService.findAll(paginationDto);
   }
 
-  //* Find By Term
+  //* FIND BY TERM
   @Get(':term')
   @Auth()
   @ApiParam({
@@ -99,7 +99,7 @@ export class PreacherController {
     return this.preacherService.findByTerm(term, searchTypeAndPaginationDto);
   }
 
-  //* Update
+  //* UPDATE
   @Patch(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
@@ -116,7 +116,7 @@ export class PreacherController {
     return this.preacherService.update(id, updatePreacherDto, user);
   }
 
-  //* Delete
+  //! DELETE
   @Delete(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({

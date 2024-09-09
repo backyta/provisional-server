@@ -1,13 +1,13 @@
 import {
-  Controller,
   Get,
   Post,
   Body,
+  Query,
   Patch,
   Param,
   Delete,
+  Controller,
   ParseUUIDPipe,
-  Query,
 } from '@nestjs/common';
 
 import {
@@ -52,7 +52,7 @@ import { FamilyGroupService } from '@/modules/family-group/family-group.service'
 export class FamilyGroupController {
   constructor(private readonly familyGroupService: FamilyGroupService) {}
 
-  //* Create
+  //* CREATE
   @Post()
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiCreatedResponse({
@@ -68,7 +68,7 @@ export class FamilyGroupController {
     return this.familyGroupService.create(createFamilyGroupDto, user);
   }
 
-  //* Find All
+  //* FIND ALL
   @Get()
   @Auth()
   @ApiOkResponse({
@@ -81,7 +81,7 @@ export class FamilyGroupController {
     return this.familyGroupService.findAll(paginationDto);
   }
 
-  //* Find By Term
+  //* FIND BY TERM
   @Get(':term')
   @Auth()
   @ApiParam({
@@ -101,7 +101,7 @@ export class FamilyGroupController {
     return this.familyGroupService.findByTerm(term, searchTypeAndPaginationDto);
   }
 
-  //* Update
+  //* UPDATE
   @Patch(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
@@ -118,7 +118,7 @@ export class FamilyGroupController {
     return this.familyGroupService.update(id, updateFamilyGroupDto, user);
   }
 
-  //* Delete
+  //! DELETE
   @Delete(':id')
   @ApiOkResponse({
     description: 'Successful operation.',

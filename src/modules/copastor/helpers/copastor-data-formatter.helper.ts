@@ -8,16 +8,16 @@ export const copastorDataFormatter = ({ copastors }: Options) => {
   return copastors.map((copastor) => ({
     ...copastor,
     theirChurch: {
-      id: copastor.theirChurch?.id,
-      churchName: copastor.theirChurch?.churchName,
-      district: copastor.theirChurch?.district,
-      urbanSector: copastor.theirChurch?.urbanSector,
+      id: copastor?.theirChurch?.id,
+      churchName: copastor?.theirChurch?.churchName,
+      district: copastor?.theirChurch?.district,
+      urbanSector: copastor?.theirChurch?.urbanSector,
     },
     theirPastor: {
-      id: copastor.theirPastor?.id,
-      firstName: copastor.theirPastor?.firstName,
-      lastName: copastor.theirPastor?.lastName,
-      roles: copastor.theirPastor?.roles,
+      id: copastor?.theirPastor?.id,
+      firstName: copastor?.theirPastor?.firstName,
+      lastName: copastor?.theirPastor?.lastName,
+      roles: copastor?.theirPastor?.roles,
     },
     supervisors: copastor?.supervisors.map((supervisor) => ({
       id: supervisor?.id,

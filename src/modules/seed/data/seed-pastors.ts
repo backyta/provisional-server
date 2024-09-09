@@ -4,13 +4,13 @@ interface SeedPastor {
   lastName: string;
   gender: string;
   originCountry: string;
-  birthDate: string | Date;
+  birthDate: Date;
   age?: number;
   maritalStatus: string;
   numberChildren?: string;
-  conversionDate?: string | Date;
+  conversionDate?: Date;
 
-  //* Contact Info
+  //* Contact info
   email: string;
   phoneNumber: string;
   country?: string;
@@ -38,10 +38,10 @@ export const dataPastors: SeedDataPastors = {
       lastName: 'Vega Rosales',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1968-08-25',
+      birthDate: new Date('1968-08-25'),
       maritalStatus: 'married',
       numberChildren: '3',
-      conversionDate: '2005-06-05',
+      conversionDate: new Date('2005-06-05'),
       email: 'michael.vega@google.com',
       phoneNumber: '990-555-876',
       district: 'Independencia',
@@ -55,10 +55,10 @@ export const dataPastors: SeedDataPastors = {
       lastName: 'Perez Torres',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1970-12-08',
+      birthDate: new Date('1970-12-08'),
       maritalStatus: 'married',
       numberChildren: '4',
-      conversionDate: '2006-03-10',
+      conversionDate: new Date('2006-03-10'),
       email: 'daniel.perez@google.com',
       phoneNumber: '999-555-578',
       district: 'Independencia',
@@ -72,10 +72,10 @@ export const dataPastors: SeedDataPastors = {
       lastName: 'Prado Torrealva',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1978-05-20',
+      birthDate: new Date('1978-05-20'),
       maritalStatus: 'married',
       numberChildren: '2',
-      conversionDate: '2010-07-15',
+      conversionDate: new Date('2010-07-15'),
       email: 'carlos.prado@google.com',
       phoneNumber: '+1-555-1234',
       district: 'Independencia',

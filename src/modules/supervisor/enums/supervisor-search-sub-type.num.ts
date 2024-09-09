@@ -31,56 +31,57 @@ export const SupervisorSearchSubTypeNames: Record<
 };
 
 //* FirstName
-export enum SupervisorSearchByFirstNames {
+export enum SubTypeSupervisorSearchByFirstNames {
   SupervisorByPastorNames = 'supervisor_by_pastor_names',
   SupervisorByCopastorNames = 'supervisor_by_copastor_names',
   BySupervisorNames = 'by_supervisor_names',
 }
 
-export const SupervisorSearchNamesByFirstNames: Record<
-  SupervisorSearchByFirstNames,
+export const SubTypeNamesSupervisorSearchByFirstNames: Record<
+  SubTypeSupervisorSearchByFirstNames,
   string
 > = {
-  [SupervisorSearchByFirstNames.SupervisorByPastorNames]:
+  [SubTypeSupervisorSearchByFirstNames.SupervisorByPastorNames]:
     'Por nombres de su pastor',
-  [SupervisorSearchByFirstNames.SupervisorByCopastorNames]:
+  [SubTypeSupervisorSearchByFirstNames.SupervisorByCopastorNames]:
     'Por nombres de su co-pastor',
-  [SupervisorSearchByFirstNames.BySupervisorNames]: 'Por sus nombres',
+  [SubTypeSupervisorSearchByFirstNames.BySupervisorNames]: 'Por sus nombres',
 };
 
 //* LastName
-export enum SupervisorSearchByLastNames {
+export enum SubTypeSupervisorSearchByLastNames {
   SupervisorByPastorLastNames = 'supervisor_by_pastor_last_names',
   SupervisorByCopastorLastNames = 'supervisor_by_copastor_last_names',
   BySupervisorLastNames = 'by_supervisor_last_names',
 }
 
-export const SupervisorSearchNamesByLastNames: Record<
-  SupervisorSearchByLastNames,
+export const SubTypeNamesSupervisorSearchByLastNames: Record<
+  SubTypeSupervisorSearchByLastNames,
   string
 > = {
-  [SupervisorSearchByLastNames.SupervisorByPastorLastNames]:
+  [SubTypeSupervisorSearchByLastNames.SupervisorByPastorLastNames]:
     'Por apellidos de su pastor',
-  [SupervisorSearchByLastNames.SupervisorByCopastorLastNames]:
+  [SubTypeSupervisorSearchByLastNames.SupervisorByCopastorLastNames]:
     'Por apellidos de su co-pastor',
-  [SupervisorSearchByLastNames.BySupervisorLastNames]: 'Por sus apellidos',
+  [SubTypeSupervisorSearchByLastNames.BySupervisorLastNames]:
+    'Por sus apellidos',
 };
 
 //* Full Name
-export enum SupervisorSearchByFullNames {
+export enum SubTypeSupervisorSearchByFullNames {
   SupervisorByPastorFullName = 'supervisor_by_pastor_full_name',
   SupervisorByCopastorFullName = 'supervisor_by_copastor_full_name',
   BySupervisorFullName = 'by_supervisor_full_name',
 }
 
-export const SupervisorSearchNamesByFullNames: Record<
-  SupervisorSearchByFullNames,
+export const SubTypeNamesSupervisorSearchByFullNames: Record<
+  SubTypeSupervisorSearchByFullNames,
   string
 > = {
-  [SupervisorSearchByFullNames.SupervisorByPastorFullName]:
+  [SubTypeSupervisorSearchByFullNames.SupervisorByPastorFullName]:
     'Por nombres y apellidos de su pastor',
-  [SupervisorSearchByFullNames.SupervisorByCopastorFullName]:
+  [SubTypeSupervisorSearchByFullNames.SupervisorByCopastorFullName]:
     'Por nombres y apellidos de su co-pastor',
-  [SupervisorSearchByFullNames.BySupervisorFullName]:
+  [SubTypeSupervisorSearchByFullNames.BySupervisorFullName]:
     'Por sus nombres y apellidos',
 };

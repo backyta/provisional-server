@@ -16,11 +16,11 @@ import { PastorModule } from '@/modules/pastor/pastor.module';
 import { DiscipleModule } from '@/modules/disciple/disciple.module';
 import { PreacherModule } from '@/modules/preacher/preacher.module';
 import { CopastorModule } from '@/modules/copastor/copastor.module';
-import { OfferingIncomeModule } from '@/modules/offering/income/offering-income.module';
-import { CloudinaryModule } from '@/modules/cloudinary/cloudinary.module';
 import { SupervisorModule } from '@/modules/supervisor/supervisor.module';
-import { ExpensesModule } from '@/modules/offering/expenses/expenses.module';
+import { CloudinaryModule } from '@/modules/cloudinary/cloudinary.module';
 import { FamilyGroupModule } from '@/modules/family-group/family-group.module';
+import { OfferingIncomeModule } from '@/modules/offering/income/offering-income.module';
+import { OfferingExpenseModule } from '@/modules/offering/expense/offering-expense.module';
 
 // TODO : Probar despliegues con migraciones
 @Module({
@@ -55,7 +55,7 @@ import { FamilyGroupModule } from '@/modules/family-group/family-group.module';
     CloudinaryModule,
     FilesModule,
     OfferingIncomeModule,
-    ExpensesModule,
+    OfferingExpenseModule,
     SeedModule,
   ],
   providers: [SuperUserService],

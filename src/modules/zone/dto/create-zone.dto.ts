@@ -2,12 +2,12 @@ import { RecordStatus } from '@/common/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
   IsUUID,
+  IsString,
   MaxLength,
   MinLength,
+  IsOptional,
+  IsNotEmpty,
 } from 'class-validator';
 
 export class CreateZoneDto {

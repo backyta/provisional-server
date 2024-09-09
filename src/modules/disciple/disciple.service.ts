@@ -290,7 +290,7 @@ export class DiscipleService {
       throw new BadRequestException(`El tipo de búsqueda es requerido.`);
     }
 
-    //? Find by first name () --> Many
+    //? Find by first name --> Many
     //* Disciple by disciple names
     if (
       term &&
@@ -330,7 +330,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -384,7 +384,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -438,7 +438,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -492,7 +492,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -546,7 +546,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -591,7 +591,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -645,7 +645,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -699,7 +699,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -753,7 +753,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -807,7 +807,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -854,7 +854,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -910,7 +910,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -966,7 +966,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1022,7 +1022,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1078,7 +1078,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1128,7 +1128,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1189,7 +1189,7 @@ export class DiscipleService {
         }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1237,7 +1237,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1285,7 +1285,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1333,7 +1333,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1380,7 +1380,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1434,7 +1434,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1472,7 +1472,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1510,7 +1510,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1548,7 +1548,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1586,7 +1586,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1624,7 +1624,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1662,7 +1662,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1708,7 +1708,7 @@ export class DiscipleService {
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1976,6 +1976,7 @@ export class DiscipleService {
           theirPastor: newPastor,
           theirCopastor: newCopastor,
           theirSupervisor: newSupervisor,
+          theirPreacher: newPreacher,
           theirZone: newZone,
           theirFamilyGroup: newFamilyGroup,
           updatedAt: new Date(),
@@ -2148,7 +2149,7 @@ export class DiscipleService {
       }
     } else {
       throw new BadRequestException(
-        `No se puede subir de nivel este registro, el modo debe ser "Activo", y el rol solo debe ser: ["discípulo"], revisar y actualizar el registro.`,
+        `No se puede subir de nivel este Discípulo, el modo debe ser "Activo", y el rol solo debe ser: ["discípulo"], revisar y actualizar el registro.`,
       );
     }
   }
@@ -2187,7 +2188,7 @@ export class DiscipleService {
       this.handleDBExceptions(error);
     }
   }
-  //TODO : revisar cuando se desactiva un discipulo desaparece en su array de las demas relaciones
+
   //? PRIVATE METHODS
   // For future index errors or constrains with code.
   private handleDBExceptions(error: any): never {
@@ -2202,7 +2203,7 @@ export class DiscipleService {
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, revise los registros de consola',
+      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
     );
   }
 }

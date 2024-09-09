@@ -4,11 +4,11 @@ interface SeedCopastor {
   lastName: string;
   gender: string;
   originCountry: string;
-  birthDate: string | Date;
+  birthDate: Date;
   age?: number;
   maritalStatus: string;
   numberChildren?: number;
-  conversionDate?: string | Date;
+  conversionDate?: Date;
 
   //* Contact Info
   email: string;
@@ -39,10 +39,10 @@ export const dataCopastors: SeedDataCopastors = {
       lastName: 'Salgado Huaman',
       gender: 'female',
       originCountry: 'Peru',
-      birthDate: '1987-03-15',
+      birthDate: new Date('1987-03-15'),
       maritalStatus: 'married',
       numberChildren: 2,
-      conversionDate: '2007-03-15',
+      conversionDate: new Date('2007-03-15'),
       email: 'luz.salgado@google.com',
       phoneNumber: '+1-623-1091',
       district: 'Independencia',
@@ -56,10 +56,10 @@ export const dataCopastors: SeedDataCopastors = {
       lastName: 'Cordova Flores',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1992-08-21',
+      birthDate: new Date('1992-08-21'),
       maritalStatus: 'single',
       numberChildren: 0,
-      conversionDate: '2010-05-12',
+      conversionDate: new Date('2010-05-12'),
       email: 'eduardo.cordova@google.com',
       phoneNumber: '+1-567-9876',
       district: 'Independencia',
@@ -73,10 +73,10 @@ export const dataCopastors: SeedDataCopastors = {
       lastName: 'Gomez Rodriguez',
       gender: 'female',
       originCountry: 'Peru',
-      birthDate: '1985-12-10',
+      birthDate: new Date('1985-12-10'),
       maritalStatus: 'married',
       numberChildren: 3,
-      conversionDate: '2005-06-30',
+      conversionDate: new Date('2005-06-30'),
       email: 'carla.gomez@google.com',
       phoneNumber: '+1-987-6543',
       district: 'Independencia',
@@ -90,10 +90,10 @@ export const dataCopastors: SeedDataCopastors = {
       lastName: 'Vargas Medina',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1978-04-03',
+      birthDate: new Date('1978-04-03'),
       maritalStatus: 'widowed',
       numberChildren: 2,
-      conversionDate: '2000-11-17',
+      conversionDate: new Date('2000-11-17'),
       email: 'julio.vargas@google.com',
       phoneNumber: '+1-234-5678',
       district: 'Independencia',
@@ -107,10 +107,10 @@ export const dataCopastors: SeedDataCopastors = {
       lastName: 'Torres Gutierrez',
       gender: 'female',
       originCountry: 'Peru',
-      birthDate: '1990-02-28',
+      birthDate: new Date('1990-02-28'),
       maritalStatus: 'married',
       numberChildren: 1,
-      conversionDate: '2009-09-05',
+      conversionDate: new Date('2009-09-05'),
       email: 'ana.torres@google.com',
       phoneNumber: '+1-876-5432',
       district: 'Independencia',
@@ -124,10 +124,10 @@ export const dataCopastors: SeedDataCopastors = {
       lastName: 'Soto Chavez',
       gender: 'male',
       originCountry: 'Peru',
-      birthDate: '1982-11-17',
+      birthDate: new Date('1982-11-17'),
       maritalStatus: 'married',
       numberChildren: 4,
-      conversionDate: '2003-08-12',
+      conversionDate: new Date('2003-08-12'),
       email: 'pedro.soto@google.com',
       phoneNumber: '+1-432-1098',
       district: 'Independencia',

@@ -1,25 +1,28 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsEnum,
+  IsString,
+  MinLength,
+  MaxLength,
   IsNotEmpty,
   IsOptional,
-  IsString,
-  MaxLength,
-  MinLength,
 } from 'class-validator';
 import {
-  OfferingIncomeCreationSubType,
   OfferingIncomeCreationType,
+  OfferingIncomeCreationSubType,
 } from '@/modules/offering/income/enums';
+
+import { OfferingFileType } from '@/common/enums';
 
 export class CreateFileDto {
   @ApiProperty({
-    example: 'Ingresos',
+    example: OfferingFileType.Income,
   })
-  @IsString()
+  @IsEnum(OfferingFileType)
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(20)
-  action: string;
+  fileType: string;
 
   @ApiProperty({
     example: OfferingIncomeCreationType.Offering,

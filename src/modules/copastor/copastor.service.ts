@@ -98,7 +98,6 @@ export class CopastorService {
       );
     }
 
-    //* Validate and assign pastor
     const pastor = await this.pastorRepository.findOne({
       where: { id: theirPastor },
       relations: ['theirChurch'],
@@ -197,7 +196,7 @@ export class CopastorService {
       throw new BadRequestException(`El tipo de búsqueda es requerido.`);
     }
 
-    //? Find by first name () --> Many
+    //? Find by first name --> Many
     //* Copastors by copastor names
     if (
       term &&
@@ -238,7 +237,7 @@ export class CopastorService {
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -293,7 +292,7 @@ export class CopastorService {
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -339,7 +338,7 @@ export class CopastorService {
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -394,7 +393,7 @@ export class CopastorService {
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -442,7 +441,7 @@ export class CopastorService {
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -499,7 +498,7 @@ export class CopastorService {
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -550,7 +549,7 @@ export class CopastorService {
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -612,7 +611,7 @@ export class CopastorService {
         }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -660,7 +659,7 @@ export class CopastorService {
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -715,7 +714,7 @@ export class CopastorService {
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -754,7 +753,7 @@ export class CopastorService {
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -793,7 +792,7 @@ export class CopastorService {
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -832,7 +831,7 @@ export class CopastorService {
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -871,7 +870,7 @@ export class CopastorService {
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -910,7 +909,7 @@ export class CopastorService {
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -949,7 +948,7 @@ export class CopastorService {
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -996,7 +995,7 @@ export class CopastorService {
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1181,7 +1180,7 @@ export class CopastorService {
         });
 
         try {
-          //* Update and set to null relationships in Supervisor
+          //* Update and set new relationships in Supervisor
           const supervisorsByCopastor = allSupervisors.filter(
             (supervisor) => supervisor?.theirCopastor?.id === copastor?.id,
           );
@@ -1195,7 +1194,7 @@ export class CopastorService {
             }),
           );
 
-          //* Update and set to null relationships in Zone
+          //* Update and set new relationships in Zone
           const zonesByCopastor = allZones.filter(
             (zone) => zone?.theirCopastor?.id === copastor?.id,
           );
@@ -1209,7 +1208,7 @@ export class CopastorService {
             }),
           );
 
-          //* Update and set to null relationships in Preacher
+          //* Update and set new relationships in Preacher
           const preachersByCopastor = allPreachers.filter(
             (preacher) => preacher?.theirCopastor?.id === copastor?.id,
           );
@@ -1223,7 +1222,7 @@ export class CopastorService {
             }),
           );
 
-          //* Update and set to null relationships in Family group
+          //* Update and set new relationships in Family group
           const familyGroupsByCopastor = allFamilyGroups.filter(
             (familyGroup) => familyGroup?.theirCopastor?.id === copastor?.id,
           );
@@ -1237,7 +1236,7 @@ export class CopastorService {
             }),
           );
 
-          //* Update and set to null relationships in Disciple
+          //* Update and set new relationships in Disciple
           const disciplesByCopastor = allDisciples.filter(
             (disciple) => disciple?.theirCopastor?.id === copastor?.id,
           );
@@ -1334,7 +1333,7 @@ export class CopastorService {
       }
     } else {
       throw new BadRequestException(
-        `No se puede subir de nivel este registro, el modo debe ser "Activo", y los roles: ["discípulo", "pastor"], revisar y actualizar el registro.`,
+        `No se puede subir de nivel este Co-Pastor, el modo debe ser "Activo", y los roles deben ser: ["discípulo", "pastor"], revisar y actualizar el registro.`,
       );
     }
   }
@@ -1351,7 +1350,7 @@ export class CopastorService {
       throw new NotFoundException(`Co-Pastor con id: ${id} no fue encontrado.`);
     }
 
-    //* Update and set in Inactive on Copastor
+    //* Update and set to Inactive on Copastor
     const updatedCopastor = await this.copastorRepository.preload({
       id: copastor.id,
       theirChurch: null,
@@ -1482,7 +1481,7 @@ export class CopastorService {
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, revise los registros de consola',
+      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
     );
   }
 }

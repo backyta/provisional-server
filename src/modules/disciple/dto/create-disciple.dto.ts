@@ -3,17 +3,17 @@ import {
   IsArray,
   IsEmail,
   IsEnum,
-  IsNotEmpty,
-  IsOptional,
   IsString,
   MaxLength,
   MinLength,
+  IsNotEmpty,
+  IsOptional,
 } from 'class-validator';
 import {
-  MaritalStatus,
-  MemberRole,
   Gender,
+  MemberRole,
   RecordStatus,
+  MaritalStatus,
 } from '@/common/enums';
 
 export class CreateDiscipleDto {
@@ -67,7 +67,7 @@ export class CreateDiscipleDto {
   })
   @IsString()
   @IsNotEmpty()
-  birthDate: string | Date;
+  birthDate: Date;
 
   @ApiProperty({
     example: '2',
@@ -80,7 +80,7 @@ export class CreateDiscipleDto {
   })
   @IsString()
   @IsOptional()
-  conversionDate?: string | Date;
+  conversionDate?: Date;
 
   //* Contact Info
   @ApiProperty({

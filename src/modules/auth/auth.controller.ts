@@ -1,12 +1,12 @@
 import { Controller, Post, Body, Get, HttpCode } from '@nestjs/common';
 import {
-  ApiBadRequestResponse,
-  ApiBearerAuth,
-  ApiForbiddenResponse,
-  ApiInternalServerErrorResponse,
-  ApiOkResponse,
   ApiTags,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiForbiddenResponse,
+  ApiBadRequestResponse,
   ApiUnauthorizedResponse,
+  ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 
 import { User } from '@/modules/user/entities';

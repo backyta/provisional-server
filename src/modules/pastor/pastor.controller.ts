@@ -1,13 +1,13 @@
 import {
-  Controller,
   Get,
   Post,
   Body,
+  Query,
   Patch,
   Param,
   Delete,
+  Controller,
   ParseUUIDPipe,
-  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -48,7 +48,7 @@ import { CreatePastorDto, UpdatePastorDto } from '@/modules/pastor/dto';
 export class PastorController {
   constructor(private readonly pastorService: PastorService) {}
 
-  //* Create
+  //* CREATE
   @Post()
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiCreatedResponse({
@@ -64,7 +64,7 @@ export class PastorController {
     return this.pastorService.create(createPastorDto, user);
   }
 
-  //* Find All
+  //* FIND ALL
   @Get()
   @Auth()
   @ApiOkResponse({
@@ -77,7 +77,7 @@ export class PastorController {
     return this.pastorService.findAll(paginationDto);
   }
 
-  //* Find By Term
+  //* FIND ALL BY TERM
   @Get(':term')
   @Auth()
   @ApiParam({
@@ -98,7 +98,7 @@ export class PastorController {
     return this.pastorService.findByTerm(term, searchTypeAndPaginationDto);
   }
 
-  //* Update
+  //* UPDATE
   @Patch(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
@@ -115,7 +115,7 @@ export class PastorController {
     return this.pastorService.update(id, updatePastorDto, user);
   }
 
-  //! Delete
+  //! DELETE
   @Delete(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({

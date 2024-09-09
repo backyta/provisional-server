@@ -1,9 +1,9 @@
 import {
+  Index,
   Column,
   Entity,
-  Index,
-  JoinColumn,
   ManyToOne,
+  JoinColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -12,6 +12,7 @@ import { RecordStatus } from '@/common/enums';
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
 import { Pastor } from '@/modules/pastor/entities';
+import { Church } from '@/modules/church/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Preacher } from '@/modules/preacher/entities';
@@ -55,15 +56,15 @@ export class OfferingIncome {
   reasonElimination: string;
 
   //* Info register and update date
-  @Column('timestamp', { name: 'created_at', nullable: true })
-  createdAt: string | Date;
+  @Column('timestamptz', { name: 'created_at', nullable: true })
+  createdAt: Date;
 
   @ManyToOne(() => User, { eager: true, nullable: true })
   @JoinColumn({ name: 'created_by' })
   createdBy: User;
 
-  @Column('timestamp', { name: 'updated_at', nullable: true })
-  updatedAt: string | Date;
+  @Column('timestamptz', { name: 'updated_at', nullable: true })
+  updatedAt: Date;
 
   @ManyToOne(() => User, { eager: true, nullable: true })
   @JoinColumn({ name: 'updated_by' })
@@ -79,6 +80,14 @@ export class OfferingIncome {
   memberType: string;
 
   //* Relations (FK)
+  // Church
+  @ManyToOne(() => Church, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'church_id' })
+  church: Church;
+
   // Family House
   @ManyToOne(() => FamilyGroup, {
     nullable: true,
@@ -88,7 +97,6 @@ export class OfferingIncome {
   familyGroup: FamilyGroup;
 
   // Member
-  // NOTE : agregar en cada entidad que al subir de nivel se elimina pero se coloca el nuevo id en todos los registros que tenia el anterior ID.
   @ManyToOne(() => Pastor, {
     nullable: true,
     onDelete: 'SET NULL',

@@ -235,7 +235,7 @@ export class ChurchService {
         return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -291,7 +291,7 @@ export class ChurchService {
         return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -335,7 +335,7 @@ export class ChurchService {
         return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -379,7 +379,7 @@ export class ChurchService {
         return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -423,7 +423,7 @@ export class ChurchService {
         return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -467,7 +467,7 @@ export class ChurchService {
         return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -511,7 +511,7 @@ export class ChurchService {
         return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -559,7 +559,7 @@ export class ChurchService {
         return churchDataFormatter({ churches }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -879,7 +879,7 @@ export class ChurchService {
 
     this.logger.error(error);
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, revise los registros de consola',
+      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
     );
   }
 }

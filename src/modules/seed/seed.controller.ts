@@ -41,6 +41,7 @@ export class SeedController {
     if (this.configService.get('STAGE') === 'prod') {
       throw new BadRequestException('Cannot run seed in production.');
     }
+
     return this.seedService.runSeed();
   }
 }

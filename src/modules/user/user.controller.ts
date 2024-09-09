@@ -46,7 +46,7 @@ import { CreateUserDto, UpdateUserDto } from '@/modules/user/dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  //* Create
+  //* CREATE
   @ApiBearerAuth()
   @Post()
   @Auth(UserRole.SuperUser)
@@ -60,7 +60,7 @@ export class UserController {
     return this.userService.create(createUserDto, user);
   }
 
-  //* Find All
+  //* FIND ALL
   @Get()
   @Auth(UserRole.SuperUser)
   @ApiOkResponse({
@@ -73,7 +73,7 @@ export class UserController {
     return this.userService.findAll(paginationDto);
   }
 
-  //* Find By Term
+  //* FIND BY TERM
   @Get(':term')
   @Auth()
   @ApiParam({
@@ -93,7 +93,7 @@ export class UserController {
     return this.userService.findByTerm(term, searchTypeAndPaginationDto);
   }
 
-  //* Update
+  //* UPDATE
   @Patch(':id')
   @Auth(UserRole.SuperUser)
   @ApiOkResponse({
@@ -110,7 +110,7 @@ export class UserController {
     return this.userService.update(id, updateUserDto, user);
   }
 
-  //* Delete
+  //! DELETE
   @Delete(':id')
   @Auth(UserRole.SuperUser)
   @ApiOkResponse({

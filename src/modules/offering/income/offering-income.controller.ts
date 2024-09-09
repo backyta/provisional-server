@@ -1,25 +1,29 @@
 import {
-  Controller,
   Get,
   Post,
   Body,
   Patch,
   Param,
-  Delete,
   Query,
+  Delete,
+  Controller,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import {
-  ApiCreatedResponse,
-  ApiForbiddenResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
   ApiParam,
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiForbiddenResponse,
 } from '@nestjs/swagger';
+
+import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
 
 import { User } from '@/modules/user/entities';
+import { DeleteOfferingDto } from '@/modules/offering/shared/dto';
 
 import {
   CreateOfferingIncomeDto,
@@ -27,13 +31,12 @@ import {
 } from '@/modules/offering/income/dto';
 import { OfferingIncome } from '@/modules/offering/income/entities';
 import { OfferingIncomeService } from '@/modules/offering/income/offering-income.service';
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 @Controller('offerings-income')
 export class OfferingIncomeController {
   constructor(private readonly offeringIncomeService: OfferingIncomeService) {}
 
-  //* Create
+  //* CREATE
   @Post()
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiCreatedResponse({
@@ -49,7 +52,7 @@ export class OfferingIncomeController {
     return this.offeringIncomeService.create(createIncomeDto, user);
   }
 
-  //* Find All
+  //* FIND ALL
   @Get()
   @Auth()
   @ApiOkResponse({
@@ -62,7 +65,7 @@ export class OfferingIncomeController {
     return this.offeringIncomeService.findAll(paginationDto);
   }
 
-  //* Find By Term
+  //* FIND BY TERM
   @Get(':term')
   @Auth()
   @ApiParam({
@@ -86,16 +89,37 @@ export class OfferingIncomeController {
     );
   }
 
+  //* UPDATE
   @Patch(':id')
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
+  @ApiOkResponse({
+    description: 'Successful operation',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
   update(
-    @Param('id') id: string,
-    @Body() updateIncomeDto: UpdateOfferingIncomeDto,
-  ) {
-    return this.offeringIncomeService.update(+id, updateIncomeDto);
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateOfferingIncomeDto: UpdateOfferingIncomeDto,
+    @GetUser() user: User,
+  ): Promise<OfferingIncome> {
+    return this.offeringIncomeService.update(id, updateOfferingIncomeDto, user);
   }
 
+  //! DELETE
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.offeringIncomeService.remove(+id);
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
+  remove(
+    @Param('id') id: string,
+    @Query() deleteOfferingIncomeDto: DeleteOfferingDto,
+    @GetUser() user: User,
+  ): Promise<void> {
+    return this.offeringIncomeService.remove(id, deleteOfferingIncomeDto, user);
   }
 }

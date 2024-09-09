@@ -17,6 +17,7 @@ export enum SearchType {
   //* Disciple, Supervisor, Preacher, Family House
   ZoneName = 'zone_name',
   ZoneId = 'zone_id',
+  CopastorId = 'copastor_id',
 
   //* Disciple, Supervisor, Preacher, Fam. House,
   FamilyGroupCode = 'family_group_code',
@@ -56,14 +57,19 @@ export enum SearchType {
   Special = 'special',
   IncomeAdjustment = 'income_adjustment',
 
+  LatestSundayOfferings = 'latest_sunday_offerings',
+  TopFamilyGroupOfferings = 'top_family_group_offerings',
+  MostPopulatedFamilyGroups = 'most_populated_family_groups',
+  LessPopulatedFamilyGroups = 'less_populated_family_groups',
+
   //* Offering Expenses
-  OperationalExpenses = 'operative_expenses',
-  MaintenanceAndRepairExpenses = 'maintenance_and_repair_expenses',
-  DecorationExpenses = 'decoration_expenses',
-  EquipmentAndTechnologyExpenses = 'equipment_and_technology_expenses',
-  SuppliesExpenses = 'supplies_expenses',
-  ActivitiesAndEventsExpenses = 'activities_and_events_expenses',
-  ExpensesAdjustment = 'expenses_adjustment',
+  OperationalExpense = 'operative_expense',
+  MaintenanceAndRepairExpense = 'maintenance_and_repair_expense',
+  DecorationExpense = 'decoration_expense',
+  EquipmentAndTechnologyExpense = 'equipment_and_technology_expense',
+  SuppliesExpense = 'supplies_expense',
+  ActivitiesAndEventsExpense = 'activities_and_events_expense',
+  ExpenseAdjustment = 'expense_adjustment',
 }
 
 export const SearchTypeNames: Record<SearchType, string> = {
@@ -81,6 +87,7 @@ export const SearchTypeNames: Record<SearchType, string> = {
 
   [SearchType.ZoneName]: 'Nombre de Zona',
   [SearchType.ZoneId]: 'ID de Zona',
+  [SearchType.CopastorId]: 'ID de Copastor',
 
   [SearchType.FamilyGroupCode]: 'Código de Grupo Familiar',
   [SearchType.FamilyGroupName]: 'Nombre de Grupo Familiar',
@@ -113,12 +120,17 @@ export const SearchTypeNames: Record<SearchType, string> = {
   [SearchType.Special]: 'Especial',
   [SearchType.IncomeAdjustment]: 'Ajuste por Ingresos',
 
-  [SearchType.OperationalExpenses]: 'Gastos Operativos',
-  [SearchType.MaintenanceAndRepairExpenses]:
+  [SearchType.LatestSundayOfferings]: 'Ultimas Ofrendas Dominicales',
+  [SearchType.TopFamilyGroupOfferings]: 'Top Ofrendas Grupos Familiares',
+  [SearchType.MostPopulatedFamilyGroups]: 'Grupos Familiares mas poblados',
+  [SearchType.LessPopulatedFamilyGroups]: 'Grupos Familiares menos poblados',
+
+  [SearchType.OperationalExpense]: 'Gastos Operativos',
+  [SearchType.MaintenanceAndRepairExpense]:
     'Gastos de Mantenimiento y Reparación',
-  [SearchType.DecorationExpenses]: 'Gastos de Decoración',
-  [SearchType.EquipmentAndTechnologyExpenses]: 'Gastos de Equipos y Tecnología',
-  [SearchType.SuppliesExpenses]: 'Gastos de Suministros',
-  [SearchType.ActivitiesAndEventsExpenses]: 'Gastos de Actividades y Eventos',
-  [SearchType.ExpensesAdjustment]: 'Ajuste de Gastos',
+  [SearchType.DecorationExpense]: 'Gastos de Decoración',
+  [SearchType.EquipmentAndTechnologyExpense]: 'Gastos de Equipos y Tecnología',
+  [SearchType.SuppliesExpense]: 'Gastos de Suministros',
+  [SearchType.ActivitiesAndEventsExpense]: 'Gastos de Actividades y Eventos',
+  [SearchType.ExpenseAdjustment]: 'Ajuste de Gastos',
 };

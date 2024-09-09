@@ -29,8 +29,8 @@ import { supervisorDataFormatter } from '@/modules/supervisor/helpers';
 
 import {
   MemberRole,
-  RecordStatus,
   GenderNames,
+  RecordStatus,
   MaritalStatusNames,
 } from '@/common/enums';
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
@@ -83,10 +83,10 @@ export class SupervisorService {
   ): Promise<Supervisor> {
     const {
       roles,
-      theirCopastor,
       theirPastor,
-      isDirectRelationToPastor,
+      theirCopastor,
       numberChildren,
+      isDirectRelationToPastor,
     } = createSupervisorDto;
 
     if (
@@ -290,6 +290,7 @@ export class SupervisorService {
       limit,
       offset = 0,
       order,
+      isNull = 'false',
     } = searchTypeAndPaginationDto;
 
     if (!term) {
@@ -300,7 +301,7 @@ export class SupervisorService {
       throw new BadRequestException(`El tipo de búsqueda es requerido.`);
     }
 
-    //? Find by first name () --> Many
+    //? Find by first name --> Many
     //* Supervisors by supervisor names
     if (
       term &&
@@ -341,7 +342,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -396,7 +397,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -451,7 +452,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -497,7 +498,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -552,7 +553,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -607,7 +608,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -655,7 +656,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -712,7 +713,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -769,7 +770,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -820,7 +821,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -882,7 +883,7 @@ export class SupervisorService {
         }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -931,7 +932,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -979,7 +980,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1034,7 +1035,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1073,7 +1074,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1112,7 +1113,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1151,7 +1152,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1190,7 +1191,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1229,7 +1230,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1268,7 +1269,7 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1315,13 +1316,63 @@ export class SupervisorService {
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
+        );
+      }
+    }
+
+    //? Find by copastor id --> Many
+    if (term && searchType === SupervisorSearchType.CopastorId) {
+      console.log(term);
+
+      const copastor = await this.copastorRepository.findOne({
+        where: {
+          id: term,
+          recordStatus: RecordStatus.Active,
+        },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      const supervisors = await this.supervisorRepository.find({
+        where: {
+          theirCopastor: copastor,
+          theirZone: isNull === 'true' ? IsNull() : null,
+          recordStatus: RecordStatus.Active,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirZone',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+      console.log(supervisors);
+
+      if (supervisors.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron predicadores(as) con este ID de zona: ${term}`,
+        );
+      }
+
+      try {
+        return supervisorDataFormatter({ supervisors }) as any;
+      } catch (error) {
+        throw new BadRequestException(
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
 
     //! General Exceptions
-
     if (
       term &&
       !Object.values(SupervisorSearchType).includes(
@@ -1561,15 +1612,12 @@ export class SupervisorService {
         const allZones = await this.zoneRepository.find({
           relations: ['theirSupervisor'],
         });
-
         const allPreachers = await this.preacherRepository.find({
           relations: ['theirSupervisor'],
         });
-
         const allFamilyGroups = await this.familyGroupRepository.find({
           relations: ['theirSupervisor'],
         });
-
         const allDisciples = await this.discipleRepository.find({
           relations: ['theirSupervisor'],
         });
@@ -1642,7 +1690,10 @@ export class SupervisorService {
       }
 
       //! Update if Is Direction relation to pastor is true
-      if (isDirectRelationToPastor) {
+      if (
+        supervisor?.theirPastor?.id !== theirPastor &&
+        isDirectRelationToPastor
+      ) {
         //* Validate pastor
         if (!theirPastor) {
           throw new NotFoundException(
@@ -1709,15 +1760,12 @@ export class SupervisorService {
         const allZones = await this.zoneRepository.find({
           relations: ['theirSupervisor'],
         });
-
         const allPreachers = await this.preacherRepository.find({
           relations: ['theirSupervisor'],
         });
-
         const allFamilyGroups = await this.familyGroupRepository.find({
           relations: ['theirSupervisor'],
         });
-
         const allDisciples = await this.discipleRepository.find({
           relations: ['theirSupervisor'],
         });
@@ -1801,6 +1849,30 @@ export class SupervisorService {
           theirChurch: supervisor.theirChurch,
           theirPastor: supervisor.theirPastor,
           theirCopastor: supervisor.theirCopastor,
+          updatedAt: new Date(),
+          updatedBy: user,
+          recordStatus: recordStatus,
+        });
+
+        try {
+          return await this.supervisorRepository.save(updatedSupervisor);
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+      }
+
+      //? Update and save if is same Pastor (isDirect true)
+      if (
+        supervisor?.theirPastor?.id === theirPastor &&
+        isDirectRelationToPastor
+      ) {
+        const updatedSupervisor = await this.supervisorRepository.preload({
+          id: supervisor.id,
+          ...updateSupervisorDto,
+          numberChildren: +numberChildren,
+          theirChurch: supervisor.theirChurch,
+          theirPastor: supervisor.theirPastor,
+          theirCopastor: null,
           updatedAt: new Date(),
           updatedBy: user,
           recordStatus: recordStatus,
@@ -1904,7 +1976,7 @@ export class SupervisorService {
       }
     } else {
       throw new BadRequestException(
-        `No se puede subir de nivel este registro, el modo debe ser "Activo" y los roles: ["discípulo", "supervisor"], revisar y actualizar el registro.`,
+        `No se puede subir de nivel este Supervisor, el modo debe ser "Activo", los roles deben ser: ["discípulo", "supervisor"], revisar y actualizar el registro.`,
       );
     }
   }
@@ -1945,15 +2017,12 @@ export class SupervisorService {
     const allZones = await this.zoneRepository.find({
       relations: ['theirSupervisor'],
     });
-
     const allPreachers = await this.preacherRepository.find({
       relations: ['theirSupervisor'],
     });
-
     const allFamilyGroup = await this.familyGroupRepository.find({
       relations: ['theirSupervisor'],
     });
-
     const allDisciples = await this.discipleRepository.find({
       relations: ['theirSupervisor'],
     });
@@ -2037,7 +2106,7 @@ export class SupervisorService {
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, revise los registros de consola',
+      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
     );
   }
 }

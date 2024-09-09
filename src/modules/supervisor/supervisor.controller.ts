@@ -1,13 +1,13 @@
 import {
-  Controller,
   Get,
   Post,
   Body,
   Patch,
+  Query,
   Param,
   Delete,
+  Controller,
   ParseUUIDPipe,
-  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -52,7 +52,7 @@ import { SupervisorService } from '@/modules/supervisor/supervisor.service';
 export class SupervisorController {
   constructor(private readonly supervisorService: SupervisorService) {}
 
-  //* Create
+  //* CREATE
   @Post()
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiCreatedResponse({
@@ -68,7 +68,7 @@ export class SupervisorController {
     return this.supervisorService.create(createSupervisorDto, user);
   }
 
-  //* Find All
+  //* FIND ALL
   @Get()
   @Auth()
   @ApiOkResponse({
@@ -81,7 +81,7 @@ export class SupervisorController {
     return this.supervisorService.findAll(paginationDto);
   }
 
-  //* Find By Term
+  //* FIND BY TERM
   @Get(':term')
   @Auth()
   @ApiParam({
@@ -102,7 +102,7 @@ export class SupervisorController {
     return this.supervisorService.findByTerm(term, searchTypeAndPaginationDto);
   }
 
-  //* Update
+  //* UPDATE
   @Patch(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
@@ -119,7 +119,7 @@ export class SupervisorController {
     return this.supervisorService.update(id, updateSupervisorDto, user);
   }
 
-  //! Delete
+  //! DELETE
   @Delete(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({

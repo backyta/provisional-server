@@ -1,13 +1,13 @@
 import {
-  Controller,
   Get,
-  Post,
   Body,
+  Post,
+  Query,
   Patch,
   Param,
   Delete,
+  Controller,
   ParseUUIDPipe,
-  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -49,7 +49,7 @@ import { CreateDiscipleDto, UpdateDiscipleDto } from '@/modules/disciple/dto';
 export class DiscipleController {
   constructor(private readonly discipleService: DiscipleService) {}
 
-  //* Create
+  //* CREATE
   @Post()
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiCreatedResponse({
@@ -65,7 +65,7 @@ export class DiscipleController {
     return this.discipleService.create(createDiscipleDto, user);
   }
 
-  //* Find All
+  //* FIND ALL
   @Get()
   @Auth()
   @ApiOkResponse({
@@ -78,7 +78,7 @@ export class DiscipleController {
     return this.discipleService.findAll(paginationDto);
   }
 
-  //* Find By Term
+  //* FIND BY TERM
   @Get(':term')
   @Auth()
   @ApiParam({
@@ -99,7 +99,7 @@ export class DiscipleController {
     return this.discipleService.findByTerm(term, searchTypeAndPaginationDto);
   }
 
-  //* Update
+  //* UPDATE
   @Patch(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
@@ -116,7 +116,7 @@ export class DiscipleController {
     return this.discipleService.update(id, updateDiscipleDto, user);
   }
 
-  //* Delete
+  //* DELETE
   @Delete(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({

@@ -1,20 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsArray,
-  IsBoolean,
-  IsEmail,
   IsEnum,
-  IsNotEmpty,
-  IsOptional,
+  IsArray,
+  IsEmail,
   IsString,
+  IsBoolean,
+  IsNotEmpty,
   MaxLength,
   MinLength,
+  IsOptional,
 } from 'class-validator';
 import {
-  MaritalStatus,
-  MemberRole,
   Gender,
+  MemberRole,
   RecordStatus,
+  MaritalStatus,
 } from '@/common/enums';
 
 export class CreatePreacherDto {
@@ -68,7 +68,7 @@ export class CreatePreacherDto {
   })
   @IsString()
   @IsNotEmpty()
-  birthDate: string | Date;
+  birthDate: Date;
 
   @ApiProperty({
     example: '2',
@@ -81,7 +81,7 @@ export class CreatePreacherDto {
   })
   @IsString()
   @IsOptional()
-  conversionDate?: string | Date;
+  conversionDate?: Date;
 
   //* Contact Info
   @ApiProperty({

@@ -1,13 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsEnum,
   IsArray,
   IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
   IsString,
   MaxLength,
   MinLength,
+  IsNotEmpty,
+  IsOptional,
 } from 'class-validator';
 import {
   Gender,
@@ -67,7 +67,7 @@ export class CreateCopastorDto {
   })
   @IsString()
   @IsNotEmpty()
-  birthDate: string | Date;
+  birthDate: Date;
 
   @ApiProperty({
     example: '2',
@@ -80,7 +80,7 @@ export class CreateCopastorDto {
   })
   @IsString()
   @IsOptional()
-  conversionDate?: string | Date;
+  conversionDate?: Date;
 
   //* Contact Info
   @ApiProperty({

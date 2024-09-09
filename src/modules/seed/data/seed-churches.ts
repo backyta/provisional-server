@@ -3,7 +3,7 @@ interface SeedMainChurch {
   churchName: string;
   isAnexe?: boolean;
   worshipTimes: string[];
-  foundingDate: string | Date;
+  foundingDate: Date;
 
   //* Contact Info
   email: string;
@@ -22,7 +22,7 @@ interface SeedAnexes {
   churchName: string;
   isAnexe?: boolean;
   worshipTimes: string[];
-  foundingDate: string | Date;
+  foundingDate: Date;
 
   //* Contact Info
   email: string;
@@ -49,9 +49,8 @@ export const dataChurches: SeedDataChurches = {
   mainChurch: [
     {
       churchName: 'Iglesia Central',
-      // isAnexe: false,
       worshipTimes: ['9:00', '16:00'],
-      foundingDate: '2020-11-20',
+      foundingDate: new Date('2020-11-20'),
       email: 'iglesia.central@google.com',
       phoneNumber: '999-999-999',
       country: 'Peru',
@@ -67,9 +66,8 @@ export const dataChurches: SeedDataChurches = {
   anexes: [
     {
       churchName: 'Iglesia - Anexo 1',
-      // isAnexe: true,
       worshipTimes: ['11:00', '18:00'],
-      foundingDate: '2021-08-12',
+      foundingDate: new Date('2021-08-12'),
       email: 'iglesia.anexo1@google.com',
       phoneNumber: '999-999-999',
       country: 'Peru',
@@ -79,13 +77,11 @@ export const dataChurches: SeedDataChurches = {
       urbanSector: 'Ermitaño',
       address: 'Jr. Charqui 4510',
       referenceAddress: 'A cuadras del mercado central',
-      // theirMainChurch: '123abc',
     },
     {
       churchName: 'Iglesia - Anexo 2',
-      // isAnexe: true,
       worshipTimes: ['10:00', '17:00'],
-      foundingDate: '2023-03-17',
+      foundingDate: new Date('2023-03-17'),
       email: 'iglesia.anexo2@google.com',
       phoneNumber: '999-999-999',
       country: 'Peru',
@@ -95,7 +91,6 @@ export const dataChurches: SeedDataChurches = {
       urbanSector: 'Payet',
       address: 'Jr. Condorcanqui 2012',
       referenceAddress: 'Al costado de la fabrica de vidrios',
-      // theirMainChurch: '123abc',
     },
   ],
 };

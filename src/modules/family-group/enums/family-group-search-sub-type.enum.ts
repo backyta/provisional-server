@@ -44,67 +44,67 @@ export const FamilyGroupSearchSubTypeNames: Record<
 };
 
 //* FirstName
-export enum FamilyGroupSearchByFirstNames {
+export enum SubTypeFamilyGroupSearchByFirstNames {
   FamilyGroupByPastorNames = 'family_group_by_pastor_names',
   FamilyGroupByCopastorNames = 'family_group_by_copastor_names',
   FamilyGroupBySupervisorNames = 'family_group_by_supervisor_names',
   FamilyGroupByPreacherNames = 'family_group_by_preacher_names',
 }
 
-export const FamilyGroupSearchNamesByFirstNames: Record<
-  FamilyGroupSearchByFirstNames,
+export const SubTypeNamesFamilyGroupSearchByFirstNames: Record<
+  SubTypeFamilyGroupSearchByFirstNames,
   string
 > = {
-  [FamilyGroupSearchByFirstNames.FamilyGroupByPastorNames]:
+  [SubTypeFamilyGroupSearchByFirstNames.FamilyGroupByPastorNames]:
     'Por nombres de su pastor',
-  [FamilyGroupSearchByFirstNames.FamilyGroupByCopastorNames]:
+  [SubTypeFamilyGroupSearchByFirstNames.FamilyGroupByCopastorNames]:
     'Por nombres de su co-pastor',
-  [FamilyGroupSearchByFirstNames.FamilyGroupBySupervisorNames]:
+  [SubTypeFamilyGroupSearchByFirstNames.FamilyGroupBySupervisorNames]:
     'Por nombres de su supervisor',
-  [FamilyGroupSearchByFirstNames.FamilyGroupByPreacherNames]:
+  [SubTypeFamilyGroupSearchByFirstNames.FamilyGroupByPreacherNames]:
     'Por nombres de su predicador',
 };
 
 //* LastName
-export enum FamilyGroupSearchByLastNames {
+export enum SubTypeFamilyGroupSearchByLastNames {
   FamilyGroupByPastorLastNames = 'family_group_by_pastor_last_names',
   FamilyGroupByCopastorLastNames = 'family_group_by_copastor_last_names',
   FamilyGroupBySupervisorLastNames = 'family_group_by_supervisor_last_names',
   FamilyGroupByPreacherLastNames = 'family_group_by_preacher_last_names',
 }
 
-export const FamilyGroupSearchNamesByLastNames: Record<
-  FamilyGroupSearchByLastNames,
+export const SubTypeNamesFamilyGroupSearchByLastNames: Record<
+  SubTypeFamilyGroupSearchByLastNames,
   string
 > = {
-  [FamilyGroupSearchByLastNames.FamilyGroupByPastorLastNames]:
+  [SubTypeFamilyGroupSearchByLastNames.FamilyGroupByPastorLastNames]:
     'Por apellidos de su pastor',
-  [FamilyGroupSearchByLastNames.FamilyGroupByCopastorLastNames]:
+  [SubTypeFamilyGroupSearchByLastNames.FamilyGroupByCopastorLastNames]:
     'Por apellidos de su co-pastor',
-  [FamilyGroupSearchByLastNames.FamilyGroupBySupervisorLastNames]:
+  [SubTypeFamilyGroupSearchByLastNames.FamilyGroupBySupervisorLastNames]:
     'Por apellidos de su supervisor',
-  [FamilyGroupSearchByLastNames.FamilyGroupByPreacherLastNames]:
+  [SubTypeFamilyGroupSearchByLastNames.FamilyGroupByPreacherLastNames]:
     'Por apellidos de su predicador',
 };
 
 //* Full Name
-export enum FamilyGroupSearchByFullNames {
+export enum SubTypeFamilyGroupSearchByFullNames {
   FamilyGroupByPastorFullName = 'family_group_by_pastor_full_name',
   FamilyGroupByCopastorFullName = 'family_group_by_copastor_full_name',
   FamilyGroupBySupervisorFullName = 'family_group_by_supervisor_full_name',
   FamilyGroupByPreacherFullName = 'family_group_by_preacher_full_name',
 }
 
-export const FamilyGroupSearchNamesByFullNames: Record<
-  FamilyGroupSearchByFullNames,
+export const SubTypeNamesFamilyGroupSearchByFullNames: Record<
+  SubTypeFamilyGroupSearchByFullNames,
   string
 > = {
-  [FamilyGroupSearchByFullNames.FamilyGroupByPastorFullName]:
+  [SubTypeFamilyGroupSearchByFullNames.FamilyGroupByPastorFullName]:
     'Por nombres y apellidos de su pastor',
-  [FamilyGroupSearchByFullNames.FamilyGroupByCopastorFullName]:
+  [SubTypeFamilyGroupSearchByFullNames.FamilyGroupByCopastorFullName]:
     'Por nombres y apellidos de su co-pastor',
-  [FamilyGroupSearchByFullNames.FamilyGroupBySupervisorFullName]:
+  [SubTypeFamilyGroupSearchByFullNames.FamilyGroupBySupervisorFullName]:
     'Por nombres y apellidos de su supervisor',
-  [FamilyGroupSearchByFullNames.FamilyGroupByPreacherFullName]:
+  [SubTypeFamilyGroupSearchByFullNames.FamilyGroupByPreacherFullName]:
     'Por nombres y apellidos de su predicador',
 };

@@ -230,7 +230,6 @@ export class PreacherService {
         'theirFamilyGroup',
         'disciples',
       ],
-      relationLoadStrategy: 'query',
       order: { createdAt: order as FindOptionsOrderValue },
     });
 
@@ -259,7 +258,7 @@ export class PreacherService {
       throw new BadRequestException(`El tipo de búsqueda es requerido.`);
     }
 
-    //? Find by first name () --> Many
+    //? Find by first name --> Many
     //* Preacher by preacher names
     if (
       term &&
@@ -286,7 +285,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -300,7 +298,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -341,7 +339,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -355,7 +352,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -396,7 +393,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -410,7 +406,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -451,7 +447,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -465,7 +460,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -497,7 +492,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -511,7 +505,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -552,7 +546,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -566,7 +559,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -607,7 +600,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -621,7 +613,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -662,7 +654,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -676,7 +667,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -710,7 +701,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -724,7 +714,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -767,7 +757,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -781,7 +770,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -824,7 +813,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -838,7 +826,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -881,7 +869,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -895,7 +882,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -929,7 +916,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -946,7 +932,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -970,7 +956,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -1008,7 +993,7 @@ export class PreacherService {
         }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1043,7 +1028,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -1057,7 +1041,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1092,7 +1076,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -1106,7 +1089,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1141,7 +1124,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -1155,7 +1137,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1189,7 +1171,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -1203,7 +1184,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1235,7 +1216,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -1251,7 +1231,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1289,7 +1269,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -1306,7 +1285,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1331,7 +1310,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -1345,7 +1323,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1370,7 +1348,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -1384,7 +1361,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1409,7 +1386,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -1423,7 +1399,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1448,7 +1424,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -1462,7 +1437,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1487,7 +1462,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -1501,7 +1475,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1526,7 +1500,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -1540,7 +1513,7 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
@@ -1571,7 +1544,6 @@ export class PreacherService {
           'theirFamilyGroup',
           'disciples',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -1587,13 +1559,12 @@ export class PreacherService {
         return preacherDataFormatter({ preachers }) as any;
       } catch (error) {
         throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador`,
+          `Ocurrió un error, habla con el administrador.`,
         );
       }
     }
 
     //! General Exceptions
-
     if (
       term &&
       !Object.values(PreacherSearchType).includes(
@@ -1907,8 +1878,8 @@ export class PreacherService {
                     : familyGroupsByNewZone.length + 1,
                 familyGroupCode:
                   familyGroupsByNewZone.length === 0
-                    ? `${newZone.zoneName.toUpperCase()}-${1}`
-                    : `${newZone.zoneName.toUpperCase()}-${familyGroupsByNewZone.length + 1}`,
+                    ? `${newZone?.zoneName?.toUpperCase()}-${1}`
+                    : `${newZone?.zoneName?.toUpperCase()}-${familyGroupsByNewZone.length + 1}`,
                 updatedAt: new Date(),
                 updatedBy: user,
               });
@@ -1934,7 +1905,7 @@ export class PreacherService {
             }),
           );
 
-          //* Reorder family group numbers and codes in the old zone
+          //* Reorder family group numbers and codes in the old zone (It is also reordered when the zone does not exist)
           const familyGroupsByOrder = await this.familyGroupRepository.find({
             relations: ['theirZone'],
             order: { familyGroupNumber: 'ASC' },
@@ -1949,7 +1920,7 @@ export class PreacherService {
             familyGroupsByOrderFiltered.map(async (familyGroup, index) => {
               await this.familyGroupRepository.update(familyGroup.id, {
                 familyGroupNumber: index + 1,
-                familyGroupCode: `${familyGroup.theirZone.zoneName.toUpperCase()}-${index + 1}`,
+                familyGroupCode: `${familyGroup?.theirZone?.zoneName?.toUpperCase() ?? 'Sin Zona'}-${index + 1}`,
                 updatedAt: new Date(),
                 updatedBy: user,
               });
@@ -1963,212 +1934,366 @@ export class PreacherService {
       }
 
       //? Update and save if is same Supervisor
+      //! Also in the case that the Preacher does not have a zone and we need to get all the new information from the supervisor that was updated with the new zone
       if (preacher?.theirSupervisor?.id === theirSupervisor) {
+        //* Validate supervisor
+        if (!theirSupervisor) {
+          throw new NotFoundException(
+            `Para poder actualizar un Predicador, se le debe asignar un Supervisor.`,
+          );
+        }
+
+        const newSupervisor = await this.supervisorRepository.findOne({
+          where: { id: theirSupervisor },
+          relations: [
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+          ],
+        });
+
+        if (!newSupervisor) {
+          throw new NotFoundException(
+            `Supervisor con id: ${theirSupervisor} no fue encontrado.`,
+          );
+        }
+
+        if (newSupervisor?.recordStatus === RecordStatus.Inactive) {
+          throw new BadRequestException(
+            `La propiedad "Estado de registro" en Supervisor debe ser "Activo".`,
+          );
+        }
+
+        //* Validate Zone according supervisor
+        if (!newSupervisor?.theirZone) {
+          throw new BadRequestException(
+            `No se encontró la Zona, verifica que Supervisor tenga una Zona asignada.`,
+          );
+        }
+
+        const newZone = await this.zoneRepository.findOne({
+          where: { id: newSupervisor?.theirZone?.id },
+        });
+
+        if (newZone?.recordStatus === RecordStatus.Inactive) {
+          throw new BadRequestException(
+            `La propiedad "Estado de registro" en Zona debe ser "Activo".`,
+          );
+        }
+
+        //* Validate Copastor according supervisor
+        if (!newSupervisor?.theirCopastor) {
+          throw new BadRequestException(
+            `No se encontró el Co-Pastor, verifica que Supervisor tenga un Co-Pastor asignado.`,
+          );
+        }
+
+        const newCopastor = await this.copastorRepository.findOne({
+          where: { id: newSupervisor?.theirCopastor?.id },
+        });
+
+        if (newCopastor?.recordStatus === RecordStatus.Inactive) {
+          throw new BadRequestException(
+            `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
+          );
+        }
+
+        //* Validate Pastor according copastor
+        if (!newSupervisor?.theirPastor) {
+          throw new BadRequestException(
+            `No se encontró el Pastor, verifica que Supervisor tenga un Pastor asignado.`,
+          );
+        }
+
+        const newPastor = await this.pastorRepository.findOne({
+          where: { id: newSupervisor?.theirPastor?.id },
+        });
+
+        if (newPastor?.recordStatus === RecordStatus.Inactive) {
+          throw new BadRequestException(
+            `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
+          );
+        }
+
+        //* Validate Church according copastor
+        if (!newSupervisor?.theirChurch) {
+          throw new BadRequestException(
+            `No se encontró la Iglesia, verifica que Supervisor tenga una Iglesia asignada.`,
+          );
+        }
+
+        const newChurch = await this.churchRepository.findOne({
+          where: { id: newSupervisor?.theirChurch?.id },
+        });
+
+        if (newChurch?.recordStatus === RecordStatus.Inactive) {
+          throw new BadRequestException(
+            `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
+          );
+        }
+
         const updatedPreacher = await this.preacherRepository.preload({
           id: preacher.id,
           ...updatePreacherDto,
           numberChildren: +numberChildren,
-          theirChurch: preacher.theirChurch,
-          theirPastor: preacher.theirPastor,
-          theirCopastor: preacher.theirCopastor,
-          theirZone: preacher.theirZone,
-          theirSupervisor: preacher.theirSupervisor,
+          theirChurch: newChurch,
+          theirPastor: newPastor,
+          theirCopastor: newCopastor,
+          theirSupervisor: newSupervisor,
+          theirZone: newZone,
+          theirFamilyGroup: preacher.theirFamilyGroup,
           updatedAt: new Date(),
           updatedBy: user,
           recordStatus: recordStatus,
         });
 
+        let savedPreacher: Preacher;
         try {
-          return await this.preacherRepository.save(updatedPreacher);
+          savedPreacher = await this.preacherRepository.save(updatedPreacher);
         } catch (error) {
           this.handleDBExceptions(error);
         }
-      }
-    }
 
-    //* Raise Preacher level to Supervisor
-    if (
-      (preacher.roles.includes(MemberRole.Disciple) &&
-        preacher.roles.includes(MemberRole.Preacher) &&
-        !preacher.roles.includes(MemberRole.Treasurer) &&
-        !preacher.roles.includes(MemberRole.Copastor) &&
-        !preacher.roles.includes(MemberRole.Supervisor) &&
-        !preacher.roles.includes(MemberRole.Pastor) &&
-        roles.includes(MemberRole.Disciple) &&
-        roles.includes(MemberRole.Supervisor) &&
-        !roles.includes(MemberRole.Treasurer) &&
-        !roles.includes(MemberRole.Copastor) &&
-        !roles.includes(MemberRole.Pastor) &&
-        !roles.includes(MemberRole.Preacher) &&
-        recordStatus === RecordStatus.Active) ||
-      (preacher.roles.includes(MemberRole.Disciple) &&
-        preacher.roles.includes(MemberRole.Preacher) &&
-        preacher.roles.includes(MemberRole.Treasurer) &&
-        !preacher.roles.includes(MemberRole.Copastor) &&
-        !preacher.roles.includes(MemberRole.Supervisor) &&
-        !preacher.roles.includes(MemberRole.Pastor) &&
-        roles.includes(MemberRole.Disciple) &&
-        roles.includes(MemberRole.Supervisor) &&
-        roles.includes(MemberRole.Treasurer) &&
-        !roles.includes(MemberRole.Copastor) &&
-        !roles.includes(MemberRole.Pastor) &&
-        !roles.includes(MemberRole.Preacher) &&
-        recordStatus === RecordStatus.Active)
-    ) {
-      //? Raise level and create with relation to copastor
-      if (!isDirectRelationToPastor) {
-        //* Validation new copastor
-        if (!theirCopastor) {
-          throw new NotFoundException(
-            `Para subir de nivel de Predicador a Supervisor, se le debe asignar un Co-Pastor.`,
-          );
-        }
-
-        const newCopastor = await this.copastorRepository.findOne({
-          where: { id: theirCopastor },
-          relations: ['theirPastor', 'theirChurch'],
+        //? Update in subordinate relations
+        const allFamilyGroups = await this.familyGroupRepository.find({
+          relations: ['theirPreacher', 'theirZone'],
         });
 
-        if (!newCopastor) {
-          throw new NotFoundException(
-            `Co-Pastor con id: ${id} no fue encontrado.`,
-          );
-        }
-
-        if (newCopastor?.recordStatus === RecordStatus.Inactive) {
-          throw new NotFoundException(
-            `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
-          );
-        }
-
-        //* Validation new pastor according copastor
-        if (!newCopastor?.theirPastor) {
-          throw new BadRequestException(
-            `No se encontró el Pastor, verifica que Co-Pastor tenga un Pastor asignado.`,
-          );
-        }
-
-        const newPastor = await this.pastorRepository.findOne({
-          where: { id: newCopastor?.theirPastor?.id },
-          relations: ['theirChurch'],
+        const allDisciples = await this.discipleRepository.find({
+          relations: ['theirPreacher'],
         });
 
-        if (newPastor?.recordStatus === RecordStatus.Inactive) {
-          throw new NotFoundException(
-            `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
-          );
-        }
-
-        //* Validation new church according copastor
-        if (!newCopastor?.theirChurch) {
-          throw new BadRequestException(
-            `No se encontró la Iglesia, verifica que Co-Pastor tenga una Iglesia asignada.`,
-          );
-        }
-
-        const newChurch = await this.churchRepository.findOne({
-          where: { id: newCopastor?.theirChurch?.id },
-          relations: ['theirMainChurch'],
-        });
-
-        if (newChurch?.recordStatus === RecordStatus.Inactive) {
-          throw new NotFoundException(
-            `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
-          );
-        }
-
-        //! Create new instance Supervisor and delete old preacher
+        //* Update in all family groups the new relations.
         try {
-          const newSupervisor = this.supervisorRepository.create({
-            ...updatePreacherDto,
-            numberChildren: +numberChildren,
-            theirPastor: newPastor,
-            theirCopastor: newCopastor,
-            createdAt: new Date(),
-            createdBy: user,
+          const familyGroupsByPreacher = allFamilyGroups.filter(
+            (familyGroup) => familyGroup?.theirPreacher?.id === preacher?.id,
+          );
+
+          await Promise.all(
+            familyGroupsByPreacher.map(async (familyGroup) => {
+              await this.familyGroupRepository.update(familyGroup?.id, {
+                theirChurch: newChurch,
+                theirPastor: newPastor,
+                theirCopastor: newCopastor,
+                theirSupervisor: newSupervisor,
+                familyGroupCode: `${newZone?.zoneName?.toUpperCase()}-${familyGroup.familyGroupNumber}`,
+                theirZone: newZone,
+                updatedAt: new Date(),
+                updatedBy: user,
+              });
+            }),
+          );
+
+          //* Update in all disciples the new relations.
+          const disciplesByPreacher = allDisciples.filter(
+            (disciple) => disciple?.theirPreacher?.id === preacher?.id,
+          );
+
+          await Promise.all(
+            disciplesByPreacher.map(async (disciple) => {
+              await this.discipleRepository.update(disciple?.id, {
+                theirChurch: newChurch,
+                theirPastor: newPastor,
+                theirCopastor: newCopastor,
+                theirSupervisor: newSupervisor,
+                theirZone: newZone,
+                updatedAt: new Date(),
+                updatedBy: user,
+              });
+            }),
+          );
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+
+        return savedPreacher;
+      }
+
+      //* Raise Preacher level to Supervisor
+      if (
+        (preacher.roles.includes(MemberRole.Disciple) &&
+          preacher.roles.includes(MemberRole.Preacher) &&
+          !preacher.roles.includes(MemberRole.Treasurer) &&
+          !preacher.roles.includes(MemberRole.Copastor) &&
+          !preacher.roles.includes(MemberRole.Supervisor) &&
+          !preacher.roles.includes(MemberRole.Pastor) &&
+          roles.includes(MemberRole.Disciple) &&
+          roles.includes(MemberRole.Supervisor) &&
+          !roles.includes(MemberRole.Treasurer) &&
+          !roles.includes(MemberRole.Copastor) &&
+          !roles.includes(MemberRole.Pastor) &&
+          !roles.includes(MemberRole.Preacher) &&
+          recordStatus === RecordStatus.Active) ||
+        (preacher.roles.includes(MemberRole.Disciple) &&
+          preacher.roles.includes(MemberRole.Preacher) &&
+          preacher.roles.includes(MemberRole.Treasurer) &&
+          !preacher.roles.includes(MemberRole.Copastor) &&
+          !preacher.roles.includes(MemberRole.Supervisor) &&
+          !preacher.roles.includes(MemberRole.Pastor) &&
+          roles.includes(MemberRole.Disciple) &&
+          roles.includes(MemberRole.Supervisor) &&
+          roles.includes(MemberRole.Treasurer) &&
+          !roles.includes(MemberRole.Copastor) &&
+          !roles.includes(MemberRole.Pastor) &&
+          !roles.includes(MemberRole.Preacher) &&
+          recordStatus === RecordStatus.Active)
+      ) {
+        //? Raise level and create with relation to copastor
+        if (!isDirectRelationToPastor) {
+          //* Validation new copastor
+          if (!theirCopastor) {
+            throw new NotFoundException(
+              `Para subir de nivel de Predicador a Supervisor, se le debe asignar un Co-Pastor.`,
+            );
+          }
+
+          const newCopastor = await this.copastorRepository.findOne({
+            where: { id: theirCopastor },
+            relations: ['theirPastor', 'theirChurch'],
           });
 
-          const savedSupervisor =
-            await this.supervisorRepository.save(newSupervisor);
+          if (!newCopastor) {
+            throw new NotFoundException(
+              `Co-Pastor con id: ${id} no fue encontrado.`,
+            );
+          }
 
-          await this.preacherRepository.remove(preacher); // onDelete subordinate entities (null)
+          if (newCopastor?.recordStatus === RecordStatus.Inactive) {
+            throw new NotFoundException(
+              `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
+            );
+          }
 
-          return savedSupervisor;
-        } catch (error) {
-          this.handleDBExceptions(error);
-        }
-      }
+          //* Validation new pastor according copastor
+          if (!newCopastor?.theirPastor) {
+            throw new BadRequestException(
+              `No se encontró el Pastor, verifica que Co-Pastor tenga un Pastor asignado.`,
+            );
+          }
 
-      //? Raise level and create direct relation to pastor
-      if (isDirectRelationToPastor) {
-        //* Validation new copastor
-        if (!theirPastor) {
-          throw new NotFoundException(
-            `Para subir de nivel de Predicador a Supervisor y asignarle de manera directa un Pastor, debe asignar un Pastor.`,
-          );
-        }
-
-        const newPastor = await this.pastorRepository.findOne({
-          where: { id: theirPastor },
-          relations: ['theirChurch'],
-        });
-
-        if (!newPastor) {
-          throw new NotFoundException(
-            `Pastor con id: ${id} no fue encontrado.`,
-          );
-        }
-
-        if (newPastor?.recordStatus === RecordStatus.Inactive) {
-          throw new NotFoundException(
-            `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
-          );
-        }
-
-        //* Validation new church according pastor
-        if (!newPastor?.theirChurch) {
-          throw new BadRequestException(
-            `No se encontró la Iglesia, verifica que Pastor tenga una Iglesia asignada.`,
-          );
-        }
-
-        const newChurch = await this.churchRepository.findOne({
-          where: { id: newPastor?.theirChurch?.id },
-          relations: ['theirMainChurch'],
-        });
-
-        if (newChurch?.recordStatus === RecordStatus.Inactive) {
-          throw new NotFoundException(
-            `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
-          );
-        }
-
-        //! Create new instance Supervisor and delete old preacher
-        try {
-          const newSupervisor = this.supervisorRepository.create({
-            ...updatePreacherDto,
-            numberChildren: +numberChildren,
-            theirChurch: newChurch,
-            theirPastor: newPastor,
-            theirCopastor: null,
-            createdAt: new Date(),
-            createdBy: user,
+          const newPastor = await this.pastorRepository.findOne({
+            where: { id: newCopastor?.theirPastor?.id },
+            relations: ['theirChurch'],
           });
 
-          const savedSupervisor =
-            await this.supervisorRepository.save(newSupervisor);
+          if (newPastor?.recordStatus === RecordStatus.Inactive) {
+            throw new NotFoundException(
+              `La propiedad "Estado de registro" en Pastor debe ser "Activo".`,
+            );
+          }
 
-          await this.preacherRepository.remove(preacher); // onDelete subordinate entities (null)
+          //* Validation new church according copastor
+          if (!newCopastor?.theirChurch) {
+            throw new BadRequestException(
+              `No se encontró la Iglesia, verifica que Co-Pastor tenga una Iglesia asignada.`,
+            );
+          }
 
-          return savedSupervisor;
-        } catch (error) {
-          this.handleDBExceptions(error);
+          const newChurch = await this.churchRepository.findOne({
+            where: { id: newCopastor?.theirChurch?.id },
+            relations: ['theirMainChurch'],
+          });
+
+          if (newChurch?.recordStatus === RecordStatus.Inactive) {
+            throw new NotFoundException(
+              `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
+            );
+          }
+
+          //! Create new instance Supervisor and delete old preacher
+          try {
+            const newSupervisor = this.supervisorRepository.create({
+              ...updatePreacherDto,
+              numberChildren: +numberChildren,
+              theirPastor: newPastor,
+              theirCopastor: newCopastor,
+              createdAt: new Date(),
+              createdBy: user,
+            });
+
+            const savedSupervisor =
+              await this.supervisorRepository.save(newSupervisor);
+
+            await this.preacherRepository.remove(preacher); // onDelete subordinate entities (null)
+
+            return savedSupervisor;
+          } catch (error) {
+            this.handleDBExceptions(error);
+          }
         }
+
+        //? Raise level and create direct relation to pastor
+        if (isDirectRelationToPastor) {
+          //* Validation new copastor
+          if (!theirPastor) {
+            throw new NotFoundException(
+              `Para subir de nivel de Predicador a Supervisor y asignarle de manera directa un Pastor, debe asignar un Pastor.`,
+            );
+          }
+
+          const newPastor = await this.pastorRepository.findOne({
+            where: { id: theirPastor },
+            relations: ['theirChurch'],
+          });
+
+          if (!newPastor) {
+            throw new NotFoundException(
+              `Pastor con id: ${id} no fue encontrado.`,
+            );
+          }
+
+          if (newPastor?.recordStatus === RecordStatus.Inactive) {
+            throw new NotFoundException(
+              `La propiedad "Estado de registro" en Co-Pastor debe ser "Activo".`,
+            );
+          }
+
+          //* Validation new church according pastor
+          if (!newPastor?.theirChurch) {
+            throw new BadRequestException(
+              `No se encontró la Iglesia, verifica que Pastor tenga una Iglesia asignada.`,
+            );
+          }
+
+          const newChurch = await this.churchRepository.findOne({
+            where: { id: newPastor?.theirChurch?.id },
+            relations: ['theirMainChurch'],
+          });
+
+          if (newChurch?.recordStatus === RecordStatus.Inactive) {
+            throw new NotFoundException(
+              `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
+            );
+          }
+
+          //! Create new instance Supervisor and delete old preacher
+          try {
+            const newSupervisor = this.supervisorRepository.create({
+              ...updatePreacherDto,
+              numberChildren: +numberChildren,
+              theirChurch: newChurch,
+              theirPastor: newPastor,
+              theirCopastor: null,
+              createdAt: new Date(),
+              createdBy: user,
+            });
+
+            const savedSupervisor =
+              await this.supervisorRepository.save(newSupervisor);
+
+            await this.preacherRepository.remove(preacher); // onDelete subordinate entities (null)
+
+            return savedSupervisor;
+          } catch (error) {
+            this.handleDBExceptions(error);
+          }
+        }
+      } else {
+        throw new BadRequestException(
+          `No se puede subir de nivel este Predicador, el modo debe ser "Activo", los roles deben ser: ["discípulo", "predicador"], revisar y actualizar el registro.`,
+        );
       }
-    } else {
-      throw new BadRequestException(
-        `No se puede subir de nivel este registro, el modo debe ser "Activo", los roles ["discípulo", "predicador"], revisar y actualizar el registro.`,
-      );
     }
   }
 
@@ -2210,13 +2335,12 @@ export class PreacherService {
     const allFamilyGroups = await this.familyGroupRepository.find({
       relations: ['theirPreacher'],
     });
-
     const allDisciples = await this.discipleRepository.find({
       relations: ['theirPreacher'],
     });
 
     try {
-      //* Update and set to null relationships in Family House
+      //* Update and set to null relationships in Family Group
       const familyGroupsByPreacher = allFamilyGroups.filter(
         (familyGroup) => familyGroup?.theirPreacher?.id === preacher?.id,
       );
@@ -2264,7 +2388,7 @@ export class PreacherService {
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, revise los registros de consola',
+      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
     );
   }
 }

@@ -4,7 +4,7 @@
 postgres-db/
 .husky/*
 .env
-.vscode/*
+.vscode
 
 # Logs
 logs
@@ -33,9 +33,6 @@ lerna-debug.log*
 
 # IDE - VSCode
 .vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+
 
 

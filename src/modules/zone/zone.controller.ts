@@ -1,12 +1,13 @@
 import {
-  Controller,
   Get,
   Post,
   Body,
   Patch,
   Param,
-  ParseUUIDPipe,
   Query,
+  Delete,
+  Controller,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -47,7 +48,7 @@ import { CreateZoneDto, UpdateZoneDto } from '@/modules/zone/dto';
 export class ZoneController {
   constructor(private readonly zoneService: ZoneService) {}
 
-  //* Create
+  //* CREATE
   @Post()
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiCreatedResponse({
@@ -63,7 +64,7 @@ export class ZoneController {
     return this.zoneService.create(createZoneDto, user);
   }
 
-  //* Find All
+  //* FIND ALL
   @Get()
   @Auth()
   @ApiOkResponse({
@@ -76,7 +77,7 @@ export class ZoneController {
     return this.zoneService.findAll(paginationDto);
   }
 
-  //* Find By Term
+  //* FIND BY TERM
   @Get(':term')
   @Auth()
   @ApiParam({
@@ -97,7 +98,7 @@ export class ZoneController {
     return this.zoneService.findByTerm(term, searchTypeAndPaginationDto);
   }
 
-  //* Update
+  //* UPDATE
   @Patch(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
@@ -114,5 +115,16 @@ export class ZoneController {
     return this.zoneService.update(id, updateZoneDto, user);
   }
 
-  //* Delete
+  //! DELETE
+  @Delete(':id')
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
+  remove(@Param('id') id: string, @GetUser() user: User): Promise<void> {
+    return this.zoneService.remove(id, user);
+  }
 }

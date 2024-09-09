@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { SeedService } from './seed.service';
-import { SeedController } from './seed.controller';
+import { SeedService } from '@/modules/seed/seed.service';
+import { SeedController } from '@/modules/seed/seed.controller';
 
 import { UserModule } from '@/modules/user/user.module';
 import { AuthModule } from '@/modules/auth/auth.module';

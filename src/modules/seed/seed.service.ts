@@ -28,15 +28,15 @@ import { Supervisor } from '@/modules/supervisor/entities';
 import { FamilyGroup } from '@/modules/family-group/entities';
 
 import {
+  dataUsers,
+  dataZones,
+  dataPastors,
   dataChurches,
   dataCopastors,
   dataDisciples,
-  dataFamilyGroups,
-  dataPastors,
   dataPreachers,
   dataSupervisors,
-  dataZones,
-  dataUsers,
+  dataFamilyGroups,
 } from '@/modules/seed/data';
 
 @Injectable()
@@ -178,7 +178,7 @@ export class SeedService {
 
     //* Create Anexes
     anexes.forEach((anexe) => {
-      anexe.theirMainChurch = mainChurch.id;
+      anexe.theirMainChurch = mainChurch?.id;
 
       promisesAnexes.push(this.churchService.create(anexe, user));
     });
@@ -187,7 +187,7 @@ export class SeedService {
 
     //* Create Pastor
     pastors.forEach((pastor) => {
-      pastor.theirChurch = mainChurch.id;
+      pastor.theirChurch = mainChurch?.id;
 
       promisesPastor.push(this.pastorService.create(pastor, user));
     });
@@ -196,11 +196,11 @@ export class SeedService {
 
     //* Create Copastor
     const pastor = await this.pastorRepository.findOne({
-      where: { age: 55 },
+      where: { firstName: 'Michael Rodrigo' },
     });
 
     copastors.forEach((copastor) => {
-      copastor.theirPastor = pastor.id;
+      copastor.theirPastor = pastor?.id;
 
       promisesCopastor.push(this.copastorService.create(copastor, user));
     });

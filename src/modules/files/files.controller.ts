@@ -1,6 +1,8 @@
 import {
   Post,
   Query,
+  Param,
+  Delete,
   Controller,
   UploadedFiles,
   ParseFilePipe,
@@ -12,6 +14,7 @@ import {
 import {
   ApiConsumes,
   ApiBearerAuth,
+  ApiOkResponse,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiBadRequestResponse,
@@ -21,9 +24,11 @@ import {
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 import { UserRole } from '@/modules/auth/enums';
-import { Auth } from '@/modules/auth/decorators';
+import { Auth, GetUser } from '@/modules/auth/decorators';
 
-import { CreateFileDto } from '@/modules/files/dto';
+import { User } from '@/modules/user/entities';
+import { CreateFileDto, DeleteFileDto } from '@/modules/files/dto';
+
 import { CloudinaryService } from '@/modules/cloudinary/cloudinary.service';
 
 @Controller('files')
@@ -75,5 +80,22 @@ export class FilesController {
 
     const imageUrls = result.map((res) => res.secure_url);
     return { imageUrls };
+  }
+
+  //! Destroy file to cloudinary
+  @Delete(':publicId')
+  @Auth(UserRole.SuperUser, UserRole.AdminUser, UserRole.TreasurerUser)
+  @ApiOkResponse({
+    description: 'Successful operation.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
+  async deleteFile(
+    @Param('publicId') publicId: string,
+    @Query() deleteFileDto: DeleteFileDto,
+    @GetUser() user: User,
+  ): Promise<void> {
+    await this.cloudinaryService.deleteFile(publicId, deleteFileDto, user);
   }
 }

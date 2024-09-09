@@ -1,5 +1,7 @@
 export enum OfferingIncomeSearchSubType {
   OfferingByDate = 'offering_by_date',
+  OfferingByChurch = 'offering_by_church',
+  OfferingByChurchDate = 'offering_by_church_date',
 
   // Sunday Worship, school sunday
   OfferingByShift = 'offering_by_shift',
@@ -27,11 +29,14 @@ export enum OfferingIncomeSearchSubType {
   OfferingByContributorFullName = 'offering_by_contributor_full_name',
 }
 
+// TODO : VER SI ESTO SIRVE PARA ALGO
 export const OfferingIncomeSearchSubTypeNames: Record<
   OfferingIncomeSearchSubType,
   string
 > = {
   [OfferingIncomeSearchSubType.OfferingByDate]: 'Por fecha',
+  [OfferingIncomeSearchSubType.OfferingByChurch]: 'Por iglesia',
+  [OfferingIncomeSearchSubType.OfferingByChurchDate]: 'Por fecha e iglesia',
 
   // Sunday Worship, youngs, school sunday
   [OfferingIncomeSearchSubType.OfferingByShift]: 'Por turno',
@@ -70,26 +75,26 @@ export const OfferingIncomeSearchSubTypeNames: Record<
 };
 
 //* Sunday Worship
-export enum OfferingIncomeSearchBySundayWorshipAndSundaySchool {
+export enum SubTypeOfferingIncomeSearchBySundayWorshipAndSundaySchool {
   OfferingByDate = 'offering_by_date',
   OfferingByShift = 'offering_by_shift',
   OfferingByShiftDate = 'offering_by_shift_date',
 }
 
-export const OfferingIncomeSearchBySundayWorshipAndSundaySchoolNames: Record<
-  OfferingIncomeSearchBySundayWorshipAndSundaySchool,
+export const SubTypeNamesOfferingIncomeSearchBySundayWorshipAndSundaySchool: Record<
+  SubTypeOfferingIncomeSearchBySundayWorshipAndSundaySchool,
   string
 > = {
-  [OfferingIncomeSearchBySundayWorshipAndSundaySchool.OfferingByDate]:
+  [SubTypeOfferingIncomeSearchBySundayWorshipAndSundaySchool.OfferingByDate]:
     'Por fecha',
-  [OfferingIncomeSearchBySundayWorshipAndSundaySchool.OfferingByShift]:
+  [SubTypeOfferingIncomeSearchBySundayWorshipAndSundaySchool.OfferingByShift]:
     'Por turno',
-  [OfferingIncomeSearchBySundayWorshipAndSundaySchool.OfferingByShiftDate]:
+  [SubTypeOfferingIncomeSearchBySundayWorshipAndSundaySchool.OfferingByShiftDate]:
     'Por fecha y turno',
 };
 
 //* Offering (Family House)
-export enum OfferingIncomeSearchByFamilyGroup {
+export enum SubTypeOfferingIncomeSearchByFamilyGroup {
   OfferingByZone = 'offering_by_zone',
   OfferingByDate = 'offering_by_date',
   OfferingByZoneDate = 'offering_by_zone_date',
@@ -100,39 +105,41 @@ export enum OfferingIncomeSearchByFamilyGroup {
   OfferingByPreacherLastNames = 'offering_by_preacher_last_names',
 }
 
-export const OfferingIncomeSearchByFamilyGroupNames: Record<
-  OfferingIncomeSearchByFamilyGroup,
+export const SubTypeNamesOfferingIncomeSearchByFamilyGroup: Record<
+  SubTypeOfferingIncomeSearchByFamilyGroup,
   string
 > = {
-  [OfferingIncomeSearchByFamilyGroup.OfferingByDate]: 'Por fecha',
-  [OfferingIncomeSearchByFamilyGroup.OfferingByZone]: 'Por zona',
-  [OfferingIncomeSearchByFamilyGroup.OfferingByZoneDate]: 'Por zona y fecha',
-  [OfferingIncomeSearchByFamilyGroup.OfferingByGroupCode]:
+  [SubTypeOfferingIncomeSearchByFamilyGroup.OfferingByDate]: 'Por fecha',
+  [SubTypeOfferingIncomeSearchByFamilyGroup.OfferingByZone]: 'Por zona',
+  [SubTypeOfferingIncomeSearchByFamilyGroup.OfferingByZoneDate]:
+    'Por zona y fecha',
+  [SubTypeOfferingIncomeSearchByFamilyGroup.OfferingByGroupCode]:
     'Por código de grupo',
-  [OfferingIncomeSearchByFamilyGroup.OfferingByGroupCodeDate]:
+  [SubTypeOfferingIncomeSearchByFamilyGroup.OfferingByGroupCodeDate]:
     'Por código y fecha',
-  [OfferingIncomeSearchByFamilyGroup.OfferingByPreacherNames]:
+  [SubTypeOfferingIncomeSearchByFamilyGroup.OfferingByPreacherNames]:
     'Por nombres de su predicador',
-  [OfferingIncomeSearchByFamilyGroup.OfferingByPreacherLastNames]:
+  [SubTypeOfferingIncomeSearchByFamilyGroup.OfferingByPreacherLastNames]:
     'Por apellidos de su predicador',
-  [OfferingIncomeSearchByFamilyGroup.OfferingByPreacherFullName]:
+  [SubTypeOfferingIncomeSearchByFamilyGroup.OfferingByPreacherFullName]:
     'Por nombres y apellidos de su predicador',
 };
 
 //* Offering (Fasting General, Vigil General)
-export enum OfferingIncomeSearchByFastingAndVigilGeneral {
+export enum SubTypeOfferingIncomeSearchByFastingAndVigilGeneral {
   OfferingByDate = 'offering_by_date',
 }
 
-export const OfferingIncomeSearchNamesByFastingAndVigilGeneral: Record<
-  OfferingIncomeSearchByFastingAndVigilGeneral,
+export const SubTypeNamesOfferingIncomeSearchByFastingAndVigilGeneral: Record<
+  SubTypeOfferingIncomeSearchByFastingAndVigilGeneral,
   string
 > = {
-  [OfferingIncomeSearchByFastingAndVigilGeneral.OfferingByDate]: 'Por fecha',
+  [SubTypeOfferingIncomeSearchByFastingAndVigilGeneral.OfferingByDate]:
+    'Por fecha',
 };
 
 //* Offering (Fasting Zonal, Vigil Zonal)
-export enum OfferingIncomeSearchByFastingAndVigilZonal {
+export enum SubTypeOfferingIncomeSearchByFastingAndVigilZonal {
   OfferingByDate = 'offering_by_date',
   OfferingByZone = 'offering_by_zone',
   OfferingByZoneDate = 'offering_by_zone_date',
@@ -141,8 +148,8 @@ export enum OfferingIncomeSearchByFastingAndVigilZonal {
   OfferingBySupervisorFullName = 'offering_by_supervisor_full_name',
 }
 
-export const OfferingIncomeSearchNamesByFastingAndVigilZonal: Record<
-  OfferingIncomeSearchByFastingAndVigilZonal,
+export const SubTypeNamesOfferingIncomeSearchByFastingAndVigilZonal: Record<
+  SubTypeOfferingIncomeSearchByFastingAndVigilZonal,
   string
 > = {
   [OfferingIncomeSearchSubType.OfferingByDate]: 'Por fecha',
@@ -157,70 +164,71 @@ export const OfferingIncomeSearchNamesByFastingAndVigilZonal: Record<
 };
 
 //* Offering (Young Worship)
-export enum OfferingIncomeSearchByYoungWorship {
+export enum SubTypeOfferingIncomeSearchByYoungWorship {
   OfferingByDate = 'offering_by_date',
 }
 
-export const OfferingIncomeSearchByYoungWorshipNames: Record<
-  OfferingIncomeSearchByFastingAndVigilGeneral,
+export const SubTypeNamesOfferingIncomeSearchByYoungWorship: Record<
+  SubTypeOfferingIncomeSearchByFastingAndVigilGeneral,
   string
 > = {
-  [OfferingIncomeSearchByYoungWorship.OfferingByDate]: 'Por fecha',
+  [SubTypeOfferingIncomeSearchByYoungWorship.OfferingByDate]: 'Por fecha',
 };
 
 //* Offering (Worship United)
-export enum OfferingIncomeSearchByUnitedWorship {
+export enum SubTypeOfferingIncomeSearchByUnitedWorship {
   OfferingByDate = 'offering_by_date',
 }
 
-export const OfferingIncomeSearchByUnitedWorshipNames: Record<
-  OfferingIncomeSearchByUnitedWorship,
+export const SubTypeNamesOfferingIncomeSearchByUnitedWorship: Record<
+  SubTypeOfferingIncomeSearchByUnitedWorship,
   string
 > = {
-  [OfferingIncomeSearchByUnitedWorship.OfferingByDate]: 'Por fecha',
+  [SubTypeOfferingIncomeSearchByUnitedWorship.OfferingByDate]: 'Por fecha',
 };
 
 //* Offering (Income Adjustment)
-export enum OfferingIncomeSearchByActivities {
+export enum SubTypeOfferingIncomeSearchByActivities {
   OfferingByDate = 'offering_by_date',
 }
 
-export const OfferingIncomeSearchByActivitiesNames: Record<
-  OfferingIncomeSearchByIncomeAdjustment,
+export const SubTypeNamesOfferingIncomeSearchByActivities: Record<
+  SubTypeOfferingIncomeSearchByIncomeAdjustment,
   string
 > = {
-  [OfferingIncomeSearchByActivities.OfferingByDate]: 'Por fecha',
+  [SubTypeOfferingIncomeSearchByActivities.OfferingByDate]: 'Por fecha',
 };
 
 //* Offering (Activities)
-export enum OfferingIncomeSearchByIncomeAdjustment {
+export enum SubTypeOfferingIncomeSearchByIncomeAdjustment {
   OfferingByDate = 'offering_by_date',
 }
 
-export const OfferingIncomeSearchByIncomeAdjustmentNames: Record<
-  OfferingIncomeSearchByIncomeAdjustment,
+export const SubTypeNamesOfferingIncomeSearchByIncomeAdjustment: Record<
+  SubTypeOfferingIncomeSearchByIncomeAdjustment,
   string
 > = {
-  [OfferingIncomeSearchByIncomeAdjustment.OfferingByDate]: 'Por fecha',
+  [SubTypeOfferingIncomeSearchByIncomeAdjustment.OfferingByDate]: 'Por fecha',
 };
 
 //* Offering (Ground Church, Special)
-export enum OfferingIncomeSearchByGroundChurchAndSpecial {
+export enum SubTypeOfferingIncomeSearchByGroundChurchAndSpecial {
   OfferingByDate = 'offering_by_date',
   OfferingByContributorNames = 'offering_by_contributor_names',
   OfferingByContributorLastNames = 'offering_by_contributor_last_names',
   OfferingByContributorFullName = 'offering_by_contributor_full_name',
 }
 
-export const OfferingIncomeSearchByGroundChurchAndSpecialNames: Record<
-  OfferingIncomeSearchByGroundChurchAndSpecial,
+export const SubTypeNamesOfferingIncomeSearchByGroundChurchAndSpecial: Record<
+  SubTypeOfferingIncomeSearchByGroundChurchAndSpecial,
   string
 > = {
-  [OfferingIncomeSearchByGroundChurchAndSpecial.OfferingByDate]: 'Por fecha',
-  [OfferingIncomeSearchByGroundChurchAndSpecial.OfferingByContributorNames]:
+  [SubTypeOfferingIncomeSearchByGroundChurchAndSpecial.OfferingByDate]:
+    'Por fecha',
+  [SubTypeOfferingIncomeSearchByGroundChurchAndSpecial.OfferingByContributorNames]:
     'Por nombres del aportante',
-  [OfferingIncomeSearchByGroundChurchAndSpecial.OfferingByContributorLastNames]:
+  [SubTypeOfferingIncomeSearchByGroundChurchAndSpecial.OfferingByContributorLastNames]:
     'Por apellidos del aportante',
-  [OfferingIncomeSearchByGroundChurchAndSpecial.OfferingByContributorFullName]:
+  [SubTypeOfferingIncomeSearchByGroundChurchAndSpecial.OfferingByContributorFullName]:
     'Por nombres y apellidos del aportante',
 };

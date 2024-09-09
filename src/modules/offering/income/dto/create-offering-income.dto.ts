@@ -1,20 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsArray,
   IsEnum,
-  IsNotEmpty,
-  IsOptional,
+  IsArray,
   IsString,
   MaxLength,
   MinLength,
+  IsNotEmpty,
+  IsOptional,
 } from 'class-validator';
 
-import { CurrencyType } from '@/modules/offering/shared/enums';
+import {
+  CurrencyType,
+  OfferingReasonEliminationType,
+} from '@/modules/offering/shared/enums';
 
 import {
-  OfferingIncomeCreationSubType,
+  MemberType,
   OfferingIncomeCreationType,
+  OfferingIncomeCreationSubType,
+  OfferingIncomeCreationShiftType,
 } from '@/modules/offering/income/enums';
+import { RecordStatus } from '@/common/enums';
 
 export class CreateOfferingIncomeDto {
   //* General data
@@ -32,10 +38,11 @@ export class CreateOfferingIncomeDto {
   subType?: string;
 
   @ApiProperty({
-    example: 'tarde',
+    example: OfferingIncomeCreationShiftType.Day,
   })
+  @IsOptional()
   @IsString()
-  shift: string;
+  shift?: string;
 
   @ApiProperty({
     example: '50',
@@ -44,30 +51,30 @@ export class CreateOfferingIncomeDto {
   amount: string | number;
 
   @ApiProperty({
-    example: CurrencyType.Sol,
+    example: CurrencyType.PEN,
   })
+  @IsEnum(CurrencyType)
   @IsNotEmpty()
   currency: string;
 
   @ApiProperty({
     example: '1990/12/23',
   })
-  @IsString()
   @IsNotEmpty()
-  date: string | Date;
+  date: Date;
 
   @ApiProperty({
-    example: 'Comments.....',
+    example: 'Example comments.....',
   })
   @IsString()
   @IsOptional()
-  @MaxLength(120)
+  @MaxLength(300)
   comments?: string;
 
   @ApiProperty({
     example: [
-      'http://... url created whit file service',
-      'http://... url created whit file service',
+      `https://res.cloudinary.com/example/image/upload/v111136172/income/offering/sunday_worship/nsdhjntwknysxkkn8zfu.png`,
+      `https://res.cloudinary.com/example/image/upload/v111125736/income/offering/sunday_worship/nsdhjntwknysxkkn8zfu.png`,
     ],
   })
   @IsArray()
@@ -75,22 +82,40 @@ export class CreateOfferingIncomeDto {
   imageUrls?: string[];
 
   @ApiProperty({
-    example: 'Reason is .....',
+    example: OfferingReasonEliminationType.TypeSelectionError,
   })
-  @IsString()
+  @IsEnum(OfferingReasonEliminationType)
   @MinLength(1)
-  @MaxLength(100)
+  @MaxLength(50)
   @IsOptional()
   reasonElimination?: string;
 
   @ApiProperty({
-    example: 'Pastor',
+    example: RecordStatus.Active,
+  })
+  @IsString()
+  @IsEnum(RecordStatus, {
+    message:
+      'El estado de registro debe ser uno de los siguientes valores: Activo o Inactivo',
+  })
+  @IsOptional()
+  recordStatus?: string;
+
+  @ApiProperty({
+    example: MemberType.Pastor,
+  })
+  @IsOptional()
+  @IsString()
+  memberType?: string | undefined;
+
+  //* Relations
+  @ApiProperty({
+    example: '0b46eb7e-7730-4cbb-8c61-3ccdfa6da391',
   })
   @IsString()
   @IsOptional()
-  memberType?: string;
+  churchId?: string;
 
-  //* Relations
   @ApiProperty({
     example: '0b46eb7e-7730-4cbb-8c61-3ccdfa6da391',
   })

@@ -48,7 +48,7 @@ import { CreateChurchDto, UpdateChurchDto } from '@/modules/church/dto';
 export class ChurchController {
   constructor(private readonly churchService: ChurchService) {}
 
-  //* Create
+  //* CREATE
   @Post()
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiCreatedResponse({
@@ -64,7 +64,7 @@ export class ChurchController {
     return this.churchService.create(createChurchDto, user);
   }
 
-  //* Find Main Church
+  //* FIN MAIN CHURCH
   @Get('main-church')
   @Auth()
   @ApiOkResponse({
@@ -77,7 +77,7 @@ export class ChurchController {
     return this.churchService.findMainChurch(paginationDto);
   }
 
-  //* Find All
+  //* FIND ALL
   @Get()
   @Auth()
   @ApiOkResponse({
@@ -90,7 +90,7 @@ export class ChurchController {
     return this.churchService.findAll(paginationDto);
   }
 
-  //* Find By Term
+  //* FIND BY TERM
   @Get(':term')
   @Auth()
   @ApiParam({
@@ -111,7 +111,7 @@ export class ChurchController {
     return this.churchService.findByTerm(term, searchTypeAndPaginationDto);
   }
 
-  //* Update
+  //* UPDATE
   @Patch(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
@@ -128,7 +128,7 @@ export class ChurchController {
     return this.churchService.update(id, updateChurchDto, user);
   }
 
-  //* Delete
+  //! DELETE
   @Delete(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({

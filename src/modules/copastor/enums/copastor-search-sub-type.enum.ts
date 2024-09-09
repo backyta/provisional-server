@@ -20,46 +20,47 @@ export const CopastorSearchSubTypeNames: Record<CopastorSearchSubType, string> =
   };
 
 //* FirstName
-export enum CopastorSearchByFirstNames {
+export enum SubTypeCopastorSearchByFirstNames {
   CopastorByPastorNames = 'copastor_by_pastor_names',
   ByCopastorNames = 'by_copastor_names',
 }
 
-export const CopastorSearchNamesByFirstNames: Record<
-  CopastorSearchByFirstNames,
+export const SubTypeNamesCopastorSearchByFirstNames: Record<
+  SubTypeCopastorSearchByFirstNames,
   string
 > = {
-  [CopastorSearchByFirstNames.CopastorByPastorNames]:
+  [SubTypeCopastorSearchByFirstNames.CopastorByPastorNames]:
     'Por nombres de su pastor',
-  [CopastorSearchByFirstNames.ByCopastorNames]: 'Por sus nombres',
+  [SubTypeCopastorSearchByFirstNames.ByCopastorNames]: 'Por sus nombres',
 };
 
 //* LastName
-export enum CopastorSearchByLastNames {
+export enum SubTypeCopastorSearchByLastNames {
   CopastorByPastorLastNames = 'copastor_by_pastor_last_names',
   ByCopastorLastNames = 'by_copastor_last_names',
 }
 
-export const CopastorSearchNamesByLastNames: Record<
-  CopastorSearchByLastNames,
+export const SubTypeNamesCopastorSearchByLastNames: Record<
+  SubTypeCopastorSearchByLastNames,
   string
 > = {
-  [CopastorSearchByLastNames.CopastorByPastorLastNames]:
+  [SubTypeCopastorSearchByLastNames.CopastorByPastorLastNames]:
     'Por apellidos de su pastor',
-  [CopastorSearchByLastNames.ByCopastorLastNames]: 'Por sus apellidos',
+  [SubTypeCopastorSearchByLastNames.ByCopastorLastNames]: 'Por sus apellidos',
 };
 
 //* Full Name
-export enum CopastorSearchByFullNames {
+export enum SubTypeCopastorSearchByFullNames {
   CopastorByPastorFullName = 'copastor_by_pastor_full_name',
   ByCopastorFullName = 'by_copastor_full_name',
 }
 
-export const CopastorSearchNamesByFullNames: Record<
-  CopastorSearchByFullNames,
+export const SubTypeNamesCopastorSearchByFullNames: Record<
+  SubTypeCopastorSearchByFullNames,
   string
 > = {
-  [CopastorSearchByFullNames.CopastorByPastorFullName]:
+  [SubTypeCopastorSearchByFullNames.CopastorByPastorFullName]:
     'Por nombres y apellidos de su pastor',
-  [CopastorSearchByFullNames.ByCopastorFullName]: 'Por sus nombres y apellidos',
+  [SubTypeCopastorSearchByFullNames.ByCopastorFullName]:
+    'Por sus nombres y apellidos',
 };
