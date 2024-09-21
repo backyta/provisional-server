@@ -135,45 +135,63 @@ export class ChurchService {
   async findMainChurch(paginationDto: PaginationDto): Promise<Church[]> {
     const { limit = 1, offset = 0, order = 'ASC' } = paginationDto;
 
-    const data = await this.churchRepository.find({
-      where: { isAnexe: false, recordStatus: RecordStatus.Active },
-      take: limit,
-      skip: offset,
-      order: { createdAt: order as FindOptionsOrderValue },
-    });
+    try {
+      const mainChurch = await this.churchRepository.find({
+        where: { isAnexe: false, recordStatus: RecordStatus.Active },
+        take: limit,
+        skip: offset,
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
 
-    return data;
+      return mainChurch;
+    } catch (error) {
+      this.handleDBExceptions(error);
+    }
   }
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
     const { limit, offset = 0, order = 'ASC' } = paginationDto;
 
-    const churches = await this.churchRepository.find({
-      where: { recordStatus: RecordStatus.Active },
-      take: limit,
-      skip: offset,
-      relations: [
-        'updatedBy',
-        'createdBy',
-        'anexes',
-        'pastors',
-        'copastors',
-        'supervisors',
-        'zones',
-        'preachers',
-        'familyGroups',
-        'disciples',
-      ],
-      relationLoadStrategy: 'query',
-      order: { createdAt: order as FindOptionsOrderValue },
-    });
+    try {
+      const churches = await this.churchRepository.find({
+        where: { recordStatus: RecordStatus.Active },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'anexes',
+          'pastors',
+          'copastors',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
 
-    const mainChurch = await this.churchRepository.findOne({
-      where: { isAnexe: false, recordStatus: RecordStatus.Active },
-    });
+      if (churches.length === 0) {
+        throw new NotFoundException(
+          `No existen registros disponibles para mostrar.`,
+        );
+      }
 
-    return churchDataFormatter({ churches, mainChurch }) as any;
+      const mainChurch = await this.churchRepository.findOne({
+        where: { isAnexe: false, recordStatus: RecordStatus.Active },
+      });
+
+      return churchDataFormatter({ churches, mainChurch }) as any;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
+    }
   }
 
   //* FIND BY TERM
@@ -198,45 +216,47 @@ export class ChurchService {
 
     //? Find by church name --> Many
     if (term && searchType === ChurchSearchType.ChurchName) {
-      const churches = await this.churchRepository.find({
-        where: {
-          churchName: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'anexes',
-          'pastors',
-          'copastors',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const mainChurch = await this.churchRepository.findOne({
-        where: { isAnexe: false, recordStatus: RecordStatus.Active },
-      });
-
-      if (churches.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron iglesias con este nombre: ${term}`,
-        );
-      }
-
       try {
+        const churches = await this.churchRepository.find({
+          where: {
+            churchName: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'anexes',
+            'pastors',
+            'copastors',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const mainChurch = await this.churchRepository.findOne({
+          where: { isAnexe: false, recordStatus: RecordStatus.Active },
+        });
+
+        if (churches.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron iglesias con este nombre: ${term}`,
+          );
+        }
+
         return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -251,316 +271,332 @@ export class ChurchService {
       const fromDate = new Date(fromTimestamp);
       const toDate = toTimestamp ? new Date(toTimestamp) : fromDate;
 
-      const churches = await this.churchRepository.find({
-        where: {
-          foundingDate: Between(fromDate, toDate),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'anexes',
-          'pastors',
-          'copastors',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const mainChurch = await this.churchRepository.findOne({
-        where: { isAnexe: false, recordStatus: RecordStatus.Active },
-      });
-
-      if (churches.length === 0) {
-        const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
-        const toDate = dateFormatterToDDMMYYY(toTimestamp);
-
-        throw new NotFoundException(
-          `No se encontraron iglesias con este rango de fechas: ${fromDate} - ${toDate}`,
-        );
-      }
-
       try {
+        const churches = await this.churchRepository.find({
+          where: {
+            foundingDate: Between(fromDate, toDate),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'anexes',
+            'pastors',
+            'copastors',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const mainChurch = await this.churchRepository.findOne({
+          where: { isAnexe: false, recordStatus: RecordStatus.Active },
+        });
+
+        if (churches.length === 0) {
+          const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
+          const toDate = dateFormatterToDDMMYYY(toTimestamp);
+
+          throw new NotFoundException(
+            `No se encontraron iglesias con este rango de fechas: ${fromDate} - ${toDate}`,
+          );
+        }
+
         return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by department --> Many
     if (term && searchType === ChurchSearchType.Department) {
-      const churches = await this.churchRepository.find({
-        where: {
-          department: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'anexes',
-          'pastors',
-          'copastors',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const mainChurch = await this.churchRepository.findOne({
-        where: { isAnexe: false, recordStatus: RecordStatus.Active },
-      });
-
-      if (churches.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron iglesias con este departamento: ${term}`,
-        );
-      }
-
       try {
+        const churches = await this.churchRepository.find({
+          where: {
+            department: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'anexes',
+            'pastors',
+            'copastors',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const mainChurch = await this.churchRepository.findOne({
+          where: { isAnexe: false, recordStatus: RecordStatus.Active },
+        });
+
+        if (churches.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron iglesias con este departamento: ${term}`,
+          );
+        }
+
         return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by province --> Many
     if (term && searchType === ChurchSearchType.Province) {
-      const churches = await this.churchRepository.find({
-        where: {
-          province: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'anexes',
-          'pastors',
-          'copastors',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const mainChurch = await this.churchRepository.findOne({
-        where: { isAnexe: false, recordStatus: RecordStatus.Active },
-      });
-
-      if (churches.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron iglesias con esta provincia: ${term}`,
-        );
-      }
-
       try {
+        const churches = await this.churchRepository.find({
+          where: {
+            province: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'anexes',
+            'pastors',
+            'copastors',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const mainChurch = await this.churchRepository.findOne({
+          where: { isAnexe: false, recordStatus: RecordStatus.Active },
+        });
+
+        if (churches.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron iglesias con esta provincia: ${term}`,
+          );
+        }
+
         return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by district --> Many
     if (term && searchType === ChurchSearchType.District) {
-      const churches = await this.churchRepository.find({
-        where: {
-          district: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'anexes',
-          'pastors',
-          'copastors',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const mainChurch = await this.churchRepository.findOne({
-        where: { isAnexe: false, recordStatus: RecordStatus.Active },
-      });
-
-      if (churches.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron iglesias con este distrito: ${term}`,
-        );
-      }
-
       try {
+        const churches = await this.churchRepository.find({
+          where: {
+            district: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'anexes',
+            'pastors',
+            'copastors',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const mainChurch = await this.churchRepository.findOne({
+          where: { isAnexe: false, recordStatus: RecordStatus.Active },
+        });
+
+        if (churches.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron iglesias con este distrito: ${term}`,
+          );
+        }
+
         return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by urban sector --> Many
     if (term && searchType === ChurchSearchType.UrbanSector) {
-      const churches = await this.churchRepository.find({
-        where: {
-          urbanSector: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'anexes',
-          'pastors',
-          'copastors',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const mainChurch = await this.churchRepository.findOne({
-        where: { isAnexe: false, recordStatus: RecordStatus.Active },
-      });
-
-      if (churches.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron iglesias con este sector urbano: ${term}`,
-        );
-      }
-
       try {
+        const churches = await this.churchRepository.find({
+          where: {
+            urbanSector: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'anexes',
+            'pastors',
+            'copastors',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const mainChurch = await this.churchRepository.findOne({
+          where: { isAnexe: false, recordStatus: RecordStatus.Active },
+        });
+
+        if (churches.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron iglesias con este sector urbano: ${term}`,
+          );
+        }
+
         return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by address --> Many
     if (term && searchType === ChurchSearchType.Address) {
-      const churches = await this.churchRepository.find({
-        where: {
-          address: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'anexes',
-          'pastors',
-          'copastors',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const mainChurch = await this.churchRepository.findOne({
-        where: { isAnexe: false, recordStatus: RecordStatus.Active },
-      });
-
-      if (churches.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron iglesias con esta dirección: ${term}`,
-        );
-      }
-
       try {
+        const churches = await this.churchRepository.find({
+          where: {
+            address: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'anexes',
+            'pastors',
+            'copastors',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const mainChurch = await this.churchRepository.findOne({
+          where: { isAnexe: false, recordStatus: RecordStatus.Active },
+        });
+
+        if (churches.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron iglesias con esta dirección: ${term}`,
+          );
+        }
+
         return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by status --> Many
     if (term && searchType === ChurchSearchType.RecordStatus) {
-      const recordStatusTerm = term.toLowerCase();
-      const validRecordStatus = ['active', 'inactive'];
-
-      if (!validRecordStatus.includes(recordStatusTerm)) {
-        throw new BadRequestException(`Estado de registro no válido: ${term}`);
-      }
-
-      const churches = await this.churchRepository.find({
-        where: {
-          recordStatus: recordStatusTerm,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'anexes',
-          'pastors',
-          'copastors',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (churches.length === 0) {
-        const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
-
-        throw new NotFoundException(
-          `No se encontraron iglesias con este estado de registro: ${value}`,
-        );
-      }
-
       try {
+        const recordStatusTerm = term.toLowerCase();
+        const validRecordStatus = ['active', 'inactive'];
+
+        if (!validRecordStatus.includes(recordStatusTerm)) {
+          throw new BadRequestException(
+            `Estado de registro no válido: ${term}`,
+          );
+        }
+
+        const churches = await this.churchRepository.find({
+          where: {
+            recordStatus: recordStatusTerm,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'anexes',
+            'pastors',
+            'copastors',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (churches.length === 0) {
+          const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
+
+          throw new NotFoundException(
+            `No se encontraron iglesias con este estado de registro: ${value}`,
+          );
+        }
+
         return churchDataFormatter({ churches }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -653,16 +689,16 @@ export class ChurchService {
       }
 
       //* Update and save
-      const updatedChurch = await this.churchRepository.preload({
-        id: church.id,
-        ...updateChurchDto,
-        theirMainChurch: newMainChurch,
-        updatedAt: new Date(),
-        updatedBy: user,
-        recordStatus: recordStatus,
-      });
-
       try {
+        const updatedChurch = await this.churchRepository.preload({
+          id: church.id,
+          ...updateChurchDto,
+          theirMainChurch: newMainChurch,
+          updatedAt: new Date(),
+          updatedBy: user,
+          recordStatus: recordStatus,
+        });
+
         return await this.churchRepository.save(updatedChurch);
       } catch (error) {
         this.handleDBExceptions(error);
@@ -672,16 +708,16 @@ export class ChurchService {
     }
 
     //? Update and save if is same Church
-    const updatedChurch = await this.churchRepository.preload({
-      id: church.id,
-      ...updateChurchDto,
-      theirMainChurch: church.theirMainChurch,
-      updatedAt: new Date(),
-      updatedBy: user,
-      recordStatus: recordStatus,
-    });
-
     try {
+      const updatedChurch = await this.churchRepository.preload({
+        id: church.id,
+        ...updateChurchDto,
+        theirMainChurch: church.theirMainChurch,
+        updatedAt: new Date(),
+        updatedBy: user,
+        recordStatus: recordStatus,
+      });
+
       return await this.churchRepository.save(updatedChurch);
     } catch (error) {
       this.handleDBExceptions(error);
@@ -711,15 +747,15 @@ export class ChurchService {
     }
 
     //* Update and set in Inactive on Church (anexe)
-    const updatedChurch = await this.churchRepository.preload({
-      id: church.id,
-      theirMainChurch: null,
-      updatedAt: new Date(),
-      updatedBy: user,
-      recordStatus: RecordStatus.Inactive,
-    });
-
     try {
+      const updatedChurch = await this.churchRepository.preload({
+        id: church.id,
+        theirMainChurch: null,
+        updatedAt: new Date(),
+        updatedBy: user,
+        recordStatus: RecordStatus.Inactive,
+      });
+
       await this.churchRepository.save(updatedChurch);
     } catch (error) {
       this.handleDBExceptions(error);

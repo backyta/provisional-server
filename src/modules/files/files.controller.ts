@@ -72,6 +72,8 @@ export class FilesController {
       throw new BadRequestException('Image limits have been exceeded (max 4).');
     }
 
+    console.log(files);
+
     const uploadedFilesPromises = files.map((file) =>
       this.cloudinaryService.uploadFile(file, createFileDto),
     );

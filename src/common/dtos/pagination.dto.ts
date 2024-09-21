@@ -1,5 +1,5 @@
-import { Type } from 'class-transformer';
-import { IsOptional, IsString, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsBoolean, IsOptional, IsString, Min } from 'class-validator';
 
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -36,7 +36,9 @@ export class PaginationDto {
     description: 'Do you want null relationships to be returned?',
   })
   @IsOptional()
-  @IsString()
-  @Type(() => String)
-  isNull?: string;
+  @IsBoolean()
+  @Transform(({ value }) =>
+    value === 'true' ? true : value === 'false' ? false : value,
+  )
+  isNull?: boolean;
 }

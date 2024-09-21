@@ -145,6 +145,10 @@ export class CopastorService {
 
       return await this.copastorRepository.save(newCopastor);
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
       this.handleDBExceptions(error);
     }
   }
@@ -153,26 +157,40 @@ export class CopastorService {
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
     const { limit, offset = 0, order = 'ASC' } = paginationDto;
 
-    const copastors = await this.copastorRepository.find({
-      where: { recordStatus: RecordStatus.Active },
-      take: limit,
-      skip: offset,
-      relations: [
-        'updatedBy',
-        'createdBy',
-        'theirPastor',
-        'theirChurch',
-        'supervisors',
-        'zones',
-        'preachers',
-        'familyGroups',
-        'disciples',
-      ],
-      relationLoadStrategy: 'query',
-      order: { createdAt: order as FindOptionsOrderValue },
-    });
+    try {
+      const copastors = await this.copastorRepository.find({
+        where: { recordStatus: RecordStatus.Active },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirPastor',
+          'theirChurch',
+          'supervisors',
+          'zones',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
 
-    return copastorDataFormatter({ copastors }) as any;
+      if (copastors.length === 0) {
+        throw new NotFoundException(
+          `No existen registros disponibles para mostrar.`,
+        );
+      }
+
+      return copastorDataFormatter({ copastors }) as any;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
+    }
   }
 
   //* FIND BY TERM
@@ -205,40 +223,42 @@ export class CopastorService {
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
-      const copastors = await this.copastorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (copastors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron co-pastores(as) con estos nombres: ${firstNames}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (copastors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron co-pastores(as) con estos nombres: ${firstNames}`,
+          );
+        }
+
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -250,50 +270,52 @@ export class CopastorService {
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
-      const pastors = await this.pastorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const pastorsId = pastors.map((pastor) => pastor?.id);
-
-      const copastors = await this.copastorRepository.find({
-        where: {
-          theirPastor: In(pastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (copastors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron co-pastores(as) por los nombres de su pastor: ${firstNames}`,
-        );
-      }
-
       try {
+        const pastors = await this.pastorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const pastorsId = pastors.map((pastor) => pastor?.id);
+
+        const copastors = await this.copastorRepository.find({
+          where: {
+            theirPastor: In(pastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (copastors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron co-pastores(as) por los nombres de su pastor: ${firstNames}`,
+          );
+        }
+
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -306,40 +328,42 @@ export class CopastorService {
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
-      const copastors = await this.copastorRepository.find({
-        where: {
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (copastors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron co-pastores(as) con estos apellidos: ${lastNames}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (copastors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron co-pastores(as) con estos apellidos: ${lastNames}`,
+          );
+        }
+
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -351,50 +375,52 @@ export class CopastorService {
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
-      const pastors = await this.pastorRepository.find({
-        where: {
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const pastorsId = pastors.map((pastor) => pastor?.id);
-
-      const copastors = await this.copastorRepository.find({
-        where: {
-          theirPastor: In(pastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (copastors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron co-pastores(as) por los apellidos de su pastor: ${lastNames}`,
-        );
-      }
-
       try {
+        const pastors = await this.pastorRepository.find({
+          where: {
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const pastorsId = pastors.map((pastor) => pastor?.id);
+
+        const copastors = await this.copastorRepository.find({
+          where: {
+            theirPastor: In(pastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (copastors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron co-pastores(as) por los apellidos de su pastor: ${lastNames}`,
+          );
+        }
+
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -408,41 +434,43 @@ export class CopastorService {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
-      const copastors = await this.copastorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (copastors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron co-pastores(as) con estos nombres y apellidos: ${firstNames} ${lastNames}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (copastors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron co-pastores(as) con estos nombres y apellidos: ${firstNames} ${lastNames}`,
+          );
+        }
+
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -455,51 +483,53 @@ export class CopastorService {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
-      const pastors = await this.pastorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const pastorsId = pastors.map((pastor) => pastor?.id);
-
-      const copastors = await this.copastorRepository.find({
-        where: {
-          theirPastor: In(pastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (copastors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron co-pastores(as) por los nombres y apellidos de su pastor: ${lastNames}`,
-        );
-      }
-
       try {
+        const pastors = await this.pastorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const pastorsId = pastors.map((pastor) => pastor?.id);
+
+        const copastors = await this.copastorRepository.find({
+          where: {
+            theirPastor: In(pastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (copastors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron co-pastores(as) por los nombres y apellidos de su pastor: ${lastNames}`,
+          );
+        }
+
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -514,105 +544,109 @@ export class CopastorService {
       const fromDate = new Date(fromTimestamp);
       const toDate = toTimestamp ? new Date(toTimestamp) : fromDate;
 
-      const copastors = await this.copastorRepository.find({
-        where: {
-          birthDate: Between(fromDate, toDate),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (copastors.length === 0) {
-        const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
-        const toDate = dateFormatterToDDMMYYY(toTimestamp);
-
-        throw new NotFoundException(
-          `No se encontraron co-pastores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            birthDate: Between(fromDate, toDate),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (copastors.length === 0) {
+          const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
+          const toDate = dateFormatterToDDMMYYY(toTimestamp);
+
+          throw new NotFoundException(
+            `No se encontraron co-pastores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
+          );
+        }
+
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by month birth --> Many
     if (term && searchType === CopastorSearchType.BirthMonth) {
-      const copastors = await this.copastorRepository.find({
-        where: {
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const resultCopastors = getBirthDateByMonth({
-        month: term,
-        data: copastors,
-      });
-
-      if (resultCopastors.length === 0) {
-        const monthNames = {
-          january: 'Enero',
-          february: 'Febrero',
-          march: 'Marzo',
-          april: 'Abril',
-          may: 'Mayo',
-          june: 'Junio',
-          july: 'Julio',
-          august: 'Agosto',
-          september: 'Septiembre',
-          october: 'Octubre',
-          november: 'Noviembre',
-          december: 'Diciembre',
-        };
-
-        const monthInSpanish = monthNames[term.toLowerCase()] ?? term;
-
-        throw new NotFoundException(
-          `No se encontraron co-pastores(as) con este mes de nacimiento: ${monthInSpanish}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const resultCopastors = getBirthDateByMonth({
+          month: term,
+          data: copastors,
+        });
+
+        if (resultCopastors.length === 0) {
+          const monthNames = {
+            january: 'Enero',
+            february: 'Febrero',
+            march: 'Marzo',
+            april: 'Abril',
+            may: 'Mayo',
+            june: 'Junio',
+            july: 'Julio',
+            august: 'Agosto',
+            september: 'Septiembre',
+            october: 'Octubre',
+            november: 'Noviembre',
+            december: 'Diciembre',
+          };
+
+          const monthInSpanish = monthNames[term.toLowerCase()] ?? term;
+
+          throw new NotFoundException(
+            `No se encontraron co-pastores(as) con este mes de nacimiento: ${monthInSpanish}`,
+          );
+        }
+
         return copastorDataFormatter({
           copastors: resultCopastors as Copastor[],
         }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -625,331 +659,347 @@ export class CopastorService {
         throw new BadRequestException(`Género no válido: ${term}`);
       }
 
-      const copastors = await this.copastorRepository.find({
-        where: {
-          gender: genderTerm,
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (copastors.length === 0) {
-        const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
-
-        throw new NotFoundException(
-          `No se encontraron co-pastores(as) con este género: ${genderInSpanish}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            gender: genderTerm,
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (copastors.length === 0) {
+          const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
+
+          throw new NotFoundException(
+            `No se encontraron co-pastores(as) con este género: ${genderInSpanish}`,
+          );
+        }
+
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by marital status --> Many
     if (term && searchType === CopastorSearchType.MaritalStatus) {
-      const maritalStatusTerm = term.toLowerCase();
-      const validMaritalStatus = [
-        'single',
-        'married',
-        'widowed',
-        'divorced',
-        'other',
-      ];
-
-      if (!validMaritalStatus.includes(maritalStatusTerm)) {
-        throw new BadRequestException(`Estado Civil no válido: ${term}`);
-      }
-
-      const copastors = await this.copastorRepository.find({
-        where: {
-          maritalStatus: maritalStatusTerm,
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (copastors.length === 0) {
-        const maritalStatusInSpanish =
-          MaritalStatusNames[term.toLowerCase()] ?? term;
-
-        throw new NotFoundException(
-          `No se encontraron co-pastores(as) con este estado civil: ${maritalStatusInSpanish}`,
-        );
-      }
-
       try {
+        const maritalStatusTerm = term.toLowerCase();
+        const validMaritalStatus = [
+          'single',
+          'married',
+          'widowed',
+          'divorced',
+          'other',
+        ];
+
+        if (!validMaritalStatus.includes(maritalStatusTerm)) {
+          throw new BadRequestException(`Estado Civil no válido: ${term}`);
+        }
+
+        const copastors = await this.copastorRepository.find({
+          where: {
+            maritalStatus: maritalStatusTerm,
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (copastors.length === 0) {
+          const maritalStatusInSpanish =
+            MaritalStatusNames[term.toLowerCase()] ?? term;
+
+          throw new NotFoundException(
+            `No se encontraron co-pastores(as) con este estado civil: ${maritalStatusInSpanish}`,
+          );
+        }
+
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by origin country --> Many
     if (term && searchType === CopastorSearchType.OriginCountry) {
-      const copastors = await this.copastorRepository.find({
-        where: {
-          originCountry: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (copastors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron co-pastores(as) con este país de origen: ${term}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            originCountry: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (copastors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron co-pastores(as) con este país de origen: ${term}`,
+          );
+        }
+
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by department --> Many
     if (term && searchType === CopastorSearchType.Department) {
-      const copastors = await this.copastorRepository.find({
-        where: {
-          department: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (copastors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron co-pastores(as) con este departamento: ${term}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            department: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (copastors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron co-pastores(as) con este departamento: ${term}`,
+          );
+        }
+
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by province --> Many
     if (term && searchType === CopastorSearchType.Province) {
-      const copastors = await this.copastorRepository.find({
-        where: {
-          province: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (copastors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron co-pastores(as) con esta provincia: ${term}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            province: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (copastors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron co-pastores(as) con esta provincia: ${term}`,
+          );
+        }
+
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by district --> Many
     if (term && searchType === CopastorSearchType.District) {
-      const copastors = await this.copastorRepository.find({
-        where: {
-          district: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (copastors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron co-pastores(as) con este distrito: ${term}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            district: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (copastors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron co-pastores(as) con este distrito: ${term}`,
+          );
+        }
+
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by urban sector --> Many
     if (term && searchType === CopastorSearchType.UrbanSector) {
-      const copastors = await this.copastorRepository.find({
-        where: {
-          urbanSector: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (copastors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron co-pastores(as) con este sector urbano: ${term}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            urbanSector: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (copastors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron co-pastores(as) con este sector urbano: ${term}`,
+          );
+        }
+
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by address --> Many
     if (term && searchType === CopastorSearchType.Address) {
-      const copastors = await this.copastorRepository.find({
-        where: {
-          address: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (copastors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron co-pastores(as) con esta dirección: ${term}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            address: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (copastors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron co-pastores(as) con esta dirección: ${term}`,
+          );
+        }
+
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -962,41 +1012,43 @@ export class CopastorService {
         throw new BadRequestException(`Estado de registro no válido: ${term}`);
       }
 
-      const copastors = await this.copastorRepository.find({
-        where: {
-          recordStatus: recordStatusTerm,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'supervisors',
-          'zones',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (copastors.length === 0) {
-        const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
-
-        throw new NotFoundException(
-          `No se encontraron co-pastores(as) con este estado de registro: ${value}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            recordStatus: recordStatusTerm,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'supervisors',
+            'zones',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (copastors.length === 0) {
+          const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
+
+          throw new NotFoundException(
+            `No se encontraron co-pastores(as) con este estado de registro: ${value}`,
+          );
+        }
+
         return copastorDataFormatter({ copastors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -1144,21 +1196,25 @@ export class CopastorService {
         }
 
         // Update and save
-        const updatedCopastor = await this.copastorRepository.preload({
-          id: copastor.id,
-          ...updateCopastorDto,
-          numberChildren: +numberChildren,
-          theirChurch: newChurch,
-          theirPastor: newPastor,
-          updatedAt: new Date(),
-          updatedBy: user,
-          recordStatus: recordStatus,
-        });
-
         let savedCopastor: Copastor;
         try {
+          const updatedCopastor = await this.copastorRepository.preload({
+            id: copastor.id,
+            ...updateCopastorDto,
+            numberChildren: +numberChildren,
+            theirChurch: newChurch,
+            theirPastor: newPastor,
+            updatedAt: new Date(),
+            updatedBy: user,
+            recordStatus: recordStatus,
+          });
+
           savedCopastor = await this.copastorRepository.save(updatedCopastor);
         } catch (error) {
+          if (error instanceof NotFoundException) {
+            throw error;
+          }
+
           this.handleDBExceptions(error);
         }
 
@@ -1250,6 +1306,10 @@ export class CopastorService {
             }),
           );
         } catch (error) {
+          if (error instanceof NotFoundException) {
+            throw error;
+          }
+
           this.handleDBExceptions(error);
         }
 
@@ -1272,6 +1332,10 @@ export class CopastorService {
         try {
           return await this.copastorRepository.save(updatedCopastor);
         } catch (error) {
+          if (error instanceof NotFoundException) {
+            throw error;
+          }
+
           this.handleDBExceptions(error);
         }
       }
@@ -1329,6 +1393,10 @@ export class CopastorService {
         await this.copastorRepository.remove(copastor); // onDelete subordinate entities (null)
         return savedPastor;
       } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
         this.handleDBExceptions(error);
       }
     } else {
@@ -1351,18 +1419,22 @@ export class CopastorService {
     }
 
     //* Update and set to Inactive on Copastor
-    const updatedCopastor = await this.copastorRepository.preload({
-      id: copastor.id,
-      theirChurch: null,
-      theirPastor: null,
-      updatedAt: new Date(),
-      updatedBy: user,
-      recordStatus: RecordStatus.Inactive,
-    });
-
     try {
+      const updatedCopastor = await this.copastorRepository.preload({
+        id: copastor.id,
+        theirChurch: null,
+        theirPastor: null,
+        updatedAt: new Date(),
+        updatedBy: user,
+        recordStatus: RecordStatus.Inactive,
+      });
+
       await this.copastorRepository.save(updatedCopastor);
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
       this.handleDBExceptions(error);
     }
 
@@ -1463,6 +1535,10 @@ export class CopastorService {
         }),
       );
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
       this.handleDBExceptions(error);
     }
   }

@@ -21,6 +21,7 @@ import { CloudinaryModule } from '@/modules/cloudinary/cloudinary.module';
 import { FamilyGroupModule } from '@/modules/family-group/family-group.module';
 import { OfferingIncomeModule } from '@/modules/offering/income/offering-income.module';
 import { OfferingExpenseModule } from '@/modules/offering/expense/offering-expense.module';
+import { MetricsModule } from './modules/metrics/metrics.module';
 
 // TODO : Probar despliegues con migraciones
 @Module({
@@ -57,6 +58,7 @@ import { OfferingExpenseModule } from '@/modules/offering/expense/offering-expen
     OfferingIncomeModule,
     OfferingExpenseModule,
     SeedModule,
+    MetricsModule,
   ],
   providers: [SuperUserService],
 })

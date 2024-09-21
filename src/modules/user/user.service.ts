@@ -56,13 +56,29 @@ export class UserService {
   async findAll(paginationDto: PaginationDto): Promise<User[]> {
     const { limit, offset = 0, order = 'ASC' } = paginationDto;
 
-    return this.userRepository.find({
-      where: { recordStatus: RecordStatus.Active },
-      take: limit,
-      skip: offset,
-      relations: ['updatedBy', 'createdBy'],
-      order: { createdAt: order as FindOptionsOrderValue },
-    });
+    try {
+      const users = await this.userRepository.find({
+        where: { recordStatus: RecordStatus.Active },
+        take: limit,
+        skip: offset,
+        relations: ['updatedBy', 'createdBy'],
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (users.length === 0) {
+        throw new NotFoundException(
+          `No existen registros disponibles para mostrar.`,
+        );
+      }
+
+      return users;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
+    }
   }
 
   //* FIND BY TERM

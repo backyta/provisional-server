@@ -68,7 +68,7 @@ export class CreateOfferingIncomeDto {
   })
   @IsString()
   @IsOptional()
-  @MaxLength(300)
+  @MaxLength(500)
   comments?: string;
 
   @ApiProperty({

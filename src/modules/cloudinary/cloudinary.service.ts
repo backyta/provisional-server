@@ -16,8 +16,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { OfferingFileType } from '@/common/enums';
 
 import { User } from '@/modules/user/entities';
-import { CreateFileDto, DeleteFileDto } from '@/modules/files/dto';
 import { CloudinaryResponse } from '@/modules/cloudinary/types';
+import { CreateFileDto, DeleteFileDto } from '@/modules/files/dto';
 
 import { OfferingIncome } from '@/modules/offering/income/entities';
 import { OfferingExpense } from '@/modules/offering/expense/entities';
@@ -69,45 +69,44 @@ export class CloudinaryService {
     //? Validation if income or expense
     //* Income
     if (fileType === OfferingFileType.Income) {
-      const offeringIncome = await this.offeringIncomeRepository.findOne({
-        where: {
-          imageUrls: Raw((alias) => `:secureUrl = ANY(${alias})`, {
-            secureUrl: secureUrl,
-          }),
-        },
-        relations: [
-          'church',
-          'zone',
-          'familyGroup',
-          'pastor',
-          'copastor',
-          'supervisor',
-          'preacher',
-          'disciple',
-        ],
-      });
-
-      if (!offeringIncome) {
-        throw new NotFoundException(
-          `Registro de Ingreso de Ofrenda no fue encontrado.`,
-        );
-      }
-
-      const newSecureUrls = offeringIncome.imageUrls.filter(
-        (imageUrl) => imageUrl !== secureUrl,
-      );
-
-      const updatedOfferingIncome = await this.offeringIncomeRepository.preload(
-        {
-          id: offeringIncome?.id,
-          ...offeringIncome,
-          imageUrls: [...newSecureUrls],
-          updatedAt: new Date(),
-          updatedBy: user,
-        },
-      );
-
       try {
+        const offeringIncome = await this.offeringIncomeRepository.findOne({
+          where: {
+            imageUrls: Raw((alias) => `:secureUrl = ANY(${alias})`, {
+              secureUrl: secureUrl,
+            }),
+          },
+          relations: [
+            'church',
+            'zone',
+            'familyGroup',
+            'pastor',
+            'copastor',
+            'supervisor',
+            'preacher',
+            'disciple',
+          ],
+        });
+
+        if (!offeringIncome) {
+          throw new NotFoundException(
+            `Registro de Ingreso de Ofrenda no fue encontrado.`,
+          );
+        }
+
+        const newSecureUrls = offeringIncome.imageUrls.filter(
+          (imageUrl) => imageUrl !== secureUrl,
+        );
+
+        const updatedOfferingIncome =
+          await this.offeringIncomeRepository.preload({
+            id: offeringIncome?.id,
+            ...offeringIncome,
+            imageUrls: [...newSecureUrls],
+            updatedAt: new Date(),
+            updatedBy: user,
+          });
+
         await this.offeringIncomeRepository.save(updatedOfferingIncome);
 
         const result = await cloudinary.uploader.destroy(`${path}${publicId}`);
@@ -118,41 +117,45 @@ export class CloudinaryService {
           );
         }
       } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
         this.handleCloudServiceExceptions(error);
       }
     }
 
     //* Expense
     if (fileType === OfferingFileType.Expense) {
-      const offeringExpense = await this.offeringExpenseRepository.findOne({
-        where: {
-          imageUrls: Raw((alias) => `:secureUrl = ANY(${alias})`, {
-            secureUrl: secureUrl,
-          }),
-        },
-        relations: ['church'],
-      });
-
-      if (!offeringExpense) {
-        throw new NotFoundException(
-          `Registro de Salida de Ofrenda no fue encontrado.`,
-        );
-      }
-
-      const newSecureUrls = offeringExpense.imageUrls.filter(
-        (imageUrl) => imageUrl !== secureUrl,
-      );
-
-      const updatedOfferingExpense =
-        await this.offeringExpenseRepository.preload({
-          id: offeringExpense?.id,
-          ...offeringExpense,
-          imageUrls: [...newSecureUrls],
-          updatedAt: new Date(),
-          updatedBy: user,
+      try {
+        const offeringExpense = await this.offeringExpenseRepository.findOne({
+          where: {
+            imageUrls: Raw((alias) => `:secureUrl = ANY(${alias})`, {
+              secureUrl: secureUrl,
+            }),
+          },
+          relations: ['church'],
         });
 
-      try {
+        if (!offeringExpense) {
+          throw new NotFoundException(
+            `Registro de Salida de Ofrenda no fue encontrado.`,
+          );
+        }
+
+        const newSecureUrls = offeringExpense.imageUrls.filter(
+          (imageUrl) => imageUrl !== secureUrl,
+        );
+
+        const updatedOfferingExpense =
+          await this.offeringExpenseRepository.preload({
+            id: offeringExpense?.id,
+            ...offeringExpense,
+            imageUrls: [...newSecureUrls],
+            updatedAt: new Date(),
+            updatedBy: user,
+          });
+
         await this.offeringExpenseRepository.save(updatedOfferingExpense);
 
         const result = await cloudinary.uploader.destroy(
@@ -165,6 +168,10 @@ export class CloudinaryService {
           );
         }
       } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
         this.handleCloudServiceExceptions(error);
       }
     }

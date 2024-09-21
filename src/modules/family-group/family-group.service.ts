@@ -240,34 +240,38 @@ export class FamilyGroupService {
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
     const { limit, offset = 0, order = 'ASC' } = paginationDto;
 
-    const familyGroups = await this.familyGroupRepository.find({
-      where: { recordStatus: RecordStatus.Active },
-      take: limit,
-      skip: offset,
-      relations: [
-        'updatedBy',
-        'createdBy',
-        'theirChurch',
-        'theirPastor',
-        'theirCopastor',
-        'theirSupervisor',
-        'theirZone',
-        'theirPreacher',
-        'disciples',
-      ],
-      order: { createdAt: order as FindOptionsOrderValue },
-    });
-
-    if (familyGroups.length === 0) {
-      throw new NotFoundException(`No se encontraron grupos familiares`);
-    }
-
     try {
+      const familyGroups = await this.familyGroupRepository.find({
+        where: { recordStatus: RecordStatus.Active },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'disciples',
+        ],
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (familyGroups.length === 0) {
+        throw new NotFoundException(
+          `No existen registros disponibles para mostrar.`,
+        );
+      }
+
       return familyGroupDataFormatter({ familyGroups }) as any;
     } catch (error) {
-      throw new BadRequestException(
-        `Ocurrió un error, habla con el administrador.`,
-      );
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
   }
 
@@ -301,49 +305,51 @@ export class FamilyGroupService {
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
-      const preachers = await this.preacherRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const preachersId = preachers.map((preacher) => preacher?.id);
-
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          theirPreacher: In(preachersId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares por los nombres de su predicador: ${firstNames}`,
-        );
-      }
-
       try {
+        const preachers = await this.preacherRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const preachersId = preachers.map((preacher) => preacher?.id);
+
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            theirPreacher: In(preachersId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares por los nombres de su predicador: ${firstNames}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -355,49 +361,51 @@ export class FamilyGroupService {
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
-
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          theirSupervisor: In(supervisorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares por los nombres de su supervisor: ${firstNames}`,
-        );
-      }
-
       try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
+
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            theirSupervisor: In(supervisorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares por los nombres de su supervisor: ${firstNames}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -409,49 +417,51 @@ export class FamilyGroupService {
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
-      const copastors = await this.copastorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const copastorsId = copastors.map((copastor) => copastor?.id);
-
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          theirCopastor: In(copastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares por los nombres de su co-pastor: ${firstNames}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const copastorsId = copastors.map((copastor) => copastor?.id);
+
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            theirCopastor: In(copastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares por los nombres de su co-pastor: ${firstNames}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -463,49 +473,51 @@ export class FamilyGroupService {
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
-      const pastors = await this.pastorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const pastorsId = pastors.map((pastor) => pastor?.id);
-
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          theirPastor: In(pastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares por los nombres de su pastor: ${firstNames}`,
-        );
-      }
-
       try {
+        const pastors = await this.pastorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const pastorsId = pastors.map((pastor) => pastor?.id);
+
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            theirPastor: In(pastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares por los nombres de su pastor: ${firstNames}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -518,49 +530,51 @@ export class FamilyGroupService {
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
-      const preachers = await this.preacherRepository.find({
-        where: {
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const preacherId = preachers.map((preacher) => preacher?.id);
-
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          theirPreacher: In(preacherId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares por los apellidos de su predicador: ${lastNames}`,
-        );
-      }
-
       try {
+        const preachers = await this.preacherRepository.find({
+          where: {
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const preacherId = preachers.map((preacher) => preacher?.id);
+
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            theirPreacher: In(preacherId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares por los apellidos de su predicador: ${lastNames}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -573,49 +587,51 @@ export class FamilyGroupService {
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
-
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          theirSupervisor: In(supervisorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares por los apellidos de su supervisor: ${lastNames}`,
-        );
-      }
-
       try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
+
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            theirSupervisor: In(supervisorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares por los apellidos de su supervisor: ${lastNames}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -627,49 +643,51 @@ export class FamilyGroupService {
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
-      const copastors = await this.copastorRepository.find({
-        where: {
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const copastorsId = copastors.map((copastor) => copastor?.id);
-
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          theirCopastor: In(copastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares por los apellidos de su co-pastor: ${lastNames}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const copastorsId = copastors.map((copastor) => copastor?.id);
+
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            theirCopastor: In(copastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares por los apellidos de su co-pastor: ${lastNames}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -681,49 +699,51 @@ export class FamilyGroupService {
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
-      const pastors = await this.pastorRepository.find({
-        where: {
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const pastorsId = pastors.map((pastor) => pastor?.id);
-
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          theirPastor: In(pastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares por los apellidos de su pastor: ${lastNames}`,
-        );
-      }
-
       try {
+        const pastors = await this.pastorRepository.find({
+          where: {
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const pastorsId = pastors.map((pastor) => pastor?.id);
+
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            theirPastor: In(pastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares por los apellidos de su pastor: ${lastNames}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -737,50 +757,52 @@ export class FamilyGroupService {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
-      const preachers = await this.preacherRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const preachersId = preachers.map((preacher) => preacher?.id);
-
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          theirPreacher: In(preachersId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares por los nombres y apellidos de su predicador: ${firstNames} ${lastNames}`,
-        );
-      }
-
       try {
+        const preachers = await this.preacherRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const preachersId = preachers.map((preacher) => preacher?.id);
+
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            theirPreacher: In(preachersId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares por los nombres y apellidos de su predicador: ${firstNames} ${lastNames}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -793,50 +815,52 @@ export class FamilyGroupService {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
-
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          theirSupervisor: In(supervisorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares por los nombres y apellidos de su supervisor: ${firstNames} ${lastNames}`,
-        );
-      }
-
       try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
+
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            theirSupervisor: In(supervisorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares por los nombres y apellidos de su supervisor: ${firstNames} ${lastNames}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -849,50 +873,52 @@ export class FamilyGroupService {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
-      const copastors = await this.copastorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const copastorsId = copastors.map((copastor) => copastor?.id);
-
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          theirCopastor: In(copastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares por los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const copastorsId = copastors.map((copastor) => copastor?.id);
+
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            theirCopastor: In(copastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares por los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -905,365 +931,383 @@ export class FamilyGroupService {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
-      const pastors = await this.pastorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const pastorsId = pastors.map((pastor) => pastor?.id);
-
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          theirPastor: In(pastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares por los nombres y apellidos de su pastor: ${firstNames} ${lastNames}`,
-        );
-      }
-
       try {
+        const pastors = await this.pastorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const pastorsId = pastors.map((pastor) => pastor?.id);
+
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            theirPastor: In(pastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares por los nombres y apellidos de su pastor: ${firstNames} ${lastNames}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by family-group-code --> Many
     if (term && searchType === FamilyGroupSearchType.FamilyGroupCode) {
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          familyGroupCode: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares con este código: ${term}`,
-        );
-      }
-
       try {
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            familyGroupCode: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares con este código: ${term}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by family-group-name --> Many
     if (term && searchType === FamilyGroupSearchType.FamilyGroupName) {
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          familyGroupName: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares con este nombre: ${term}`,
-        );
-      }
-
       try {
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            familyGroupName: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares con este nombre: ${term}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by zone name --> Many
     if (term && searchType === FamilyGroupSearchType.ZoneName) {
-      const zones = await this.zoneRepository.find({
-        where: {
-          zoneName: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const zonesId = zones.map((zone) => zone?.id);
-
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          theirZone: In(zonesId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares con este nombre zona: ${term}`,
-        );
-      }
-
       try {
+        const zones = await this.zoneRepository.find({
+          where: {
+            zoneName: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const zonesId = zones.map((zone) => zone?.id);
+
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            theirZone: In(zonesId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares con este nombre zona: ${term}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by department --> Many
     if (term && searchType === FamilyGroupSearchType.Department) {
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          department: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares con este departamento: ${term}`,
-        );
-      }
-
       try {
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            department: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares con este departamento: ${term}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by province --> Many
     if (term && searchType === FamilyGroupSearchType.Province) {
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          province: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares con esta provincia: ${term}`,
-        );
-      }
-
       try {
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            province: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares con esta provincia: ${term}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by district --> Many
     if (term && searchType === FamilyGroupSearchType.District) {
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          district: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares con este distrito: ${term}`,
-        );
-      }
-
       try {
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            district: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares con este distrito: ${term}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by urban sector --> Many
     if (term && searchType === FamilyGroupSearchType.UrbanSector) {
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          urbanSector: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares con este sector urbano: ${term}`,
-        );
-      }
-
       try {
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            urbanSector: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares con este sector urbano: ${term}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by address --> Many
     if (term && searchType === FamilyGroupSearchType.Address) {
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          address: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron grupos familiares con esta dirección: ${term}`,
-        );
-      }
-
       try {
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            address: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares con esta dirección: ${term}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -1276,122 +1320,128 @@ export class FamilyGroupService {
         throw new BadRequestException(`Estado de registro no válido: ${term}`);
       }
 
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          recordStatus: recordStatusTerm,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
-
-        throw new NotFoundException(
-          `No se encontraron grupos familiares con este estado de registro: ${value}`,
-        );
-      }
-
       try {
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            recordStatus: recordStatusTerm,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
+
+          throw new NotFoundException(
+            `No se encontraron grupos familiares con este estado de registro: ${value}`,
+          );
+        }
+
         return familyGroupDataFormatter({ familyGroups }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find family groups by most populated --> Many
     if (term && searchType === DashboardSearchType.MostPopulatedFamilyGroups) {
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(`No se encontraron grupos familiares`);
-      }
-
-      const resultData = familyGroups
-        .sort((a, b) => b.disciples.length - a.disciples.length)
-        .slice(0, 7);
-
       try {
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(`No se encontraron grupos familiares`);
+        }
+
+        const resultData = familyGroups
+          .sort((a, b) => b.disciples.length - a.disciples.length)
+          .slice(0, 7);
+
         return familyGroupDataFormatter({
           familyGroups: resultData,
         }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by less populated --> Many
     if (term && searchType === DashboardSearchType.LessPopulatedFamilyGroups) {
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'disciples',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (familyGroups.length === 0) {
-        throw new NotFoundException(`No se encontraron grupos familiares`);
-      }
-
-      const resultData = familyGroups
-        .sort((a, b) => a.disciples.length - b.disciples.length)
-        .slice(0, 7);
-
       try {
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'disciples',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(`No se encontraron grupos familiares`);
+        }
+
+        const resultData = familyGroups
+          .sort((a, b) => a.disciples.length - b.disciples.length)
+          .slice(0, 7);
+
         return familyGroupDataFormatter({
           familyGroups: resultData,
         }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -2030,25 +2080,25 @@ export class FamilyGroupService {
         );
       }
 
-      const updatedFamilyGroup = await this.familyGroupRepository.preload({
-        id: familyGroup?.id,
-        ...updateFamilyGroupDto,
-        theirChurch: newChurch,
-        theirPastor: newPastor,
-        theirCopastor: newCopastor,
-        theirSupervisor: newSupervisor,
-        theirZone: newZone,
-        theirPreacher: newPreacher,
-        updatedAt: new Date(),
-        updatedBy: user,
-        recordStatus: recordStatus,
-      });
-
-      //* Set relationship in preacher according their family group
-      newPreacher.theirFamilyGroup = updatedFamilyGroup;
-      await this.preacherRepository.save(newPreacher);
-
       try {
+        const updatedFamilyGroup = await this.familyGroupRepository.preload({
+          id: familyGroup?.id,
+          ...updateFamilyGroupDto,
+          theirChurch: newChurch,
+          theirPastor: newPastor,
+          theirCopastor: newCopastor,
+          theirSupervisor: newSupervisor,
+          theirZone: newZone,
+          theirPreacher: newPreacher,
+          updatedAt: new Date(),
+          updatedBy: user,
+          recordStatus: recordStatus,
+        });
+
+        //* Set relationship in preacher according their family group
+        newPreacher.theirFamilyGroup = updatedFamilyGroup;
+        await this.preacherRepository.save(newPreacher);
+
         return await this.familyGroupRepository.save(updatedFamilyGroup);
       } catch (error) {
         this.handleDBExceptions(error);
@@ -2073,19 +2123,19 @@ export class FamilyGroupService {
     }
 
     //* Update and set in Inactive on Family Group
-    const updatedFamilyGroup = await this.familyGroupRepository.preload({
-      id: familyGroup.id,
-      theirChurch: null,
-      theirPastor: null,
-      theirCopastor: null,
-      theirSupervisor: null,
-      theirPreacher: null,
-      updatedAt: new Date(),
-      updatedBy: user,
-      recordStatus: RecordStatus.Inactive,
-    });
-
     try {
+      const updatedFamilyGroup = await this.familyGroupRepository.preload({
+        id: familyGroup.id,
+        theirChurch: null,
+        theirPastor: null,
+        theirCopastor: null,
+        theirSupervisor: null,
+        theirPreacher: null,
+        updatedAt: new Date(),
+        updatedBy: user,
+        recordStatus: RecordStatus.Inactive,
+      });
+
       await this.familyGroupRepository.save(updatedFamilyGroup);
     } catch (error) {
       this.handleDBExceptions(error);

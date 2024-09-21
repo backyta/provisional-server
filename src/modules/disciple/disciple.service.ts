@@ -248,25 +248,39 @@ export class DiscipleService {
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
     const { limit, offset = 0, order = 'ASC' } = paginationDto;
 
-    const disciples = await this.discipleRepository.find({
-      where: { recordStatus: RecordStatus.Active },
-      take: limit,
-      skip: offset,
-      relations: [
-        'updatedBy',
-        'createdBy',
-        'theirChurch',
-        'theirPastor',
-        'theirCopastor',
-        'theirSupervisor',
-        'theirZone',
-        'theirPreacher',
-        'theirFamilyGroup',
-      ],
-      order: { createdAt: order as FindOptionsOrderValue },
-    });
+    try {
+      const disciples = await this.discipleRepository.find({
+        where: { recordStatus: RecordStatus.Active },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirSupervisor',
+          'theirZone',
+          'theirPreacher',
+          'theirFamilyGroup',
+        ],
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
 
-    return discipleDataFormatter({ disciples }) as any;
+      if (disciples.length === 0) {
+        throw new NotFoundException(
+          `No existen registros disponibles para mostrar.`,
+        );
+      }
+
+      return discipleDataFormatter({ disciples }) as any;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
+    }
   }
 
   //* FIND BY TERM
@@ -299,39 +313,41 @@ export class DiscipleService {
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
-      const disciples = await this.discipleRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos por los nombres: ${firstNames}`,
-        );
-      }
-
       try {
+        const disciples = await this.discipleRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos por los nombres: ${firstNames}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -343,49 +359,51 @@ export class DiscipleService {
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
-      const preachers = await this.preacherRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const preachersId = preachers.map((preacher) => preacher?.id);
-
-      const disciples = await this.discipleRepository.find({
-        where: {
-          theirPreacher: In(preachersId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos por los nombres de su predicador: ${firstNames}`,
-        );
-      }
-
       try {
+        const preachers = await this.preacherRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const preachersId = preachers.map((preacher) => preacher?.id);
+
+        const disciples = await this.discipleRepository.find({
+          where: {
+            theirPreacher: In(preachersId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos por los nombres de su predicador: ${firstNames}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -397,49 +415,51 @@ export class DiscipleService {
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
-
-      const disciples = await this.discipleRepository.find({
-        where: {
-          theirSupervisor: In(supervisorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos por los nombres de su supervisor: ${firstNames}`,
-        );
-      }
-
       try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
+
+        const disciples = await this.discipleRepository.find({
+          where: {
+            theirSupervisor: In(supervisorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos por los nombres de su supervisor: ${firstNames}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -451,49 +471,51 @@ export class DiscipleService {
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
-      const copastors = await this.copastorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const copastorsId = copastors.map((copastor) => copastor?.id);
-
-      const disciples = await this.discipleRepository.find({
-        where: {
-          theirCopastor: In(copastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos por los nombres de su co-pastor: ${firstNames}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const copastorsId = copastors.map((copastor) => copastor?.id);
+
+        const disciples = await this.discipleRepository.find({
+          where: {
+            theirCopastor: In(copastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos por los nombres de su co-pastor: ${firstNames}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -505,49 +527,51 @@ export class DiscipleService {
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
-      const pastors = await this.pastorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const pastorsId = pastors.map((pastor) => pastor?.id);
-
-      const disciples = await this.discipleRepository.find({
-        where: {
-          theirPastor: In(pastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos por los nombres de su pastor: ${firstNames}`,
-        );
-      }
-
       try {
+        const pastors = await this.pastorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const pastorsId = pastors.map((pastor) => pastor?.id);
+
+        const disciples = await this.discipleRepository.find({
+          where: {
+            theirPastor: In(pastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos por los nombres de su pastor: ${firstNames}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -560,39 +584,41 @@ export class DiscipleService {
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
-      const disciples = await this.discipleRepository.find({
-        where: {
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos por los apellidos: ${lastNames}`,
-        );
-      }
-
       try {
+        const disciples = await this.discipleRepository.find({
+          where: {
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos por los apellidos: ${lastNames}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -604,49 +630,51 @@ export class DiscipleService {
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
-      const preachers = await this.preacherRepository.find({
-        where: {
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const preacherId = preachers.map((preacher) => preacher?.id);
-
-      const disciples = await this.discipleRepository.find({
-        where: {
-          theirPreacher: In(preacherId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos por los apellidos de su predicador: ${lastNames}`,
-        );
-      }
-
       try {
+        const preachers = await this.preacherRepository.find({
+          where: {
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const preacherId = preachers.map((preacher) => preacher?.id);
+
+        const disciples = await this.discipleRepository.find({
+          where: {
+            theirPreacher: In(preacherId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos por los apellidos de su predicador: ${lastNames}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -658,49 +686,51 @@ export class DiscipleService {
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
-
-      const disciples = await this.discipleRepository.find({
-        where: {
-          theirSupervisor: In(supervisorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos por los apellidos de su supervisor: ${lastNames}`,
-        );
-      }
-
       try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
+
+        const disciples = await this.discipleRepository.find({
+          where: {
+            theirSupervisor: In(supervisorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos por los apellidos de su supervisor: ${lastNames}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -712,49 +742,51 @@ export class DiscipleService {
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
-      const copastors = await this.copastorRepository.find({
-        where: {
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const copastorsId = copastors.map((copastor) => copastor?.id);
-
-      const disciples = await this.discipleRepository.find({
-        where: {
-          theirCopastor: In(copastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos por los apellidos de su co-pastor: ${lastNames}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const copastorsId = copastors.map((copastor) => copastor?.id);
+
+        const disciples = await this.discipleRepository.find({
+          where: {
+            theirCopastor: In(copastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos por los apellidos de su co-pastor: ${lastNames}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -766,49 +798,51 @@ export class DiscipleService {
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
-      const pastors = await this.pastorRepository.find({
-        where: {
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const pastorsId = pastors.map((pastor) => pastor?.id);
-
-      const disciples = await this.discipleRepository.find({
-        where: {
-          theirPastor: In(pastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos por los apellidos de su pastor: ${lastNames}`,
-        );
-      }
-
       try {
+        const pastors = await this.pastorRepository.find({
+          where: {
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const pastorsId = pastors.map((pastor) => pastor?.id);
+
+        const disciples = await this.discipleRepository.find({
+          where: {
+            theirPastor: In(pastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos por los apellidos de su pastor: ${lastNames}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -822,40 +856,42 @@ export class DiscipleService {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
-      const disciples = await this.discipleRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos por los nombres y apellidos: ${firstNames} ${lastNames}`,
-        );
-      }
-
       try {
+        const disciples = await this.discipleRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos por los nombres y apellidos: ${firstNames} ${lastNames}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -868,50 +904,52 @@ export class DiscipleService {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
-      const preachers = await this.preacherRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const preachersId = preachers.map((preacher) => preacher?.id);
-
-      const disciples = await this.discipleRepository.find({
-        where: {
-          theirPreacher: In(preachersId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos por los nombres y apellidos de su predicador: ${firstNames} ${lastNames}`,
-        );
-      }
-
       try {
+        const preachers = await this.preacherRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const preachersId = preachers.map((preacher) => preacher?.id);
+
+        const disciples = await this.discipleRepository.find({
+          where: {
+            theirPreacher: In(preachersId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos por los nombres y apellidos de su predicador: ${firstNames} ${lastNames}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -924,50 +962,52 @@ export class DiscipleService {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
-
-      const disciples = await this.discipleRepository.find({
-        where: {
-          theirSupervisor: In(supervisorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos por los nombres y apellidos de su supervisor: ${firstNames} ${lastNames}`,
-        );
-      }
-
       try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
+
+        const disciples = await this.discipleRepository.find({
+          where: {
+            theirSupervisor: In(supervisorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos por los nombres y apellidos de su supervisor: ${firstNames} ${lastNames}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -980,50 +1020,52 @@ export class DiscipleService {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
-      const copastors = await this.copastorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const copastorsId = copastors.map((copastor) => copastor?.id);
-
-      const disciples = await this.discipleRepository.find({
-        where: {
-          theirCopastor: In(copastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos por los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const copastorsId = copastors.map((copastor) => copastor?.id);
+
+        const disciples = await this.discipleRepository.find({
+          where: {
+            theirCopastor: In(copastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos por los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -1036,50 +1078,52 @@ export class DiscipleService {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
-      const pastors = await this.pastorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const pastorsId = pastors.map((pastor) => pastor?.id);
-
-      const disciples = await this.discipleRepository.find({
-        where: {
-          theirPastor: In(pastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos por los nombres y apellidos de su pastor: ${firstNames} ${lastNames}`,
-        );
-      }
-
       try {
+        const pastors = await this.pastorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const pastorsId = pastors.map((pastor) => pastor?.id);
+
+        const disciples = await this.discipleRepository.find({
+          where: {
+            theirPastor: In(pastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos por los nombres y apellidos de su pastor: ${firstNames} ${lastNames}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -1094,247 +1138,261 @@ export class DiscipleService {
       const fromDate = new Date(fromTimestamp);
       const toDate = toTimestamp ? new Date(toTimestamp) : fromDate;
 
-      const disciples = await this.discipleRepository.find({
-        where: {
-          birthDate: Between(fromDate, toDate),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
-        const toDate = dateFormatterToDDMMYYY(toTimestamp);
-
-        throw new NotFoundException(
-          `No se encontraron discípulos con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
-        );
-      }
-
       try {
+        const disciples = await this.discipleRepository.find({
+          where: {
+            birthDate: Between(fromDate, toDate),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
+          const toDate = dateFormatterToDDMMYYY(toTimestamp);
+
+          throw new NotFoundException(
+            `No se encontraron discípulos con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by month birth --> Many
     if (term && searchType === DiscipleSearchType.BirthMonth) {
-      const disciples = await this.discipleRepository.find({
-        where: {
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const resultDisciples = getBirthDateByMonth({
-        month: term,
-        data: disciples,
-      });
-
-      if (resultDisciples.length === 0) {
-        const monthNames = {
-          january: 'Enero',
-          february: 'Febrero',
-          march: 'Marzo',
-          april: 'Abril',
-          may: 'Mayo',
-          june: 'Junio',
-          july: 'Julio',
-          august: 'Agosto',
-          september: 'Septiembre',
-          october: 'Octubre',
-          november: 'Noviembre',
-          december: 'Diciembre',
-        };
-
-        const monthInSpanish = monthNames[term.toLowerCase()] ?? term;
-
-        throw new NotFoundException(
-          `No se encontraron discípulos con este mes de nacimiento: ${monthInSpanish}`,
-        );
-      }
-
       try {
+        const disciples = await this.discipleRepository.find({
+          where: {
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const resultDisciples = getBirthDateByMonth({
+          month: term,
+          data: disciples,
+        });
+
+        if (resultDisciples.length === 0) {
+          const monthNames = {
+            january: 'Enero',
+            february: 'Febrero',
+            march: 'Marzo',
+            april: 'Abril',
+            may: 'Mayo',
+            june: 'Junio',
+            july: 'Julio',
+            august: 'Agosto',
+            september: 'Septiembre',
+            october: 'Octubre',
+            november: 'Noviembre',
+            december: 'Diciembre',
+          };
+
+          const monthInSpanish = monthNames[term.toLowerCase()] ?? term;
+
+          throw new NotFoundException(
+            `No se encontraron discípulos con este mes de nacimiento: ${monthInSpanish}`,
+          );
+        }
+
         return discipleDataFormatter({
           disciples: resultDisciples as Disciple[],
         }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by family-group-code --> Many
     if (term && searchType === DiscipleSearchType.FamilyGroupCode) {
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          familyGroupCode: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const familyGroupsId = familyGroups.map((familyGroup) => familyGroup?.id);
-
-      const disciples = await this.discipleRepository.find({
-        where: {
-          theirFamilyGroup: In(familyGroupsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos con este código de grupo familiar: ${term}`,
-        );
-      }
-
       try {
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            familyGroupCode: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const familyGroupsId = familyGroups.map(
+          (familyGroup) => familyGroup?.id,
+        );
+
+        const disciples = await this.discipleRepository.find({
+          where: {
+            theirFamilyGroup: In(familyGroupsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos con este código de grupo familiar: ${term}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by family-group-name --> Many
     if (term && searchType === DiscipleSearchType.FamilyGroupName) {
-      const familyGroups = await this.familyGroupRepository.find({
-        where: {
-          familyGroupName: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const familyGroupsId = familyGroups.map((familyGroup) => familyGroup?.id);
-
-      const disciples = await this.discipleRepository.find({
-        where: {
-          theirFamilyGroup: In(familyGroupsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos con este nombre de grupo familiar: ${term}`,
-        );
-      }
-
       try {
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            familyGroupName: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const familyGroupsId = familyGroups.map(
+          (familyGroup) => familyGroup?.id,
+        );
+
+        const disciples = await this.discipleRepository.find({
+          where: {
+            theirFamilyGroup: In(familyGroupsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos con este nombre de grupo familiar: ${term}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by zone --> Many
     if (term && searchType === DiscipleSearchType.ZoneName) {
-      const zones = await this.zoneRepository.find({
-        where: {
-          zoneName: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const zonesId = zones.map((zone) => zone?.id);
-
-      const disciples = await this.discipleRepository.find({
-        where: {
-          theirZone: In(zonesId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos con este nombre de zona: ${term}`,
-        );
-      }
-
       try {
+        const zones = await this.zoneRepository.find({
+          where: {
+            zoneName: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const zonesId = zones.map((zone) => zone?.id);
+
+        const disciples = await this.discipleRepository.find({
+          where: {
+            theirZone: In(zonesId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos con este nombre de zona: ${term}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -1347,41 +1405,43 @@ export class DiscipleService {
         throw new BadRequestException(`Género no válido: ${term}`);
       }
 
-      const disciples = await this.discipleRepository.find({
-        where: {
-          gender: genderTerm,
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
-
-        throw new NotFoundException(
-          `No se encontraron discípulos con este género: ${genderInSpanish}`,
-        );
-      }
-
       try {
+        const disciples = await this.discipleRepository.find({
+          where: {
+            gender: genderTerm,
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
+
+          throw new NotFoundException(
+            `No se encontraron discípulos con este género: ${genderInSpanish}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -1400,270 +1460,284 @@ export class DiscipleService {
         throw new BadRequestException(`Estado Civil no válido: ${term}`);
       }
 
-      const disciples = await this.discipleRepository.find({
-        where: {
-          maritalStatus: maritalStatusTerm,
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        const maritalStatusInSpanish =
-          MaritalStatusNames[term.toLowerCase()] ?? term;
-
-        throw new NotFoundException(
-          `No se encontraron discípulos con este estado civil: ${maritalStatusInSpanish}`,
-        );
-      }
-
       try {
+        const disciples = await this.discipleRepository.find({
+          where: {
+            maritalStatus: maritalStatusTerm,
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          const maritalStatusInSpanish =
+            MaritalStatusNames[term.toLowerCase()] ?? term;
+
+          throw new NotFoundException(
+            `No se encontraron discípulos con este estado civil: ${maritalStatusInSpanish}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by origin country --> Many
     if (term && searchType === DiscipleSearchType.OriginCountry) {
-      const disciples = await this.discipleRepository.find({
-        where: {
-          originCountry: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos con este país de origen: ${term}`,
-        );
-      }
-
       try {
+        const disciples = await this.discipleRepository.find({
+          where: {
+            originCountry: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos con este país de origen: ${term}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by department --> Many
     if (term && searchType === DiscipleSearchType.Department) {
-      const disciples = await this.discipleRepository.find({
-        where: {
-          department: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos con este departamento: ${term}`,
-        );
-      }
-
       try {
+        const disciples = await this.discipleRepository.find({
+          where: {
+            department: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos con este departamento: ${term}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by province --> Many
     if (term && searchType === DiscipleSearchType.Province) {
-      const disciples = await this.discipleRepository.find({
-        where: {
-          province: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos con esta provincia: ${term}`,
-        );
-      }
-
       try {
+        const disciples = await this.discipleRepository.find({
+          where: {
+            province: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos con esta provincia: ${term}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by district --> Many
     if (term && searchType === DiscipleSearchType.District) {
-      const disciples = await this.discipleRepository.find({
-        where: {
-          district: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos con este distrito: ${term}`,
-        );
-      }
-
       try {
+        const disciples = await this.discipleRepository.find({
+          where: {
+            district: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos con este distrito: ${term}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by urban sector --> Many
     if (term && searchType === DiscipleSearchType.UrbanSector) {
-      const disciples = await this.discipleRepository.find({
-        where: {
-          urbanSector: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos con este sector urbano: ${term}`,
-        );
-      }
-
       try {
+        const disciples = await this.discipleRepository.find({
+          where: {
+            urbanSector: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos con este sector urbano: ${term}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by address --> Many
     if (term && searchType === DiscipleSearchType.Address) {
-      const disciples = await this.discipleRepository.find({
-        where: {
-          address: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron discípulos con esta dirección: ${term}`,
-        );
-      }
-
       try {
+        const disciples = await this.discipleRepository.find({
+          where: {
+            address: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos con esta dirección: ${term}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -1676,40 +1750,42 @@ export class DiscipleService {
         throw new BadRequestException(`Estado de registro no válido: ${term}`);
       }
 
-      const disciples = await this.discipleRepository.find({
-        where: {
-          recordStatus: recordStatusTerm,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
-          'theirZone',
-          'theirPreacher',
-          'theirFamilyGroup',
-        ],
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (disciples.length === 0) {
-        const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
-
-        throw new NotFoundException(
-          `No se encontraron discípulos con este estado de registro: ${value}`,
-        );
-      }
-
       try {
+        const disciples = await this.discipleRepository.find({
+          where: {
+            recordStatus: recordStatusTerm,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirSupervisor',
+            'theirZone',
+            'theirPreacher',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
+
+          throw new NotFoundException(
+            `No se encontraron discípulos con este estado de registro: ${value}`,
+          );
+        }
+
         return discipleDataFormatter({ disciples }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -1968,23 +2044,23 @@ export class DiscipleService {
         }
 
         // Update and save
-        const updatedDisciple = await this.discipleRepository.preload({
-          id: disciple.id,
-          ...updateDiscipleDto,
-          numberChildren: +numberChildren,
-          theirChurch: newChurch,
-          theirPastor: newPastor,
-          theirCopastor: newCopastor,
-          theirSupervisor: newSupervisor,
-          theirPreacher: newPreacher,
-          theirZone: newZone,
-          theirFamilyGroup: newFamilyGroup,
-          updatedAt: new Date(),
-          updatedBy: user,
-          recordStatus: recordStatus,
-        });
-
         try {
+          const updatedDisciple = await this.discipleRepository.preload({
+            id: disciple.id,
+            ...updateDiscipleDto,
+            numberChildren: +numberChildren,
+            theirChurch: newChurch,
+            theirPastor: newPastor,
+            theirCopastor: newCopastor,
+            theirSupervisor: newSupervisor,
+            theirPreacher: newPreacher,
+            theirZone: newZone,
+            theirFamilyGroup: newFamilyGroup,
+            updatedAt: new Date(),
+            updatedBy: user,
+            recordStatus: recordStatus,
+          });
+
           return await this.discipleRepository.save(updatedDisciple);
         } catch (error) {
           this.handleDBExceptions(error);
@@ -1993,23 +2069,23 @@ export class DiscipleService {
 
       //? Update and save if is same Copastor
       if (disciple?.theirFamilyGroup?.id === theirFamilyGroup) {
-        const updatedDisciple = await this.discipleRepository.preload({
-          id: disciple.id,
-          ...updateDiscipleDto,
-          numberChildren: +numberChildren,
-          theirChurch: disciple.theirChurch,
-          theirPastor: disciple.theirPastor,
-          theirCopastor: disciple.theirCopastor,
-          theirSupervisor: disciple.theirSupervisor,
-          theirPreacher: disciple.theirPreacher,
-          theirZone: disciple.theirZone,
-          theirFamilyGroup: disciple.theirFamilyGroup,
-          updatedAt: new Date(),
-          updatedBy: user,
-          recordStatus: recordStatus,
-        });
-
         try {
+          const updatedDisciple = await this.discipleRepository.preload({
+            id: disciple.id,
+            ...updateDiscipleDto,
+            numberChildren: +numberChildren,
+            theirChurch: disciple.theirChurch,
+            theirPastor: disciple.theirPastor,
+            theirCopastor: disciple.theirCopastor,
+            theirSupervisor: disciple.theirSupervisor,
+            theirPreacher: disciple.theirPreacher,
+            theirZone: disciple.theirZone,
+            theirFamilyGroup: disciple.theirFamilyGroup,
+            updatedAt: new Date(),
+            updatedBy: user,
+            recordStatus: recordStatus,
+          });
+
           return await this.discipleRepository.save(updatedDisciple);
         } catch (error) {
           this.handleDBExceptions(error);

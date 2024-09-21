@@ -254,29 +254,43 @@ export class SupervisorService {
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
     const { limit, offset = 0, order = 'ASC', isNull } = paginationDto;
 
-    const supervisors = await this.supervisorRepository.find({
-      where: {
-        recordStatus: RecordStatus.Active,
-        theirZone: isNull === 'true' ? IsNull() : null,
-      },
-      take: limit,
-      skip: offset,
-      relations: [
-        'updatedBy',
-        'createdBy',
-        'theirChurch',
-        'theirPastor',
-        'theirCopastor',
-        'theirZone',
-        'preachers',
-        'familyGroups',
-        'disciples',
-      ],
-      relationLoadStrategy: 'query',
-      order: { createdAt: order as FindOptionsOrderValue },
-    });
+    try {
+      const supervisors = await this.supervisorRepository.find({
+        where: {
+          recordStatus: RecordStatus.Active,
+          theirZone: isNull ? IsNull() : null,
+        },
+        take: limit,
+        skip: offset,
+        relations: [
+          'updatedBy',
+          'createdBy',
+          'theirChurch',
+          'theirPastor',
+          'theirCopastor',
+          'theirZone',
+          'preachers',
+          'familyGroups',
+          'disciples',
+        ],
+        relationLoadStrategy: 'query',
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
 
-    return supervisorDataFormatter({ supervisors }) as any;
+      if (supervisors.length === 0) {
+        throw new NotFoundException(
+          `No existen registros disponibles para mostrar.`,
+        );
+      }
+
+      return supervisorDataFormatter({ supervisors }) as any;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
+    }
   }
 
   //* FIND BY TERM
@@ -310,40 +324,42 @@ export class SupervisorService {
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) con estos nombres: ${firstNames}`,
-        );
-      }
-
       try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) con estos nombres: ${firstNames}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -355,50 +371,52 @@ export class SupervisorService {
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
-      const copastors = await this.copastorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const copastorsId = copastors.map((copastor) => copastor?.id);
-
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          theirCopastor: In(copastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) por los nombres de su co-pastor: ${firstNames}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const copastorsId = copastors.map((copastor) => copastor?.id);
+
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            theirCopastor: In(copastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) por los nombres de su co-pastor: ${firstNames}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -410,50 +428,52 @@ export class SupervisorService {
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
-      const pastors = await this.pastorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const pastorsId = pastors.map((pastor) => pastor?.id);
-
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          theirPastor: In(pastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) por los nombres de su pastor: ${firstNames}`,
-        );
-      }
-
       try {
+        const pastors = await this.pastorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const pastorsId = pastors.map((pastor) => pastor?.id);
+
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            theirPastor: In(pastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) por los nombres de su pastor: ${firstNames}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -466,40 +486,42 @@ export class SupervisorService {
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) con estos apellidos: ${lastNames}`,
-        );
-      }
-
       try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) con estos apellidos: ${lastNames}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -511,50 +533,52 @@ export class SupervisorService {
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
-      const copastors = await this.copastorRepository.find({
-        where: {
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const copastorsId = copastors.map((copastor) => copastor?.id);
-
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          theirCopastor: In(copastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) por los apellidos de su co-pastor: ${lastNames}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const copastorsId = copastors.map((copastor) => copastor?.id);
+
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            theirCopastor: In(copastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) por los apellidos de su co-pastor: ${lastNames}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -566,50 +590,52 @@ export class SupervisorService {
     ) {
       const lastNames = term.replace(/\+/g, ' ');
 
-      const pastors = await this.pastorRepository.find({
-        where: {
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const pastorsId = pastors.map((pastor) => pastor?.id);
-
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          theirPastor: In(pastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) por los apellidos de su pastor: ${lastNames}`,
-        );
-      }
-
       try {
+        const pastors = await this.pastorRepository.find({
+          where: {
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const pastorsId = pastors.map((pastor) => pastor?.id);
+
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            theirPastor: In(pastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) por los apellidos de su pastor: ${lastNames}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -623,41 +649,43 @@ export class SupervisorService {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) con estos nombres y apellidos: ${firstNames} ${lastNames}`,
-        );
-      }
-
       try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) con estos nombres y apellidos: ${firstNames} ${lastNames}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -670,51 +698,53 @@ export class SupervisorService {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
-      const copastors = await this.copastorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const copastorsId = copastors.map((copastor) => copastor?.id);
-
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          theirCopastor: In(copastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) por los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames}`,
-        );
-      }
-
       try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const copastorsId = copastors.map((copastor) => copastor?.id);
+
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            theirCopastor: In(copastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) por los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -727,51 +757,53 @@ export class SupervisorService {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
-      const pastors = await this.pastorRepository.find({
-        where: {
-          firstName: ILike(`%${firstNames}%`),
-          lastName: ILike(`%${lastNames}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const pastorsId = pastors.map((pastor) => pastor?.id);
-
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          theirPastor: In(pastorsId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) por los nombres y apellidos de su pastor: ${firstNames} ${lastNames}`,
-        );
-      }
-
       try {
+        const pastors = await this.pastorRepository.find({
+          where: {
+            firstName: ILike(`%${firstNames}%`),
+            lastName: ILike(`%${lastNames}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const pastorsId = pastors.map((pastor) => pastor?.id);
+
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            theirPastor: In(pastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) por los nombres y apellidos de su pastor: ${firstNames} ${lastNames}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -779,161 +811,167 @@ export class SupervisorService {
     if (term && searchType === SupervisorSearchType.BirthDate) {
       const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
 
-      if (isNaN(fromTimestamp)) {
-        throw new NotFoundException('Formato de marca de tiempo invalido.');
-      }
-
-      const fromDate = new Date(fromTimestamp);
-      const toDate = toTimestamp ? new Date(toTimestamp) : fromDate;
-
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          birthDate: Between(fromDate, toDate),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
-        const toDate = dateFormatterToDDMMYYY(toTimestamp);
-
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
-        );
-      }
-
       try {
+        if (isNaN(fromTimestamp)) {
+          throw new NotFoundException('Formato de marca de tiempo invalido.');
+        }
+
+        const fromDate = new Date(fromTimestamp);
+        const toDate = toTimestamp ? new Date(toTimestamp) : fromDate;
+
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            birthDate: Between(fromDate, toDate),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
+          const toDate = dateFormatterToDDMMYYY(toTimestamp);
+
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by month birth --> Many
     if (term && searchType === SupervisorSearchType.BirthMonth) {
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const resultSupervisors = getBirthDateByMonth({
-        month: term,
-        data: supervisors,
-      });
-
-      if (resultSupervisors.length === 0) {
-        const monthNames = {
-          january: 'Enero',
-          february: 'Febrero',
-          march: 'Marzo',
-          april: 'Abril',
-          may: 'Mayo',
-          june: 'Junio',
-          july: 'Julio',
-          august: 'Agosto',
-          september: 'Septiembre',
-          october: 'Octubre',
-          november: 'Noviembre',
-          december: 'Diciembre',
-        };
-
-        const monthInSpanish = monthNames[term.toLowerCase()] ?? term;
-
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) con este mes de nacimiento: ${monthInSpanish}`,
-        );
-      }
-
       try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const resultSupervisors = getBirthDateByMonth({
+          month: term,
+          data: supervisors,
+        });
+
+        if (resultSupervisors.length === 0) {
+          const monthNames = {
+            january: 'Enero',
+            february: 'Febrero',
+            march: 'Marzo',
+            april: 'Abril',
+            may: 'Mayo',
+            june: 'Junio',
+            july: 'Julio',
+            august: 'Agosto',
+            september: 'Septiembre',
+            october: 'Octubre',
+            november: 'Noviembre',
+            december: 'Diciembre',
+          };
+
+          const monthInSpanish = monthNames[term.toLowerCase()] ?? term;
+
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) con este mes de nacimiento: ${monthInSpanish}`,
+          );
+        }
+
         return supervisorDataFormatter({
           supervisors: resultSupervisors as Supervisor[],
         }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by zone name --> Many
     if (term && searchType === SupervisorSearchType.ZoneName) {
-      const zones = await this.zoneRepository.find({
-        where: {
-          zoneName: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const zonesId = zones.map((zone) => zone?.id);
-
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          theirZone: In(zonesId),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) con este nombre de zona: ${term}`,
-        );
-      }
-
       try {
+        const zones = await this.zoneRepository.find({
+          where: {
+            zoneName: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const zonesId = zones.map((zone) => zone?.id);
+
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            theirZone: In(zonesId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) con este nombre de zona: ${term}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -942,46 +980,48 @@ export class SupervisorService {
       const genderTerm = term.toLowerCase();
       const validGenders = ['male', 'female'];
 
-      if (!validGenders.includes(genderTerm)) {
-        throw new BadRequestException(`Género no válido: ${term}`);
-      }
-
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          gender: genderTerm,
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
-
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) con este género: ${genderInSpanish}`,
-        );
-      }
-
       try {
+        if (!validGenders.includes(genderTerm)) {
+          throw new BadRequestException(`Género no válido: ${term}`);
+        }
+
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            gender: genderTerm,
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
+
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) con este género: ${genderInSpanish}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -996,281 +1036,295 @@ export class SupervisorService {
         'other',
       ];
 
-      if (!validMaritalStatus.includes(maritalStatusTerm)) {
-        throw new BadRequestException(`Estado Civil no válido: ${term}`);
-      }
-
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          maritalStatus: maritalStatusTerm,
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        const maritalStatusInSpanish =
-          MaritalStatusNames[term.toLowerCase()] ?? term;
-
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) con este estado civil: ${maritalStatusInSpanish}`,
-        );
-      }
-
       try {
+        if (!validMaritalStatus.includes(maritalStatusTerm)) {
+          throw new BadRequestException(`Estado Civil no válido: ${term}`);
+        }
+
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            maritalStatus: maritalStatusTerm,
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          const maritalStatusInSpanish =
+            MaritalStatusNames[term.toLowerCase()] ?? term;
+
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) con este estado civil: ${maritalStatusInSpanish}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by origin country --> Many
     if (term && searchType === SupervisorSearchType.OriginCountry) {
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          originCountry: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) con este país de origen: ${term}`,
-        );
-      }
-
       try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            originCountry: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) con este país de origen: ${term}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by department --> Many
     if (term && searchType === SupervisorSearchType.Department) {
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          department: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) con este departamento: ${term}`,
-        );
-      }
-
       try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            department: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) con este departamento: ${term}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by province --> Many
     if (term && searchType === SupervisorSearchType.Province) {
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          province: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron supervises(as) con esta provincia: ${term}`,
-        );
-      }
-
       try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            province: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervises(as) con esta provincia: ${term}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by district --> Many
     if (term && searchType === SupervisorSearchType.District) {
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          district: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) con este distrito: ${term}`,
-        );
-      }
-
       try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            district: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) con este distrito: ${term}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by urban sector --> Many
     if (term && searchType === SupervisorSearchType.UrbanSector) {
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          urbanSector: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) con este sector urbano: ${term}`,
-        );
-      }
-
       try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            urbanSector: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) con este sector urbano: ${term}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
     //? Find by address --> Many
     if (term && searchType === SupervisorSearchType.Address) {
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          address: ILike(`%${term}%`),
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) con esta dirección: ${term}`,
-        );
-      }
-
       try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            address: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) con esta dirección: ${term}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -1279,96 +1333,103 @@ export class SupervisorService {
       const recordStatusTerm = term.toLowerCase();
       const validRecordStatus = ['active', 'inactive'];
 
-      if (!validRecordStatus.includes(recordStatusTerm)) {
-        throw new BadRequestException(`Estado de registro no válido: ${term}`);
-      }
-
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          recordStatus: recordStatusTerm,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      if (supervisors.length === 0) {
-        const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
-
-        throw new NotFoundException(
-          `No se encontraron supervisores(as) con este estado de registro: ${value}`,
-        );
-      }
-
       try {
+        if (!validRecordStatus.includes(recordStatusTerm)) {
+          throw new BadRequestException(
+            `Estado de registro no válido: ${term}`,
+          );
+        }
+
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            recordStatus: recordStatusTerm,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
+
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) con este estado de registro: ${value}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
+    //TODO : revisar este al igual que del predicador, derrepente tiene errores
     //? Find by copastor id --> Many
     if (term && searchType === SupervisorSearchType.CopastorId) {
       console.log(term);
 
-      const copastor = await this.copastorRepository.findOne({
-        where: {
-          id: term,
-          recordStatus: RecordStatus.Active,
-        },
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-
-      const supervisors = await this.supervisorRepository.find({
-        where: {
-          theirCopastor: copastor,
-          theirZone: isNull === 'true' ? IsNull() : null,
-          recordStatus: RecordStatus.Active,
-        },
-        take: limit,
-        skip: offset,
-        relations: [
-          'updatedBy',
-          'createdBy',
-          'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
-          'familyGroups',
-          'disciples',
-        ],
-        relationLoadStrategy: 'query',
-        order: { createdAt: order as FindOptionsOrderValue },
-      });
-      console.log(supervisors);
-
-      if (supervisors.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron predicadores(as) con este ID de zona: ${term}`,
-        );
-      }
-
       try {
+        const copastor = await this.copastorRepository.findOne({
+          where: {
+            id: term,
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            theirCopastor: copastor,
+            theirZone: isNull ? IsNull() : null,
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor',
+            'theirCopastor',
+            'theirZone',
+            'preachers',
+            'familyGroups',
+            'disciples',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+        console.log(supervisors);
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) con este ID de zona: ${term}`,
+          );
+        }
+
         return supervisorDataFormatter({ supervisors }) as any;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -1587,21 +1648,20 @@ export class SupervisorService {
         }
 
         //* Update and save
-        const updatedSupervisor = await this.supervisorRepository.preload({
-          id: supervisor.id,
-          ...updateSupervisorDto,
-          numberChildren: +numberChildren,
-          theirChurch: newChurch,
-          theirPastor: newPastor,
-          theirCopastor: newCopastor,
-          updatedAt: new Date(),
-          updatedBy: user,
-          recordStatus: recordStatus,
-        });
-
         let savedSupervisor: Supervisor;
-
         try {
+          const updatedSupervisor = await this.supervisorRepository.preload({
+            id: supervisor.id,
+            ...updateSupervisorDto,
+            numberChildren: +numberChildren,
+            theirChurch: newChurch,
+            theirPastor: newPastor,
+            theirCopastor: newCopastor,
+            updatedAt: new Date(),
+            updatedBy: user,
+            recordStatus: recordStatus,
+          });
+
           savedSupervisor =
             await this.supervisorRepository.save(updatedSupervisor);
         } catch (error) {
@@ -1736,20 +1796,20 @@ export class SupervisorService {
         }
 
         // Update and save
-        const updatedSupervisor = await this.supervisorRepository.preload({
-          id: supervisor.id,
-          ...updateSupervisorDto,
-          numberChildren: +numberChildren,
-          theirChurch: newChurch,
-          theirPastor: newPastor,
-          theirCopastor: null,
-          updatedAt: new Date(),
-          updatedBy: user,
-          recordStatus: recordStatus,
-        });
-
         let savedSupervisor: Supervisor;
         try {
+          const updatedSupervisor = await this.supervisorRepository.preload({
+            id: supervisor.id,
+            ...updateSupervisorDto,
+            numberChildren: +numberChildren,
+            theirChurch: newChurch,
+            theirPastor: newPastor,
+            theirCopastor: null,
+            updatedAt: new Date(),
+            updatedBy: user,
+            recordStatus: recordStatus,
+          });
+
           savedSupervisor =
             await this.supervisorRepository.save(updatedSupervisor);
         } catch (error) {
@@ -1842,19 +1902,19 @@ export class SupervisorService {
         supervisor?.theirCopastor?.id === theirCopastor &&
         !isDirectRelationToPastor
       ) {
-        const updatedSupervisor = await this.supervisorRepository.preload({
-          id: supervisor.id,
-          ...updateSupervisorDto,
-          numberChildren: +numberChildren,
-          theirChurch: supervisor.theirChurch,
-          theirPastor: supervisor.theirPastor,
-          theirCopastor: supervisor.theirCopastor,
-          updatedAt: new Date(),
-          updatedBy: user,
-          recordStatus: recordStatus,
-        });
-
         try {
+          const updatedSupervisor = await this.supervisorRepository.preload({
+            id: supervisor.id,
+            ...updateSupervisorDto,
+            numberChildren: +numberChildren,
+            theirChurch: supervisor.theirChurch,
+            theirPastor: supervisor.theirPastor,
+            theirCopastor: supervisor.theirCopastor,
+            updatedAt: new Date(),
+            updatedBy: user,
+            recordStatus: recordStatus,
+          });
+
           return await this.supervisorRepository.save(updatedSupervisor);
         } catch (error) {
           this.handleDBExceptions(error);

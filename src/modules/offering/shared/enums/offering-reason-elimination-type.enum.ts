@@ -1,4 +1,5 @@
 export enum OfferingReasonEliminationType {
+  CurrencyExchange = 'currency_exchange',
   TypeSelectionError = 'type_selection_error',
   SubTypeSelectionError = 'sub_type_selection_error',
   ShiftSelectionError = 'shift_selection_error',
@@ -17,6 +18,7 @@ export const OfferingReasonEliminationTypeNames: Record<
   OfferingReasonEliminationType,
   string
 > = {
+  currency_exchange: '💲💲 Cambio de divisa',
   type_selection_error: '❌ Error en selección de tipo',
   sub_type_selection_error: '❌ Error en selección de sub-tipo',
   shift_selection_error: '❌ Error en selección de turno',

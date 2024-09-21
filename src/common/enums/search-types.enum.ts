@@ -57,8 +57,8 @@ export enum SearchType {
   Special = 'special',
   IncomeAdjustment = 'income_adjustment',
 
-  LatestSundayOfferings = 'latest_sunday_offerings',
-  TopFamilyGroupOfferings = 'top_family_group_offerings',
+  LastSundaysOfferings = 'last_sundays_offerings',
+  TopFamilyGroupsOfferings = 'top_family_groups_offerings',
   MostPopulatedFamilyGroups = 'most_populated_family_groups',
   LessPopulatedFamilyGroups = 'less_populated_family_groups',
 
@@ -70,6 +70,18 @@ export enum SearchType {
   SuppliesExpense = 'supplies_expense',
   ActivitiesAndEventsExpense = 'activities_and_events_expense',
   ExpenseAdjustment = 'expense_adjustment',
+
+  //* Metrics
+  MembersFluctuationByYear = 'members_fluctuation_by_year',
+  MembersByBirthMonth = 'members_by_birth_month',
+  MembersByCategory = 'members_by_category',
+  MembersByCategoryAndGender = 'members_by_category_and_gender',
+  MembersByRoleAndGender = 'members_by_role_and_gender',
+  MembersByMaritalStatus = 'members_by_marital_status',
+  MembersByZoneAndGender = 'members_by_zone_and_gender',
+  PreachersByZoneAndGender = 'preachers_by_zone_and_gender',
+  MembersByDistrictAndGender = 'members_by_district_and_gender',
+  MembersByRecordStatus = 'members_by_record_status',
 }
 
 export const SearchTypeNames: Record<SearchType, string> = {
@@ -120,8 +132,8 @@ export const SearchTypeNames: Record<SearchType, string> = {
   [SearchType.Special]: 'Especial',
   [SearchType.IncomeAdjustment]: 'Ajuste por Ingresos',
 
-  [SearchType.LatestSundayOfferings]: 'Ultimas Ofrendas Dominicales',
-  [SearchType.TopFamilyGroupOfferings]: 'Top Ofrendas Grupos Familiares',
+  [SearchType.LastSundaysOfferings]: 'Ultimas Ofrendas Dominicales',
+  [SearchType.TopFamilyGroupsOfferings]: 'Top Ofrendas Grupos Familiares',
   [SearchType.MostPopulatedFamilyGroups]: 'Grupos Familiares mas poblados',
   [SearchType.LessPopulatedFamilyGroups]: 'Grupos Familiares menos poblados',
 
@@ -133,4 +145,22 @@ export const SearchTypeNames: Record<SearchType, string> = {
   [SearchType.SuppliesExpense]: 'Gastos de Suministros',
   [SearchType.ActivitiesAndEventsExpense]: 'Gastos de Actividades y Eventos',
   [SearchType.ExpenseAdjustment]: 'Ajuste de Gastos',
+
+  //* Metrics
+  [SearchType.MembersFluctuationByYear]:
+    'Análisis de fluctuación de miembros por año',
+  [SearchType.MembersByBirthMonth]:
+    'Análisis de miembros por mes de nacimiento',
+  [SearchType.MembersByCategory]: 'Análisis de miembros por categoría',
+  [SearchType.MembersByCategoryAndGender]:
+    'Análisis de miembros por categoría y género',
+  [SearchType.MembersByRoleAndGender]: 'Análisis de miembros por rol y género',
+  [SearchType.MembersByMaritalStatus]: 'Análisis de miembros por estado civil',
+  [SearchType.MembersByZoneAndGender]: 'Análisis de miembros por zona y genero',
+  [SearchType.PreachersByZoneAndGender]:
+    'Análisis de predicadores por zona y genero',
+  [SearchType.MembersByDistrictAndGender]:
+    'Análisis de miembros por distrito y genero',
+  [SearchType.MembersByRecordStatus]:
+    'Análisis de miembros por estado de registro',
 };

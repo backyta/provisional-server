@@ -1,7 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Type } from 'class-transformer';
-import { IsEnum, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  Min,
+  IsEnum,
+  IsString,
+  IsBoolean,
+  IsNotEmpty,
+  IsOptional,
+} from 'class-validator';
 
 import { SearchType, SearchSubType } from '@/common/enums';
 
@@ -57,7 +64,21 @@ export class SearchAndPaginationDto {
     description: 'Do you want null relationships to be returned?',
   })
   @IsOptional()
-  @IsString()
-  @Type(() => String)
-  isNull?: string;
+  @IsBoolean()
+  @Transform(({ value }) =>
+    value === 'true' ? true : value === 'false' ? false : value,
+  )
+  isNull?: boolean;
+
+  //* Form Zones in metrics
+  @ApiProperty({
+    default: 'ASC',
+    description: 'Do you want returned all zones?',
+  })
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) =>
+    value === 'true' ? true : value === 'false' ? false : value,
+  )
+  allZones?: boolean;
 }

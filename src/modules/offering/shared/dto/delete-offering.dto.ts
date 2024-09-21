@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { OfferingReasonEliminationType } from '@/modules/offering/shared/enums';
 
 export class DeleteOfferingDto {
@@ -8,6 +8,19 @@ export class DeleteOfferingDto {
   })
   @IsNotEmpty()
   @IsEnum(OfferingReasonEliminationType)
-  @IsNotEmpty()
   reasonEliminationType: string;
+
+  @ApiProperty({
+    example: '3.89',
+  })
+  @IsString()
+  @IsOptional()
+  exchangeRate?: string;
+
+  @ApiProperty({
+    example: 'pen_to_usd',
+  })
+  @IsString()
+  @IsOptional()
+  exchangeCurrencyType?: string;
 }

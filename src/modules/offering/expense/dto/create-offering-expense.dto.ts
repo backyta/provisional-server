@@ -58,7 +58,7 @@ export class CreateOfferingExpenseDto {
   })
   @IsString()
   @IsOptional()
-  @MaxLength(300)
+  @MaxLength(500)
   comments?: string;
 
   @ApiProperty({
