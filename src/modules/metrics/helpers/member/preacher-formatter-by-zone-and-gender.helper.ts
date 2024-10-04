@@ -1,23 +1,25 @@
-import { Gender } from '@/common/enums';
 import { Zone } from '@/modules/zone/entities';
+
+import { Gender } from '@/common/enums';
+import { getInitialFullNames } from '@/common/helpers';
 
 interface Options {
   zones: Zone[];
 }
 
-export const memberFormatterByZoneAndGender = ({ zones }: Options) => {
+export const preacherFormatterByZoneAndGender = ({ zones }: Options) => {
   const result = zones.reduce((acc, zone) => {
-    const menCount = zone.disciples.filter(
+    const menCount = zone.preachers.filter(
       (disciple) => disciple.gender === Gender.Male,
     ).length;
 
-    const womenCount = zone.disciples.filter(
+    const womenCount = zone.preachers.filter(
       (disciple) => disciple.gender === Gender.Female,
     ).length;
 
     acc[zone.zoneName] = {
       supervisor: zone?.theirSupervisor?.firstName
-        ? `${zone.theirSupervisor.firstName} ${zone.theirSupervisor.lastName}`
+        ? `${getInitialFullNames({ firstNames: zone?.theirSupervisor?.firstName, lastNames: '' })} ${zone?.theirSupervisor?.lastName}`
         : 'Sin Supervisor',
       men: menCount,
       women: womenCount,

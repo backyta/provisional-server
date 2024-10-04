@@ -72,6 +72,7 @@ export enum SearchType {
   ExpenseAdjustment = 'expense_adjustment',
 
   //* Metrics
+  MembersByProportion = 'members_by_proportion',
   MembersFluctuationByYear = 'members_fluctuation_by_year',
   MembersByBirthMonth = 'members_by_birth_month',
   MembersByCategory = 'members_by_category',
@@ -82,6 +83,20 @@ export enum SearchType {
   PreachersByZoneAndGender = 'preachers_by_zone_and_gender',
   MembersByDistrictAndGender = 'members_by_district_and_gender',
   MembersByRecordStatus = 'members_by_record_status',
+
+  FamilyGroupsByProportion = 'family_groups_by_proportion',
+  FamilyGroupsFluctuationByYear = 'family_groups_fluctuation_by_year',
+  FamilyGroupsByCode = 'family_groups_by_code',
+  FamilyGroupsByZone = 'family_groups_by_zone',
+  FamilyGroupsByDistrict = 'family_groups_by_district',
+  FamilyGroupsByWorshipTime = 'family_groups_by_worship_time',
+  FamilyGroupsByRecordStatus = 'family_groups_by_record_status',
+
+  OfferingsIncomeByProportion = 'offerings_income_by_proportion',
+  OfferingsIncomeBySundayService = 'offerings_income_by_sunday_service',
+  OfferingsIncomeByFamilyGroup = 'offerings_income_by_family_group',
+  OfferingsIncomeBySundaySchool = 'offerings_income_by_sunday_school',
+  OfferingsIncomeByFastingAndVigil = 'offerings_income_by_fasting_and_vigil',
 }
 
 export const SearchTypeNames: Record<SearchType, string> = {
@@ -147,6 +162,7 @@ export const SearchTypeNames: Record<SearchType, string> = {
   [SearchType.ExpenseAdjustment]: 'Ajuste de Gastos',
 
   //* Metrics
+  [SearchType.MembersByProportion]: 'Análisis de proporción de miembros',
   [SearchType.MembersFluctuationByYear]:
     'Análisis de fluctuación de miembros por año',
   [SearchType.MembersByBirthMonth]:
@@ -163,4 +179,28 @@ export const SearchTypeNames: Record<SearchType, string> = {
     'Análisis de miembros por distrito y genero',
   [SearchType.MembersByRecordStatus]:
     'Análisis de miembros por estado de registro',
+
+  [SearchType.FamilyGroupsByProportion]:
+    'Análisis de proporción de grupos familiares',
+  [SearchType.FamilyGroupsFluctuationByYear]:
+    'Análisis de fluctuación de grupos familiares por año',
+  [SearchType.FamilyGroupsByCode]: 'Análisis de grupos familiares por código',
+  [SearchType.FamilyGroupsByZone]: 'Análisis de grupos familiares por zona',
+  [SearchType.FamilyGroupsByDistrict]:
+    'Análisis de grupos familiares por distrito',
+  [SearchType.FamilyGroupsByWorshipTime]:
+    'Análisis de grupos familiares por horario de culto',
+  [SearchType.FamilyGroupsByRecordStatus]:
+    'Análisis de grupos familiares por estado de registro',
+
+  [SearchType.OfferingsIncomeByProportion]:
+    'Análisis de proporción de ingresos de ofrenda',
+  [SearchType.OfferingsIncomeBySundayService]:
+    'Análisis de ingresos de ofrenda por culto dominical.',
+  [SearchType.OfferingsIncomeByFamilyGroup]:
+    'Análisis de ingresos de ofrenda por grupo familiar.',
+  [SearchType.OfferingsIncomeBySundaySchool]:
+    'Análisis de ingresos de ofrenda por escuela dominical.',
+  [SearchType.OfferingsIncomeByFastingAndVigil]:
+    'Análisis de ingresos de ofrenda por ayuno y vigilia.',
 };

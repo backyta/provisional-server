@@ -68,9 +68,20 @@ export class SearchAndPaginationDto {
   @Transform(({ value }) =>
     value === 'true' ? true : value === 'false' ? false : value,
   )
-  isNull?: boolean;
+  isNullFamilyGroup?: boolean;
 
-  //* Form Zones in metrics
+  @ApiProperty({
+    default: 'ASC',
+    description: 'Do you want null relationships to be returned?',
+  })
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) =>
+    value === 'true' ? true : value === 'false' ? false : value,
+  )
+  isNullZone?: boolean;
+
+  //* For Zones in metrics
   @ApiProperty({
     default: 'ASC',
     description: 'Do you want returned all zones?',
@@ -81,4 +92,16 @@ export class SearchAndPaginationDto {
     value === 'true' ? true : value === 'false' ? false : value,
   )
   allZones?: boolean;
+
+  //* For Family groups in metrics
+  @ApiProperty({
+    default: 'ASC',
+    description: 'Do you want returned all family groups?',
+  })
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) =>
+    value === 'true' ? true : value === 'false' ? false : value,
+  )
+  allFamilyGroups?: boolean;
 }

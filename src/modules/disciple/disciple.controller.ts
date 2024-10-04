@@ -92,7 +92,7 @@ export class DiscipleController {
   @ApiNotFoundResponse({
     description: 'Not found resource.',
   })
-  findTerm(
+  findByTerm(
     @Param('term') term: string,
     @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
   ): Promise<Disciple | Disciple[]> {

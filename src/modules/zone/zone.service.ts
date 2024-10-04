@@ -160,7 +160,39 @@ export class ZoneService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit, offset = 0, order = 'ASC' } = paginationDto;
+    const {
+      limit,
+      offset = 0,
+      order = 'ASC',
+      isSimpleQuery,
+      church: churchId,
+    } = paginationDto;
+
+    if (isSimpleQuery && churchId) {
+      try {
+        const church = await this.churchRepository.findOne({
+          where: {
+            id: churchId,
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const zones = await this.zoneRepository.find({
+          where: { theirChurch: church, recordStatus: RecordStatus.Active },
+          relations: ['familyGroups'],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        return zones;
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
+      }
+    }
 
     try {
       const zones = await this.zoneRepository.find({

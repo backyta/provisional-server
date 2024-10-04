@@ -31,7 +31,7 @@ export class CreateFileDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(40)
-  type: string;
+  offeringType: string;
 
   @ApiProperty({
     example: OfferingIncomeCreationSubType.ChurchGround,
@@ -41,5 +41,5 @@ export class CreateFileDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(40)
-  subType?: string;
+  offeringSubType?: string;
 }

@@ -4,6 +4,21 @@ import { Disciple } from '@/modules/disciple/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
 
+const monthNames = [
+  'Ene',
+  'Feb',
+  'Mar',
+  'Abr',
+  'May',
+  'Jun',
+  'Jul',
+  'Ago',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dic',
+];
+
 interface Options {
   pastors: Pastor[];
   copastors: Copastor[];
@@ -12,20 +27,11 @@ interface Options {
   disciples: Disciple[];
 }
 
-const months = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
+interface ResultDataOptions {
+  month: string;
+  membersCount: number;
+  averageAge: string | number;
+}
 
 export const memberFormatterByBirthMonth = ({
   pastors,
@@ -42,7 +48,7 @@ export const memberFormatterByBirthMonth = ({
     ...disciples,
   ];
 
-  const memberByBirthMonth = months.map((_, index) =>
+  const memberByBirthMonth = monthNames.map((_, index) =>
     allMembers.filter(
       (member) => new Date(member.birthDate).getMonth() === index,
     ),
@@ -59,13 +65,12 @@ export const memberFormatterByBirthMonth = ({
     return { membersCount, averageAge };
   };
 
-  const result = months.reduce(
-    (acc, month, index) => {
-      acc[`membersIn${month}`] = calculateMemberData(memberByBirthMonth[index]);
-      return acc;
-    },
-    {} as Record<string, { membersCount: number; averageAge: string | number }>,
-  );
+  const resultData: ResultDataOptions[] = monthNames.map((_, index) => {
+    return {
+      month: monthNames[index],
+      ...calculateMemberData(memberByBirthMonth[index]),
+    };
+  });
 
-  return result;
+  return resultData;
 };

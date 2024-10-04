@@ -40,13 +40,13 @@ export class CloudinaryService {
     createFileDto: CreateFileDto,
   ): Promise<CloudinaryResponse> {
     return new Promise<CloudinaryResponse>((resolve, reject) => {
-      const { fileType, type, subType } = createFileDto;
+      const { fileType, offeringType, offeringSubType } = createFileDto;
 
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          folder: subType
-            ? `${fileType}/${type}/${subType}`
-            : `${fileType}/${type}`,
+          folder: offeringSubType
+            ? `${fileType}/${offeringType}/${offeringSubType}`
+            : `${fileType}/${offeringType}`,
         },
         (error, result) => {
           if (error) return reject(error);

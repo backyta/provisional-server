@@ -79,7 +79,7 @@ export class OfferingIncomeController {
   @ApiNotFoundResponse({
     description: 'Not found resource.',
   })
-  findTerm(
+  findByTerm(
     @Param('term') term: string,
     @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
   ): Promise<OfferingIncome | OfferingIncome[]> {

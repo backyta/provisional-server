@@ -14,7 +14,7 @@ interface Options {
   disciples: Disciple[];
 }
 
-export const memberCountFormatter = ({
+export const memberProportionFormatter = ({
   pastors,
   copastors,
   supervisors,

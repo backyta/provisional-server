@@ -32,7 +32,7 @@ import {
   MaritalStatusNames,
 } from '@/common/enums';
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
-import { dateFormatterToDDMMYYY, getBirthDateByMonth } from '@/common/helpers';
+import { dateFormatterToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
 
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
@@ -213,7 +213,20 @@ export class PreacherService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit, offset = 0, order = 'ASC' } = paginationDto;
+    const { limit, offset = 0, order = 'ASC', isSimpleQuery } = paginationDto;
+
+    if (isSimpleQuery) {
+      try {
+        const preachers = await this.preacherRepository.find({
+          where: { recordStatus: RecordStatus.Active },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        return preachers;
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
+    }
 
     try {
       const preachers = await this.preacherRepository.find({
@@ -261,7 +274,7 @@ export class PreacherService {
       limit,
       offset = 0,
       order,
-      isNull = 'false',
+      isNullFamilyGroup = 'false',
     } = searchTypeAndPaginationDto;
 
     if (!term) {
@@ -959,8 +972,8 @@ export class PreacherService {
         });
 
         if (preachers.length === 0) {
-          const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
-          const toDate = dateFormatterToDDMMYYY(toTimestamp);
+          const fromDate = dateFormatterToDDMMYYYY(fromTimestamp);
+          const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
             `No se encontraron predicadores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
@@ -1208,33 +1221,14 @@ export class PreacherService {
         const preachers = await this.preacherRepository.find({
           where: {
             theirZone: zone,
-            theirFamilyGroup: isNull ? IsNull() : null,
+            theirFamilyGroup: isNullFamilyGroup ? IsNull() : null,
             recordStatus: RecordStatus.Active,
           },
-          take: limit,
-          skip: offset,
-          relations: [
-            'updatedBy',
-            'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
-            'theirZone',
-            'theirFamilyGroup',
-            'disciples',
-          ],
+          relations: ['theirFamilyGroup'],
           order: { createdAt: order as FindOptionsOrderValue },
         });
 
-        //TODO : ver estas fallas donde se refleja similar puede ser en supervisor (probar en front)
-        // if (preachers.length === 0) {
-        //   throw new NotFoundException(
-        //     `No se encontraron predicadores(as) con este ID de zona: ${term}`,
-        //   );
-        // }
-
-        return preacherDataFormatter({ preachers }) as any;
+        return preachers;
       } catch (error) {
         this.handleDBExceptions(error);
       }

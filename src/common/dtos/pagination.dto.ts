@@ -40,5 +40,26 @@ export class PaginationDto {
   @Transform(({ value }) =>
     value === 'true' ? true : value === 'false' ? false : value,
   )
-  isNull?: boolean;
+  isNullZone?: boolean;
+
+  @ApiProperty({
+    default: 'ASC',
+    description:
+      'Es un consulta simple(no necesita cargar relaciones) o completa(si necesita cargar relaciones)?',
+  })
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) =>
+    value === 'true' ? true : value === 'false' ? false : value,
+  )
+  isSimpleQuery?: boolean;
+
+  @ApiProperty({
+    default: '1221312-123j34-34',
+    description: 'Iglesia?',
+  })
+  @IsOptional()
+  @IsString()
+  @Type(() => String)
+  church?: string;
 }

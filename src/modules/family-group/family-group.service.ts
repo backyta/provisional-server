@@ -238,7 +238,20 @@ export class FamilyGroupService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit, offset = 0, order = 'ASC' } = paginationDto;
+    const { limit, offset = 0, order = 'ASC', isSimpleQuery } = paginationDto;
+
+    if (isSimpleQuery) {
+      try {
+        const familyGroups = await this.familyGroupRepository.find({
+          where: { recordStatus: RecordStatus.Active },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        return familyGroups;
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
+    }
 
     try {
       const familyGroups = await this.familyGroupRepository.find({

@@ -23,7 +23,7 @@ import {
   SearchTypeNames,
   DashboardSearchType,
 } from '@/common/enums';
-import { dateFormatterToDDMMYYY } from '@/common/helpers';
+import { dateFormatterToDDMMYYYY } from '@/common/helpers';
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 import { DeleteOfferingDto } from '@/modules/offering/shared/dto';
@@ -46,7 +46,11 @@ import {
   UpdateOfferingIncomeDto,
 } from '@/modules/offering/income/dto';
 import { RepositoryType } from '@/modules/offering/income/types';
-import { formatDataOfferingIncome } from '@/modules/offering/income/helpers';
+import {
+  lastSundayOfferingsDataFormatter,
+  offeringIncomeDataFormatter,
+  topOfferingsFamilyGroupsDataFormatter,
+} from '@/modules/offering/income/helpers';
 
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
@@ -161,7 +165,7 @@ export class OfferingIncomeService {
         });
 
         if (offeringsIncome.length > 0) {
-          const newDate = dateFormatterToDDMMYYY(
+          const newDate = dateFormatterToDDMMYYYY(
             new Date(createOfferingIncomeDto.date).getTime(),
           );
 
@@ -234,7 +238,7 @@ export class OfferingIncomeService {
         });
 
         if (offeringsIncome.length > 0) {
-          const newDate = dateFormatterToDDMMYYY(
+          const newDate = dateFormatterToDDMMYYYY(
             new Date(createOfferingIncomeDto.date).getTime(),
           );
 
@@ -317,12 +321,13 @@ export class OfferingIncomeService {
             subType: subType,
             zone: zone,
             date: new Date(createOfferingIncomeDto.date),
+            currency: currency,
             recordStatus: RecordStatus.Active,
           },
         });
 
         if (offeringsIncome.length > 0) {
-          const newDate = dateFormatterToDDMMYYY(
+          const newDate = dateFormatterToDDMMYYYY(
             new Date(createOfferingIncomeDto.date).getTime(),
           );
 
@@ -358,7 +363,7 @@ export class OfferingIncomeService {
 
       //? General fasting, vigil, youth worship, united worship, activities
       if (
-        subType === OfferingIncomeCreationSubType.GeneralFasting ||
+        subType === OfferingIncomeCreationSubType.GeneralVigil ||
         subType === OfferingIncomeCreationSubType.GeneralFasting ||
         subType === OfferingIncomeCreationSubType.YouthWorship ||
         subType === OfferingIncomeCreationSubType.UnitedWorship ||
@@ -379,12 +384,13 @@ export class OfferingIncomeService {
             subType: subType,
             church: church,
             date: new Date(createOfferingIncomeDto.date),
+            currency: currency,
             recordStatus: RecordStatus.Active,
           },
         });
 
         if (offeringsIncome.length > 0) {
-          const newDate = dateFormatterToDDMMYYY(
+          const newDate = dateFormatterToDDMMYYYY(
             new Date(createOfferingIncomeDto.date).getTime(),
           );
 
@@ -464,7 +470,7 @@ export class OfferingIncomeService {
           });
 
           if (offeringsIncome.length > 0) {
-            const newDate = dateFormatterToDDMMYYY(
+            const newDate = dateFormatterToDDMMYYYY(
               new Date(createOfferingIncomeDto.date).getTime(),
             );
 
@@ -529,7 +535,7 @@ export class OfferingIncomeService {
           });
 
           if (offeringsIncome.length > 0) {
-            const newDate = dateFormatterToDDMMYYY(
+            const newDate = dateFormatterToDDMMYYYY(
               new Date(createOfferingIncomeDto.date).getTime(),
             );
 
@@ -599,7 +605,7 @@ export class OfferingIncomeService {
           });
 
           if (offeringsIncome.length > 0) {
-            const newDate = dateFormatterToDDMMYYY(
+            const newDate = dateFormatterToDDMMYYYY(
               new Date(createOfferingIncomeDto.date).getTime(),
             );
 
@@ -671,7 +677,7 @@ export class OfferingIncomeService {
           });
 
           if (offeringsIncome.length > 0) {
-            const newDate = dateFormatterToDDMMYYY(
+            const newDate = dateFormatterToDDMMYYYY(
               new Date(createOfferingIncomeDto.date).getTime(),
             );
 
@@ -744,7 +750,7 @@ export class OfferingIncomeService {
           });
 
           if (offeringsIncome.length > 0) {
-            const newDate = dateFormatterToDDMMYYY(
+            const newDate = dateFormatterToDDMMYYYY(
               new Date(createOfferingIncomeDto.date).getTime(),
             );
 
@@ -860,7 +866,7 @@ export class OfferingIncomeService {
         );
       }
 
-      return formatDataOfferingIncome({ offeringsIncome }) as any;
+      return offeringIncomeDataFormatter({ offeringsIncome }) as any;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -972,15 +978,15 @@ export class OfferingIncomeService {
         }
 
         if (offeringsIncome.length === 0) {
-          const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
-          const toDate = dateFormatterToDDMMYYY(toTimestamp);
+          const fromDate = dateFormatterToDDMMYYYY(fromTimestamp);
+          const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
             `No se encontraron ingresos de ofrendas (${SearchTypeNames[searchType]}) con este rango de fechas: ${fromDate} - ${toDate}`,
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -1076,7 +1082,7 @@ export class OfferingIncomeService {
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -1179,15 +1185,15 @@ export class OfferingIncomeService {
         }
 
         if (offeringsIncome.length === 0) {
-          const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
-          const toDate = dateFormatterToDDMMYYY(toTimestamp);
+          const fromDate = dateFormatterToDDMMYYYY(fromTimestamp);
+          const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
             `No se encontraron ingresos de ofrendas (${SearchTypeNames[searchType]}) con esta iglesia: ${church?.churchName} y con este rango de fechas: ${fromDate} - ${toDate}`,
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -1247,7 +1253,7 @@ export class OfferingIncomeService {
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -1310,8 +1316,8 @@ export class OfferingIncomeService {
         });
 
         if (offeringsIncome.length === 0) {
-          const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
-          const toDate = dateFormatterToDDMMYYY(toTimestamp);
+          const fromDate = dateFormatterToDDMMYYYY(fromTimestamp);
+          const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           const shiftInSpanish =
             OfferingIncomeCreationShiftTypeNames[shiftTerm.toLowerCase()] ??
@@ -1322,7 +1328,7 @@ export class OfferingIncomeService {
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -1386,7 +1392,7 @@ export class OfferingIncomeService {
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -1456,15 +1462,15 @@ export class OfferingIncomeService {
         });
 
         if (offeringsIncome.length === 0) {
-          const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
-          const toDate = dateFormatterToDDMMYYY(toTimestamp);
+          const fromDate = dateFormatterToDDMMYYYY(fromTimestamp);
+          const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
             `No se encontraron ingresos de ofrendas (${SearchTypeNames[searchType]}) con este rango de fechas: ${fromDate} - ${toDate} y esta zona: ${zone}`,
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -1522,7 +1528,7 @@ export class OfferingIncomeService {
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -1587,15 +1593,15 @@ export class OfferingIncomeService {
         });
 
         if (offeringsIncome.length === 0) {
-          const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
-          const toDate = dateFormatterToDDMMYYY(toTimestamp);
+          const fromDate = dateFormatterToDDMMYYYY(fromTimestamp);
+          const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
             `No se encontraron ingresos de ofrendas (${SearchTypeNames[searchType]}) con este rango de fechas: ${fromDate} - ${toDate} y este código de grupo: ${code}`,
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -1656,7 +1662,7 @@ export class OfferingIncomeService {
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -1717,7 +1723,7 @@ export class OfferingIncomeService {
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -1778,7 +1784,7 @@ export class OfferingIncomeService {
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -1835,7 +1841,7 @@ export class OfferingIncomeService {
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -1899,15 +1905,15 @@ export class OfferingIncomeService {
         });
 
         if (offeringsIncome.length === 0) {
-          const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
-          const toDate = dateFormatterToDDMMYYY(toTimestamp);
+          const fromDate = dateFormatterToDDMMYYYY(fromTimestamp);
+          const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
             `No se encontraron ingresos de ofrendas (${SearchTypeNames[searchType]}) con este rango de fechas: ${fromDate} - ${toDate} y esta zona: ${zone}`,
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -1969,7 +1975,7 @@ export class OfferingIncomeService {
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -2032,7 +2038,7 @@ export class OfferingIncomeService {
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -2094,7 +2100,7 @@ export class OfferingIncomeService {
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -2180,7 +2186,7 @@ export class OfferingIncomeService {
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -2266,7 +2272,7 @@ export class OfferingIncomeService {
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -2355,7 +2361,7 @@ export class OfferingIncomeService {
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -2408,7 +2414,7 @@ export class OfferingIncomeService {
           );
         }
 
-        return formatDataOfferingIncome({
+        return offeringIncomeDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -2421,7 +2427,7 @@ export class OfferingIncomeService {
     }
 
     //? BAR CHARTS OFFERINGS
-    //* Latest Sunday Offerings
+    //* Last Sunday Offerings
     if (term && searchType === DashboardSearchType.LastSundaysOfferings) {
       const [dateTerm, churchId] = term.split('&');
 
@@ -2479,7 +2485,7 @@ export class OfferingIncomeService {
           order: { createdAt: order as FindOptionsOrderValue },
         });
 
-        return formatDataOfferingIncome({
+        return lastSundayOfferingsDataFormatter({
           offeringsIncome,
         }) as any;
       } catch (error) {
@@ -2552,7 +2558,7 @@ export class OfferingIncomeService {
             return year === +currentYear;
           });
 
-        return formatDataOfferingIncome({
+        return topOfferingsFamilyGroupsDataFormatter({
           offeringsIncome: filteredOfferingsIncomeByCurrentYear,
         }) as any;
       } catch (error) {
@@ -2756,7 +2762,7 @@ export class OfferingIncomeService {
       });
 
       if (offeringsIncome.length > 0) {
-        const newDate = dateFormatterToDDMMYYY(new Date(date).getTime());
+        const newDate = dateFormatterToDDMMYYYY(new Date(date).getTime());
 
         throw new NotFoundException(
           `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, esta divisa: ${currency} y fecha: ${newDate}.  Si desea hacer cambio de divisa, debe eliminar este registro y actualizar el registro de destino, con el monto correspondiente.`,

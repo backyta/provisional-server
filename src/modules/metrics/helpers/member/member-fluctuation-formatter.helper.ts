@@ -4,25 +4,31 @@ import { Disciple } from '@/modules/disciple/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
 
+const monthNames = [
+  'Ene',
+  'Feb',
+  'Mar',
+  'Abr',
+  'May',
+  'Jun',
+  'Jul',
+  'Ago',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dic',
+];
+
 interface Options {
   newMembers: [Pastor[], Copastor[], Supervisor[], Preacher[], Disciple[]];
   inactiveMembers: [Pastor[], Copastor[], Supervisor[], Preacher[], Disciple[]];
 }
 
-const months = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-] as const;
+interface ResultDataOptions {
+  month: string;
+  newMembers: number;
+  inactiveMembers: number;
+}
 
 export const memberFluctuationFormatter = ({
   newMembers,
@@ -43,14 +49,13 @@ export const memberFluctuationFormatter = ({
       (member) => new Date(member.createdAt).getMonth() === monthIndex,
     );
 
-  const result: Record<string, { new: number; inactive: number }> = {};
-
-  months.forEach((month, index) => {
-    result[`membersIn${month}`] = {
-      new: filterMembersByMonth(allNewMembers, index).length,
-      inactive: filterMembersByMonth(allInactiveMembers, index).length,
+  const resultData: ResultDataOptions[] = monthNames.map((_, index) => {
+    return {
+      month: monthNames[index],
+      newMembers: filterMembersByMonth(allNewMembers, index).length,
+      inactiveMembers: filterMembersByMonth(allInactiveMembers, index).length,
     };
   });
 
-  return result;
+  return resultData;
 };

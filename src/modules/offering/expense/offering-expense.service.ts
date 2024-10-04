@@ -10,7 +10,7 @@ import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, FindOptionsOrderValue, Repository } from 'typeorm';
 
-import { dateFormatterToDDMMYYY } from '@/common/helpers';
+import { dateFormatterToDDMMYYYY } from '@/common/helpers';
 import { RecordStatus, SearchTypeNames } from '@/common/enums';
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
@@ -258,8 +258,8 @@ export class OfferingExpenseService {
         }
 
         if (offeringsExpenses.length === 0) {
-          const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
-          const toDate = dateFormatterToDDMMYYY(toTimestamp);
+          const fromDate = dateFormatterToDDMMYYYY(fromTimestamp);
+          const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
             `No se encontraron salidas de ofrendas (${SearchTypeNames[searchType]}) con esta iglesia: ${church?.churchName} y con este rango de fechas: ${fromDate} - ${toDate}`,

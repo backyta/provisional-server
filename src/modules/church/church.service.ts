@@ -18,7 +18,7 @@ import {
 } from '@/modules/church/enums';
 
 import { RecordStatus } from '@/common/enums';
-import { dateFormatterToDDMMYYY } from '@/common/helpers';
+import { dateFormatterToDDMMYYYY } from '@/common/helpers';
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 import { User } from '@/modules/user/entities';
@@ -151,7 +151,20 @@ export class ChurchService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit, offset = 0, order = 'ASC' } = paginationDto;
+    const { limit, offset = 0, order = 'ASC', isSimpleQuery } = paginationDto;
+
+    if (isSimpleQuery) {
+      try {
+        const churches = await this.churchRepository.find({
+          where: { recordStatus: RecordStatus.Active },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        return churches;
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
+    }
 
     try {
       const churches = await this.churchRepository.find({
@@ -300,8 +313,8 @@ export class ChurchService {
         });
 
         if (churches.length === 0) {
-          const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
-          const toDate = dateFormatterToDDMMYYY(toTimestamp);
+          const fromDate = dateFormatterToDDMMYYYY(fromTimestamp);
+          const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
             `No se encontraron iglesias con este rango de fechas: ${fromDate} - ${toDate}`,

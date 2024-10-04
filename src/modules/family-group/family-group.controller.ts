@@ -94,7 +94,7 @@ export class FamilyGroupController {
   @ApiNotFoundResponse({
     description: 'Not found resource.',
   })
-  findTerm(
+  findByTerm(
     @Param('term') term: string,
     @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
   ): Promise<FamilyGroup | FamilyGroup[]> {

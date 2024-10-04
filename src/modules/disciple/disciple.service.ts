@@ -16,7 +16,7 @@ import {
   MaritalStatusNames,
 } from '@/common/enums';
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
-import { dateFormatterToDDMMYYY, getBirthDateByMonth } from '@/common/helpers';
+import { dateFormatterToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
 
 import {
   DiscipleSearchType,
@@ -246,7 +246,20 @@ export class DiscipleService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit, offset = 0, order = 'ASC' } = paginationDto;
+    const { limit, offset = 0, order = 'ASC', isSimpleQuery } = paginationDto;
+
+    if (isSimpleQuery) {
+      try {
+        const disciples = await this.discipleRepository.find({
+          where: { recordStatus: RecordStatus.Active },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        return disciples;
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
+    }
 
     try {
       const disciples = await this.discipleRepository.find({
@@ -1161,8 +1174,8 @@ export class DiscipleService {
         });
 
         if (disciples.length === 0) {
-          const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
-          const toDate = dateFormatterToDDMMYYY(toTimestamp);
+          const fromDate = dateFormatterToDDMMYYYY(fromTimestamp);
+          const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
             `No se encontraron discípulos con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,

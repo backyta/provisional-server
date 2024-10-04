@@ -10,7 +10,7 @@ import {
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import { SearchAndPaginationDto } from '@/common/dtos';
 
 import { Auth } from '@/modules/auth/decorators';
 import { MetricsService } from '@/modules/metrics/metrics.service';
@@ -30,19 +30,6 @@ import { MetricsService } from '@/modules/metrics/metrics.service';
 export class MetricsController {
   constructor(private readonly metricsService: MetricsService) {}
 
-  //* FIND ALL AND COUNT MEMBERS
-  @Get()
-  @Auth()
-  @ApiOkResponse({
-    description: 'Successful operation.',
-  })
-  @ApiNotFoundResponse({
-    description: 'Not found resource.',
-  })
-  findAllAndCountMembers(@Query() paginationDto: PaginationDto): Promise<any> {
-    return this.metricsService.findAllAndCountMembers(paginationDto);
-  }
-
   //? FIND BY TERM
   @Get(':term')
   @Auth()
@@ -57,7 +44,7 @@ export class MetricsController {
   @ApiNotFoundResponse({
     description: 'Not found resource.',
   })
-  findTerm(
+  findByTerm(
     @Param('term') term: string,
     @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
   ): Promise<any> {

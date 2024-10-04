@@ -46,5 +46,15 @@ export const memberFormatterByDistrictAndGender = ({
     return acc;
   }, {});
 
-  return result;
+  const sortedResult = Object.keys(result)
+    .sort()
+    .reduce(
+      (acc, key) => {
+        acc[key] = result[key];
+        return acc;
+      },
+      {} as Record<string, { men: number; women: number }>,
+    );
+
+  return sortedResult;
 };

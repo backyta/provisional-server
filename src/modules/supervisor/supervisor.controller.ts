@@ -95,7 +95,7 @@ export class SupervisorController {
   @ApiNotFoundResponse({
     description: 'Not found resource.',
   })
-  findTerm(
+  findByTerm(
     @Param('term') term: string,
     @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
   ): Promise<Supervisor | Supervisor[]> {

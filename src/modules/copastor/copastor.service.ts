@@ -24,7 +24,7 @@ import {
   MaritalStatusNames,
 } from '@/common/enums';
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
-import { dateFormatterToDDMMYYY, getBirthDateByMonth } from '@/common/helpers';
+import { dateFormatterToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
 
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
@@ -155,7 +155,34 @@ export class CopastorService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit, offset = 0, order = 'ASC' } = paginationDto;
+    const {
+      limit,
+      offset = 0,
+      order = 'ASC',
+      isSimpleQuery,
+      church: churchId,
+    } = paginationDto;
+
+    if (isSimpleQuery && churchId) {
+      try {
+        const church = await this.churchRepository.findOne({
+          where: {
+            id: churchId,
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const copastors = await this.copastorRepository.find({
+          where: { theirChurch: church, recordStatus: RecordStatus.Active },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        return copastors;
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
+    }
 
     try {
       const copastors = await this.copastorRepository.find({
@@ -568,8 +595,8 @@ export class CopastorService {
         });
 
         if (copastors.length === 0) {
-          const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
-          const toDate = dateFormatterToDDMMYYY(toTimestamp);
+          const fromDate = dateFormatterToDDMMYYYY(fromTimestamp);
+          const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
             `No se encontraron co-pastores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,

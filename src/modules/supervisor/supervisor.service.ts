@@ -34,7 +34,7 @@ import {
   MaritalStatusNames,
 } from '@/common/enums';
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
-import { dateFormatterToDDMMYYY, getBirthDateByMonth } from '@/common/helpers';
+import { dateFormatterToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
 
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
@@ -252,13 +252,35 @@ export class SupervisorService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit, offset = 0, order = 'ASC', isNull } = paginationDto;
+    const {
+      limit,
+      offset = 0,
+      order = 'ASC',
+      isNullZone,
+      isSimpleQuery,
+    } = paginationDto;
+
+    if (isSimpleQuery) {
+      try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            recordStatus: RecordStatus.Active,
+            theirZone: isNullZone ? IsNull() : null,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        return supervisors;
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
+    }
 
     try {
       const supervisors = await this.supervisorRepository.find({
         where: {
           recordStatus: RecordStatus.Active,
-          theirZone: isNull ? IsNull() : null,
+          theirZone: isNullZone ? IsNull() : null,
         },
         take: limit,
         skip: offset,
@@ -304,7 +326,7 @@ export class SupervisorService {
       limit,
       offset = 0,
       order,
-      isNull = 'false',
+      isNullZone = 'false',
     } = searchTypeAndPaginationDto;
 
     if (!term) {
@@ -842,8 +864,8 @@ export class SupervisorService {
         });
 
         if (supervisors.length === 0) {
-          const fromDate = dateFormatterToDDMMYYY(fromTimestamp);
-          const toDate = dateFormatterToDDMMYYY(toTimestamp);
+          const fromDate = dateFormatterToDDMMYYYY(fromTimestamp);
+          const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
             `No se encontraron supervisores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
@@ -1379,11 +1401,8 @@ export class SupervisorService {
       }
     }
 
-    //TODO : revisar este al igual que del predicador, derrepente tiene errores
     //? Find by copastor id --> Many
     if (term && searchType === SupervisorSearchType.CopastorId) {
-      console.log(term);
-
       try {
         const copastor = await this.copastorRepository.findOne({
           where: {
@@ -1396,34 +1415,13 @@ export class SupervisorService {
         const supervisors = await this.supervisorRepository.find({
           where: {
             theirCopastor: copastor,
-            theirZone: isNull ? IsNull() : null,
+            theirZone: isNullZone ? IsNull() : null,
             recordStatus: RecordStatus.Active,
           },
-          take: limit,
-          skip: offset,
-          relations: [
-            'updatedBy',
-            'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
-            'familyGroups',
-            'disciples',
-          ],
-          relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
         });
-        console.log(supervisors);
 
-        if (supervisors.length === 0) {
-          throw new NotFoundException(
-            `No se encontraron supervisores(as) con este ID de zona: ${term}`,
-          );
-        }
-
-        return supervisorDataFormatter({ supervisors }) as any;
+        return supervisors;
       } catch (error) {
         if (error instanceof NotFoundException) {
           throw error;

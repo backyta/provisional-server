@@ -4,7 +4,7 @@ interface Options {
   offeringsIncome: OfferingIncome[];
 }
 
-export const formatDataOfferingIncome = ({ offeringsIncome }: Options) => {
+export const offeringIncomeDataFormatter = ({ offeringsIncome }: Options) => {
   return offeringsIncome.map((offeringIncome) => ({
     ...offeringIncome,
     church: {

@@ -83,7 +83,6 @@ export class SeedService {
     private readonly userService: UserService,
   ) {}
 
-  //TODO : HACER SEMILLA PARA OFRENDAS DESPUES Y TMB ANIADIR MAS PARA PROBARCON MAS USUARIOS Y MIEMBROS
   async runSeed(): Promise<string> {
     const queryChurches = this.churchRepository.createQueryBuilder('churches');
     const queryPastors = this.pastorRepository.createQueryBuilder('pastors');

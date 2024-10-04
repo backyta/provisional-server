@@ -1,4 +1,4 @@
-export * from './member-count-formatter.helper';
+export * from './member-proportion-formatter.helper';
 export * from './member-fluctuation-formatter.helper';
 export * from './member-formatter-by-birth-month.helper';
 export * from './member-formatter-by-category.helper';
