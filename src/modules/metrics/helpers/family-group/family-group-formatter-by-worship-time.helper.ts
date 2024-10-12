@@ -14,7 +14,7 @@ export const familyGroupFormatterByWorshipTime = ({
         acc[familyGroup.worshipTime] = {
           worshipTimesCount: 0,
           supervisor: familyGroup?.theirSupervisor?.firstName
-            ? `${getInitialFullNames({ firstNames: familyGroup?.theirSupervisor?.firstName, lastNames: '' })} ${familyGroup?.theirSupervisor?.lastName}`
+            ? `${getInitialFullNames({ firstNames: familyGroup?.theirSupervisor?.firstName ?? '', lastNames: '' })} ${familyGroup?.theirSupervisor?.lastName}`
             : familyGroup?.theirSupervisor?.firstName === undefined
               ? ''
               : 'Sin Supervisor',

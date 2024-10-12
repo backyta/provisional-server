@@ -2,7 +2,8 @@ export enum OfferingExpenseSearchSubType {
   //* Operative Expenses
   VenueRental = 'venue_rental',
   PublicServices = 'public_services',
-  TravelAndTransportation = 'travel_and_transportation',
+  TransportationAndTravelAllowance = 'transportation_and_travel_allowance',
+  InsuranceAndTaxes = 'insurance_and_taxes',
   SecurityAndSurveillance = 'security_and_surveillance',
   OtherAdministrativeExpenses = 'other_administrative_expenses',
 
@@ -10,11 +11,13 @@ export enum OfferingExpenseSearchSubType {
   PlumbingServices = 'plumbing_services',
   ElectricalServices = 'electrical_services',
   PaintingAndTouchUpsServices = 'painting_and_touch_ups_services',
-  DeepCleaningServices = 'deep_cleaning_services',
+  CleaningServices = 'cleaning_services',
   HeatingAndACSystemMaintenance = 'heating_and_ac_system_maintenance',
-  SoundAndLightingEquipmentRepairAndMaintenance = 'sound_and_lighting_equipment_repair_and_maintenance',
+  SoundAndLightingEquipmentMaintenance = 'sound_and_lighting_equipment_maintenance',
+  SoundAndLightingEquipmentRepairs = 'sound_and_lighting_equipment_repairs',
   GardenAndExteriorMaintenance = 'garden_and_exterior_maintenance',
-  OtherEquipmentRepairsAndMaintenance = 'other_equipment_repairs_and_maintenance',
+  GeneralEquipmentRepairs = 'general_equipment_repairs',
+  GeneralEquipmentMaintenance = 'general_equipment_maintenance',
   FurnitureRepairAndMaintenance = 'furniture_repair_and_maintenance',
   ComputerEquipmentRepairAndMaintenance = 'computer_equipment_repair_and_maintenance',
   RoofAndStructuralRepairs = 'roof_and_structural_repairs',
@@ -24,20 +27,28 @@ export enum OfferingExpenseSearchSubType {
   PurchaseFlowersAndPlants = 'purchase_flowers_and_plants',
   PurchaseDecorativeFurniture = 'purchase_decorative_furniture',
   PurchaseDecorativeItems = 'purchase_decorative_items',
-  AltarAndWorshipAreaDecorationService = 'altar_and_worship_area_decoration_service',
+  DecorationServices = 'decoration_services',
+  LightingAndIlluminationServices = 'lighting_and_illumination_services',
+  StageSetupServices = 'stage_setup_services',
+  EventDecorationRentals = 'event_decoration_rentals',
+  CleaningPostEventServices = 'cleaning_post_event_services',
 
   //* Equipment and Technology Expenses
   SoundEquipment = 'sound_equipment',
-  ComputerEquipment = 'computer_equipment',
   ProjectionEquipment = 'projection_equipment',
   HvacEquipment = 'hvac_equipment',
   LightingEquipment = 'lighting_equipment',
   SecurityEquipment = 'security_equipment',
+  ComputerEquipment = 'computer_equipment',
   OfficeEquipment = 'office_equipment',
+  KitchenEquipment = 'kitchen_equipment',
+  CleaningEquipment = 'cleaning_equipment',
   AudioVideoRecordingEquipment = 'audio_video_recording_equipment',
-  Furniture = 'furniture',
+  OfficeFurniture = 'office_furniture',
+  KitchenFurniture = 'kitchen_furniture',
+  GeneralFurniture = 'general_furniture',
   MusicalInstruments = 'musical_instruments',
-  InternetTelecommunicationsServices = 'internet_and_telecommunications_services',
+  InternetTelephoneServices = 'internet_and_telephone_services',
   HostingSoftwareServices = 'hosting_and_software_services',
 
   //* Supplies Expenses
@@ -48,18 +59,18 @@ export enum OfferingExpenseSearchSubType {
   PackagingMaterials = 'packaging_and_storage_materials',
   SundaySchoolMaterials = 'sunday_school_educational_materials',
 
-  //* Activities and Events Expenses
+  //* Planing Events Expenses
   AdvertisingAndEventPromotion = 'advertising_and_event_promotion',
-  SpecialGuestFees = 'fees_special_guests',
-  ExternalVenueRental = 'rental_external_venues',
-  DecorationsAndAmbiance = 'decorations_and_ambiance',
-  FoodAndBeverage = 'food_beverage',
-  PromotionalMaterials = 'promotional_materials',
+  SpecialGuestsFees = 'special_guests_fess',
+  SecurityPersonnelFees = 'security_personnel_fees',
+  SupportStaffFees = 'support_staff_fees',
+  ExternalVenueRental = 'external_venue_rental',
+  FoodAndBeverage = 'food_and_beverage',
   TransportationSpecialGuests = 'transportation_special_guests',
   EquipmentTransportation = 'equipment_transportation',
-  SupportStaffFees = 'fees_support_staff',
-  RentalTechnicalAndLogisticEquipment = 'rental_technical_and_logistical_equipment',
-  EducationalMaterialsAndResources = 'educational_materials_and_resources',
+  RentalTechnicalEquipment = 'rental_technical_equipment',
+  EducationalMaterials = 'educational_materials',
+  PrivateMobilityRental = 'private_mobility_rental',
   GiftsAndPrizesParticipants = 'gifts_and_prizes_participants',
   OtherRelatedExpenses = 'other_related_expenses',
 }
@@ -68,101 +79,112 @@ export const OfferingExpenseSearchSubTypeNames: Record<
   OfferingExpenseSearchSubType,
   string
 > = {
-  //* Operative Expenses
+  // Operative Expenses
   [OfferingExpenseSearchSubType.VenueRental]: 'Alquiler de local',
   [OfferingExpenseSearchSubType.PublicServices]: 'Servicios públicos',
-  [OfferingExpenseSearchSubType.TravelAndTransportation]: 'Viaje y transporte',
+  [OfferingExpenseSearchSubType.InsuranceAndTaxes]: 'Seguros y/o impuestos',
+  [OfferingExpenseSearchSubType.TransportationAndTravelAllowance]:
+    'Transporte y/o viáticos',
   [OfferingExpenseSearchSubType.SecurityAndSurveillance]:
     'Seguridad y vigilancia',
   [OfferingExpenseSearchSubType.OtherAdministrativeExpenses]:
     'Otros gastos administrativos',
 
-  //* Maintenance and Repair Expenses
+  // Maintenance and Repair Expenses
   [OfferingExpenseSearchSubType.PlumbingServices]: 'Servicios de gasfiteria',
   [OfferingExpenseSearchSubType.ElectricalServices]:
     'Servicios de electricidad',
   [OfferingExpenseSearchSubType.PaintingAndTouchUpsServices]:
     'Servicios de pintura y retoques',
-  [OfferingExpenseSearchSubType.DeepCleaningServices]:
-    'Servicios de limpieza profunda',
+  [OfferingExpenseSearchSubType.CleaningServices]: 'Servicios de limpieza',
   [OfferingExpenseSearchSubType.HeatingAndACSystemMaintenance]:
-    'Mantenimiento de sistemas de calefacción y AC',
-  [OfferingExpenseSearchSubType.SoundAndLightingEquipmentRepairAndMaintenance]:
-    'Mantenimiento de equipos de sonido e iluminación',
+    'Mantenimiento de SC y AC',
+  [OfferingExpenseSearchSubType.SoundAndLightingEquipmentMaintenance]:
+    'Mant. Equipos de sonido e iluminación',
   [OfferingExpenseSearchSubType.GardenAndExteriorMaintenance]:
-    'Mantenimiento de jardines y exteriores',
-  [OfferingExpenseSearchSubType.FurnitureRepairAndMaintenance]:
-    'Mantenimiento de muebles',
+    'Mant. Jardines y exteriores',
+  [OfferingExpenseSearchSubType.FurnitureRepairAndMaintenance]: 'Mant. Muebles',
   [OfferingExpenseSearchSubType.ComputerEquipmentRepairAndMaintenance]:
-    'Mantenimiento de equipos informáticos',
-  [OfferingExpenseSearchSubType.OtherEquipmentRepairsAndMaintenance]:
-    'Mantenimiento de otros equipos',
+    'Mant. Equipos informáticos',
+  [OfferingExpenseSearchSubType.GeneralEquipmentMaintenance]:
+    'Mant. Equipos en general',
+  [OfferingExpenseSearchSubType.GeneralEquipmentRepairs]:
+    'Rep. Equipos en general',
   [OfferingExpenseSearchSubType.RoofAndStructuralRepairs]:
-    'Reparación de techo y estructuras',
+    'Rep. Techo y estructuras',
   [OfferingExpenseSearchSubType.DoorAndWindowRepairs]:
-    'Reparación de puertas y ventanas',
+    'Rep. Puertas y ventanas',
+  [OfferingExpenseSearchSubType.SoundAndLightingEquipmentRepairs]:
+    'Rep. Equipos de sonido e iluminación',
 
-  //* Decoration Expenses
+  // Decoration Expenses
   [OfferingExpenseSearchSubType.PurchaseFlowersAndPlants]:
-    'Adquisición de flores y plantas',
+    'Adq. Flores y plantas',
   [OfferingExpenseSearchSubType.PurchaseDecorativeFurniture]:
-    'Adquisición de muebles decorativos',
+    'Adq. Muebles decorativos',
   [OfferingExpenseSearchSubType.PurchaseDecorativeItems]:
-    'Adquisición de elementos decorativos',
-  [OfferingExpenseSearchSubType.AltarAndWorshipAreaDecorationService]:
-    'Servicio de decoración de altar y áreas de culto',
+    'Adq. Artículos decorativos',
+  [OfferingExpenseSearchSubType.DecorationServices]: 'Serv. Decoración general',
+  [OfferingExpenseSearchSubType.LightingAndIlluminationServices]:
+    'Serv. Iluminación y efectos',
+  [OfferingExpenseSearchSubType.StageSetupServices]:
+    'Serv. Montaje de escenario',
+  [OfferingExpenseSearchSubType.EventDecorationRentals]:
+    'Alq. Decoraciones especiales',
+  [OfferingExpenseSearchSubType.CleaningPostEventServices]:
+    'Serv. Limpieza post-evento',
 
-  //* Equipment and Technology Expenses
+  // Equipment and Technology Expenses
   [OfferingExpenseSearchSubType.SoundEquipment]: 'Equipos de sonido',
   [OfferingExpenseSearchSubType.ProjectionEquipment]: 'Equipos de proyección',
   [OfferingExpenseSearchSubType.HvacEquipment]:
-    'Equipos de ventilación, calefacción y AC',
+    'Equipos de ventilación, SC y AC',
   [OfferingExpenseSearchSubType.LightingEquipment]: 'Equipos de iluminación',
   [OfferingExpenseSearchSubType.SecurityEquipment]: 'Equipos de seguridad',
   [OfferingExpenseSearchSubType.OfficeEquipment]: 'Equipos de oficina',
   [OfferingExpenseSearchSubType.ComputerEquipment]: 'Equipos informáticos',
+  [OfferingExpenseSearchSubType.KitchenEquipment]: 'Equipos de cocina',
+  [OfferingExpenseSearchSubType.CleaningEquipment]: 'Equipos de limpieza',
   [OfferingExpenseSearchSubType.AudioVideoRecordingEquipment]:
-    'Equipos de grabación de audio/video',
-  [OfferingExpenseSearchSubType.Furniture]: 'Mobiliario',
+    'Equipos de grabación (a/v)',
+  [OfferingExpenseSearchSubType.OfficeFurniture]: 'Mobiliarios informáticos',
+  [OfferingExpenseSearchSubType.KitchenFurniture]: 'Mobiliarios de cocina',
+  [OfferingExpenseSearchSubType.GeneralFurniture]: 'Mobiliarios en general',
   [OfferingExpenseSearchSubType.MusicalInstruments]: 'Instrumentos musicales',
-  [OfferingExpenseSearchSubType.InternetTelecommunicationsServices]:
-    'Servicios de internet y telecomunicaciones',
+  [OfferingExpenseSearchSubType.InternetTelephoneServices]:
+    'Serv. Internet y telefonía',
   [OfferingExpenseSearchSubType.HostingSoftwareServices]:
-    'Servicios de Hosting y Software',
+    'Serv. Hosting y software',
 
-  //* Supplies Expenses
+  // Supplies Expenses
   [OfferingExpenseSearchSubType.KitchenUtensils]: 'Utensilios de cocina',
-  [OfferingExpenseSearchSubType.CookingIngredients]: 'Ingredientes de cocina',
+  [OfferingExpenseSearchSubType.CookingIngredients]: 'Insumos de cocina',
   [OfferingExpenseSearchSubType.OfficeSupplies]: 'Utensilios de oficina',
   [OfferingExpenseSearchSubType.CleaningMaterials]: 'Materiales de limpieza',
   [OfferingExpenseSearchSubType.PackagingMaterials]:
     'Materiales de almacenamiento',
   [OfferingExpenseSearchSubType.SundaySchoolMaterials]:
-    'Material educativo Esc. Dominical',
+    'Material educativo (Esc. Dom.)',
 
-  //* Activities and Events Expenses
+  // Planing Events Expenses
   [OfferingExpenseSearchSubType.AdvertisingAndEventPromotion]:
     'Publicidad y promoción de eventos',
-  [OfferingExpenseSearchSubType.SpecialGuestFees]:
-    'Honorarios para invitados especiales',
-  [OfferingExpenseSearchSubType.SupportStaffFees]:
-    'Honorarios de personal de apoyo',
-  [OfferingExpenseSearchSubType.ExternalVenueRental]:
-    'Alquiler de locales externos',
-  [OfferingExpenseSearchSubType.RentalTechnicalAndLogisticEquipment]:
-    'Alquiler de equipos técnicos y logísticos',
+  [OfferingExpenseSearchSubType.SpecialGuestsFees]: 'Hon. Invitados especiales',
+  [OfferingExpenseSearchSubType.SupportStaffFees]: 'Hon. Personal de apoyo',
+  [OfferingExpenseSearchSubType.SecurityPersonnelFees]:
+    'Hon. Personal de seguridad',
+  [OfferingExpenseSearchSubType.ExternalVenueRental]: 'Alq. Local externo',
+  [OfferingExpenseSearchSubType.RentalTechnicalEquipment]:
+    'Alq. Equipos técnicos',
   [OfferingExpenseSearchSubType.TransportationSpecialGuests]:
-    'Transporte para invitados especiales',
-  [OfferingExpenseSearchSubType.EquipmentTransportation]:
-    'Transporte de equipos',
-  [OfferingExpenseSearchSubType.FoodAndBeverage]: 'Comida y bebida',
-  [OfferingExpenseSearchSubType.DecorationsAndAmbiance]:
-    'Decoraciones y ambientación',
-  [OfferingExpenseSearchSubType.PromotionalMaterials]: 'Material promocional',
-  [OfferingExpenseSearchSubType.EducationalMaterialsAndResources]:
-    'Material didáctico y recursos',
+    'Trans. Invitados especiales',
+  [OfferingExpenseSearchSubType.EquipmentTransportation]: 'Trans. Equipos',
+  [OfferingExpenseSearchSubType.PrivateMobilityRental]:
+    'Alq. Movilidad particular',
+  [OfferingExpenseSearchSubType.FoodAndBeverage]: 'Alimentación y bebida',
+  [OfferingExpenseSearchSubType.EducationalMaterials]: 'Material didáctico',
   [OfferingExpenseSearchSubType.GiftsAndPrizesParticipants]:
-    'Regalos y premios para participantes',
+    'Premios y regalos',
   [OfferingExpenseSearchSubType.OtherRelatedExpenses]:
     'Otros gastos relacionados',
 };

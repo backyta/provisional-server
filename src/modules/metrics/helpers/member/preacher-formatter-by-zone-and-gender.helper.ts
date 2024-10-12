@@ -19,7 +19,7 @@ export const preacherFormatterByZoneAndGender = ({ zones }: Options) => {
 
     acc[zone.zoneName] = {
       supervisor: zone?.theirSupervisor?.firstName
-        ? `${getInitialFullNames({ firstNames: zone?.theirSupervisor?.firstName, lastNames: '' })} ${zone?.theirSupervisor?.lastName}`
+        ? `${getInitialFullNames({ firstNames: zone?.theirSupervisor?.firstName ?? '', lastNames: '' })} ${zone?.theirSupervisor?.lastName}`
         : 'Sin Supervisor',
       men: menCount,
       women: womenCount,

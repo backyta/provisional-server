@@ -2,20 +2,20 @@ import { RecordStatus } from '@/common/enums';
 import { OfferingIncome } from '@/modules/offering/income/entities';
 
 interface Options {
-  offeringsIncome: OfferingIncome[];
+  offeringIncome: OfferingIncome[];
 }
 
 export const offeringIncomeProportionFormatter = ({
-  offeringsIncome,
+  offeringIncome,
 }: Options) => {
-  const totalCountOfferingsIncome = offeringsIncome.length;
+  const totalCountOfferingsIncome = offeringIncome.length;
 
-  const countOfferingIncomeActive = offeringsIncome.filter(
-    (offeringIncome) => offeringIncome.recordStatus === RecordStatus.Active,
+  const countOfferingIncomeActive = offeringIncome.filter(
+    (offering) => offering.recordStatus === RecordStatus.Active,
   ).length;
 
-  const countOfferingsIncomeInactive = offeringsIncome.filter(
-    (offeringIncome) => offeringIncome.recordStatus === RecordStatus.Inactive,
+  const countOfferingsIncomeInactive = offeringIncome.filter(
+    (offering) => offering.recordStatus === RecordStatus.Inactive,
   ).length;
 
   return {

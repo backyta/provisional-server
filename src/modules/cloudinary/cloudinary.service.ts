@@ -88,26 +88,22 @@ export class CloudinaryService {
           ],
         });
 
-        if (!offeringIncome) {
-          throw new NotFoundException(
-            `Registro de Ingreso de Ofrenda no fue encontrado.`,
+        if (offeringIncome) {
+          const newSecureUrls = offeringIncome.imageUrls.filter(
+            (imageUrl) => imageUrl !== secureUrl,
           );
+
+          const updatedOfferingIncome =
+            await this.offeringIncomeRepository.preload({
+              id: offeringIncome?.id,
+              ...offeringIncome,
+              imageUrls: [...newSecureUrls],
+              updatedAt: new Date(),
+              updatedBy: user,
+            });
+
+          await this.offeringIncomeRepository.save(updatedOfferingIncome);
         }
-
-        const newSecureUrls = offeringIncome.imageUrls.filter(
-          (imageUrl) => imageUrl !== secureUrl,
-        );
-
-        const updatedOfferingIncome =
-          await this.offeringIncomeRepository.preload({
-            id: offeringIncome?.id,
-            ...offeringIncome,
-            imageUrls: [...newSecureUrls],
-            updatedAt: new Date(),
-            updatedBy: user,
-          });
-
-        await this.offeringIncomeRepository.save(updatedOfferingIncome);
 
         const result = await cloudinary.uploader.destroy(`${path}${publicId}`);
 
@@ -137,26 +133,22 @@ export class CloudinaryService {
           relations: ['church'],
         });
 
-        if (!offeringExpense) {
-          throw new NotFoundException(
-            `Registro de Salida de Ofrenda no fue encontrado.`,
+        if (offeringExpense) {
+          const newSecureUrls = offeringExpense.imageUrls.filter(
+            (imageUrl) => imageUrl !== secureUrl,
           );
+
+          const updatedOfferingExpense =
+            await this.offeringExpenseRepository.preload({
+              id: offeringExpense?.id,
+              ...offeringExpense,
+              imageUrls: [...newSecureUrls],
+              updatedAt: new Date(),
+              updatedBy: user,
+            });
+
+          await this.offeringExpenseRepository.save(updatedOfferingExpense);
         }
-
-        const newSecureUrls = offeringExpense.imageUrls.filter(
-          (imageUrl) => imageUrl !== secureUrl,
-        );
-
-        const updatedOfferingExpense =
-          await this.offeringExpenseRepository.preload({
-            id: offeringExpense?.id,
-            ...offeringExpense,
-            imageUrls: [...newSecureUrls],
-            updatedAt: new Date(),
-            updatedBy: user,
-          });
-
-        await this.offeringExpenseRepository.save(updatedOfferingExpense);
 
         const result = await cloudinary.uploader.destroy(
           `${deleteFileDto.path}${publicId}`,

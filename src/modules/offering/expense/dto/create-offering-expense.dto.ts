@@ -22,7 +22,7 @@ import { RecordStatus } from '@/common/enums';
 
 export class CreateOfferingExpenseDto {
   @ApiProperty({
-    example: OfferingExpenseSearchType.OperationalExpense,
+    example: OfferingExpenseSearchType.OperationalExpenses,
   })
   @IsEnum(OfferingExpenseSearchType)
   type: string;

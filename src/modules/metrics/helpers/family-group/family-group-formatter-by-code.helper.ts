@@ -19,7 +19,7 @@ export const familyGroupFormatterByCode = ({ familyGroups }: Options) => {
 
     acc[`familyGroup-${index + 1}`] = {
       preacher: familyGroup?.theirPreacher?.firstName
-        ? `${getInitialFullNames({ firstNames: familyGroup?.theirPreacher?.firstName, lastNames: '' })} ${familyGroup?.theirPreacher?.lastName}`
+        ? `${getInitialFullNames({ firstNames: familyGroup?.theirPreacher?.firstName ?? '', lastNames: '' })} ${familyGroup?.theirPreacher?.lastName}`
         : 'Sin Predicador',
       familyGroupCode: familyGroup.familyGroupCode,
       men: menCount,

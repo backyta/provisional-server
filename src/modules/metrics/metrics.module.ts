@@ -14,6 +14,7 @@ import { PreacherModule } from '@/modules/preacher/preacher.module';
 import { SupervisorModule } from '@/modules/supervisor/supervisor.module';
 import { FamilyGroupModule } from '@/modules/family-group/family-group.module';
 import { OfferingIncomeModule } from '@/modules/offering/income/offering-income.module';
+import { OfferingExpenseModule } from '@/modules/offering/expense/offering-expense.module';
 
 @Module({
   providers: [MetricsService],
@@ -28,6 +29,7 @@ import { OfferingIncomeModule } from '@/modules/offering/income/offering-income.
     FamilyGroupModule,
     DiscipleModule,
     OfferingIncomeModule,
+    OfferingExpenseModule,
     AuthModule,
   ],
 })

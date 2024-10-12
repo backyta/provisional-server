@@ -1,39 +1,34 @@
-import { getInitialFullNames } from '@/common/helpers';
-
 import { CurrencyType } from '@/modules/offering/shared/enums';
-import { OfferingIncome } from '@/modules/offering/income/entities';
+import { OfferingExpense } from '@/modules/offering/expense/entities';
+import { OfferingExpenseSearchSubTypeNames } from '@/modules/offering/expense/enums';
 
 interface Options {
-  offeringIncome: OfferingIncome[];
+  offeringExpenses: OfferingExpense[];
 }
 
 interface ResultDataOptions {
+  subType: string;
   date: Date;
   accumulatedOfferingPEN: number;
   accumulatedOfferingUSD: number;
   accumulatedOfferingEUR: number;
-  familyGroup: {
+  church: {
     id: string;
-    familyGroupName: string;
-    familyGroupCode: string;
+    churchName: string;
   };
-  preacher: {
-    id: string;
-    firstName: string;
-    lastName: string;
-  };
-  disciples: number;
   allOfferings: { offering: number; currency: string; date: string | Date }[];
+  totalAmount: number;
 }
 
-export const offeringIncomeByFamilyGroupFormatter = ({
-  offeringIncome,
+export const offeringExpenseChartFormatter = ({
+  offeringExpenses,
 }: Options) => {
-  const resultData: ResultDataOptions[] = offeringIncome?.reduce<
+  const resultData: ResultDataOptions[] = offeringExpenses?.reduce<
     ResultDataOptions[]
   >((acc, offering) => {
     const existing = acc.find(
-      (item) => item?.familyGroup?.id === offering?.familyGroup?.id,
+      (item) =>
+        item?.subType === OfferingExpenseSearchSubTypeNames[offering?.subType],
     );
 
     if (existing) {
@@ -45,6 +40,8 @@ export const offeringIncomeByFamilyGroupFormatter = ({
         existing.accumulatedOfferingEUR += +offering.amount;
       }
 
+      existing.totalAmount += +offering.amount;
+
       existing.allOfferings.push({
         offering: +offering?.amount,
         currency: offering.currency,
@@ -52,6 +49,7 @@ export const offeringIncomeByFamilyGroupFormatter = ({
       });
     } else {
       acc.push({
+        subType: OfferingExpenseSearchSubTypeNames[offering.subType],
         date: offering.date,
         accumulatedOfferingPEN:
           offering?.currency === CurrencyType.PEN ? +offering?.amount : 0,
@@ -59,20 +57,10 @@ export const offeringIncomeByFamilyGroupFormatter = ({
           offering?.currency === CurrencyType.USD ? +offering?.amount : 0,
         accumulatedOfferingEUR:
           offering?.currency === CurrencyType.EUR ? +offering?.amount : 0,
-        familyGroup: {
-          id: offering?.familyGroup?.id,
-          familyGroupName: offering?.familyGroup?.familyGroupName,
-          familyGroupCode: offering?.familyGroup?.familyGroupCode,
+        church: {
+          id: offering?.church?.id,
+          churchName: offering?.church?.churchName,
         },
-        preacher: {
-          id: offering?.familyGroup?.theirPreacher?.id,
-          firstName: getInitialFullNames({
-            firstNames: offering?.familyGroup?.theirPreacher?.firstName ?? '',
-            lastNames: '',
-          }),
-          lastName: offering?.familyGroup?.theirPreacher?.lastName,
-        },
-        disciples: offering?.familyGroup?.disciples?.length,
         allOfferings: [
           {
             offering: +offering?.amount,
@@ -80,6 +68,7 @@ export const offeringIncomeByFamilyGroupFormatter = ({
             date: offering?.date,
           },
         ],
+        totalAmount: +offering.amount,
       });
     }
 

@@ -75,21 +75,21 @@ export const OfferingIncomeSearchSubTypeNames: Record<
 };
 
 //* Sunday Worship
-export enum SubTypeOfferingIncomeSearchBySundayWorshipAndSundaySchool {
+export enum SubTypeOfferingIncomeSearchBySundayServiceAndSundaySchool {
   OfferingByDate = 'offering_by_date',
   OfferingByShift = 'offering_by_shift',
   OfferingByShiftDate = 'offering_by_shift_date',
 }
 
-export const SubTypeNamesOfferingIncomeSearchBySundayWorshipAndSundaySchool: Record<
-  SubTypeOfferingIncomeSearchBySundayWorshipAndSundaySchool,
+export const SubTypeNamesOfferingIncomeSearchBySundayServiceAndSundaySchool: Record<
+  SubTypeOfferingIncomeSearchBySundayServiceAndSundaySchool,
   string
 > = {
-  [SubTypeOfferingIncomeSearchBySundayWorshipAndSundaySchool.OfferingByDate]:
+  [SubTypeOfferingIncomeSearchBySundayServiceAndSundaySchool.OfferingByDate]:
     'Por fecha',
-  [SubTypeOfferingIncomeSearchBySundayWorshipAndSundaySchool.OfferingByShift]:
+  [SubTypeOfferingIncomeSearchBySundayServiceAndSundaySchool.OfferingByShift]:
     'Por turno',
-  [SubTypeOfferingIncomeSearchBySundayWorshipAndSundaySchool.OfferingByShiftDate]:
+  [SubTypeOfferingIncomeSearchBySundayServiceAndSundaySchool.OfferingByShiftDate]:
     'Por fecha y turno',
 };
 
@@ -176,15 +176,15 @@ export const SubTypeNamesOfferingIncomeSearchByYoungWorship: Record<
 };
 
 //* Offering (Worship United)
-export enum SubTypeOfferingIncomeSearchByUnitedWorship {
+export enum SubTypeOfferingIncomeSearchByUnitedService {
   OfferingByDate = 'offering_by_date',
 }
 
-export const SubTypeNamesOfferingIncomeSearchByUnitedWorship: Record<
-  SubTypeOfferingIncomeSearchByUnitedWorship,
+export const SubTypeNamesOfferingIncomeSearchByUnitedService: Record<
+  SubTypeOfferingIncomeSearchByUnitedService,
   string
 > = {
-  [SubTypeOfferingIncomeSearchByUnitedWorship.OfferingByDate]: 'Por fecha',
+  [SubTypeOfferingIncomeSearchByUnitedService.OfferingByDate]: 'Por fecha',
 };
 
 //* Offering (Income Adjustment)
@@ -212,23 +212,23 @@ export const SubTypeNamesOfferingIncomeSearchByIncomeAdjustment: Record<
 };
 
 //* Offering (Ground Church, Special)
-export enum SubTypeOfferingIncomeSearchByGroundChurchAndSpecial {
+export enum SubTypeOfferingIncomeSearchByChurchGroundAndSpecial {
   OfferingByDate = 'offering_by_date',
   OfferingByContributorNames = 'offering_by_contributor_names',
   OfferingByContributorLastNames = 'offering_by_contributor_last_names',
   OfferingByContributorFullName = 'offering_by_contributor_full_name',
 }
 
-export const SubTypeNamesOfferingIncomeSearchByGroundChurchAndSpecial: Record<
-  SubTypeOfferingIncomeSearchByGroundChurchAndSpecial,
+export const SubTypeNamesOfferingIncomeSearchByChurchGroundAndSpecial: Record<
+  SubTypeOfferingIncomeSearchByChurchGroundAndSpecial,
   string
 > = {
-  [SubTypeOfferingIncomeSearchByGroundChurchAndSpecial.OfferingByDate]:
+  [SubTypeOfferingIncomeSearchByChurchGroundAndSpecial.OfferingByDate]:
     'Por fecha',
-  [SubTypeOfferingIncomeSearchByGroundChurchAndSpecial.OfferingByContributorNames]:
+  [SubTypeOfferingIncomeSearchByChurchGroundAndSpecial.OfferingByContributorNames]:
     'Por nombres del aportante',
-  [SubTypeOfferingIncomeSearchByGroundChurchAndSpecial.OfferingByContributorLastNames]:
+  [SubTypeOfferingIncomeSearchByChurchGroundAndSpecial.OfferingByContributorLastNames]:
     'Por apellidos del aportante',
-  [SubTypeOfferingIncomeSearchByGroundChurchAndSpecial.OfferingByContributorFullName]:
+  [SubTypeOfferingIncomeSearchByChurchGroundAndSpecial.OfferingByContributorFullName]:
     'Por nombres y apellidos del aportante',
 };

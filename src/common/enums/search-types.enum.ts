@@ -43,15 +43,15 @@ export enum SearchType {
   Roles = 'roles',
 
   //* Offering Income (tithe and offering)
-  SundayWorship = 'sunday_worship',
+  SundayService = 'sunday_service',
   FamilyGroup = 'family_group',
   GeneralFasting = 'general_fasting',
   GeneralVigil = 'general_vigil',
   ZonalFasting = 'zonal_fasting',
   ZonalVigil = 'zonal_vigil',
   SundaySchool = 'sunday_school',
-  YouthWorship = 'youth_worship',
-  UnitedWorship = 'united_worship',
+  YouthService = 'youth_service',
+  UnitedService = 'united_service',
   Activities = 'activities',
   ChurchGround = 'church_ground',
   Special = 'special',
@@ -63,13 +63,13 @@ export enum SearchType {
   LessPopulatedFamilyGroups = 'less_populated_family_groups',
 
   //* Offering Expenses
-  OperationalExpense = 'operative_expense',
-  MaintenanceAndRepairExpense = 'maintenance_and_repair_expense',
-  DecorationExpense = 'decoration_expense',
-  EquipmentAndTechnologyExpense = 'equipment_and_technology_expense',
-  SuppliesExpense = 'supplies_expense',
-  ActivitiesAndEventsExpense = 'activities_and_events_expense',
-  ExpenseAdjustment = 'expense_adjustment',
+  OperationalExpenses = 'operative_expenses',
+  MaintenanceAndRepairExpenses = 'maintenance_and_repair_expenses',
+  DecorationExpenses = 'decoration_expenses',
+  EquipmentAndTechnologyExpenses = 'equipment_and_technology_expenses',
+  SuppliesExpenses = 'supplies_expenses',
+  PlaningEventsExpenses = 'planing_events_expenses',
+  ExpensesAdjustment = 'expenses_adjustment',
 
   //* Metrics
   MembersByProportion = 'members_by_proportion',
@@ -89,14 +89,29 @@ export enum SearchType {
   FamilyGroupsByCode = 'family_groups_by_code',
   FamilyGroupsByZone = 'family_groups_by_zone',
   FamilyGroupsByDistrict = 'family_groups_by_district',
-  FamilyGroupsByWorshipTime = 'family_groups_by_worship_time',
+  FamilyGroupsByServiceTime = 'family_groups_by_service_time',
   FamilyGroupsByRecordStatus = 'family_groups_by_record_status',
 
-  OfferingsIncomeByProportion = 'offerings_income_by_proportion',
-  OfferingsIncomeBySundayService = 'offerings_income_by_sunday_service',
-  OfferingsIncomeByFamilyGroup = 'offerings_income_by_family_group',
-  OfferingsIncomeBySundaySchool = 'offerings_income_by_sunday_school',
-  OfferingsIncomeByFastingAndVigil = 'offerings_income_by_fasting_and_vigil',
+  OfferingIncomeByProportion = 'offering_income_by_proportion',
+  OfferingIncomeBySundayService = 'offering_income_by_sunday_service',
+  OfferingIncomeByFamilyGroup = 'offering_income_by_family_group',
+  OfferingIncomeBySundaySchool = 'offering_income_by_sunday_school',
+  OfferingIncomeByFastingAndVigil = 'offering_income_by_fasting_and_vigil',
+  OfferingIncomeByYouthService = 'offering_income_by_youth_service',
+  OfferingIncomeBySpecialOffering = 'offering_income_by_special_offering',
+  OfferingIncomeByChurchGround = 'offering_income_by_church_ground',
+  OfferingIncomeByUnitedService = 'offering_income_by_united_service',
+  OfferingIncomeByActivities = 'offering_income_by_activities',
+  OfferingIncomeAdjustment = 'offering_income_adjustment',
+
+  OfferingExpensesByProportion = 'offering_expenses_by_proportion',
+  OperationalOfferingExpenses = 'operational_offering_expenses',
+  MaintenanceAndRepairOfferingExpenses = 'maintenance_and_repair_offering_expenses',
+  DecorationOfferingExpenses = 'decoration_offering_expenses',
+  EquipmentAndTechnologyOfferingExpenses = 'equipment_and_technology_offering_expenses',
+  SuppliesOfferingExpenses = 'supplies_offering_expenses',
+  PlaningEventsOfferingExpenses = 'planing_events_offering_expenses',
+  OfferingsExpensesAdjustment = 'offering_expenses_adjustment',
 }
 
 export const SearchTypeNames: Record<SearchType, string> = {
@@ -133,15 +148,15 @@ export const SearchTypeNames: Record<SearchType, string> = {
 
   [SearchType.Roles]: 'Roles',
 
-  [SearchType.SundayWorship]: 'Culto Dominical',
+  [SearchType.SundayService]: 'Culto Dominical',
   [SearchType.FamilyGroup]: 'Grupo Familiar',
   [SearchType.GeneralFasting]: 'Ayuno General',
   [SearchType.GeneralVigil]: 'Vigilia General',
   [SearchType.ZonalFasting]: 'Ayuno Zonal',
   [SearchType.ZonalVigil]: 'Vigilia Zonal',
   [SearchType.SundaySchool]: 'Escuela Dominical',
-  [SearchType.YouthWorship]: 'Culto Jóvenes',
-  [SearchType.UnitedWorship]: 'Culto Unido',
+  [SearchType.YouthService]: 'Culto Jóvenes',
+  [SearchType.UnitedService]: 'Culto Unido',
   [SearchType.Activities]: 'Actividades',
   [SearchType.ChurchGround]: 'Terreno Iglesia',
   [SearchType.Special]: 'Especial',
@@ -152,14 +167,14 @@ export const SearchTypeNames: Record<SearchType, string> = {
   [SearchType.MostPopulatedFamilyGroups]: 'Grupos Familiares mas poblados',
   [SearchType.LessPopulatedFamilyGroups]: 'Grupos Familiares menos poblados',
 
-  [SearchType.OperationalExpense]: 'Gastos Operativos',
-  [SearchType.MaintenanceAndRepairExpense]:
+  [SearchType.OperationalExpenses]: 'Gastos Operativos',
+  [SearchType.MaintenanceAndRepairExpenses]:
     'Gastos de Mantenimiento y Reparación',
-  [SearchType.DecorationExpense]: 'Gastos de Decoración',
-  [SearchType.EquipmentAndTechnologyExpense]: 'Gastos de Equipos y Tecnología',
-  [SearchType.SuppliesExpense]: 'Gastos de Suministros',
-  [SearchType.ActivitiesAndEventsExpense]: 'Gastos de Actividades y Eventos',
-  [SearchType.ExpenseAdjustment]: 'Ajuste de Gastos',
+  [SearchType.DecorationExpenses]: 'Gastos de Decoración',
+  [SearchType.EquipmentAndTechnologyExpenses]: 'Gastos de Equipos y Tecnología',
+  [SearchType.SuppliesExpenses]: 'Gastos de Suministros',
+  [SearchType.PlaningEventsExpenses]: 'Gastos de Actividades y Eventos',
+  [SearchType.ExpensesAdjustment]: 'Ajuste de Gastos',
 
   //* Metrics
   [SearchType.MembersByProportion]: 'Análisis de proporción de miembros',
@@ -188,19 +203,48 @@ export const SearchTypeNames: Record<SearchType, string> = {
   [SearchType.FamilyGroupsByZone]: 'Análisis de grupos familiares por zona',
   [SearchType.FamilyGroupsByDistrict]:
     'Análisis de grupos familiares por distrito',
-  [SearchType.FamilyGroupsByWorshipTime]:
+  [SearchType.FamilyGroupsByServiceTime]:
     'Análisis de grupos familiares por horario de culto',
   [SearchType.FamilyGroupsByRecordStatus]:
     'Análisis de grupos familiares por estado de registro',
 
-  [SearchType.OfferingsIncomeByProportion]:
+  [SearchType.OfferingIncomeByProportion]:
     'Análisis de proporción de ingresos de ofrenda',
-  [SearchType.OfferingsIncomeBySundayService]:
+  [SearchType.OfferingIncomeBySundayService]:
     'Análisis de ingresos de ofrenda por culto dominical.',
-  [SearchType.OfferingsIncomeByFamilyGroup]:
+  [SearchType.OfferingIncomeByFamilyGroup]:
     'Análisis de ingresos de ofrenda por grupo familiar.',
-  [SearchType.OfferingsIncomeBySundaySchool]:
+  [SearchType.OfferingIncomeBySundaySchool]:
     'Análisis de ingresos de ofrenda por escuela dominical.',
-  [SearchType.OfferingsIncomeByFastingAndVigil]:
+  [SearchType.OfferingIncomeByFastingAndVigil]:
     'Análisis de ingresos de ofrenda por ayuno y vigilia.',
+  [SearchType.OfferingIncomeByYouthService]:
+    'Análisis de ingresos de ofrenda por culto juvenil.',
+  [SearchType.OfferingIncomeBySpecialOffering]:
+    'Análisis de ingresos de ofrenda por ofrenda especial.',
+  [SearchType.OfferingIncomeByChurchGround]:
+    'Análisis de ingresos de ofrenda por terreno iglesia.',
+  [SearchType.OfferingIncomeByUnitedService]:
+    'Análisis de ingresos de ofrenda por culto unido.',
+  [SearchType.OfferingIncomeByActivities]:
+    'Análisis de ingresos de ofrenda por actividades.',
+  [SearchType.OfferingIncomeAdjustment]:
+    'Análisis de ingresos de ofrenda por ajustes de ingreso.',
+
+  [SearchType.OfferingExpensesByProportion]:
+    'Análisis de proporción de salidas de ofrenda',
+  [SearchType.OperationalOfferingExpenses]:
+    'Análisis de ofrendas por gastos operativos.',
+  [SearchType.MaintenanceAndRepairOfferingExpenses]:
+    'Análisis de salidas de ofrenda por gastos de mantenimiento y reparación.',
+  [SearchType.DecorationOfferingExpenses]:
+    'Análisis de salidas de ofrenda por gastos de decoración.',
+  [SearchType.EquipmentAndTechnologyOfferingExpenses]:
+    'Análisis de salidas de ofrenda por gastos de equipamiento y tecnología.',
+  [SearchType.SuppliesOfferingExpenses]:
+    'Análisis de salidas de ofrenda por gastos de suministros.',
+  [SearchType.PlaningEventsOfferingExpenses]:
+    'Análisis de salidas de ofrenda por gastos de planificación de eventos.',
+  [SearchType.OfferingsExpensesAdjustment]:
+    'Análisis de salidas de ofrenda por ajustes de salida.',
 };

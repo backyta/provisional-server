@@ -1,4 +1,5 @@
 export enum SearchSubType {
+  //? Members
   //* Disciple
   DiscipleByPastorNames = 'disciple_by_pastor_names',
   DiscipleByPastorLastNames = 'disciple_by_pastor_last_names',
@@ -68,13 +69,13 @@ export enum SearchSubType {
   FamilyGroupByPreacherLastNames = 'family_group_by_preacher_last_names',
   FamilyGroupByPreacherFullName = 'family_group_by_preacher_full_name',
 
-  // ! Offering Income
+  // ? Offering Income
   //* Family House, Fasting Zonal, Fasting General, Vigil Zonal, vigilia General, Ground Church, Activities, Youngs
   OfferingByDate = 'offering_by_date',
   OfferingByChurch = 'offering_by_church',
   OfferingByChurchDate = 'offering_by_church_date',
 
-  //* Sunday Worship, youngs, school sunday
+  //* Sunday Service, youngs, school sunday
   OfferingByShift = 'offering_by_shift',
   OfferingByShiftDate = 'offering_by_shift_date',
 
@@ -99,12 +100,12 @@ export enum SearchSubType {
   OfferingByContributorLastNames = 'offering_by_contributor_last_names',
   OfferingByContributorFullName = 'offering_by_contributor_full_name',
 
-  // ! Offering Expenses
-  //* Operational Expenses
+  // ? Offering Expenses
+  //* Operative Expenses
   VenueRental = 'venue_rental',
   PublicServices = 'public_services',
-  AdvertisingAndEventPromotion = 'advertising_and_event_promotion',
-  TravelAndTransportation = 'travel_and_transportation',
+  TransportationAndTravelAllowance = 'transportation_and_travel_allowance',
+  InsuranceAndTaxes = 'insurance_and_taxes',
   SecurityAndSurveillance = 'security_and_surveillance',
   OtherAdministrativeExpenses = 'other_administrative_expenses',
 
@@ -112,11 +113,13 @@ export enum SearchSubType {
   PlumbingServices = 'plumbing_services',
   ElectricalServices = 'electrical_services',
   PaintingAndTouchUpsServices = 'painting_and_touch_ups_services',
-  DeepCleaningServices = 'deep_cleaning_services',
+  CleaningServices = 'cleaning_services',
   HeatingAndACSystemMaintenance = 'heating_and_ac_system_maintenance',
-  SoundAndLightingEquipmentRepairAndMaintenance = 'sound_and_lighting_equipment_repair_and_maintenance',
+  SoundAndLightingEquipmentMaintenance = 'sound_and_lighting_equipment_maintenance',
+  SoundAndLightingEquipmentRepairs = 'sound_and_lighting_equipment_repairs',
   GardenAndExteriorMaintenance = 'garden_and_exterior_maintenance',
-  OtherEquipmentRepairsAndMaintenance = 'other_equipment_repairs_and_maintenance',
+  GeneralEquipmentRepairs = 'general_equipment_repairs',
+  GeneralEquipmentMaintenance = 'general_equipment_maintenance',
   FurnitureRepairAndMaintenance = 'furniture_repair_and_maintenance',
   ComputerEquipmentRepairAndMaintenance = 'computer_equipment_repair_and_maintenance',
   RoofAndStructuralRepairs = 'roof_and_structural_repairs',
@@ -126,20 +129,28 @@ export enum SearchSubType {
   PurchaseFlowersAndPlants = 'purchase_flowers_and_plants',
   PurchaseDecorativeFurniture = 'purchase_decorative_furniture',
   PurchaseDecorativeItems = 'purchase_decorative_items',
-  AltarAndWorshipAreaDecorationService = 'altar_and_worship_area_decoration_service',
+  DecorationServices = 'decoration_services',
+  LightingAndIlluminationServices = 'lighting_and_illumination_services',
+  StageSetupServices = 'stage_setup_services',
+  EventDecorationRentals = 'event_decoration_rentals',
+  CleaningPostEventServices = 'cleaning_post_event_services',
 
   //* Equipment and Technology Expenses
   SoundEquipment = 'sound_equipment',
-  ComputerEquipment = 'computer_equipment',
   ProjectionEquipment = 'projection_equipment',
   HvacEquipment = 'hvac_equipment',
   LightingEquipment = 'lighting_equipment',
   SecurityEquipment = 'security_equipment',
+  ComputerEquipment = 'computer_equipment',
   OfficeEquipment = 'office_equipment',
+  KitchenEquipment = 'kitchen_equipment',
+  CleaningEquipment = 'cleaning_equipment',
   AudioVideoRecordingEquipment = 'audio_video_recording_equipment',
-  Furniture = 'furniture',
+  OfficeFurniture = 'office_furniture',
+  KitchenFurniture = 'kitchen_furniture',
+  GeneralFurniture = 'general_furniture',
   MusicalInstruments = 'musical_instruments',
-  InternetTelecommunicationsServices = 'internet_and_telecommunications_services',
+  InternetTelephoneServices = 'internet_and_telephone_services',
   HostingSoftwareServices = 'hosting_and_software_services',
 
   //* Supplies Expenses
@@ -150,21 +161,21 @@ export enum SearchSubType {
   PackagingMaterials = 'packaging_and_storage_materials',
   SundaySchoolMaterials = 'sunday_school_educational_materials',
 
-  //* Activities and Events Expenses
-  SpecialGuestFees = 'fees_special_guests',
-  ExternalVenueRental = 'rental_external_venues',
-  DecorationsAndAmbiance = 'decorations_and_ambiance',
-  FoodAndBeverage = 'food_beverage',
-  PromotionalMaterials = 'promotional_materials',
+  //* Planing Events Expenses
+  AdvertisingAndEventPromotion = 'advertising_and_event_promotion',
+  SpecialGuestsFees = 'special_guests_fess',
+  SecurityPersonnelFees = 'security_personnel_fees',
+  SupportStaffFees = 'support_staff_fees',
+  ExternalVenueRental = 'external_venue_rental',
+  FoodAndBeverage = 'food_and_beverage',
   TransportationSpecialGuests = 'transportation_special_guests',
   EquipmentTransportation = 'equipment_transportation',
-  SupportStaffFees = 'fees_support_staff',
-  RentalTechnicalAndLogisticEquipment = 'rental_technical_and_logistical_equipment',
-  EducationalMaterialsAndResources = 'educational_materials_and_resources',
+  RentalTechnicalEquipment = 'rental_technical_equipment',
+  EducationalMaterials = 'educational_materials',
   GiftsAndPrizesParticipants = 'gifts_and_prizes_participants',
   OtherRelatedExpenses = 'other_related_expenses',
 
-  //* Users
+  //? Users
   UserByNames = 'user_by_names',
   UserByLastNames = 'user_by_last_names',
   UserByFullName = 'user_by_full_name',

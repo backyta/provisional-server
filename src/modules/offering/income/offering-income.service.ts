@@ -11,6 +11,7 @@ import {
   FindOptionsOrderValue,
   ILike,
   In,
+  IsNull,
   Not,
   Repository,
 } from 'typeorm';
@@ -110,6 +111,7 @@ export class OfferingIncomeService {
     const {
       type,
       shift,
+      date,
       zoneId,
       amount,
       subType,
@@ -158,19 +160,19 @@ export class OfferingIncomeService {
           where: {
             subType: subType,
             familyGroup: familyGroup,
-            date: new Date(createOfferingIncomeDto.date),
+            date: new Date(date),
             currency: currency,
             recordStatus: RecordStatus.Active,
           },
         });
 
         if (offeringsIncome.length > 0) {
-          const newDate = dateFormatterToDDMMYYYY(
-            new Date(createOfferingIncomeDto.date).getTime(),
+          const offeringDate = dateFormatterToDDMMYYYY(
+            new Date(date).getTime(),
           );
 
           throw new NotFoundException(
-            `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]} y fecha: ${newDate}`,
+            `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Divisa: ${currency} y Fecha: ${offeringDate}.`,
           );
         }
 
@@ -199,10 +201,10 @@ export class OfferingIncomeService {
         }
       }
 
-      //? Sunday worship and Sunday school
+      //? Sunday service and Sunday school
       if (
         subType === OfferingIncomeCreationSubType.SundaySchool ||
-        subType === OfferingIncomeCreationSubType.SundayWorship
+        subType === OfferingIncomeCreationSubType.SundayService
       ) {
         if (!churchId) {
           throw new NotFoundException(`La iglesia es requerida.`);
@@ -231,19 +233,19 @@ export class OfferingIncomeService {
             subType: subType,
             church: church,
             shift: shift,
-            date: new Date(createOfferingIncomeDto.date),
+            date: new Date(date),
             currency: currency,
             recordStatus: RecordStatus.Active,
           },
         });
 
         if (offeringsIncome.length > 0) {
-          const newDate = dateFormatterToDDMMYYYY(
-            new Date(createOfferingIncomeDto.date).getTime(),
+          const offeringDate = dateFormatterToDDMMYYYY(
+            new Date(date).getTime(),
           );
 
           throw new NotFoundException(
-            `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, turno: ${OfferingIncomeCreationShiftTypeNames[shift]} y fecha: ${newDate}`,
+            `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Divisa: ${currency}, Turno: ${OfferingIncomeCreationShiftTypeNames[shift]} y Fecha: ${offeringDate}.`,
           );
         }
 
@@ -320,19 +322,19 @@ export class OfferingIncomeService {
           where: {
             subType: subType,
             zone: zone,
-            date: new Date(createOfferingIncomeDto.date),
+            date: new Date(date),
             currency: currency,
             recordStatus: RecordStatus.Active,
           },
         });
 
         if (offeringsIncome.length > 0) {
-          const newDate = dateFormatterToDDMMYYYY(
-            new Date(createOfferingIncomeDto.date).getTime(),
+          const offeringDate = dateFormatterToDDMMYYYY(
+            new Date(date).getTime(),
           );
 
           throw new NotFoundException(
-            `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]} y fecha: ${newDate}`,
+            `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Divisa: ${currency} y Fecha: ${offeringDate}.`,
           );
         }
 
@@ -361,12 +363,12 @@ export class OfferingIncomeService {
         }
       }
 
-      //? General fasting, vigil, youth worship, united worship, activities
+      //? General fasting, vigil, youth service, united service, activities
       if (
         subType === OfferingIncomeCreationSubType.GeneralVigil ||
         subType === OfferingIncomeCreationSubType.GeneralFasting ||
-        subType === OfferingIncomeCreationSubType.YouthWorship ||
-        subType === OfferingIncomeCreationSubType.UnitedWorship ||
+        subType === OfferingIncomeCreationSubType.YouthService ||
+        subType === OfferingIncomeCreationSubType.UnitedService ||
         subType === OfferingIncomeCreationSubType.Activities
       ) {
         if (!churchId) {
@@ -383,19 +385,19 @@ export class OfferingIncomeService {
           where: {
             subType: subType,
             church: church,
-            date: new Date(createOfferingIncomeDto.date),
+            date: new Date(date),
             currency: currency,
             recordStatus: RecordStatus.Active,
           },
         });
 
         if (offeringsIncome.length > 0) {
-          const newDate = dateFormatterToDDMMYYYY(
-            new Date(createOfferingIncomeDto.date).getTime(),
+          const offeringDate = dateFormatterToDDMMYYYY(
+            new Date(date).getTime(),
           );
 
           throw new NotFoundException(
-            `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]} y fecha: ${newDate}`,
+            `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Divisa: ${currency} y Fecha: ${offeringDate}.`,
           );
         }
 
@@ -424,7 +426,7 @@ export class OfferingIncomeService {
         }
       }
 
-      //? Church ground and special
+      //? Church ground and special offering
       if (
         subType === OfferingIncomeCreationSubType.ChurchGround ||
         subType === OfferingIncomeCreationSubType.Special
@@ -464,18 +466,19 @@ export class OfferingIncomeService {
               subType: subType,
               memberType: memberType,
               pastor: pastor,
-              date: new Date(createOfferingIncomeDto.date),
+              date: new Date(date),
+              currency: currency,
               recordStatus: RecordStatus.Active,
             },
           });
 
           if (offeringsIncome.length > 0) {
-            const newDate = dateFormatterToDDMMYYYY(
-              new Date(createOfferingIncomeDto.date).getTime(),
+            const offeringDate = dateFormatterToDDMMYYYY(
+              new Date(date).getTime(),
             );
 
             throw new NotFoundException(
-              `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, tipo de miembro: ${MemberTypeNames[memberType]} y fecha: ${newDate}`,
+              `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, Tipo de miembro: ${MemberTypeNames[memberType]} (mismos nombres), Divisa: ${currency} y Fecha: ${offeringDate}.`,
             );
           }
 
@@ -529,18 +532,19 @@ export class OfferingIncomeService {
               subType: subType,
               memberType: memberType,
               copastor: copastor,
-              date: new Date(createOfferingIncomeDto.date),
+              currency: currency,
+              date: new Date(date),
               recordStatus: RecordStatus.Active,
             },
           });
 
           if (offeringsIncome.length > 0) {
-            const newDate = dateFormatterToDDMMYYYY(
+            const offeringDate = dateFormatterToDDMMYYYY(
               new Date(createOfferingIncomeDto.date).getTime(),
             );
 
             throw new NotFoundException(
-              `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, tipo de miembro: ${MemberTypeNames[memberType]} y fecha: ${newDate}`,
+              `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, Tipo de miembro: ${MemberTypeNames[memberType]} (mismos nombres), Divisa: ${currency} y Fecha: ${offeringDate}.`,
             );
           }
 
@@ -599,18 +603,19 @@ export class OfferingIncomeService {
               subType: subType,
               memberType: memberType,
               supervisor: supervisor,
-              date: new Date(createOfferingIncomeDto.date),
+              currency: currency,
+              date: new Date(date),
               recordStatus: RecordStatus.Active,
             },
           });
 
           if (offeringsIncome.length > 0) {
-            const newDate = dateFormatterToDDMMYYYY(
-              new Date(createOfferingIncomeDto.date).getTime(),
+            const offeringDate = dateFormatterToDDMMYYYY(
+              new Date(date).getTime(),
             );
 
             throw new NotFoundException(
-              `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, tipo de miembro: ${MemberTypeNames[memberType]} y fecha: ${newDate}`,
+              `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, Tipo de miembro: ${MemberTypeNames[memberType]} (mismos nombres), Divisa: ${currency} y Fecha: ${offeringDate}.`,
             );
           }
 
@@ -671,18 +676,19 @@ export class OfferingIncomeService {
               subType: subType,
               memberType: memberType,
               preacher: preacher,
-              date: new Date(createOfferingIncomeDto.date),
+              currency: currency,
+              date: new Date(date),
               recordStatus: RecordStatus.Active,
             },
           });
 
           if (offeringsIncome.length > 0) {
-            const newDate = dateFormatterToDDMMYYYY(
-              new Date(createOfferingIncomeDto.date).getTime(),
+            const offeringDate = dateFormatterToDDMMYYYY(
+              new Date(date).getTime(),
             );
 
             throw new NotFoundException(
-              `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, tipo de miembro: ${MemberTypeNames[memberType]} y fecha: ${newDate}`,
+              `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, Tipo de miembro: ${MemberTypeNames[memberType]} (mismos nombres), Divisa: ${currency} y Fecha: ${offeringDate}.`,
             );
           }
 
@@ -744,18 +750,19 @@ export class OfferingIncomeService {
               subType: subType,
               memberType: memberType,
               disciple: disciple,
-              date: new Date(createOfferingIncomeDto.date),
+              currency: currency,
+              date: new Date(date),
               recordStatus: RecordStatus.Active,
             },
           });
 
           if (offeringsIncome.length > 0) {
-            const newDate = dateFormatterToDDMMYYYY(
-              new Date(createOfferingIncomeDto.date).getTime(),
+            const offeringDate = dateFormatterToDDMMYYYY(
+              new Date(date).getTime(),
             );
 
             throw new NotFoundException(
-              `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, tipo de miembro: ${MemberTypeNames[memberType]} y fecha: ${newDate}`,
+              `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, Tipo de miembro: ${MemberTypeNames[memberType]} (mismos nombres), Divisa: ${currency} y Fecha: ${offeringDate}.`,
             );
           }
 
@@ -901,15 +908,15 @@ export class OfferingIncomeService {
     //* By date
     if (
       term &&
-      (searchType === OfferingIncomeSearchType.SundayWorship ||
+      (searchType === OfferingIncomeSearchType.SundayService ||
         searchType === OfferingIncomeSearchType.SundaySchool ||
         searchType === OfferingIncomeSearchType.FamilyGroup ||
         searchType === OfferingIncomeSearchType.ZonalFasting ||
         searchType === OfferingIncomeSearchType.ZonalVigil ||
         searchType === OfferingIncomeSearchType.GeneralFasting ||
         searchType === OfferingIncomeSearchType.GeneralVigil ||
-        searchType === OfferingIncomeSearchType.YouthWorship ||
-        searchType === OfferingIncomeSearchType.UnitedWorship ||
+        searchType === OfferingIncomeSearchType.YouthService ||
+        searchType === OfferingIncomeSearchType.UnitedService ||
         searchType === OfferingIncomeSearchType.Activities ||
         searchType === OfferingIncomeSearchType.Special ||
         searchType === OfferingIncomeSearchType.ChurchGround ||
@@ -1002,12 +1009,12 @@ export class OfferingIncomeService {
     //* By church
     if (
       term &&
-      (searchType === OfferingIncomeSearchType.SundayWorship ||
+      (searchType === OfferingIncomeSearchType.SundayService ||
         searchType === OfferingIncomeSearchType.SundaySchool ||
         searchType === OfferingIncomeSearchType.GeneralFasting ||
         searchType === OfferingIncomeSearchType.GeneralVigil ||
-        searchType === OfferingIncomeSearchType.YouthWorship ||
-        searchType === OfferingIncomeSearchType.UnitedWorship ||
+        searchType === OfferingIncomeSearchType.YouthService ||
+        searchType === OfferingIncomeSearchType.UnitedService ||
         searchType === OfferingIncomeSearchType.Activities ||
         searchType === OfferingIncomeSearchType.IncomeAdjustment) &&
       searchSubType === OfferingIncomeSearchSubType.OfferingByChurch
@@ -1097,12 +1104,12 @@ export class OfferingIncomeService {
     //* By church and date
     if (
       term &&
-      (searchType === OfferingIncomeSearchType.SundayWorship ||
+      (searchType === OfferingIncomeSearchType.SundayService ||
         searchType === OfferingIncomeSearchType.SundaySchool ||
         searchType === OfferingIncomeSearchType.GeneralFasting ||
         searchType === OfferingIncomeSearchType.GeneralVigil ||
-        searchType === OfferingIncomeSearchType.YouthWorship ||
-        searchType === OfferingIncomeSearchType.UnitedWorship ||
+        searchType === OfferingIncomeSearchType.YouthService ||
+        searchType === OfferingIncomeSearchType.UnitedService ||
         searchType === OfferingIncomeSearchType.Activities ||
         searchType === OfferingIncomeSearchType.IncomeAdjustment) &&
       searchSubType === OfferingIncomeSearchSubType.OfferingByChurchDate
@@ -1209,7 +1216,7 @@ export class OfferingIncomeService {
     //* By shift
     if (
       term &&
-      (searchType === OfferingIncomeSearchType.SundayWorship ||
+      (searchType === OfferingIncomeSearchType.SundayService ||
         searchType === OfferingIncomeSearchType.SundaySchool) &&
       searchSubType === OfferingIncomeSearchSubType.OfferingByShift
     ) {
@@ -1268,7 +1275,7 @@ export class OfferingIncomeService {
     //* By shift and date
     if (
       term &&
-      (searchType === OfferingIncomeSearchType.SundayWorship ||
+      (searchType === OfferingIncomeSearchType.SundayService ||
         searchType === OfferingIncomeSearchType.SundaySchool) &&
       searchSubType === OfferingIncomeSearchSubType.OfferingByShiftDate
     ) {
@@ -2463,7 +2470,7 @@ export class OfferingIncomeService {
 
         const offeringsIncome = await this.offeringIncomeRepository.find({
           where: {
-            subType: OfferingIncomeSearchType.SundayWorship,
+            subType: OfferingIncomeSearchType.SundayService,
             date: In(sundays),
             church: church,
             recordStatus: RecordStatus.Active,
@@ -2584,15 +2591,15 @@ export class OfferingIncomeService {
 
     if (
       term &&
-      (OfferingIncomeSearchType.SundayWorship ||
+      (OfferingIncomeSearchType.SundayService ||
         OfferingIncomeSearchType.SundaySchool ||
         OfferingIncomeSearchType.FamilyGroup ||
         OfferingIncomeSearchType.ZonalFasting ||
         OfferingIncomeSearchType.ZonalVigil ||
         OfferingIncomeSearchType.GeneralFasting ||
         OfferingIncomeSearchType.GeneralVigil ||
-        OfferingIncomeSearchType.YouthWorship ||
-        OfferingIncomeSearchType.UnitedWorship ||
+        OfferingIncomeSearchType.YouthService ||
+        OfferingIncomeSearchType.UnitedService ||
         OfferingIncomeSearchType.Activities ||
         OfferingIncomeSearchType.Special ||
         OfferingIncomeSearchType.ChurchGround ||
@@ -2748,24 +2755,240 @@ export class OfferingIncomeService {
       );
     }
 
-    //* Validate if exists record already
     try {
-      const offeringsIncome = await this.offeringIncomeRepository.find({
+      //? Validate if exists record already
+      const zone = await this.zoneRepository.findOne({
         where: {
-          id: Not(id),
-          type: type,
-          subType: subType,
-          date: new Date(date),
-          currency: currency,
-          recordStatus: RecordStatus.Active,
+          id: zoneId,
         },
       });
+
+      const familyGroup = await this.familyGroupRepository.findOne({
+        where: {
+          id: familyGroupId,
+        },
+      });
+
+      const church = await this.churchRepository.findOne({
+        where: {
+          id: churchId,
+        },
+      });
+
+      let memberValue: Pastor | Copastor | Supervisor | Preacher | Disciple;
+      if (memberType === MemberType.Pastor) {
+        memberValue = await this.pastorRepository.findOne({
+          where: {
+            id: memberId,
+          },
+        });
+      }
+      if (memberType === MemberType.Copastor) {
+        memberValue = await this.copastorRepository.findOne({
+          where: {
+            id: memberId,
+          },
+        });
+      }
+      if (memberType === MemberType.Supervisor) {
+        memberValue = await this.supervisorRepository.findOne({
+          where: {
+            id: memberId,
+          },
+        });
+      }
+      if (memberType === MemberType.Preacher) {
+        memberValue = await this.preacherRepository.findOne({
+          where: {
+            id: memberId,
+          },
+        });
+      }
+      if (memberType === MemberType.Disciple) {
+        memberValue = await this.discipleRepository.findOne({
+          where: {
+            id: memberId,
+          },
+        });
+      }
+
+      let offeringsIncome: OfferingIncome[];
+
+      //* Sunday school and sunday service
+      if (
+        subType === OfferingIncomeCreationSubType.SundaySchool ||
+        subType === OfferingIncomeCreationSubType.SundayService
+      ) {
+        offeringsIncome = await this.offeringIncomeRepository.find({
+          where: {
+            id: Not(id),
+            type: type,
+            subType: subType,
+            church: church,
+            date: new Date(date),
+            currency: currency,
+            shift: shift,
+            recordStatus: RecordStatus.Active,
+          },
+        });
+      }
+
+      //* Family group
+      if (subType === OfferingIncomeCreationSubType.FamilyGroup) {
+        offeringsIncome = await this.offeringIncomeRepository.find({
+          where: {
+            id: Not(id),
+            type: type,
+            subType: subType,
+            date: new Date(date),
+            currency: currency,
+            familyGroup: familyGroup,
+            recordStatus: RecordStatus.Active,
+          },
+        });
+      }
+
+      //* Zonal fasting and vigil
+      if (
+        subType === OfferingIncomeCreationSubType.ZonalVigil ||
+        subType === OfferingIncomeCreationSubType.ZonalFasting
+      ) {
+        offeringsIncome = await this.offeringIncomeRepository.find({
+          where: {
+            id: Not(id),
+            type: type,
+            subType: subType,
+            date: new Date(date),
+            currency: currency,
+            zone: zone,
+            recordStatus: RecordStatus.Active,
+          },
+        });
+      }
+
+      //* General fasting, general vigil, youth service, united services, activities
+      if (
+        subType === OfferingIncomeCreationSubType.GeneralFasting ||
+        subType === OfferingIncomeCreationSubType.GeneralVigil ||
+        subType === OfferingIncomeCreationSubType.YouthService ||
+        subType === OfferingIncomeCreationSubType.UnitedService ||
+        subType === OfferingIncomeCreationSubType.Activities
+      ) {
+        offeringsIncome = await this.offeringIncomeRepository.find({
+          where: {
+            id: Not(id),
+            type: type,
+            subType: subType,
+            date: new Date(date),
+            church: church,
+            currency: currency,
+            recordStatus: RecordStatus.Active,
+          },
+        });
+      }
+
+      //* Special and church ground
+      if (
+        subType === OfferingIncomeCreationSubType.Special ||
+        subType === OfferingIncomeCreationSubType.ChurchGround
+      ) {
+        if (memberType === MemberType.Pastor) {
+          offeringsIncome = await this.offeringIncomeRepository.find({
+            where: {
+              id: Not(id),
+              type: type,
+              subType: subType,
+              date: new Date(date),
+              currency: currency,
+              memberType: memberType,
+              pastor: memberValue as Pastor,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+        }
+        if (memberType === MemberType.Copastor) {
+          offeringsIncome = await this.offeringIncomeRepository.find({
+            where: {
+              id: Not(id),
+              type: type,
+              subType: subType,
+              date: new Date(date),
+              currency: currency,
+              memberType: memberType,
+              copastor: memberValue as Copastor,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+        }
+        if (memberType === MemberType.Supervisor) {
+          offeringsIncome = await this.offeringIncomeRepository.find({
+            where: {
+              id: Not(id),
+              type: type,
+              subType: subType,
+              date: new Date(date),
+              currency: currency,
+              memberType: memberType,
+              supervisor: memberValue as Supervisor,
+              disciple: memberValue as Disciple,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+        }
+        if (memberType === MemberType.Preacher) {
+          offeringsIncome = await this.offeringIncomeRepository.find({
+            where: {
+              id: Not(id),
+              type: type,
+              subType: subType,
+              date: new Date(date),
+              currency: currency,
+              memberType: memberType,
+              preacher: memberValue as Preacher,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+        }
+        if (memberType === MemberType.Disciple) {
+          offeringsIncome = await this.offeringIncomeRepository.find({
+            where: {
+              id: Not(id),
+              type: type,
+              subType: subType,
+              date: new Date(date),
+              currency: currency,
+              memberType: memberType,
+              disciple: memberValue as Disciple,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+        }
+      }
+
+      //* Income adjustment
+      if (type === OfferingIncomeCreationType.IncomeAdjustment) {
+        offeringsIncome = await this.offeringIncomeRepository.find({
+          where: {
+            id: Not(id),
+            type: type,
+            date: new Date(date),
+            currency: currency,
+            memberType: memberType ?? IsNull(),
+            pastor: (memberValue as Pastor) ?? IsNull(),
+            copastor: (memberValue as Copastor) ?? IsNull(),
+            supervisor: (memberValue as Supervisor) ?? IsNull(),
+            preacher: (memberValue as Preacher) ?? IsNull(),
+            disciple: (memberValue as Disciple) ?? IsNull(),
+            recordStatus: RecordStatus.Active,
+          },
+        });
+      }
 
       if (offeringsIncome.length > 0) {
         const newDate = dateFormatterToDDMMYYYY(new Date(date).getTime());
 
         throw new NotFoundException(
-          `Ya existe un registro con este tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, esta divisa: ${currency} y fecha: ${newDate}.  Si desea hacer cambio de divisa, debe eliminar este registro y actualizar el registro de destino, con el monto correspondiente.`,
+          `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Divisa: ${currency} y Fecha: ${newDate}.\nSi desea hacer cambio de divisa, debe hacerlo desde el modulo Eliminar Ingreso.`,
         );
       }
 
@@ -2826,25 +3049,267 @@ export class OfferingIncomeService {
       );
     }
 
-    const existingComments = offeringIncome.comments || '';
-    const exchangeRateComments = `Tipo de cambio(precio): ${exchangeRate}\nTipo de cambio(moneda) ${ExchangeCurrencyTypeNames[exchangeCurrencyType]}\nTotal monto cambiado: ${offeringIncome.amount * +exchangeRate} ${
-      exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-      exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN
-        ? CurrencyType.PEN
-        : exchangeCurrencyType === ExchangeCurrencyType.PENtoEUR
-          ? CurrencyType.EUR
-          : CurrencyType.USD
-    }`;
-    const removalInfoComments: string = `Fecha de eliminación: ${format(new Date(), 'dd/MM/yyyy')}\nMotivo de eliminación: ${OfferingReasonEliminationTypeNames[reasonEliminationType as OfferingReasonEliminationType]}\nUsuario: ${user.firstName} ${user.lastName}`;
-
-    const updatedComments =
-      exchangeRate && exchangeCurrencyType
-        ? `${existingComments}\n\n${exchangeRateComments}\n\n${removalInfoComments}`
-        : `${existingComments}\n\n${removalInfoComments}`;
-
-    //* Update and set in Inactive on Offering Income
+    //? Actualizar ofrenda de destino con el monto convertido
     try {
-      const updatedOfferingIncome = await this.offeringIncomeRepository.preload(
+      if (
+        reasonEliminationType === OfferingReasonEliminationType.CurrencyExchange
+      ) {
+        let offeringDestiny: OfferingIncome;
+
+        if (
+          offeringIncome.subType ===
+            OfferingIncomeCreationSubType.SundayService ||
+          offeringIncome.subType === OfferingIncomeCreationSubType.SundaySchool
+        ) {
+          offeringDestiny = await this.offeringIncomeRepository.findOne({
+            where: {
+              type: offeringIncome.type,
+              subType: offeringIncome.subType,
+              date: offeringIncome.date,
+              church: offeringIncome.church,
+              shift: offeringIncome.shift,
+              currency:
+                (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+                  exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
+                CurrencyType.PEN,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+        }
+
+        if (
+          offeringIncome.subType === OfferingIncomeCreationSubType.FamilyGroup
+        ) {
+          offeringDestiny = await this.offeringIncomeRepository.findOne({
+            where: {
+              type: offeringIncome.type,
+              subType: offeringIncome.subType,
+              date: offeringIncome.date,
+              familyGroup: offeringIncome.familyGroup,
+              currency:
+                (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+                  exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
+                CurrencyType.PEN,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+        }
+
+        if (
+          offeringIncome.subType ===
+            OfferingIncomeCreationSubType.ZonalFasting ||
+          offeringIncome.subType === OfferingIncomeCreationSubType.ZonalVigil
+        ) {
+          offeringDestiny = await this.offeringIncomeRepository.findOne({
+            where: {
+              type: offeringIncome.type,
+              subType: offeringIncome.subType,
+              date: offeringIncome.date,
+              zone: offeringIncome.zone,
+              currency:
+                (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+                  exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
+                CurrencyType.PEN,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+        }
+
+        if (
+          offeringIncome.subType ===
+            OfferingIncomeCreationSubType.GeneralFasting ||
+          offeringIncome.subType ===
+            OfferingIncomeCreationSubType.GeneralVigil ||
+          offeringIncome.subType ===
+            OfferingIncomeCreationSubType.UnitedService ||
+          offeringIncome.subType ===
+            OfferingIncomeCreationSubType.YouthService ||
+          offeringIncome.subType === OfferingIncomeCreationSubType.Activities
+        ) {
+          offeringDestiny = await this.offeringIncomeRepository.findOne({
+            where: {
+              type: offeringIncome.type,
+              subType: offeringIncome.subType,
+              date: offeringIncome.date,
+              church: offeringIncome.church,
+              currency:
+                (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+                  exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
+                CurrencyType.PEN,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+        }
+
+        if (
+          offeringIncome.subType ===
+            OfferingIncomeCreationSubType.ChurchGround ||
+          offeringIncome.subType === OfferingIncomeCreationSubType.Special
+        ) {
+          if (offeringIncome.memberType === MemberType.Pastor) {
+            offeringDestiny = await this.offeringIncomeRepository.findOne({
+              where: {
+                type: offeringIncome.type,
+                subType: offeringIncome.subType,
+                date: offeringIncome.date,
+                memberType: offeringIncome.memberType,
+                pastor: offeringIncome.pastor,
+                currency:
+                  (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+                    exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
+                  CurrencyType.PEN,
+                recordStatus: RecordStatus.Active,
+              },
+            });
+          }
+          if (offeringIncome.memberType === MemberType.Copastor) {
+            offeringDestiny = await this.offeringIncomeRepository.findOne({
+              where: {
+                type: offeringIncome.type,
+                subType: offeringIncome.subType,
+                date: offeringIncome.date,
+                memberType: offeringIncome.memberType,
+                copastor: offeringIncome.copastor,
+                currency:
+                  (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+                    exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
+                  CurrencyType.PEN,
+                recordStatus: RecordStatus.Active,
+              },
+            });
+          }
+          if (offeringIncome.memberType === MemberType.Supervisor) {
+            offeringDestiny = await this.offeringIncomeRepository.findOne({
+              where: {
+                type: offeringIncome.type,
+                subType: offeringIncome.subType,
+                date: offeringIncome.date,
+                memberType: offeringIncome.memberType,
+                supervisor: offeringIncome.supervisor,
+                currency:
+                  (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+                    exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
+                  CurrencyType.PEN,
+                recordStatus: RecordStatus.Active,
+              },
+            });
+          }
+          if (offeringIncome.memberType === MemberType.Preacher) {
+            offeringDestiny = await this.offeringIncomeRepository.findOne({
+              where: {
+                type: offeringIncome.type,
+                subType: offeringIncome.subType,
+                date: offeringIncome.date,
+                memberType: offeringIncome.memberType,
+                preacher: offeringIncome.preacher,
+                currency:
+                  (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+                    exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
+                  CurrencyType.PEN,
+                recordStatus: RecordStatus.Active,
+              },
+            });
+          }
+          if (offeringIncome.memberType === MemberType.Disciple) {
+            offeringDestiny = await this.offeringIncomeRepository.findOne({
+              where: {
+                type: offeringIncome.type,
+                subType: offeringIncome.subType,
+                date: offeringIncome.date,
+                memberType: offeringIncome.memberType,
+                disciple: offeringIncome.disciple,
+                currency:
+                  (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+                    exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
+                  CurrencyType.PEN,
+                recordStatus: RecordStatus.Active,
+              },
+            });
+          }
+        }
+
+        //* Si existe, se suma el monto transformado al registro existente.
+        if (offeringDestiny) {
+          const currentComments = offeringDestiny.comments || '';
+          const newComments = `💲 Monto anterior: ${offeringDestiny.amount} ${offeringDestiny.currency}\n💲 Monto añadido: ${(offeringIncome.amount * +exchangeRate).toFixed(2)} ${offeringDestiny.currency} (${offeringIncome.amount} ${offeringIncome.currency})\n💰Tipo de cambio (precio): ${exchangeRate}`;
+          const updatedComments = currentComments
+            ? `${currentComments}\n\n${newComments}`
+            : `${newComments}`;
+
+          const updatedOffering = await this.offeringIncomeRepository.preload({
+            id: offeringDestiny.id,
+            comments: updatedComments,
+            amount: parseFloat(
+              (
+                +offeringDestiny.amount +
+                offeringIncome.amount * +exchangeRate
+              ).toFixed(2),
+            ),
+            updatedAt: new Date(),
+            updatedBy: user,
+          });
+
+          await this.offeringIncomeRepository.save(updatedOffering);
+        }
+
+        //* Si no existe un registro a donde aumentar el cambio, se crea.
+        if (!offeringDestiny) {
+          const newComments = `💲 Monto convertido: ${(+offeringIncome.amount * +exchangeRate).toFixed(2)} ${
+            (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+              exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
+            CurrencyType.PEN
+          } (${offeringIncome.amount} ${offeringIncome?.currency})\n💰Tipo de cambio (precio): ${exchangeRate}`;
+
+          offeringDestiny = this.offeringIncomeRepository.create({
+            type: offeringIncome.type,
+            subType: offeringIncome.subType,
+            amount: parseFloat(
+              (offeringIncome.amount * +exchangeRate).toFixed(2),
+            ),
+            currency:
+              (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+                exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
+              CurrencyType.PEN,
+            date: offeringIncome.date,
+            comments: newComments,
+            church: offeringIncome.church,
+            pastor: offeringIncome.pastor,
+            copastor: offeringIncome.copastor,
+            supervisor: offeringIncome.supervisor,
+            preacher: offeringIncome.preacher,
+            disciple: offeringIncome.disciple,
+            zone: offeringIncome.zone,
+            memberType: offeringIncome.memberType,
+            shift: offeringIncome.shift,
+            imageUrls: offeringIncome.imageUrls,
+            familyGroup: offeringIncome.familyGroup,
+            createdAt: new Date(),
+            createdBy: user,
+          });
+
+          await this.offeringIncomeRepository.save(offeringDestiny);
+        }
+      }
+
+      //* Update and set in Inactive and info comments on Offering Income
+      const existingComments = offeringIncome.comments || '';
+      const exchangeRateComments = `Tipo de cambio(precio): ${exchangeRate}\nTipo de cambio(moneda): ${ExchangeCurrencyTypeNames[exchangeCurrencyType]}\nTotal monto cambiado: ${(offeringIncome.amount * +exchangeRate).toFixed(2)} ${
+        (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+          exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
+        CurrencyType.PEN
+      }`;
+      const removalInfoComments: string = `Fecha de eliminación: ${format(new Date(), 'dd/MM/yyyy')}\nMotivo de eliminación: ${OfferingReasonEliminationTypeNames[reasonEliminationType as OfferingReasonEliminationType]}\nUsuario: ${user.firstName} ${user.lastName}`;
+
+      const updatedComments =
+        exchangeRate && exchangeCurrencyType && existingComments
+          ? `${existingComments}\n\n${exchangeRateComments}\n\n${removalInfoComments}`
+          : exchangeRate && exchangeCurrencyType && !existingComments
+            ? `${exchangeRateComments}\n\n${removalInfoComments}`
+            : !exchangeRate && !exchangeCurrencyType && existingComments
+              ? `${existingComments}\n\n${removalInfoComments}`
+              : `${removalInfoComments}`;
+
+      const deletedOfferingIncome = await this.offeringIncomeRepository.preload(
         {
           id: offeringIncome.id,
           comments: updatedComments,
@@ -2855,12 +3320,10 @@ export class OfferingIncomeService {
         },
       );
 
-      await this.offeringIncomeRepository.save(updatedOfferingIncome);
+      await this.offeringIncomeRepository.save(deletedOfferingIncome);
     } catch (error) {
       this.handleDBExceptions(error);
     }
-
-    return;
   }
 
   //? PRIVATE METHODS

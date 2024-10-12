@@ -16,7 +16,7 @@ export const familyGroupFormatterByRecordStatus = ({
       if (!acc[zoneName]) {
         acc[zoneName] = {
           supervisor: familyGroup?.theirSupervisor?.firstName
-            ? `${getInitialFullNames({ firstNames: familyGroup?.theirSupervisor?.firstName, lastNames: '' })} ${familyGroup?.theirSupervisor?.lastName}`
+            ? `${getInitialFullNames({ firstNames: familyGroup?.theirSupervisor?.firstName ?? '', lastNames: '' })} ${familyGroup?.theirSupervisor?.lastName}`
             : 'Sin Supervisor',
           active: 0,
           inactive: 0,

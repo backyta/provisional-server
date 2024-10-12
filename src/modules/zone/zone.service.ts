@@ -168,7 +168,7 @@ export class ZoneService {
       church: churchId,
     } = paginationDto;
 
-    if (isSimpleQuery && churchId) {
+    if (isSimpleQuery || (isSimpleQuery && churchId)) {
       try {
         const church = await this.churchRepository.findOne({
           where: {

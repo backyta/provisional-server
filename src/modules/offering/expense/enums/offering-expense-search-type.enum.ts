@@ -1,11 +1,11 @@
 export enum OfferingExpenseSearchType {
-  OperationalExpense = 'operative_expense',
-  MaintenanceAndRepairExpense = 'maintenance_and_repair_expense',
-  DecorationExpense = 'decoration_expense',
-  EquipmentAndTechnologyExpense = 'equipment_and_technology_expense',
-  SuppliesExpense = 'supplies_expense',
-  ActivitiesAndEventsExpense = 'activities_and_events_expense',
-  ExpenseAdjustment = 'expense_adjustment',
+  OperationalExpenses = 'operational_expenses',
+  MaintenanceAndRepairExpenses = 'maintenance_and_repair_expenses',
+  DecorationExpenses = 'decoration_expenses',
+  EquipmentAndTechnologyExpenses = 'equipment_and_technology_expenses',
+  SuppliesExpenses = 'supplies_expenses',
+  PlaningEventsExpenses = 'planing_events_expenses',
+  ExpensesAdjustment = 'expenses_adjustment',
   RecordStatus = 'record_status',
 }
 
@@ -13,15 +13,15 @@ export const OfferingExpenseSearchTypeNames: Record<
   OfferingExpenseSearchType,
   string
 > = {
-  [OfferingExpenseSearchType.OperationalExpense]: 'Gastos de operación',
-  [OfferingExpenseSearchType.MaintenanceAndRepairExpense]:
-    'Gastos de reparación y mantenimiento',
-  [OfferingExpenseSearchType.DecorationExpense]: 'Gastos de decoración',
-  [OfferingExpenseSearchType.EquipmentAndTechnologyExpense]:
-    'Gastos de equipamiento y tecnología',
-  [OfferingExpenseSearchType.SuppliesExpense]: 'Gastos de suministros',
-  [OfferingExpenseSearchType.ActivitiesAndEventsExpense]:
-    'Gastos de actividades y eventos',
-  [OfferingExpenseSearchType.ExpenseAdjustment]: 'Ajuste por Salida',
+  [OfferingExpenseSearchType.OperationalExpenses]: 'Gastos Operativos',
+  [OfferingExpenseSearchType.MaintenanceAndRepairExpenses]:
+    'Gastos de Reparación y Mantenimiento',
+  [OfferingExpenseSearchType.DecorationExpenses]: 'Gastos de Decoración',
+  [OfferingExpenseSearchType.EquipmentAndTechnologyExpenses]:
+    'Gastos de Equipamiento y Tecnología',
+  [OfferingExpenseSearchType.SuppliesExpenses]: 'Gastos de Suministros',
+  [OfferingExpenseSearchType.PlaningEventsExpenses]:
+    'Gastos de Planificación de Eventos',
+  [OfferingExpenseSearchType.ExpensesAdjustment]: 'Ajuste por Salida',
   [OfferingExpenseSearchType.RecordStatus]: 'Estado de Registro',
 };

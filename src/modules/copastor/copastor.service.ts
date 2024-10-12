@@ -163,7 +163,7 @@ export class CopastorService {
       church: churchId,
     } = paginationDto;
 
-    if (isSimpleQuery && churchId) {
+    if (isSimpleQuery || (churchId && isSimpleQuery)) {
       try {
         const church = await this.churchRepository.findOne({
           where: {

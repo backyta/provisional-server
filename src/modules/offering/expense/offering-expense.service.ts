@@ -52,12 +52,12 @@ export class OfferingExpenseService {
 
     //? All Types
     if (
-      type === OfferingExpenseSearchType.SuppliesExpense ||
-      type === OfferingExpenseSearchType.DecorationExpense ||
-      type === OfferingExpenseSearchType.OperationalExpense ||
-      type === OfferingExpenseSearchType.MaintenanceAndRepairExpense ||
-      type === OfferingExpenseSearchType.ActivitiesAndEventsExpense ||
-      type === OfferingExpenseSearchType.EquipmentAndTechnologyExpense
+      type === OfferingExpenseSearchType.SuppliesExpenses ||
+      type === OfferingExpenseSearchType.DecorationExpenses ||
+      type === OfferingExpenseSearchType.OperationalExpenses ||
+      type === OfferingExpenseSearchType.MaintenanceAndRepairExpenses ||
+      type === OfferingExpenseSearchType.PlaningEventsExpenses ||
+      type === OfferingExpenseSearchType.EquipmentAndTechnologyExpenses
     ) {
       if (!churchId) {
         throw new NotFoundException(`La iglesia es requerida.`);
@@ -97,7 +97,7 @@ export class OfferingExpenseService {
     }
 
     //? Expense adjustment
-    if (type === OfferingExpenseSearchType.ExpenseAdjustment) {
+    if (type === OfferingExpenseSearchType.ExpensesAdjustment) {
       if (!churchId) {
         throw new NotFoundException(`La iglesia es requerida.`);
       }
@@ -192,14 +192,14 @@ export class OfferingExpenseService {
     //* By date and church
     if (
       term &&
-      (searchType === OfferingExpenseSearchType.ActivitiesAndEventsExpense ||
-        searchType === OfferingExpenseSearchType.DecorationExpense ||
+      (searchType === OfferingExpenseSearchType.PlaningEventsExpenses ||
+        searchType === OfferingExpenseSearchType.DecorationExpenses ||
         searchType ===
-          OfferingExpenseSearchType.EquipmentAndTechnologyExpense ||
-        searchType === OfferingExpenseSearchType.MaintenanceAndRepairExpense ||
-        searchType === OfferingExpenseSearchType.OperationalExpense ||
-        searchType === OfferingExpenseSearchType.SuppliesExpense ||
-        searchType === OfferingExpenseSearchType.ExpenseAdjustment)
+          OfferingExpenseSearchType.EquipmentAndTechnologyExpenses ||
+        searchType === OfferingExpenseSearchType.MaintenanceAndRepairExpenses ||
+        searchType === OfferingExpenseSearchType.OperationalExpenses ||
+        searchType === OfferingExpenseSearchType.SuppliesExpenses ||
+        searchType === OfferingExpenseSearchType.ExpensesAdjustment)
     ) {
       const [churchId, date] = term.split('&');
 
@@ -226,7 +226,7 @@ export class OfferingExpenseService {
         const toDate = toTimestamp ? new Date(toTimestamp) : fromDate;
 
         let offeringsExpenses: OfferingExpense[];
-        if (searchType !== OfferingExpenseSearchType.ExpenseAdjustment) {
+        if (searchType !== OfferingExpenseSearchType.ExpensesAdjustment) {
           offeringsExpenses = await this.offeringExpenseRepository.find({
             where: {
               type: searchType,
@@ -242,7 +242,7 @@ export class OfferingExpenseService {
           });
         }
 
-        if (searchType === OfferingExpenseSearchType.ExpenseAdjustment) {
+        if (searchType === OfferingExpenseSearchType.ExpensesAdjustment) {
           offeringsExpenses = await this.offeringExpenseRepository.find({
             where: {
               type: searchType,
@@ -419,8 +419,10 @@ export class OfferingExpenseService {
     }
 
     const existingComments = offeringExpense.comments || '';
-    const newComments: string = `Fecha de eliminación: ${format(new Date(), 'dd/MM/yyyy')} \nMotivo de eliminación: ${OfferingReasonEliminationTypeNames[reasonEliminationType as OfferingReasonEliminationType]}\nUsuario: ${user.firstName} ${user.lastName}  `;
-    const updatedComments = `${existingComments}\n${newComments}`;
+    const newComments: string = `Fecha de eliminación: ${format(new Date(), 'dd/MM/yyyy')}\nMotivo de eliminación: ${OfferingReasonEliminationTypeNames[reasonEliminationType as OfferingReasonEliminationType]}\nUsuario: ${user.firstName} ${user.lastName}  `;
+    const updatedComments = existingComments
+      ? `${existingComments}\n\n${newComments}`
+      : `${newComments}`;
 
     //* Update and set in Inactive on Offering Expense
     try {

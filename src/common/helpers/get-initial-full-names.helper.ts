@@ -10,5 +10,7 @@ export const getInitialFullNames = ({
   const firstName = firstNames.split(' ');
   const lastName = lastNames.split(' ');
 
-  return `${firstName[0]} ${lastName[0]}`;
+  return lastName[0]
+    ? `${firstName[0]} ${lastName[0]}`
+    : `${firstName[0]}${lastName[0]}`;
 };

@@ -16,14 +16,29 @@ export enum MetricSearchType {
   FamilyGroupsByCode = 'family_groups_by_code',
   FamilyGroupsByZone = 'family_groups_by_zone',
   FamilyGroupsByDistrict = 'family_groups_by_district',
-  FamilyGroupsByWorshipTime = 'family_groups_by_worship_time',
+  FamilyGroupsByServiceTime = 'family_groups_by_service_time',
   FamilyGroupsByRecordStatus = 'family_groups_by_record_status',
 
-  OfferingsIncomeByProportion = 'offerings_income_by_proportion',
-  OfferingsIncomeBySundayService = 'offerings_income_by_sunday_service',
-  OfferingsIncomeByFamilyGroup = 'offerings_income_by_family_group',
-  OfferingsIncomeBySundaySchool = 'offerings_income_by_sunday_school',
-  OfferingsIncomeByFastingAndVigil = 'offerings_income_by_fasting_and_vigil',
+  OfferingIncomeByProportion = 'offering_income_by_proportion',
+  OfferingIncomeBySundayService = 'offering_income_by_sunday_service',
+  OfferingIncomeByFamilyGroup = 'offering_income_by_family_group',
+  OfferingIncomeBySundaySchool = 'offering_income_by_sunday_school',
+  OfferingIncomeByFastingAndVigil = 'offering_income_by_fasting_and_vigil',
+  OfferingIncomeByYouthService = 'offering_income_by_youth_service',
+  OfferingIncomeBySpecialOffering = 'offering_income_by_special_offering',
+  OfferingIncomeByChurchGround = 'offering_income_by_church_ground',
+  OfferingIncomeByUnitedService = 'offering_income_by_united_service',
+  OfferingIncomeByActivities = 'offering_income_by_activities',
+  OfferingIncomeAdjustment = 'offering_income_adjustment',
+
+  OfferingExpensesByProportion = 'offering_expenses_by_proportion',
+  OperationalOfferingExpenses = 'operational_offering_expenses',
+  MaintenanceAndRepairOfferingExpenses = 'maintenance_and_repair_offering_expenses',
+  DecorationOfferingExpenses = 'decoration_offering_expenses',
+  EquipmentAndTechnologyOfferingExpenses = 'equipment_and_technology_offering_expenses',
+  SuppliesOfferingExpenses = 'supplies_offering_expenses',
+  PlaningEventsOfferingExpenses = 'planing_events_offering_expenses',
+  OfferingExpensesAdjustment = 'offering_expenses_adjustment',
 }
 
 export const MetricSearchTypeNames: Record<MetricSearchType, string> = {
@@ -58,19 +73,48 @@ export const MetricSearchTypeNames: Record<MetricSearchType, string> = {
     'Análisis de grupos familiares por zona.',
   [MetricSearchType.FamilyGroupsByDistrict]:
     'Análisis de grupos familiares por distrito.',
-  [MetricSearchType.FamilyGroupsByWorshipTime]:
+  [MetricSearchType.FamilyGroupsByServiceTime]:
     'Análisis de grupos familiares por horario de culto.',
   [MetricSearchType.FamilyGroupsByRecordStatus]:
     'Análisis de grupos familiares por estado de registro.',
 
-  [MetricSearchType.OfferingsIncomeByProportion]:
+  [MetricSearchType.OfferingIncomeByProportion]:
     'Análisis de proporción de ingresos de ofrenda.',
-  [MetricSearchType.OfferingsIncomeBySundayService]:
+  [MetricSearchType.OfferingIncomeBySundayService]:
     'Análisis de ingresos de ofrenda por culto dominical.',
-  [MetricSearchType.OfferingsIncomeByFamilyGroup]:
+  [MetricSearchType.OfferingIncomeByFamilyGroup]:
     'Análisis de ingresos de ofrenda por grupo familiar.',
-  [MetricSearchType.OfferingsIncomeBySundaySchool]:
+  [MetricSearchType.OfferingIncomeBySundaySchool]:
     'Análisis de ingresos de ofrenda por escuela dominical.',
-  [MetricSearchType.OfferingsIncomeByFastingAndVigil]:
+  [MetricSearchType.OfferingIncomeByFastingAndVigil]:
     'Análisis de ingresos de ofrenda por ayuno y vigilia.',
+  [MetricSearchType.OfferingIncomeByYouthService]:
+    'Análisis de ingresos de ofrenda por culto juvenil.',
+  [MetricSearchType.OfferingIncomeBySpecialOffering]:
+    'Análisis de ingresos de ofrenda por ofrenda especial.',
+  [MetricSearchType.OfferingIncomeByChurchGround]:
+    'Análisis de ingresos de ofrenda por terreno iglesia.',
+  [MetricSearchType.OfferingIncomeByUnitedService]:
+    'Análisis de ingresos de ofrenda por culto unido.',
+  [MetricSearchType.OfferingIncomeByActivities]:
+    'Análisis de ingresos de ofrenda por actividades.',
+  [MetricSearchType.OfferingIncomeAdjustment]:
+    'Análisis de ingresos de ofrenda por ajustes de ingreso.',
+
+  [MetricSearchType.OfferingExpensesByProportion]:
+    'Análisis de proporción de salidas de ofrenda.',
+  [MetricSearchType.OperationalOfferingExpenses]:
+    'Análisis de salidas de ofrenda por gastos operativos.',
+  [MetricSearchType.MaintenanceAndRepairOfferingExpenses]:
+    'Análisis de salidas de ofrenda por gastos de mantenimiento y reparación.',
+  [MetricSearchType.DecorationOfferingExpenses]:
+    'Análisis de salidas de ofrenda por gastos de decoración.',
+  [MetricSearchType.EquipmentAndTechnologyOfferingExpenses]:
+    'Análisis de salidas de ofrenda por gastos de equipamiento y tecnología.',
+  [MetricSearchType.SuppliesOfferingExpenses]:
+    'Análisis de salidas de ofrenda por gastos de suministros.',
+  [MetricSearchType.PlaningEventsOfferingExpenses]:
+    'Análisis de salidas de ofrenda por gastos de planificación de eventos.',
+  [MetricSearchType.OfferingExpensesAdjustment]:
+    'Análisis de salidas de ofrenda por ajustes de salida.',
 };
