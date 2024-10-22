@@ -61,5 +61,5 @@ export class PaginationDto {
   @IsOptional()
   @IsString()
   @Type(() => String)
-  church?: string;
+  churchId?: string;
 }

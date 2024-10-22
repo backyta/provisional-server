@@ -52,8 +52,6 @@ export const topOfferingsFamilyGroupsDataFormatter = ({
         currency: offering.currency,
         date: offering.date,
       });
-
-      console.log(existing.allOfferings);
     } else {
       acc.push({
         date: offering.date,

@@ -11,7 +11,7 @@ interface ResultDataOptions {
   accumulatedOfferingUSD: number;
   accumulatedOfferingEUR: number;
   church: {
-    id: string;
+    isAnexe: boolean;
     churchName: string;
   };
   allOfferings: {
@@ -52,7 +52,7 @@ export const offeringIncomeByIncomeAdjustmentFormatter = ({
         accumulatedOfferingEUR:
           offering.currency === CurrencyType.EUR ? +offering.amount : 0,
         church: {
-          id: offering?.church?.id,
+          isAnexe: offering?.church?.isAnexe,
           churchName: offering?.church?.churchName,
         },
         allOfferings: [

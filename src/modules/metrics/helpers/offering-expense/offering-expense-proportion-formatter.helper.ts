@@ -8,19 +8,19 @@ interface Options {
 export const offeringExpenseProportionFormatter = ({
   offeringExpenses,
 }: Options) => {
-  const totalCountOfferingExpenses = offeringExpenses.length;
+  const totalOfferingExpenseRecordsCount = offeringExpenses.length;
 
-  const countOfferingExpensesActive = offeringExpenses.filter(
+  const activeOfferingExpenseRecordsCount = offeringExpenses.filter(
     (offeringExpense) => offeringExpense.recordStatus === RecordStatus.Active,
   ).length;
 
-  const countOfferingExpensesInactive = offeringExpenses.filter(
+  const inactiveOfferingExpenseRecordsCount = offeringExpenses.filter(
     (offeringExpense) => offeringExpense.recordStatus === RecordStatus.Inactive,
   ).length;
 
   return {
-    totalCountOfferingExpenses: totalCountOfferingExpenses,
-    countOfferingExpensesActive: countOfferingExpensesActive,
-    countOfferingExpensesInactive: countOfferingExpensesInactive,
+    totalOfferingExpenseRecordsCount: totalOfferingExpenseRecordsCount,
+    activeOfferingExpenseRecordsCount: activeOfferingExpenseRecordsCount,
+    inactiveOfferingExpenseRecordsCount: inactiveOfferingExpenseRecordsCount,
   };
 };

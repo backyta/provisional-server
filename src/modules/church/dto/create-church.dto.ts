@@ -35,7 +35,7 @@ export class CreateChurchDto {
   })
   @IsArray()
   @IsNotEmpty()
-  worshipTimes: string[];
+  serviceTimes: string[];
 
   @ApiProperty({
     example: '2020/10/25',

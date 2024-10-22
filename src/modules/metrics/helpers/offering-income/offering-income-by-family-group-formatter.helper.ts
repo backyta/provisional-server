@@ -9,6 +9,7 @@ interface Options {
 
 interface ResultDataOptions {
   date: Date;
+  category: string;
   accumulatedOfferingPEN: number;
   accumulatedOfferingUSD: number;
   accumulatedOfferingEUR: number;
@@ -21,6 +22,10 @@ interface ResultDataOptions {
     id: string;
     firstName: string;
     lastName: string;
+  };
+  church: {
+    isAnexe: boolean;
+    churchName: string;
   };
   disciples: number;
   allOfferings: { offering: number; currency: string; date: string | Date }[];
@@ -53,6 +58,7 @@ export const offeringIncomeByFamilyGroupFormatter = ({
     } else {
       acc.push({
         date: offering.date,
+        category: offering.category,
         accumulatedOfferingPEN:
           offering?.currency === CurrencyType.PEN ? +offering?.amount : 0,
         accumulatedOfferingUSD:
@@ -71,6 +77,10 @@ export const offeringIncomeByFamilyGroupFormatter = ({
             lastNames: '',
           }),
           lastName: offering?.familyGroup?.theirPreacher?.lastName,
+        },
+        church: {
+          isAnexe: offering?.church?.isAnexe,
+          churchName: offering?.church?.churchName,
         },
         disciples: offering?.familyGroup?.disciples?.length,
         allOfferings: [

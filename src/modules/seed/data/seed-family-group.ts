@@ -4,7 +4,7 @@ interface SeedFamilyGroup {
   zoneName?: string;
   familyGroupNumber?: string;
   familyGroupCode?: string;
-  worshipTime: string;
+  serviceTime: string;
 
   //* Contact info
   country?: string;
@@ -30,7 +30,7 @@ export const dataFamilyGroups: SeedDataGroups = {
   houses: [
     {
       familyGroupName: 'Faro de Luz',
-      worshipTime: '17:00',
+      serviceTime: '17:00',
       district: 'Independencia',
       urbanSector: 'Payet',
       address: 'Jr. Los Pinos 123',
@@ -38,7 +38,7 @@ export const dataFamilyGroups: SeedDataGroups = {
     },
     {
       familyGroupName: 'Bethel',
-      worshipTime: '18:00',
+      serviceTime: '18:00',
       district: 'Independencia',
       urbanSector: 'Tahuantinsuyo',
       address: 'Av. Los Girasoles 456',
@@ -46,7 +46,7 @@ export const dataFamilyGroups: SeedDataGroups = {
     },
     {
       familyGroupName: 'Monte Sion',
-      worshipTime: '19:00',
+      serviceTime: '19:00',
       district: 'Independencia',
       urbanSector: 'Ermitaño',
       address: 'Jr. Las Acacias 789',
@@ -54,7 +54,7 @@ export const dataFamilyGroups: SeedDataGroups = {
     },
     {
       familyGroupName: 'Renuevo Espiritual',
-      worshipTime: '20:00',
+      serviceTime: '20:00',
       district: 'Independencia',
       urbanSector: 'Payet',
       address: 'Av. Las Hortensias 890',
@@ -62,7 +62,7 @@ export const dataFamilyGroups: SeedDataGroups = {
     },
     {
       familyGroupName: 'Centro Cristiano',
-      worshipTime: '10:00',
+      serviceTime: '10:00',
       district: 'Independencia',
       urbanSector: 'Tahuantinsuyo',
       address: 'Av. Los Laureles 234',
@@ -70,7 +70,7 @@ export const dataFamilyGroups: SeedDataGroups = {
     },
     {
       familyGroupName: 'Puerta del Cielo',
-      worshipTime: '17:00',
+      serviceTime: '17:00',
       district: 'Independencia',
       urbanSector: 'Ermitaño',
       address: 'Jr. Las Orquídeas 567',
@@ -78,7 +78,7 @@ export const dataFamilyGroups: SeedDataGroups = {
     },
     {
       familyGroupName: 'Manantial de Vida',
-      worshipTime: '18:00',
+      serviceTime: '18:00',
       district: 'Independencia',
       urbanSector: 'Payet',
       address: 'Av. Los Nogales 890',
@@ -86,7 +86,7 @@ export const dataFamilyGroups: SeedDataGroups = {
     },
     {
       familyGroupName: 'Cristo Vive',
-      worshipTime: '19:00',
+      serviceTime: '19:00',
       district: 'Independencia',
       urbanSector: 'Tahuantinsuyo',
       address: 'Jr. Las Rosas 123',
@@ -94,7 +94,7 @@ export const dataFamilyGroups: SeedDataGroups = {
     },
     {
       familyGroupName: 'Nueva Esperanza',
-      worshipTime: '20:00',
+      serviceTime: '20:00',
       district: 'Independencia',
       urbanSector: 'Ermitaño',
       address: 'Av. Las Margaritas 456',
@@ -102,7 +102,7 @@ export const dataFamilyGroups: SeedDataGroups = {
     },
     {
       familyGroupName: 'Iglesia de la Paz',
-      worshipTime: '10:00',
+      serviceTime: '10:00',
       district: 'Independencia',
       urbanSector: 'Payet',
       address: 'Jr. Los Jazmines 789',

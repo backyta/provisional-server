@@ -8,19 +8,19 @@ interface Options {
 export const offeringIncomeProportionFormatter = ({
   offeringIncome,
 }: Options) => {
-  const totalCountOfferingsIncome = offeringIncome.length;
+  const totalOfferingIncomeRecordsCount = offeringIncome.length;
 
-  const countOfferingIncomeActive = offeringIncome.filter(
+  const activeOfferingIncomeRecordsCount = offeringIncome.filter(
     (offering) => offering.recordStatus === RecordStatus.Active,
   ).length;
 
-  const countOfferingsIncomeInactive = offeringIncome.filter(
+  const inactiveOfferingIncomeRecordsCount = offeringIncome.filter(
     (offering) => offering.recordStatus === RecordStatus.Inactive,
   ).length;
 
   return {
-    totalCountOfferingsIncome: totalCountOfferingsIncome,
-    countOfferingsIncomeActive: countOfferingIncomeActive,
-    countOfferingsIncomeInactive: countOfferingsIncomeInactive,
+    totalOfferingIncomeRecordsCount: totalOfferingIncomeRecordsCount,
+    activeOfferingIncomeRecordsCount: activeOfferingIncomeRecordsCount,
+    inactiveOfferingIncomeRecordsCount: inactiveOfferingIncomeRecordsCount,
   };
 };

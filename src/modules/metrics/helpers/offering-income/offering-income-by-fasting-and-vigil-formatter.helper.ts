@@ -9,11 +9,12 @@ interface Options {
 }
 
 interface ResultDataOptions {
+  type: string;
   date: Date;
+  category: string;
   accumulatedOfferingPEN: number;
   accumulatedOfferingUSD: number;
   accumulatedOfferingEUR: number;
-  type: OfferingIncomeCreationSubType;
   supervisor: {
     id: string;
     firstName: string;
@@ -26,9 +27,9 @@ interface ResultDataOptions {
     disciples: number;
   } | null;
   church: {
-    id: string;
+    isAnexe: boolean;
     churchName: string;
-  } | null;
+  };
   allOfferings: {
     offering: number;
     currency: string;
@@ -62,6 +63,7 @@ export const offeringIncomeByFastingAndVigilFormatter = ({
     } else {
       acc.push({
         date: offering?.date,
+        category: offering.category,
         type: offering?.subType as OfferingIncomeCreationSubType,
         accumulatedOfferingPEN:
           offering.currency === CurrencyType.PEN ? +offering.amount : 0,
@@ -84,7 +86,7 @@ export const offeringIncomeByFastingAndVigilFormatter = ({
           lastName: offering?.zone?.theirSupervisor?.lastName,
         },
         church: {
-          id: offering?.church?.id,
+          isAnexe: offering?.church?.isAnexe,
           churchName: offering?.church?.churchName,
         },
         allOfferings: [
@@ -99,6 +101,8 @@ export const offeringIncomeByFastingAndVigilFormatter = ({
 
     return acc;
   }, []);
+
+  console.log(resultData);
 
   return resultData.sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),

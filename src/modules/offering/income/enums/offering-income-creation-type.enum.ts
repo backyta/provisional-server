@@ -8,5 +8,5 @@ export const OfferingIncomeCreationTypeNames: Record<
   string
 > = {
   offering: 'Ofrenda',
-  income_adjustment: 'Ajuste por Ingreso ',
+  income_adjustment: 'Ajuste por Ingreso',
 };

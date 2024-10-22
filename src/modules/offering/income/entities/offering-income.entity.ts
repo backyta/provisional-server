@@ -33,6 +33,10 @@ export class OfferingIncome {
   @Column('text', { name: 'sub_type', nullable: true })
   subType: string;
 
+  @Index()
+  @Column('text', { name: 'category', nullable: true })
+  category: string;
+
   @Column('decimal')
   amount: number;
 

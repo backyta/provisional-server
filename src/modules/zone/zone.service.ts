@@ -165,7 +165,7 @@ export class ZoneService {
       offset = 0,
       order = 'ASC',
       isSimpleQuery,
-      church: churchId,
+      churchId,
     } = paginationDto;
 
     if (isSimpleQuery || (isSimpleQuery && churchId)) {

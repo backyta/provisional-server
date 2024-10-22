@@ -8,3 +8,4 @@ export * from './offering-income-by-church-ground-formatter.helper';
 export * from './offering-income-by-activities-formatter.helper';
 export * from './offering-income-by-united-service-formatter.helper';
 export * from './offering-income-by-income-adjustment-formatter.helper';
+export * from './offering-income-by-sunday-school-formatter.helper';

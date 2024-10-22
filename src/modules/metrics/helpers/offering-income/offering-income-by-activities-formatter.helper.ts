@@ -7,11 +7,12 @@ interface Options {
 
 interface ResultDataOptions {
   date: Date;
+  category: string;
   accumulatedOfferingPEN: number;
   accumulatedOfferingUSD: number;
   accumulatedOfferingEUR: number;
   church: {
-    id: string;
+    isAnexe: boolean;
     churchName: string;
   };
   allOfferings: {
@@ -45,6 +46,7 @@ export const offeringIncomeByActivitiesFormatter = ({
     } else {
       acc.push({
         date: offering?.date,
+        category: offering.category,
         accumulatedOfferingPEN:
           offering.currency === CurrencyType.PEN ? +offering.amount : 0,
         accumulatedOfferingUSD:
@@ -52,7 +54,7 @@ export const offeringIncomeByActivitiesFormatter = ({
         accumulatedOfferingEUR:
           offering.currency === CurrencyType.EUR ? +offering.amount : 0,
         church: {
-          id: offering?.church?.id,
+          isAnexe: offering?.church?.isAnexe,
           churchName: offering?.church?.churchName,
         },
         allOfferings: [

@@ -18,6 +18,7 @@ import {
   MemberType,
   OfferingIncomeCreationType,
   OfferingIncomeCreationSubType,
+  OfferingIncomeCreationCategory,
   OfferingIncomeCreationShiftType,
 } from '@/modules/offering/income/enums';
 import { RecordStatus } from '@/common/enums';
@@ -33,9 +34,14 @@ export class CreateOfferingIncomeDto {
   @ApiProperty({
     example: OfferingIncomeCreationSubType.FamilyGroup,
   })
-  @IsEnum(OfferingIncomeCreationSubType)
   @IsOptional()
   subType?: string;
+
+  @ApiProperty({
+    example: OfferingIncomeCreationCategory.OfferingBox,
+  })
+  @IsOptional()
+  category?: string;
 
   @ApiProperty({
     example: OfferingIncomeCreationShiftType.Day,
@@ -73,8 +79,8 @@ export class CreateOfferingIncomeDto {
 
   @ApiProperty({
     example: [
-      `https://res.cloudinary.com/example/image/upload/v111136172/income/offering/sunday_worship/nsdhjntwknysxkkn8zfu.png`,
-      `https://res.cloudinary.com/example/image/upload/v111125736/income/offering/sunday_worship/nsdhjntwknysxkkn8zfu.png`,
+      `https://res.cloudinary.com/example/image/upload/v111136172/income/offering/sunday_service/nsdhjntwknysxkkn8zfu.png`,
+      `https://res.cloudinary.com/example/image/upload/v111125736/income/offering/sunday_service/nsdhjntwknysxkkn8zfu.png`,
     ],
   })
   @IsArray()

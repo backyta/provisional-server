@@ -11,54 +11,54 @@ interface Options {
 
 interface ResultDataOptions {
   date: Date;
+  category: string;
   dayPEN: number;
   afternoonPEN: number;
   dayUSD: number;
   afternoonUSD: number;
   dayEUR: number;
   afternoonEUR: number;
+  church: {
+    isAnexe: boolean;
+    churchName: string;
+  };
 }
 
 export const offeringIncomeBySundayServiceFormatter = ({
   offeringIncome,
 }: Options) => {
-  const resultData: ResultDataOptions[] = offeringIncome?.reduce<
+  const resultData: ResultDataOptions[] = offeringIncome.reduce<
     ResultDataOptions[]
   >((acc, offering) => {
-    const existing = acc.find((item) => item.date === offering.date);
+    const existingEntry = acc.find((item) => item.date === offering.date);
 
-    if (existing) {
-      if (offering.shift === 'day' && offering.currency === CurrencyType.PEN) {
-        existing.dayPEN += +offering.amount;
-      } else if (
-        offering.shift === 'day' &&
-        offering.currency === CurrencyType.USD
-      ) {
-        existing.dayUSD += +offering.amount;
-      } else if (
-        offering.shift === 'day' &&
-        offering.currency === CurrencyType.EUR
-      ) {
-        existing.dayEUR += +offering.amount;
-      } else if (
-        offering.shift === 'afternoon' &&
-        offering.currency === CurrencyType.PEN
-      ) {
-        existing.afternoonPEN += +offering.amount;
-      } else if (
-        offering.shift === 'afternoon' &&
-        offering.currency === CurrencyType.USD
-      ) {
-        existing.afternoonUSD += +offering.amount;
-      } else if (
-        offering.shift === 'afternoon' &&
-        offering.currency === CurrencyType.EUR
-      ) {
-        existing.afternoonEUR += +offering.amount;
+    const updateValues = (entry: ResultDataOptions) => {
+      const isDayShift = offering.shift === 'day';
+      switch (offering.currency) {
+        case CurrencyType.PEN:
+          isDayShift
+            ? (entry.dayPEN += +offering.amount)
+            : (entry.afternoonPEN += +offering.amount);
+          break;
+        case CurrencyType.USD:
+          isDayShift
+            ? (entry.dayUSD += +offering.amount)
+            : (entry.afternoonUSD += +offering.amount);
+          break;
+        case CurrencyType.EUR:
+          isDayShift
+            ? (entry.dayEUR += +offering.amount)
+            : (entry.afternoonEUR += +offering.amount);
+          break;
       }
+    };
+
+    if (existingEntry) {
+      updateValues(existingEntry);
     } else {
-      acc.push({
+      const newEntry: ResultDataOptions = {
         date: offering.date,
+        category: offering.category,
         dayPEN:
           offering.shift === 'day' && offering.currency === CurrencyType.PEN
             ? +offering.amount
@@ -86,17 +86,20 @@ export const offeringIncomeBySundayServiceFormatter = ({
           offering.currency === CurrencyType.EUR
             ? +offering.amount
             : 0,
-      });
+        church: {
+          isAnexe: offering?.church?.isAnexe,
+          churchName: offering?.church?.churchName,
+        },
+      };
+      acc.push(newEntry);
     }
 
     return acc;
   }, []);
 
-  const resultSorted = resultData.sort((a, b) => {
+  return resultData.sort((a, b) => {
     const dateA = parse(dateFormatterToDDMMYY(a.date), 'dd/MM/yy', new Date());
     const dateB = parse(dateFormatterToDDMMYY(b.date), 'dd/MM/yy', new Date());
     return compareAsc(dateA, dateB);
   });
-
-  return resultSorted;
 };

@@ -26,7 +26,7 @@ export class CreateFamilyGroupDto {
   })
   @IsString()
   @IsNotEmpty()
-  worshipTime: string;
+  serviceTime: string;
 
   //* Contact Info
   @ApiProperty({

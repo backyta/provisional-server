@@ -2,7 +2,7 @@ interface SeedMainChurch {
   //* General Info
   churchName: string;
   isAnexe?: boolean;
-  worshipTimes: string[];
+  serviceTimes: string[];
   foundingDate: Date;
 
   //* Contact Info
@@ -21,7 +21,7 @@ interface SeedAnexes {
   //* General Info
   churchName: string;
   isAnexe?: boolean;
-  worshipTimes: string[];
+  serviceTimes: string[];
   foundingDate: Date;
 
   //* Contact Info
@@ -49,7 +49,7 @@ export const dataChurches: SeedDataChurches = {
   mainChurch: [
     {
       churchName: 'Iglesia Central',
-      worshipTimes: ['9:00', '16:00'],
+      serviceTimes: ['9:00', '16:00'],
       foundingDate: new Date('2020-11-20'),
       email: 'iglesia.central@google.com',
       phoneNumber: '999-999-999',
@@ -66,7 +66,7 @@ export const dataChurches: SeedDataChurches = {
   anexes: [
     {
       churchName: 'Iglesia - Anexo 1',
-      worshipTimes: ['11:00', '18:00'],
+      serviceTimes: ['11:00', '18:00'],
       foundingDate: new Date('2021-08-12'),
       email: 'iglesia.anexo1@google.com',
       phoneNumber: '999-999-999',
@@ -80,7 +80,7 @@ export const dataChurches: SeedDataChurches = {
     },
     {
       churchName: 'Iglesia - Anexo 2',
-      worshipTimes: ['10:00', '17:00'],
+      serviceTimes: ['10:00', '17:00'],
       foundingDate: new Date('2023-03-17'),
       email: 'iglesia.anexo2@google.com',
       phoneNumber: '999-999-999',

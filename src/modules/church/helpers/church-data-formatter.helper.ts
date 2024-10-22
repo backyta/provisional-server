@@ -53,7 +53,7 @@ export const churchDataFormatter = ({ churches, mainChurch }: Options) => {
       familyGroupCode: familyGroup?.familyGroupCode,
       district: familyGroup?.district,
       urbanSector: familyGroup?.urbanSector,
-      theirZone: familyGroup.theirZone,
+      // theirZone: familyGroup.theirZone,
     })),
     disciples: church.disciples.map((disciple) => ({
       id: disciple?.id,

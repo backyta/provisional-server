@@ -32,8 +32,8 @@ export class Church {
   @Column('boolean', { name: 'is_anexe', default: false })
   isAnexe: boolean;
 
-  @Column('text', { name: 'worship_times', array: true })
-  worshipTimes: string[];
+  @Column('text', { name: 'service_times', array: true })
+  serviceTimes: string[];
 
   @Column('date', { name: 'founding_date' })
   foundingDate: Date;

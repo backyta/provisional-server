@@ -10,8 +10,8 @@ import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, FindOptionsOrderValue, Repository } from 'typeorm';
 
+import { RecordStatus } from '@/common/enums';
 import { dateFormatterToDDMMYYYY } from '@/common/helpers';
-import { RecordStatus, SearchTypeNames } from '@/common/enums';
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 import { User } from '@/modules/user/entities';
@@ -27,8 +27,11 @@ import {
   UpdateOfferingExpenseDto,
   CreateOfferingExpenseDto,
 } from '@/modules/offering/expense/dto';
+import {
+  OfferingExpenseSearchType,
+  OfferingExpenseSearchTypeNames,
+} from '@/modules/offering/expense/enums';
 import { OfferingExpense } from '@/modules/offering/expense/entities';
-import { OfferingExpenseSearchType } from '@/modules/offering/expense/enums';
 import { formatDataOfferingExpense } from '@/modules/offering/expense/helpers';
 
 @Injectable()
@@ -262,7 +265,7 @@ export class OfferingExpenseService {
           const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
-            `No se encontraron salidas de ofrendas (${SearchTypeNames[searchType]}) con esta iglesia: ${church?.churchName} y con este rango de fechas: ${fromDate} - ${toDate}`,
+            `No se encontraron salidas de ofrendas (${OfferingExpenseSearchTypeNames[searchType]}) con esta iglesia: ${church?.churchName} y con este rango de fechas: ${fromDate} - ${toDate}`,
           );
         }
 
@@ -304,7 +307,7 @@ export class OfferingExpenseService {
           const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
 
           throw new NotFoundException(
-            `No se encontraron salidas de ofrendas (${SearchTypeNames[searchType]}) con este estado de registro: ${value}`,
+            `No se encontraron salidas de ofrendas (${OfferingExpenseSearchTypeNames[searchType]}) con este estado de registro: ${value}`,
           );
         }
 

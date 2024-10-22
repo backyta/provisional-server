@@ -238,17 +238,36 @@ export class FamilyGroupService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit, offset = 0, order = 'ASC', isSimpleQuery } = paginationDto;
+    const {
+      limit,
+      offset = 0,
+      order = 'ASC',
+      isSimpleQuery,
+      churchId,
+    } = paginationDto;
 
-    if (isSimpleQuery) {
+    if (isSimpleQuery || (isSimpleQuery && churchId)) {
       try {
+        const church = await this.churchRepository.findOne({
+          where: {
+            id: churchId,
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
         const familyGroups = await this.familyGroupRepository.find({
-          where: { recordStatus: RecordStatus.Active },
+          where: { theirChurch: church, recordStatus: RecordStatus.Active },
+
           order: { createdAt: order as FindOptionsOrderValue },
         });
 
         return familyGroups;
       } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
         this.handleDBExceptions(error);
       }
     }

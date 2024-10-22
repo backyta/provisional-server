@@ -37,8 +37,8 @@ export class FamilyGroup {
   @Column('text', { name: 'family_group_code', nullable: true })
   familyGroupCode: string;
 
-  @Column('text', { name: 'worship_time' })
-  worshipTime: string;
+  @Column('text', { name: 'service_time' })
+  serviceTime: string;
 
   //* Contact Info
   @Column('text', { name: 'country', default: 'Peru' })

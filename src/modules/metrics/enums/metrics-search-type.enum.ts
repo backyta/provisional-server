@@ -39,82 +39,105 @@ export enum MetricSearchType {
   SuppliesOfferingExpenses = 'supplies_offering_expenses',
   PlaningEventsOfferingExpenses = 'planing_events_offering_expenses',
   OfferingExpensesAdjustment = 'offering_expenses_adjustment',
+
+  OfferingExpensesAndOfferingIncomeByProportion = 'offering_expenses_and_offering_income_by_proportion',
+  IncomeAndExpensesComparativeByYear = 'income_and_expense_comparative_by_year',
+  GeneralComparativeOfferingIncome = 'general_comparative_offering_income',
+  ComparativeOfferingIncomeByType = 'comparative_offering_income_by_type',
+  GeneralComparativeOfferingExpenses = 'general_comparative_offering_expenses',
+  ComparativeOfferingExpensesByType = 'comparative_offering_expenses_by_type',
+  ComparativeOfferingExpensesBySubType = 'comparative_offering_expenses_by_sub_type',
 }
 
-export const MetricSearchTypeNames: Record<MetricSearchType, string> = {
-  [MetricSearchType.MembersByProportion]: 'Análisis de proporción de miembros.',
-  [MetricSearchType.MembersFluctuationByYear]:
-    'Análisis de fluctuación de miembros por año.',
-  [MetricSearchType.MembersByBirthMonth]:
-    'Análisis de miembros por mes de nacimiento.',
-  [MetricSearchType.MembersByCategory]: 'Análisis de miembros por categoría.',
-  [MetricSearchType.MembersByCategoryAndGender]:
-    'Análisis de miembros por categoría y género.',
-  [MetricSearchType.MembersByRoleAndGender]:
-    'Análisis de miembros por rol y género.',
-  [MetricSearchType.MembersByMaritalStatus]:
-    'Análisis de miembros por estado civil.',
-  [MetricSearchType.MembersByZoneAndGender]:
-    'Análisis de miembros por zone y género.',
-  [MetricSearchType.PreachersByZoneAndGender]:
-    'Análisis de predicadores por zone y género.',
-  [MetricSearchType.MembersByDistrictAndGender]:
-    'Análisis de miembros por distrito y género.',
-  [MetricSearchType.MembersByRecordStatus]:
-    'Análisis de miembros por estado de registro.',
+// export const MetricSearchTypeNames: Record<MetricSearchType, string> = {
+//   [MetricSearchType.MembersByProportion]: 'Análisis de proporción de miembros.',
+//   [MetricSearchType.MembersFluctuationByYear]:
+//     'Análisis de fluctuación de miembros por año.',
+//   [MetricSearchType.MembersByBirthMonth]:
+//     'Análisis de miembros por mes de nacimiento.',
+//   [MetricSearchType.MembersByCategory]: 'Análisis de miembros por categoría.',
+//   [MetricSearchType.MembersByCategoryAndGender]:
+//     'Análisis de miembros por categoría y género.',
+//   [MetricSearchType.MembersByRoleAndGender]:
+//     'Análisis de miembros por rol y género.',
+//   [MetricSearchType.MembersByMaritalStatus]:
+//     'Análisis de miembros por estado civil.',
+//   [MetricSearchType.MembersByZoneAndGender]:
+//     'Análisis de miembros por zone y género.',
+//   [MetricSearchType.PreachersByZoneAndGender]:
+//     'Análisis de predicadores por zone y género.',
+//   [MetricSearchType.MembersByDistrictAndGender]:
+//     'Análisis de miembros por distrito y género.',
+//   [MetricSearchType.MembersByRecordStatus]:
+//     'Análisis de miembros por estado de registro.',
 
-  [MetricSearchType.FamilyGroupsByProportion]:
-    'Análisis de proporción de grupos familiares.',
-  [MetricSearchType.FamilyGroupsFluctuationByYear]:
-    'Análisis de fluctuación de grupos familiares por año.',
-  [MetricSearchType.FamilyGroupsByCode]:
-    'Análisis de grupos familiares por código.',
-  [MetricSearchType.FamilyGroupsByZone]:
-    'Análisis de grupos familiares por zona.',
-  [MetricSearchType.FamilyGroupsByDistrict]:
-    'Análisis de grupos familiares por distrito.',
-  [MetricSearchType.FamilyGroupsByServiceTime]:
-    'Análisis de grupos familiares por horario de culto.',
-  [MetricSearchType.FamilyGroupsByRecordStatus]:
-    'Análisis de grupos familiares por estado de registro.',
+//   [MetricSearchType.FamilyGroupsByProportion]:
+//     'Análisis de proporción de grupos familiares.',
+//   [MetricSearchType.FamilyGroupsFluctuationByYear]:
+//     'Análisis de fluctuación de grupos familiares por año.',
+//   [MetricSearchType.FamilyGroupsByCode]:
+//     'Análisis de grupos familiares por código.',
+//   [MetricSearchType.FamilyGroupsByZone]:
+//     'Análisis de grupos familiares por zona.',
+//   [MetricSearchType.FamilyGroupsByDistrict]:
+//     'Análisis de grupos familiares por distrito.',
+//   [MetricSearchType.FamilyGroupsByServiceTime]:
+//     'Análisis de grupos familiares por horario de culto.',
+//   [MetricSearchType.FamilyGroupsByRecordStatus]:
+//     'Análisis de grupos familiares por estado de registro.',
 
-  [MetricSearchType.OfferingIncomeByProportion]:
-    'Análisis de proporción de ingresos de ofrenda.',
-  [MetricSearchType.OfferingIncomeBySundayService]:
-    'Análisis de ingresos de ofrenda por culto dominical.',
-  [MetricSearchType.OfferingIncomeByFamilyGroup]:
-    'Análisis de ingresos de ofrenda por grupo familiar.',
-  [MetricSearchType.OfferingIncomeBySundaySchool]:
-    'Análisis de ingresos de ofrenda por escuela dominical.',
-  [MetricSearchType.OfferingIncomeByFastingAndVigil]:
-    'Análisis de ingresos de ofrenda por ayuno y vigilia.',
-  [MetricSearchType.OfferingIncomeByYouthService]:
-    'Análisis de ingresos de ofrenda por culto juvenil.',
-  [MetricSearchType.OfferingIncomeBySpecialOffering]:
-    'Análisis de ingresos de ofrenda por ofrenda especial.',
-  [MetricSearchType.OfferingIncomeByChurchGround]:
-    'Análisis de ingresos de ofrenda por terreno iglesia.',
-  [MetricSearchType.OfferingIncomeByUnitedService]:
-    'Análisis de ingresos de ofrenda por culto unido.',
-  [MetricSearchType.OfferingIncomeByActivities]:
-    'Análisis de ingresos de ofrenda por actividades.',
-  [MetricSearchType.OfferingIncomeAdjustment]:
-    'Análisis de ingresos de ofrenda por ajustes de ingreso.',
+//   [MetricSearchType.OfferingIncomeByProportion]:
+//     'Análisis de proporción de ingresos de ofrenda.',
+//   [MetricSearchType.OfferingIncomeBySundayService]:
+//     'Análisis de ingresos de ofrenda por culto dominical.',
+//   [MetricSearchType.OfferingIncomeByFamilyGroup]:
+//     'Análisis de ingresos de ofrenda por grupo familiar.',
+//   [MetricSearchType.OfferingIncomeBySundaySchool]:
+//     'Análisis de ingresos de ofrenda por escuela dominical.',
+//   [MetricSearchType.OfferingIncomeByFastingAndVigil]:
+//     'Análisis de ingresos de ofrenda por ayuno y vigilia.',
+//   [MetricSearchType.OfferingIncomeByYouthService]:
+//     'Análisis de ingresos de ofrenda por culto juvenil.',
+//   [MetricSearchType.OfferingIncomeBySpecialOffering]:
+//     'Análisis de ingresos de ofrenda por ofrenda especial.',
+//   [MetricSearchType.OfferingIncomeByChurchGround]:
+//     'Análisis de ingresos de ofrenda por terreno iglesia.',
+//   [MetricSearchType.OfferingIncomeByUnitedService]:
+//     'Análisis de ingresos de ofrenda por culto unido.',
+//   [MetricSearchType.OfferingIncomeByActivities]:
+//     'Análisis de ingresos de ofrenda por actividades.',
+//   [MetricSearchType.OfferingIncomeAdjustment]:
+//     'Análisis de ingresos de ofrenda por ajustes de ingreso.',
 
-  [MetricSearchType.OfferingExpensesByProportion]:
-    'Análisis de proporción de salidas de ofrenda.',
-  [MetricSearchType.OperationalOfferingExpenses]:
-    'Análisis de salidas de ofrenda por gastos operativos.',
-  [MetricSearchType.MaintenanceAndRepairOfferingExpenses]:
-    'Análisis de salidas de ofrenda por gastos de mantenimiento y reparación.',
-  [MetricSearchType.DecorationOfferingExpenses]:
-    'Análisis de salidas de ofrenda por gastos de decoración.',
-  [MetricSearchType.EquipmentAndTechnologyOfferingExpenses]:
-    'Análisis de salidas de ofrenda por gastos de equipamiento y tecnología.',
-  [MetricSearchType.SuppliesOfferingExpenses]:
-    'Análisis de salidas de ofrenda por gastos de suministros.',
-  [MetricSearchType.PlaningEventsOfferingExpenses]:
-    'Análisis de salidas de ofrenda por gastos de planificación de eventos.',
-  [MetricSearchType.OfferingExpensesAdjustment]:
-    'Análisis de salidas de ofrenda por ajustes de salida.',
-};
+//   [MetricSearchType.OfferingExpensesByProportion]:
+//     'Análisis de proporción de salidas de ofrenda.',
+//   [MetricSearchType.OperationalOfferingExpenses]:
+//     'Análisis de salidas de ofrenda por gastos operativos.',
+//   [MetricSearchType.MaintenanceAndRepairOfferingExpenses]:
+//     'Análisis de salidas de ofrenda por gastos de mantenimiento y reparación.',
+//   [MetricSearchType.DecorationOfferingExpenses]:
+//     'Análisis de salidas de ofrenda por gastos de decoración.',
+//   [MetricSearchType.EquipmentAndTechnologyOfferingExpenses]:
+//     'Análisis de salidas de ofrenda por gastos de equipamiento y tecnología.',
+//   [MetricSearchType.SuppliesOfferingExpenses]:
+//     'Análisis de salidas de ofrenda por gastos de suministros.',
+//   [MetricSearchType.PlaningEventsOfferingExpenses]:
+//     'Análisis de salidas de ofrenda por gastos de planificación de eventos.',
+//   [MetricSearchType.OfferingExpensesAdjustment]:
+//     'Análisis de salidas de ofrenda por ajustes de salida.',
+
+//   [MetricSearchType.OfferingExpensesAndOfferingIncomeByProportion]:
+//     'Análisis de proporción de ingresos y salidas de ofrendas.',
+//   [MetricSearchType.IncomeAndExpensesComparativeByYear]:
+//     'Análisis de comparación de ingresos y salidas de ofrenda.',
+//   [MetricSearchType.GeneralComparativeOfferingIncome]:
+//     'Análisis de comparación general de ingreso de ofrenda.',
+//   [MetricSearchType.ComparativeOfferingIncomeByType]:
+//     'Análisis de comparación de ingreso de ofrenda por tipo.',
+//   [MetricSearchType.GeneralComparativeOfferingExpenses]:
+//     'Análisis de comparación general de salida de ofrenda.',
+//   [MetricSearchType.ComparativeOfferingExpensesByType]:
+//     'Análisis de comparación de salida de ofrenda por tipo.',
+//   [MetricSearchType.ComparativeOfferingExpensesBySubType]:
+//     'Análisis de comparación de salida de ofrenda por sub-tipo.',
+// };
