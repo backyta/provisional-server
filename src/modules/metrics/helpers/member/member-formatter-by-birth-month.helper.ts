@@ -31,6 +31,10 @@ interface ResultDataOptions {
   month: string;
   membersCount: number;
   averageAge: string | number;
+  church: {
+    isAnexe: boolean;
+    abbreviatedChurchName: string;
+  };
 }
 
 export const memberFormatterByBirthMonth = ({
@@ -69,6 +73,11 @@ export const memberFormatterByBirthMonth = ({
     return {
       month: monthNames[index],
       ...calculateMemberData(memberByBirthMonth[index]),
+      church: {
+        isAnexe: allMembers[0]?.theirChurch?.isAnexe,
+        abbreviatedChurchName:
+          allMembers[0]?.theirChurch?.abbreviatedChurchName,
+      },
     };
   });
 

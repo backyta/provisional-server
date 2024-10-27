@@ -17,6 +17,10 @@ interface MonthlyResult {
   totalExpenses: number;
   currency: string;
   netResult: number;
+  church: {
+    isAnexe: boolean;
+    abbreviatedChurchName: string;
+  };
 }
 
 const monthNames = [
@@ -95,6 +99,11 @@ export const IncomeAndExpensesComparativeFormatter = ({
       totalIncome,
       totalExpenses,
       netResult: totalIncome + previousNetResult - totalExpenses,
+      church: {
+        isAnexe: previousYearData[0]?.church?.isAnexe,
+        abbreviatedChurchName:
+          previousYearData[0]?.church?.abbreviatedChurchName,
+      },
     };
 
     previousNetResult = previousMonthResult.netResult;
@@ -127,6 +136,11 @@ export const IncomeAndExpensesComparativeFormatter = ({
         index === 0
           ? totalIncome + previousYearResults.at(-1).netResult - totalExpenses
           : totalIncome + currentNetResult - totalExpenses,
+      church: {
+        isAnexe: currentYearData[0]?.church?.isAnexe,
+        abbreviatedChurchName:
+          currentYearData[0]?.church?.abbreviatedChurchName,
+      },
     };
 
     currentNetResult = currentMonthResult.netResult;

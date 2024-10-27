@@ -10,6 +10,7 @@ export const pastorDataFormatter = ({ pastors }: Options) => {
     theirChurch: {
       id: pastor?.theirChurch?.id,
       churchName: pastor?.theirChurch?.churchName,
+      abbreviatedChurchName: pastor?.theirChurch?.abbreviatedChurchName,
     },
     copastors: pastor?.copastors.map((copastor) => ({
       id: copastor?.id,

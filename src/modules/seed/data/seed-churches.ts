@@ -1,6 +1,7 @@
 interface SeedMainChurch {
   //* General Info
   churchName: string;
+  abbreviatedChurchName: string;
   isAnexe?: boolean;
   serviceTimes: string[];
   foundingDate: Date;
@@ -20,6 +21,7 @@ interface SeedMainChurch {
 interface SeedAnexes {
   //* General Info
   churchName: string;
+  abbreviatedChurchName: string;
   isAnexe?: boolean;
   serviceTimes: string[];
   foundingDate: Date;
@@ -48,7 +50,8 @@ interface SeedDataChurches {
 export const dataChurches: SeedDataChurches = {
   mainChurch: [
     {
-      churchName: 'Iglesia Central',
+      churchName: 'Iglesia Cristiana Unidos en su Presencia - Central',
+      abbreviatedChurchName: 'ICUP - Central',
       serviceTimes: ['9:00', '16:00'],
       foundingDate: new Date('2020-11-20'),
       email: 'iglesia.central@google.com',
@@ -65,7 +68,8 @@ export const dataChurches: SeedDataChurches = {
 
   anexes: [
     {
-      churchName: 'Iglesia - Anexo 1',
+      churchName: 'Iglesia Cristiana Unidos en su Presencia - Nueva Esperanza',
+      abbreviatedChurchName: 'ICUP - Nueva Esperanza',
       serviceTimes: ['11:00', '18:00'],
       foundingDate: new Date('2021-08-12'),
       email: 'iglesia.anexo1@google.com',
@@ -79,7 +83,8 @@ export const dataChurches: SeedDataChurches = {
       referenceAddress: 'A cuadras del mercado central',
     },
     {
-      churchName: 'Iglesia - Anexo 2',
+      churchName: 'Iglesia Cristiana Unidos en su Presencia - Roca Fuerte',
+      abbreviatedChurchName: 'ICUP - Roca Fuerte',
       serviceTimes: ['10:00', '17:00'],
       foundingDate: new Date('2023-03-17'),
       email: 'iglesia.anexo2@google.com',

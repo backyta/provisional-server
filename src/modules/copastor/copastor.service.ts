@@ -160,7 +160,7 @@ export class CopastorService {
       offset = 0,
       order = 'ASC',
       isSimpleQuery,
-      churchId: churchId,
+      churchId,
     } = paginationDto;
 
     if (isSimpleQuery || (churchId && isSimpleQuery)) {

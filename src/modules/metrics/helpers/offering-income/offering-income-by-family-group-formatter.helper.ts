@@ -25,7 +25,7 @@ interface ResultDataOptions {
   };
   church: {
     isAnexe: boolean;
-    churchName: string;
+    abbreviatedChurchName: string;
   };
   disciples: number;
   allOfferings: { offering: number; currency: string; date: string | Date }[];
@@ -80,7 +80,7 @@ export const offeringIncomeByFamilyGroupFormatter = ({
         },
         church: {
           isAnexe: offering?.church?.isAnexe,
-          churchName: offering?.church?.churchName,
+          abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
         },
         disciples: offering?.familyGroup?.disciples?.length,
         allOfferings: [

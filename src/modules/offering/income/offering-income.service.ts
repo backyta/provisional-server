@@ -176,7 +176,7 @@ export class OfferingIncomeService {
         }
 
         //* Validate if exists record already
-        const offeringsIncome = await this.offeringIncomeRepository.find({
+        const offeringIncome = await this.offeringIncomeRepository.find({
           where: {
             subType: subType,
             category: category,
@@ -188,7 +188,7 @@ export class OfferingIncomeService {
           },
         });
 
-        if (offeringsIncome.length > 0) {
+        if (offeringIncome.length > 0) {
           const offeringDate = dateFormatterToDDMMYYYY(
             new Date(date).getTime(),
           );
@@ -248,7 +248,7 @@ export class OfferingIncomeService {
         }
 
         //* Validate if exists record already
-        const offeringsIncome = await this.offeringIncomeRepository.find({
+        const offeringIncome = await this.offeringIncomeRepository.find({
           where: {
             subType: subType,
             category: category,
@@ -260,7 +260,7 @@ export class OfferingIncomeService {
           },
         });
 
-        if (offeringsIncome.length > 0) {
+        if (offeringIncome.length > 0) {
           const offeringDate = dateFormatterToDDMMYYYY(
             new Date(date).getTime(),
           );
@@ -597,7 +597,7 @@ export class OfferingIncomeService {
         }
 
         //* Validate if exists record already
-        const offeringsIncome = await this.offeringIncomeRepository.find({
+        const offeringIncome = await this.offeringIncomeRepository.find({
           where: {
             church: church,
             category: category,
@@ -609,7 +609,7 @@ export class OfferingIncomeService {
           },
         });
 
-        if (offeringsIncome.length > 0) {
+        if (offeringIncome.length > 0) {
           const offeringDate = dateFormatterToDDMMYYYY(
             new Date(date).getTime(),
           );
@@ -661,7 +661,7 @@ export class OfferingIncomeService {
         });
 
         //* Validate if exists record already
-        const offeringsIncome = await this.offeringIncomeRepository.find({
+        const offeringIncome = await this.offeringIncomeRepository.find({
           where: {
             subType: subType,
             category: category,
@@ -672,7 +672,7 @@ export class OfferingIncomeService {
           },
         });
 
-        if (offeringsIncome.length > 0) {
+        if (offeringIncome.length > 0) {
           const offeringDate = dateFormatterToDDMMYYYY(
             new Date(date).getTime(),
           );
@@ -763,7 +763,7 @@ export class OfferingIncomeService {
     const { limit, offset = 0, order = 'ASC' } = paginationDto;
 
     try {
-      const offeringsIncome = await this.offeringIncomeRepository.find({
+      const offeringIncome = await this.offeringIncomeRepository.find({
         where: { recordStatus: RecordStatus.Active },
         take: limit,
         skip: offset,
@@ -782,13 +782,15 @@ export class OfferingIncomeService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      if (offeringsIncome.length === 0) {
+      if (offeringIncome.length === 0) {
         throw new NotFoundException(
           `No existen registros disponibles para mostrar.`,
         );
       }
 
-      return offeringIncomeDataFormatter({ offeringsIncome }) as any;
+      return offeringIncomeDataFormatter({
+        offeringIncome: offeringIncome,
+      }) as any;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -909,7 +911,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -1005,7 +1007,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -1116,7 +1118,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -1176,7 +1178,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -1251,7 +1253,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -1315,7 +1317,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -1393,7 +1395,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -1451,7 +1453,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -1524,7 +1526,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -1585,7 +1587,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -1646,7 +1648,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -1707,7 +1709,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -1764,7 +1766,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -1836,7 +1838,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -1898,7 +1900,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -1961,7 +1963,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -2023,7 +2025,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -2109,7 +2111,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -2195,7 +2197,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -2284,7 +2286,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -2337,7 +2339,7 @@ export class OfferingIncomeService {
         }
 
         return offeringIncomeDataFormatter({
-          offeringsIncome,
+          offeringIncome: offeringsIncome,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -2979,14 +2981,28 @@ export class OfferingIncomeService {
           offeringDestiny = await this.offeringIncomeRepository.findOne({
             where: {
               type: offeringIncome.type,
+              category: offeringIncome.category,
               subType: offeringIncome.subType,
               date: offeringIncome.date,
               church: offeringIncome.church,
-              shift: offeringIncome.shift,
+              shift:
+                offeringIncome.category ===
+                OfferingIncomeCreationCategory.OfferingBox
+                  ? offeringIncome.shift
+                  : IsNull(),
               currency:
-                (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-                  exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
-                CurrencyType.PEN,
+                exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+                exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN
+                  ? CurrencyType.PEN
+                  : exchangeCurrencyType === ExchangeCurrencyType.PENtoEUR
+                    ? CurrencyType.EUR
+                    : CurrencyType.USD,
+              memberType: offeringIncome.memberType ?? IsNull(),
+              pastor: offeringIncome.pastor ?? IsNull(),
+              copastor: offeringIncome.copastor ?? IsNull(),
+              supervisor: offeringIncome.supervisor ?? IsNull(),
+              preacher: offeringIncome.preacher ?? IsNull(),
+              disciple: offeringIncome.disciple ?? IsNull(),
               recordStatus: RecordStatus.Active,
             },
           });
@@ -2999,12 +3015,17 @@ export class OfferingIncomeService {
             where: {
               type: offeringIncome.type,
               subType: offeringIncome.subType,
+              category: offeringIncome.category,
               date: offeringIncome.date,
+              church: offeringIncome.church,
               familyGroup: offeringIncome.familyGroup,
               currency:
-                (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-                  exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
-                CurrencyType.PEN,
+                exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+                exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN
+                  ? CurrencyType.PEN
+                  : exchangeCurrencyType === ExchangeCurrencyType.PENtoEUR
+                    ? CurrencyType.EUR
+                    : CurrencyType.USD,
               recordStatus: RecordStatus.Active,
             },
           });
@@ -3019,12 +3040,17 @@ export class OfferingIncomeService {
             where: {
               type: offeringIncome.type,
               subType: offeringIncome.subType,
+              category: offeringIncome.category,
+              church: offeringIncome.church,
               date: offeringIncome.date,
               zone: offeringIncome.zone,
               currency:
-                (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-                  exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
-                CurrencyType.PEN,
+                exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+                exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN
+                  ? CurrencyType.PEN
+                  : exchangeCurrencyType === ExchangeCurrencyType.PENtoEUR
+                    ? CurrencyType.EUR
+                    : CurrencyType.USD,
               recordStatus: RecordStatus.Active,
             },
           });
@@ -3045,12 +3071,16 @@ export class OfferingIncomeService {
             where: {
               type: offeringIncome.type,
               subType: offeringIncome.subType,
+              category: offeringIncome.category,
               date: offeringIncome.date,
               church: offeringIncome.church,
               currency:
-                (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-                  exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
-                CurrencyType.PEN,
+                exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+                exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN
+                  ? CurrencyType.PEN
+                  : exchangeCurrencyType === ExchangeCurrencyType.PENtoEUR
+                    ? CurrencyType.EUR
+                    : CurrencyType.USD,
               recordStatus: RecordStatus.Active,
             },
           });
@@ -3061,86 +3091,29 @@ export class OfferingIncomeService {
             OfferingIncomeCreationSubType.ChurchGround ||
           offeringIncome.subType === OfferingIncomeCreationSubType.Special
         ) {
-          if (offeringIncome.memberType === MemberType.Pastor) {
-            offeringDestiny = await this.offeringIncomeRepository.findOne({
-              where: {
-                type: offeringIncome.type,
-                subType: offeringIncome.subType,
-                date: offeringIncome.date,
-                memberType: offeringIncome.memberType,
-                pastor: offeringIncome.pastor,
-                currency:
-                  (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-                    exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
-                  CurrencyType.PEN,
-                recordStatus: RecordStatus.Active,
-              },
-            });
-          }
-          if (offeringIncome.memberType === MemberType.Copastor) {
-            offeringDestiny = await this.offeringIncomeRepository.findOne({
-              where: {
-                type: offeringIncome.type,
-                subType: offeringIncome.subType,
-                date: offeringIncome.date,
-                memberType: offeringIncome.memberType,
-                copastor: offeringIncome.copastor,
-                currency:
-                  (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-                    exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
-                  CurrencyType.PEN,
-                recordStatus: RecordStatus.Active,
-              },
-            });
-          }
-          if (offeringIncome.memberType === MemberType.Supervisor) {
-            offeringDestiny = await this.offeringIncomeRepository.findOne({
-              where: {
-                type: offeringIncome.type,
-                subType: offeringIncome.subType,
-                date: offeringIncome.date,
-                memberType: offeringIncome.memberType,
-                supervisor: offeringIncome.supervisor,
-                currency:
-                  (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-                    exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
-                  CurrencyType.PEN,
-                recordStatus: RecordStatus.Active,
-              },
-            });
-          }
-          if (offeringIncome.memberType === MemberType.Preacher) {
-            offeringDestiny = await this.offeringIncomeRepository.findOne({
-              where: {
-                type: offeringIncome.type,
-                subType: offeringIncome.subType,
-                date: offeringIncome.date,
-                memberType: offeringIncome.memberType,
-                preacher: offeringIncome.preacher,
-                currency:
-                  (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-                    exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
-                  CurrencyType.PEN,
-                recordStatus: RecordStatus.Active,
-              },
-            });
-          }
-          if (offeringIncome.memberType === MemberType.Disciple) {
-            offeringDestiny = await this.offeringIncomeRepository.findOne({
-              where: {
-                type: offeringIncome.type,
-                subType: offeringIncome.subType,
-                date: offeringIncome.date,
-                memberType: offeringIncome.memberType,
-                disciple: offeringIncome.disciple,
-                currency:
-                  (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-                    exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
-                  CurrencyType.PEN,
-                recordStatus: RecordStatus.Active,
-              },
-            });
-          }
+          offeringDestiny = await this.offeringIncomeRepository.findOne({
+            where: {
+              type: offeringIncome.type,
+              category: offeringIncome.category,
+              subType: offeringIncome.subType,
+              date: offeringIncome.date,
+              church: offeringIncome.church,
+              currency:
+                exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+                exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN
+                  ? CurrencyType.PEN
+                  : exchangeCurrencyType === ExchangeCurrencyType.PENtoEUR
+                    ? CurrencyType.EUR
+                    : CurrencyType.USD,
+              memberType: offeringIncome.memberType ?? IsNull(),
+              pastor: offeringIncome.pastor ?? IsNull(),
+              copastor: offeringIncome.copastor ?? IsNull(),
+              supervisor: offeringIncome.supervisor ?? IsNull(),
+              preacher: offeringIncome.preacher ?? IsNull(),
+              disciple: offeringIncome.disciple ?? IsNull(),
+              recordStatus: RecordStatus.Active,
+            },
+          });
         }
 
         //* Si existe, se suma el monto transformado al registro existente.
@@ -3170,21 +3143,28 @@ export class OfferingIncomeService {
         //* Si no existe un registro a donde aumentar el cambio, se crea.
         if (!offeringDestiny) {
           const newComments = `💲 Monto convertido: ${(+offeringIncome.amount * +exchangeRate).toFixed(2)} ${
-            (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-              exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
-            CurrencyType.PEN
+            exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+            exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN
+              ? CurrencyType.PEN
+              : exchangeCurrencyType === ExchangeCurrencyType.PENtoEUR
+                ? CurrencyType.EUR
+                : CurrencyType.USD
           } (${offeringIncome.amount} ${offeringIncome?.currency})\n💰Tipo de cambio (precio): ${exchangeRate}`;
 
           offeringDestiny = this.offeringIncomeRepository.create({
             type: offeringIncome.type,
             subType: offeringIncome.subType,
+            category: offeringIncome.category,
             amount: parseFloat(
               (offeringIncome.amount * +exchangeRate).toFixed(2),
             ),
             currency:
-              (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-                exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
-              CurrencyType.PEN,
+              exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
+              exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN
+                ? CurrencyType.PEN
+                : exchangeCurrencyType === ExchangeCurrencyType.PENtoEUR
+                  ? CurrencyType.EUR
+                  : CurrencyType.USD,
             date: offeringIncome.date,
             comments: newComments,
             church: offeringIncome.church,

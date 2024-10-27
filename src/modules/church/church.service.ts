@@ -10,7 +10,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Between, FindOptionsOrderValue, ILike, Repository } from 'typeorm';
 
 import { Church } from '@/modules/church/entities';
-import { churchDataFormatter } from '@/modules/church/helpers';
+import {
+  churchDataFormatter,
+  generateCodeChurch,
+} from '@/modules/church/helpers';
 import { CreateChurchDto, UpdateChurchDto } from '@/modules/church/dto';
 import {
   ChurchSearchType,
@@ -62,7 +65,7 @@ export class ChurchService {
 
   //* CREATE CHURCH
   async create(createChurchDto: CreateChurchDto, user: User): Promise<Church> {
-    const { theirMainChurch } = createChurchDto;
+    const { theirMainChurch, abbreviatedChurchName } = createChurchDto;
 
     const mainChurch = await this.churchRepository.findOne({
       where: { isAnexe: false },
@@ -104,6 +107,7 @@ export class ChurchService {
         const newChurch = this.churchRepository.create({
           ...createChurchDto,
           isAnexe: true,
+          churchCode: generateCodeChurch(abbreviatedChurchName),
           theirMainChurch: mainChurch,
           createdAt: new Date(),
           createdBy: user,
@@ -120,6 +124,7 @@ export class ChurchService {
       const newChurch = this.churchRepository.create({
         ...createChurchDto,
         isAnexe: false,
+        churchCode: generateCodeChurch(abbreviatedChurchName),
         theirMainChurch: null,
         createdAt: new Date(),
         createdBy: user,
@@ -595,6 +600,10 @@ export class ChurchService {
           order: { createdAt: order as FindOptionsOrderValue },
         });
 
+        const mainChurch = await this.churchRepository.findOne({
+          where: { isAnexe: false, recordStatus: RecordStatus.Active },
+        });
+
         if (churches.length === 0) {
           const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
 
@@ -603,7 +612,7 @@ export class ChurchService {
           );
         }
 
-        return churchDataFormatter({ churches }) as any;
+        return churchDataFormatter({ churches, mainChurch }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
           throw error;
@@ -630,7 +639,7 @@ export class ChurchService {
     updateChurchDto: UpdateChurchDto,
     user: User,
   ): Promise<Church> {
-    const { recordStatus, theirMainChurch } = updateChurchDto;
+    const { recordStatus, theirMainChurch, isAnexe } = updateChurchDto;
 
     //* Validations
     if (!isUUID(id)) {
@@ -644,6 +653,12 @@ export class ChurchService {
 
     if (!church) {
       throw new NotFoundException(`No se encontró iglesia con id: ${id}`);
+    }
+
+    if (church?.isAnexe && !isAnexe) {
+      throw new BadRequestException(
+        `No se puede cambiar una iglesia anexada a una principal.`,
+      );
     }
 
     if (!church?.isAnexe && theirMainChurch) {
@@ -706,6 +721,11 @@ export class ChurchService {
         const updatedChurch = await this.churchRepository.preload({
           id: church.id,
           ...updateChurchDto,
+          churchCode:
+            updateChurchDto.abbreviatedChurchName !==
+            church.abbreviatedChurchName
+              ? generateCodeChurch(updateChurchDto.abbreviatedChurchName)
+              : church.churchCode,
           theirMainChurch: newMainChurch,
           updatedAt: new Date(),
           updatedBy: user,
@@ -716,8 +736,6 @@ export class ChurchService {
       } catch (error) {
         this.handleDBExceptions(error);
       }
-
-      return;
     }
 
     //? Update and save if is same Church
@@ -725,6 +743,10 @@ export class ChurchService {
       const updatedChurch = await this.churchRepository.preload({
         id: church.id,
         ...updateChurchDto,
+        churchCode:
+          updateChurchDto.abbreviatedChurchName !== church.abbreviatedChurchName
+            ? generateCodeChurch(updateChurchDto.abbreviatedChurchName)
+            : church.churchCode,
         theirMainChurch: church.theirMainChurch,
         updatedAt: new Date(),
         updatedBy: user,

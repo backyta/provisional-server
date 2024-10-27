@@ -19,8 +19,8 @@ interface ResultDataOptions {
   accumulatedOfferingUSD: number;
   accumulatedOfferingEUR: number;
   church: {
-    id: string;
-    churchName: string;
+    isAnexe: boolean;
+    abbreviatedChurchName: string;
   };
   totalAmount: number;
 }
@@ -77,24 +77,8 @@ export const comparativeOfferingIncomeByTypeFormatter = ({
         accumulatedOfferingEUR:
           offering?.currency === CurrencyType.EUR ? +offering?.amount : 0,
         church: {
-          id:
-            offering?.church?.id ??
-            offering?.pastor?.theirChurch?.id ??
-            offering?.copastor?.theirChurch?.id ??
-            offering?.supervisor?.theirChurch?.id ??
-            offering?.preacher?.theirChurch?.id ??
-            offering?.disciple?.theirChurch?.id ??
-            offering?.familyGroup?.theirChurch?.id ??
-            offering?.zone?.theirChurch?.id,
-          churchName:
-            offering?.church?.churchName ??
-            offering?.pastor?.theirChurch?.churchName ??
-            offering?.copastor?.theirChurch?.churchName ??
-            offering?.supervisor?.theirChurch?.churchName ??
-            offering?.preacher?.theirChurch?.churchName ??
-            offering?.disciple?.theirChurch?.churchName ??
-            offering?.familyGroup?.theirChurch?.churchName ??
-            offering?.zone?.theirChurch?.churchName,
+          isAnexe: offering?.church?.isAnexe,
+          abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
         },
         totalAmount: +offering.amount,
       });

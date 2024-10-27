@@ -20,6 +20,11 @@ export const familyGroupFormatterByRecordStatus = ({
             : 'Sin Supervisor',
           active: 0,
           inactive: 0,
+          church: {
+            isAnexe: familyGroups[0]?.theirChurch?.isAnexe,
+            abbreviatedChurchName:
+              familyGroups[0]?.theirChurch?.abbreviatedChurchName,
+          },
         };
       }
 
@@ -32,7 +37,12 @@ export const familyGroupFormatterByRecordStatus = ({
     },
     {} as Record<
       string,
-      { active: number; inactive: number; supervisor: string }
+      {
+        active: number;
+        inactive: number;
+        supervisor: string;
+        church: { isAnexe: boolean; abbreviatedChurchName: string };
+      }
     >,
   );
 

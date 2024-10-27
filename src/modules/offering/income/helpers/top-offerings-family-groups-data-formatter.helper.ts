@@ -3,6 +3,7 @@ import { OfferingIncome } from '@/modules/offering/income/entities';
 
 interface ResultDataOptions {
   date: string | Date;
+  category: string;
   accumulatedOfferingPEN: number;
   accumulatedOfferingUSD: number;
   accumulatedOfferingEUR: number;
@@ -16,6 +17,10 @@ interface ResultDataOptions {
     id: string;
     firstName: string;
     lastName: string;
+  };
+  church: {
+    isAnexe: boolean;
+    abbreviatedChurchName: string;
   };
   allOfferings: {
     offering: number;
@@ -55,6 +60,7 @@ export const topOfferingsFamilyGroupsDataFormatter = ({
     } else {
       acc.push({
         date: offering.date,
+        category: offering.category,
         accumulatedOfferingPEN:
           offering.currency === CurrencyType.PEN ? +offering.amount : 0,
         accumulatedOfferingUSD:
@@ -71,6 +77,10 @@ export const topOfferingsFamilyGroupsDataFormatter = ({
           id: offering?.familyGroup?.theirPreacher?.id,
           firstName: offering?.familyGroup?.theirPreacher?.firstName,
           lastName: offering?.familyGroup?.theirPreacher?.lastName,
+        },
+        church: {
+          isAnexe: offering?.church?.isAnexe,
+          abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
         },
         allOfferings: [
           {

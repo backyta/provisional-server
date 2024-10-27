@@ -24,6 +24,15 @@ export class CreateChurchDto {
   churchName: string;
 
   @ApiProperty({
+    example: 'ICF - Agua Viva',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(1)
+  @MaxLength(100)
+  abbreviatedChurchName: string;
+
+  @ApiProperty({
     example: 'true',
   })
   @IsBoolean()

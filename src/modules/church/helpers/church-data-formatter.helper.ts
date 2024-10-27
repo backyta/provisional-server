@@ -12,6 +12,7 @@ export const churchDataFormatter = ({ churches, mainChurch }: Options) => {
       ? {
           id: mainChurch?.id,
           churchName: mainChurch?.churchName,
+          abbreviatedChurchName: mainChurch?.abbreviatedChurchName,
           district: mainChurch?.district,
           urbanSector: mainChurch?.urbanSector,
         }

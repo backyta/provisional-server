@@ -30,6 +30,11 @@ export const memberFormatterByRecordStatus = ({
 
   const membersByRecordStatus = {
     pastor: {
+      church: {
+        isAnexe: allMembers[0]?.theirChurch?.isAnexe,
+        abbreviatedChurchName:
+          allMembers[0]?.theirChurch?.abbreviatedChurchName,
+      },
       active: allMembers.filter(
         (member) =>
           member.roles.includes(MemberRole.Pastor) &&
@@ -42,6 +47,11 @@ export const memberFormatterByRecordStatus = ({
       ).length,
     },
     copastor: {
+      church: {
+        isAnexe: allMembers[0]?.theirChurch?.isAnexe,
+        abbreviatedChurchName:
+          allMembers[0]?.theirChurch?.abbreviatedChurchName,
+      },
       active: allMembers.filter(
         (member) =>
           member.roles.includes(MemberRole.Copastor) &&
@@ -54,6 +64,11 @@ export const memberFormatterByRecordStatus = ({
       ).length,
     },
     supervisor: {
+      church: {
+        isAnexe: allMembers[0]?.theirChurch?.isAnexe,
+        abbreviatedChurchName:
+          allMembers[0]?.theirChurch?.abbreviatedChurchName,
+      },
       active: allMembers.filter(
         (member) =>
           member.roles.includes(MemberRole.Supervisor) &&
@@ -66,6 +81,11 @@ export const memberFormatterByRecordStatus = ({
       ).length,
     },
     preacher: {
+      church: {
+        isAnexe: allMembers[0]?.theirChurch?.isAnexe,
+        abbreviatedChurchName:
+          allMembers[0]?.theirChurch?.abbreviatedChurchName,
+      },
       active: allMembers.filter(
         (member) =>
           member.roles.includes(MemberRole.Preacher) &&
@@ -78,24 +98,29 @@ export const memberFormatterByRecordStatus = ({
       ).length,
     },
     disciple: {
+      church: {
+        isAnexe: allMembers[0]?.theirChurch?.isAnexe,
+        abbreviatedChurchName:
+          allMembers[0]?.theirChurch?.abbreviatedChurchName,
+      },
       active: allMembers.filter(
         (member) =>
           member.roles.includes(MemberRole.Disciple) &&
-          (!member.roles.includes(MemberRole.Pastor) ||
-            !member.roles.includes(MemberRole.Copastor) ||
-            !member.roles.includes(MemberRole.Supervisor) ||
-            !member.roles.includes(MemberRole.Preacher) ||
-            !member.roles.includes(MemberRole.Treasurer)) &&
+          !member.roles.includes(MemberRole.Pastor) &&
+          !member.roles.includes(MemberRole.Copastor) &&
+          !member.roles.includes(MemberRole.Supervisor) &&
+          !member.roles.includes(MemberRole.Preacher) &&
+          !member.roles.includes(MemberRole.Treasurer) &&
           member.recordStatus === RecordStatus.Active,
       ).length,
       inactive: allMembers.filter(
         (member) =>
           member.roles.includes(MemberRole.Disciple) &&
-          (!member.roles.includes(MemberRole.Pastor) ||
-            !member.roles.includes(MemberRole.Copastor) ||
-            !member.roles.includes(MemberRole.Supervisor) ||
-            !member.roles.includes(MemberRole.Preacher) ||
-            !member.roles.includes(MemberRole.Treasurer)) &&
+          !member.roles.includes(MemberRole.Pastor) &&
+          !member.roles.includes(MemberRole.Copastor) &&
+          !member.roles.includes(MemberRole.Supervisor) &&
+          !member.roles.includes(MemberRole.Preacher) &&
+          !member.roles.includes(MemberRole.Treasurer) &&
           member.recordStatus === RecordStatus.Inactive,
       ).length,
     },

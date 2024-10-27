@@ -15,7 +15,7 @@ interface ResultDataOptions {
   accumulatedOfferingEUR: number;
   church: {
     isAnexe: boolean;
-    churchName: string;
+    abbreviatedChurchName: string;
   };
   memberType: string;
   memberId: string;
@@ -76,7 +76,7 @@ export const offeringIncomeByYouthServiceFormatter = ({
           offering.currency === CurrencyType.EUR ? +offering.amount : 0,
         church: {
           isAnexe: offering?.church?.isAnexe,
-          churchName: offering?.church?.churchName,
+          abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
         },
         memberType:
           offering.category === OfferingIncomeCreationCategory.InternalDonation

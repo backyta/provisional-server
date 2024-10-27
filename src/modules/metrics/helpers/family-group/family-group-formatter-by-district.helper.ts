@@ -9,6 +9,11 @@ export const familyGroupFormatterByDistrict = ({ familyGroups }: Options) => {
     if (!acc[item.urbanSector]) {
       acc[item.urbanSector] = {
         familyGroupsCount: 0,
+        church: {
+          isAnexe: familyGroups[0]?.theirChurch?.isAnexe,
+          abbreviatedChurchName:
+            familyGroups[0]?.theirChurch?.abbreviatedChurchName,
+        },
       };
     }
 

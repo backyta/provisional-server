@@ -6,24 +6,28 @@ interface Options {
 }
 
 const monthNames = [
-  'Ene',
-  'Feb',
-  'Mar',
-  'Abr',
-  'May',
-  'Jun',
-  'Jul',
-  'Ago',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dic',
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
 ];
 
 interface ResultDataOptions {
   month: string;
   newFamilyGroups: number;
   inactiveFamilyGroups: number;
+  church: {
+    isAnexe: boolean;
+    abbreviatedChurchName: string;
+  };
 }
 
 export const familyGroupFluctuationFormatter = ({
@@ -47,6 +51,11 @@ export const familyGroupFluctuationFormatter = ({
         inactiveFamilyGroups,
         index,
       ).length,
+      church: {
+        isAnexe: activeFamilyGroups[0]?.theirChurch?.isAnexe,
+        abbreviatedChurchName:
+          activeFamilyGroups[0]?.theirChurch?.abbreviatedChurchName,
+      },
     };
   });
 

@@ -24,7 +24,7 @@ interface ResultDataOptions {
   memberFullName: string;
   church: {
     isAnexe: boolean;
-    churchName: string;
+    abbreviatedChurchName: string;
   };
   accumulatedOfferingPEN: number;
   accumulatedOfferingUSD: number;
@@ -165,7 +165,7 @@ export const offeringIncomeBySundaySchoolFormatter = ({
                   : null,
         church: {
           isAnexe: offering?.church?.isAnexe,
-          churchName: offering?.church?.churchName,
+          abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
         },
         allOfferings:
           offering.category !== OfferingIncomeCreationCategory.OfferingBox
@@ -189,8 +189,6 @@ export const offeringIncomeBySundaySchoolFormatter = ({
     const dateB = parse(dateFormatterToDDMMYY(b.date), 'dd/MM/yy', new Date());
     return compareAsc(dateA, dateB);
   });
-
-  console.log(resultSorted);
 
   return resultSorted;
 };

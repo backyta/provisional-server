@@ -10,6 +10,7 @@ export const copastorDataFormatter = ({ copastors }: Options) => {
     theirChurch: {
       id: copastor?.theirChurch?.id,
       churchName: copastor?.theirChurch?.churchName,
+      abbreviatedChurchName: copastor?.theirChurch?.abbreviatedChurchName,
       district: copastor?.theirChurch?.district,
       urbanSector: copastor?.theirChurch?.urbanSector,
     },

@@ -31,6 +31,11 @@ export const memberFormatterByRoleAndGender = ({
 
   const membersByRole = {
     pastor: {
+      church: {
+        isAnexe: allMembers[0]?.theirChurch?.isAnexe,
+        abbreviatedChurchName:
+          allMembers[0]?.theirChurch?.abbreviatedChurchName,
+      },
       men: allMembers.filter(
         (member) =>
           member.roles.includes(MemberRole.Pastor) &&
@@ -43,6 +48,11 @@ export const memberFormatterByRoleAndGender = ({
       ).length,
     },
     copastor: {
+      church: {
+        isAnexe: allMembers[0]?.theirChurch?.isAnexe,
+        abbreviatedChurchName:
+          allMembers[0]?.theirChurch?.abbreviatedChurchName,
+      },
       men: allMembers.filter(
         (member) =>
           member.roles.includes(MemberRole.Copastor) &&
@@ -55,6 +65,11 @@ export const memberFormatterByRoleAndGender = ({
       ).length,
     },
     supervisor: {
+      church: {
+        isAnexe: allMembers[0]?.theirChurch?.isAnexe,
+        abbreviatedChurchName:
+          allMembers[0]?.theirChurch?.abbreviatedChurchName,
+      },
       men: allMembers.filter(
         (member) =>
           member.roles.includes(MemberRole.Supervisor) &&
@@ -67,6 +82,11 @@ export const memberFormatterByRoleAndGender = ({
       ).length,
     },
     preacher: {
+      church: {
+        isAnexe: allMembers[0]?.theirChurch?.isAnexe,
+        abbreviatedChurchName:
+          allMembers[0]?.theirChurch?.abbreviatedChurchName,
+      },
       men: allMembers.filter(
         (member) =>
           member.roles.includes(MemberRole.Preacher) &&
@@ -79,6 +99,11 @@ export const memberFormatterByRoleAndGender = ({
       ).length,
     },
     disciple: {
+      church: {
+        isAnexe: allMembers[0]?.theirChurch?.isAnexe,
+        abbreviatedChurchName:
+          allMembers[0]?.theirChurch?.abbreviatedChurchName,
+      },
       men: allMembers.filter(
         (member) =>
           member.roles.includes(MemberRole.Disciple) &&

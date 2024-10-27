@@ -24,6 +24,11 @@ export const familyGroupFormatterByCode = ({ familyGroups }: Options) => {
       familyGroupCode: familyGroup.familyGroupCode,
       men: menCount,
       women: womenCount,
+      church: {
+        isAnexe: familyGroups[0]?.theirChurch?.isAnexe,
+        abbreviatedChurchName:
+          familyGroups[0]?.theirChurch?.abbreviatedChurchName,
+      },
     };
 
     return acc;

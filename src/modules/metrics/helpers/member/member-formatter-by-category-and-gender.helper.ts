@@ -60,11 +60,26 @@ export const memberFormatterByCategoryAndGender = ({
             member.age >= minAge &&
             (maxAge === null || member.age <= maxAge),
         ).length,
+        church: {
+          isAnexe: allMembers[0]?.theirChurch?.isAnexe,
+          abbreviatedChurchName:
+            allMembers[0]?.theirChurch?.abbreviatedChurchName,
+        },
       };
 
       return acc;
     },
-    {} as Record<string, { men: number; women: number }>,
+    {} as Record<
+      string,
+      {
+        men: number;
+        women: number;
+        church: {
+          isAnexe: boolean;
+          abbreviatedChurchName: string;
+        };
+      }
+    >,
   );
 
   return membersByCategoryAndGender;

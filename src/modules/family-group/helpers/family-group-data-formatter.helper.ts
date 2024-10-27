@@ -10,6 +10,7 @@ export const familyGroupDataFormatter = ({ familyGroups }: Options) => {
     theirChurch: {
       id: familyGroup?.theirChurch?.id,
       churchName: familyGroup?.theirChurch?.churchName,
+      abbreviatedChurchName: familyGroup?.theirChurch?.abbreviatedChurchName,
       district: familyGroup?.theirChurch?.district,
       urbanSector: familyGroup?.theirChurch?.urbanSector,
     },

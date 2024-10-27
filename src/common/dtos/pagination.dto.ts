@@ -56,7 +56,7 @@ export class PaginationDto {
 
   @ApiProperty({
     default: '1221312-123j34-34',
-    description: 'Iglesia?',
+    description: 'Iglesia',
   })
   @IsOptional()
   @IsString()

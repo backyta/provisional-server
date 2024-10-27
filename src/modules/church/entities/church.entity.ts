@@ -29,6 +29,16 @@ export class Church {
   @Column('text', { name: 'church_name', unique: true })
   churchName: string;
 
+  @Column('text', {
+    name: 'abbreviated_church_name',
+    unique: true,
+  })
+  abbreviatedChurchName: string;
+
+  @Index()
+  @Column('text', { name: 'church_code', unique: true, nullable: true })
+  churchCode: string;
+
   @Column('boolean', { name: 'is_anexe', default: false })
   isAnexe: boolean;
 
@@ -40,10 +50,10 @@ export class Church {
 
   //* Contact Info
   @Index()
-  @Column('text', { name: 'email', unique: true, nullable: true })
+  @Column('text', { name: 'email', unique: true })
   email: string;
 
-  @Column('text', { name: 'phone_number', nullable: true })
+  @Column('text', { name: 'phone_number' })
   phoneNumber: string;
 
   @Column('text', { name: 'country', default: 'Peru' })

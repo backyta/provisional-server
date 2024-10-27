@@ -10,6 +10,7 @@ export const supervisorDataFormatter = ({ supervisors }: Options) => {
     theirChurch: {
       id: supervisor?.theirChurch?.id,
       churchName: supervisor?.theirChurch?.churchName,
+      abbreviatedChurchName: supervisor?.theirChurch?.abbreviatedChurchName,
       district: supervisor?.theirChurch?.district,
       urbanSector: supervisor?.theirChurch?.urbanSector,
     },

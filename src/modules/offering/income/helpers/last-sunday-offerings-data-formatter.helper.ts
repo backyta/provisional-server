@@ -11,12 +11,17 @@ interface Options {
 
 interface ResultDataOptions {
   date: Date;
+  category: string;
   dayPEN: number;
   afternoonPEN: number;
   dayUSD: number;
   afternoonUSD: number;
   dayEUR: number;
   afternoonEUR: number;
+  church: {
+    isAnexe: boolean;
+    abbreviatedChurchName: string;
+  };
 }
 
 export const lastSundayOfferingsDataFormatter = ({
@@ -59,6 +64,7 @@ export const lastSundayOfferingsDataFormatter = ({
     } else {
       acc.push({
         date: offering.date,
+        category: offering?.category,
         dayPEN:
           offering.shift === 'day' && offering.currency === CurrencyType.PEN
             ? +offering.amount
@@ -86,6 +92,10 @@ export const lastSundayOfferingsDataFormatter = ({
           offering.currency === CurrencyType.EUR
             ? +offering.amount
             : 0,
+        church: {
+          isAnexe: offering?.church?.isAnexe,
+          abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
+        },
       });
     }
 

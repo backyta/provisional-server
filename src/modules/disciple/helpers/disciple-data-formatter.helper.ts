@@ -10,6 +10,7 @@ export const discipleDataFormatter = ({ disciples }: Options) => {
     theirChurch: {
       id: disciple?.theirChurch?.id,
       churchName: disciple?.theirChurch?.churchName,
+      abbreviatedChurchName: disciple?.theirChurch?.abbreviatedChurchName,
       district: disciple?.theirChurch?.district,
       urbanSector: disciple?.theirChurch?.urbanSector,
     },

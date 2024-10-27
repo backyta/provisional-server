@@ -10,9 +10,9 @@ export const formatDataOfferingExpense = ({ offeringsExpenses }: Options) => {
     church: {
       id: offeringExpense.church?.id,
       churchName: offeringExpense.church?.churchName,
-      department: offeringExpense.church?.department,
-      province: offeringExpense.church?.province,
+      abbreviatedChurchName: offeringExpense.church?.abbreviatedChurchName,
       district: offeringExpense.church?.district,
+      urbanSector: offeringExpense.church?.urbanSector,
     },
   }));
 };

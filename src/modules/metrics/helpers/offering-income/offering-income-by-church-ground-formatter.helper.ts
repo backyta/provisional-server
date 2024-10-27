@@ -20,7 +20,7 @@ interface ResultDataOptions {
   }[];
   church: {
     isAnexe: boolean;
-    churchName: string;
+    abbreviatedChurchName: string;
   };
   accumulatedOfferingPEN: number;
   accumulatedOfferingUSD: number;
@@ -99,7 +99,7 @@ export const offeringIncomeByChurchGroundFormatter = ({
                 : offering?.disciple?.id,
         church: {
           isAnexe: offering?.church?.isAnexe,
-          churchName: offering?.church?.churchName,
+          abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
         },
         allOfferings: [
           {

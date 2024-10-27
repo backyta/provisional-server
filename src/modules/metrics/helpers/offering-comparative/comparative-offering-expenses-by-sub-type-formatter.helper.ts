@@ -14,8 +14,8 @@ interface ResultDataOptions {
   accumulatedOfferingUSD: number;
   accumulatedOfferingEUR: number;
   church: {
-    id: string;
-    churchName: string;
+    isAnexe: boolean;
+    abbreviatedChurchName: string;
   };
   totalAmount: number;
 }
@@ -51,8 +51,8 @@ export const ComparativeOfferingExpensesBySubTypeFormatter = ({
         accumulatedOfferingEUR:
           offering?.currency === CurrencyType.EUR ? +offering?.amount : 0,
         church: {
-          id: offering?.church?.id,
-          churchName: offering?.church?.churchName,
+          isAnexe: offering?.church?.isAnexe,
+          abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
         },
         totalAmount: +offering.amount,
       });

@@ -10,6 +10,7 @@ export const zoneDataFormatter = ({ zones }: Options) => {
     theirChurch: {
       id: zone?.theirChurch?.id,
       churchName: zone?.theirChurch?.churchName,
+      abbreviatedChurchName: zone?.theirChurch?.abbreviatedChurchName,
       district: zone?.theirChurch?.district,
       urbanSector: zone?.theirChurch?.urbanSector,
     },

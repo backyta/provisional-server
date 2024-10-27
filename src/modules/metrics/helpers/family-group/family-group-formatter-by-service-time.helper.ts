@@ -18,6 +18,11 @@ export const familyGroupFormatterByServiceTime = ({
             : familyGroup?.theirSupervisor?.firstName === undefined
               ? ''
               : 'Sin Supervisor',
+          church: {
+            isAnexe: familyGroups[0]?.theirChurch?.isAnexe,
+            abbreviatedChurchName:
+              familyGroups[0]?.theirChurch?.abbreviatedChurchName,
+          },
         };
       }
 
@@ -25,7 +30,14 @@ export const familyGroupFormatterByServiceTime = ({
 
       return acc;
     },
-    {} as Record<string, { serviceTimesCount: number; supervisor: string }>,
+    {} as Record<
+      string,
+      {
+        serviceTimesCount: number;
+        supervisor: string;
+        church: { isAnexe: boolean; abbreviatedChurchName: string };
+      }
+    >,
   );
 
   return result;

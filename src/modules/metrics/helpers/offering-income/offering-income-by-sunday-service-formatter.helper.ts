@@ -20,7 +20,7 @@ interface ResultDataOptions {
   afternoonEUR: number;
   church: {
     isAnexe: boolean;
-    churchName: string;
+    abbreviatedChurchName: string;
   };
 }
 
@@ -88,7 +88,7 @@ export const offeringIncomeBySundayServiceFormatter = ({
             : 0,
         church: {
           isAnexe: offering?.church?.isAnexe,
-          churchName: offering?.church?.churchName,
+          abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
         },
       };
       acc.push(newEntry);

@@ -5,18 +5,18 @@ import { Preacher } from '@/modules/preacher/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
 
 const monthNames = [
-  'Ene',
-  'Feb',
-  'Mar',
-  'Abr',
-  'May',
-  'Jun',
-  'Jul',
-  'Ago',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dic',
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
 ];
 
 interface Options {
@@ -28,6 +28,10 @@ interface ResultDataOptions {
   month: string;
   newMembers: number;
   inactiveMembers: number;
+  church: {
+    isAnexe: boolean;
+    abbreviatedChurchName: string;
+  };
 }
 
 export const memberFluctuationFormatter = ({
@@ -54,6 +58,11 @@ export const memberFluctuationFormatter = ({
       month: monthNames[index],
       newMembers: filterMembersByMonth(allNewMembers, index).length,
       inactiveMembers: filterMembersByMonth(allInactiveMembers, index).length,
+      church: {
+        isAnexe: allNewMembers[0]?.theirChurch?.isAnexe,
+        abbreviatedChurchName:
+          allNewMembers[0]?.theirChurch?.abbreviatedChurchName,
+      },
     };
   });
 

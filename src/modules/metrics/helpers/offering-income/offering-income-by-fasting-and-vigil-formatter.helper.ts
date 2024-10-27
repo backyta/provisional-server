@@ -28,7 +28,7 @@ interface ResultDataOptions {
   } | null;
   church: {
     isAnexe: boolean;
-    churchName: string;
+    abbreviatedChurchName: string;
   };
   allOfferings: {
     offering: number;
@@ -87,7 +87,7 @@ export const offeringIncomeByFastingAndVigilFormatter = ({
         },
         church: {
           isAnexe: offering?.church?.isAnexe,
-          churchName: offering?.church?.churchName,
+          abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
         },
         allOfferings: [
           {
@@ -101,8 +101,6 @@ export const offeringIncomeByFastingAndVigilFormatter = ({
 
     return acc;
   }, []);
-
-  console.log(resultData);
 
   return resultData.sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),

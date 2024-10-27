@@ -18,6 +18,10 @@ export const familyGroupFormatterByZone = ({ zones }: Options) => {
         ? `${getInitialFullNames({ firstNames: zone?.theirSupervisor?.firstName ?? '', lastNames: '' })} ${zone?.theirSupervisor?.lastName}`
         : 'Sin Supervisor',
       familyGroupsCount: filteredFamilyGroups,
+      church: {
+        isAnexe: zones[0]?.theirChurch?.isAnexe,
+        abbreviatedChurchName: zones[0]?.theirChurch?.abbreviatedChurchName,
+      },
     };
 
     return acc;

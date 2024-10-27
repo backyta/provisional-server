@@ -37,6 +37,11 @@ export const memberFormatterByDistrictAndGender = ({
       acc[item.urbanSector] = {
         men: 0,
         women: 0,
+        church: {
+          isAnexe: allMembers[0]?.theirChurch?.isAnexe,
+          abbreviatedChurchName:
+            allMembers[0]?.theirChurch?.abbreviatedChurchName,
+        },
       };
     }
 
@@ -53,7 +58,17 @@ export const memberFormatterByDistrictAndGender = ({
         acc[key] = result[key];
         return acc;
       },
-      {} as Record<string, { men: number; women: number }>,
+      {} as Record<
+        string,
+        {
+          men: number;
+          women: number;
+          church: {
+            isAnexe: boolean;
+            abbreviatedChurchName: string;
+          };
+        }
+      >,
     );
 
   return sortedResult;

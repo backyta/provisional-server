@@ -14,7 +14,7 @@ interface ResultDataOptions {
   accumulatedOfferingEUR: number;
   church: {
     id: string;
-    churchName: string;
+    abbreviatedChurchName: string;
   };
   allOfferings: { offering: number; currency: string; date: string | Date }[];
   totalAmount: number;
@@ -59,7 +59,7 @@ export const offeringExpenseChartFormatter = ({
           offering?.currency === CurrencyType.EUR ? +offering?.amount : 0,
         church: {
           id: offering?.church?.id,
-          churchName: offering?.church?.churchName,
+          abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
         },
         allOfferings: [
           {

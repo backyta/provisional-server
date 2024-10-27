@@ -1,15 +1,18 @@
 import { OfferingIncome } from '@/modules/offering/income/entities';
 
 interface Options {
-  offeringsIncome: OfferingIncome[];
+  offeringIncome: OfferingIncome[];
 }
 
-export const offeringIncomeDataFormatter = ({ offeringsIncome }: Options) => {
+export const offeringIncomeDataFormatter = ({
+  offeringIncome: offeringsIncome,
+}: Options) => {
   return offeringsIncome.map((offeringIncome) => ({
     ...offeringIncome,
     church: {
       id: offeringIncome?.church?.id,
       churchName: offeringIncome?.church?.churchName,
+      abbreviatedChurchName: offeringIncome?.church?.abbreviatedChurchName,
       department: offeringIncome?.church?.department,
       province: offeringIncome?.church?.province,
       district: offeringIncome?.church?.district,
