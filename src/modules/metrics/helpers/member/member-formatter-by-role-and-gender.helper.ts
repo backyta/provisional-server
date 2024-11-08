@@ -14,13 +14,33 @@ interface Options {
   disciples: Disciple[];
 }
 
+interface Church {
+  isAnexe: boolean;
+  abbreviatedChurchName: string;
+}
+
+interface MembersByRole {
+  church: Church;
+  men: number;
+  women: number;
+}
+
+// Interfaz para la estructura de salida de memberFormatterByRoleAndGender
+interface MemberFormatterResult {
+  pastor: MembersByRole;
+  copastor: MembersByRole;
+  supervisor: MembersByRole;
+  preacher: MembersByRole;
+  disciple: MembersByRole;
+}
+
 export const memberFormatterByRoleAndGender = ({
   pastors,
   copastors,
   supervisors,
   preachers,
   disciples,
-}: Options) => {
+}: Options): MemberFormatterResult => {
   const allMembers = [
     ...pastors,
     ...copastors,
@@ -29,7 +49,7 @@ export const memberFormatterByRoleAndGender = ({
     ...disciples,
   ];
 
-  const membersByRole = {
+  const membersByRole: MemberFormatterResult = {
     pastor: {
       church: {
         isAnexe: allMembers[0]?.theirChurch?.isAnexe,
@@ -37,14 +57,14 @@ export const memberFormatterByRoleAndGender = ({
           allMembers[0]?.theirChurch?.abbreviatedChurchName,
       },
       men: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Pastor) &&
-          member.gender === Gender.Male,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Pastor) &&
+          item?.member?.gender === Gender.Male,
       ).length,
       women: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Pastor) &&
-          member.gender === Gender.Female,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Pastor) &&
+          item?.member?.gender === Gender.Female,
       ).length,
     },
     copastor: {
@@ -54,14 +74,14 @@ export const memberFormatterByRoleAndGender = ({
           allMembers[0]?.theirChurch?.abbreviatedChurchName,
       },
       men: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Copastor) &&
-          member.gender === Gender.Male,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Copastor) &&
+          item?.member?.gender === Gender.Male,
       ).length,
       women: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Copastor) &&
-          member.gender === Gender.Female,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Copastor) &&
+          item?.member?.gender === Gender.Female,
       ).length,
     },
     supervisor: {
@@ -71,14 +91,14 @@ export const memberFormatterByRoleAndGender = ({
           allMembers[0]?.theirChurch?.abbreviatedChurchName,
       },
       men: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Supervisor) &&
-          member.gender === Gender.Male,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Supervisor) &&
+          item?.member?.gender === Gender.Male,
       ).length,
       women: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Supervisor) &&
-          member.gender === Gender.Female,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Supervisor) &&
+          item?.member?.gender === Gender.Female,
       ).length,
     },
     preacher: {
@@ -88,14 +108,14 @@ export const memberFormatterByRoleAndGender = ({
           allMembers[0]?.theirChurch?.abbreviatedChurchName,
       },
       men: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Preacher) &&
-          member.gender === Gender.Male,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Preacher) &&
+          item?.member?.gender === Gender.Male,
       ).length,
       women: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Preacher) &&
-          member.gender === Gender.Female,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Preacher) &&
+          item?.member?.gender === Gender.Female,
       ).length,
     },
     disciple: {
@@ -105,19 +125,19 @@ export const memberFormatterByRoleAndGender = ({
           allMembers[0]?.theirChurch?.abbreviatedChurchName,
       },
       men: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Disciple) &&
-          (!member.roles.includes(MemberRole.Pastor) ||
-            !member.roles.includes(MemberRole.Copastor) ||
-            !member.roles.includes(MemberRole.Supervisor) ||
-            !member.roles.includes(MemberRole.Preacher) ||
-            !member.roles.includes(MemberRole.Treasurer)) &&
-          member.gender === Gender.Male,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Disciple) &&
+          (!item?.member?.roles.includes(MemberRole.Pastor) ||
+            !item?.member?.roles.includes(MemberRole.Copastor) ||
+            !item?.member?.roles.includes(MemberRole.Supervisor) ||
+            !item?.member?.roles.includes(MemberRole.Preacher) ||
+            !item?.member?.roles.includes(MemberRole.Treasurer)) &&
+          item?.member?.gender === Gender.Male,
       ).length,
       women: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Disciple) &&
-          member.gender === Gender.Female,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Disciple) &&
+          item?.member?.gender === Gender.Female,
       ).length,
     },
   };

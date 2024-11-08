@@ -30,13 +30,13 @@ interface ResultDataOptions {
 }
 
 interface Options {
-  offeringsIncome: OfferingIncome[];
+  offeringIncome: OfferingIncome[];
 }
 
 export const topOfferingsFamilyGroupsDataFormatter = ({
-  offeringsIncome,
+  offeringIncome,
 }: Options) => {
-  const resultData: ResultDataOptions[] = offeringsIncome?.reduce<
+  const resultData: ResultDataOptions[] = offeringIncome?.reduce<
     ResultDataOptions[]
   >((acc, offering) => {
     const existing = acc.find(
@@ -75,8 +75,8 @@ export const topOfferingsFamilyGroupsDataFormatter = ({
         },
         preacher: {
           id: offering?.familyGroup?.theirPreacher?.id,
-          firstName: offering?.familyGroup?.theirPreacher?.firstName,
-          lastName: offering?.familyGroup?.theirPreacher?.lastName,
+          firstName: offering?.familyGroup?.theirPreacher?.member?.firstName,
+          lastName: offering?.familyGroup?.theirPreacher?.member?.lastName,
         },
         church: {
           isAnexe: offering?.church?.isAnexe,

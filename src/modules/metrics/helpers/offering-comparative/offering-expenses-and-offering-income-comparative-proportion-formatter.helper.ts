@@ -7,10 +7,16 @@ interface Options {
   offeringExpenses: OfferingExpense[];
 }
 
+export interface OfferingRecordsCount {
+  totalOfferingRecordsCount: number;
+  offeringIncomeRecordsCount: number;
+  offeringExpenseRecordsCount: number;
+}
+
 export const offeringExpensesAndOfferingIncomeProportionFormatter = ({
   offeringIncome,
   offeringExpenses,
-}: Options) => {
+}: Options): OfferingRecordsCount => {
   const totalOfferingRecordsCount =
     offeringExpenses.length + offeringIncome.length;
 
@@ -23,8 +29,8 @@ export const offeringExpensesAndOfferingIncomeProportionFormatter = ({
   ).length;
 
   return {
-    totalOfferingRecordsCount: totalOfferingRecordsCount,
-    offeringIncomeRecordsCount: offeringIncomeRecordsCount,
-    offeringExpenseRecordsCount: offeringExpenseRecordsCount,
+    totalOfferingRecordsCount,
+    offeringIncomeRecordsCount,
+    offeringExpenseRecordsCount,
   };
 };

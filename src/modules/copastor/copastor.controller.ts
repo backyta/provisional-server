@@ -95,7 +95,7 @@ export class CopastorController {
   findByTerm(
     @Param('term') term: string,
     @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<Copastor | Copastor[]> {
+  ): Promise<Copastor[]> {
     return this.copastorService.findByTerm(term, searchTypeAndPaginationDto);
   }
 

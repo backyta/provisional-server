@@ -95,7 +95,7 @@ export class DiscipleController {
   findByTerm(
     @Param('term') term: string,
     @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<Disciple | Disciple[]> {
+  ): Promise<Disciple[]> {
     return this.discipleService.findByTerm(term, searchTypeAndPaginationDto);
   }
 

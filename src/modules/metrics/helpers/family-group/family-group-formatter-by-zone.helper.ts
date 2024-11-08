@@ -7,15 +7,33 @@ interface Options {
   zones: Zone[];
 }
 
+interface ZoneChurchInfo {
+  isAnexe: boolean;
+  abbreviatedChurchName: string;
+}
+
+interface ZoneInfo {
+  supervisor: string;
+  familyGroupsCount: number;
+  church: ZoneChurchInfo;
+}
+
+type ZoneResult = {
+  [zoneName: string]: ZoneInfo;
+};
+
 export const familyGroupFormatterByZone = ({ zones }: Options) => {
-  const result = zones.reduce((acc, zone) => {
+  const result: ZoneResult = zones.reduce((acc, zone) => {
     const filteredFamilyGroups = zone.familyGroups.filter(
       (zone) => zone.recordStatus === RecordStatus.Active,
     ).length;
 
     acc[zone.zoneName] = {
-      supervisor: zone?.theirSupervisor?.firstName
-        ? `${getInitialFullNames({ firstNames: zone?.theirSupervisor?.firstName ?? '', lastNames: '' })} ${zone?.theirSupervisor?.lastName}`
+      supervisor: zone?.theirSupervisor?.member?.firstName
+        ? `${getInitialFullNames({
+            firstNames: zone?.theirSupervisor?.member?.firstName ?? '',
+            lastNames: '',
+          })} ${zone?.theirSupervisor?.member?.lastName}`
         : 'Sin Supervisor',
       familyGroupsCount: filteredFamilyGroups,
       church: {

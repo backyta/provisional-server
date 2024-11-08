@@ -5,70 +5,73 @@ interface Options {
   offeringIncome: OfferingIncome[];
 }
 
+interface Church {
+  isAnexe: boolean;
+  abbreviatedChurchName: string;
+}
+
 interface ResultDataOptions {
   date: Date;
   category: string;
   accumulatedOfferingPEN: number;
   accumulatedOfferingUSD: number;
   accumulatedOfferingEUR: number;
-  church: {
-    isAnexe: boolean;
-    abbreviatedChurchName: string;
-  };
-  allOfferings: {
+  church: Church;
+  allOfferings: Array<{
     offering: number;
     currency: string;
     date: Date;
-  }[];
+  }>;
 }
 
 export const offeringIncomeByUnitedServiceFormatter = ({
   offeringIncome,
-}: Options) => {
-  const resultData: ResultDataOptions[] = offeringIncome?.reduce<
-    ResultDataOptions[]
-  >((acc, offering) => {
-    const existing = acc.find((item) => item.date === offering.date);
+}: Options): ResultDataOptions[] => {
+  const resultData: ResultDataOptions[] = offeringIncome?.reduce(
+    (acc, offering) => {
+      const existing = acc.find((item) => item.date === offering.date);
 
-    if (existing) {
-      if (offering.currency === CurrencyType.PEN) {
-        existing.accumulatedOfferingPEN += +offering.amount;
-      } else if (offering.currency === CurrencyType.USD) {
-        existing.accumulatedOfferingUSD += +offering.amount;
-      } else if (offering.currency === CurrencyType.EUR) {
-        existing.accumulatedOfferingEUR += +offering.amount;
-      }
-      existing.allOfferings.push({
-        offering: +offering?.amount,
-        currency: offering?.currency,
-        date: offering?.date,
-      });
-    } else {
-      acc.push({
-        date: offering?.date,
-        category: offering.category,
-        accumulatedOfferingPEN:
-          offering.currency === CurrencyType.PEN ? +offering.amount : 0,
-        accumulatedOfferingUSD:
-          offering.currency === CurrencyType.USD ? +offering.amount : 0,
-        accumulatedOfferingEUR:
-          offering.currency === CurrencyType.EUR ? +offering.amount : 0,
-        church: {
-          isAnexe: offering?.church?.isAnexe,
-          abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
-        },
-        allOfferings: [
-          {
-            offering: +offering?.amount,
-            currency: offering?.currency,
-            date: offering?.date,
+      if (existing) {
+        if (offering.currency === CurrencyType.PEN) {
+          existing.accumulatedOfferingPEN += +offering.amount;
+        } else if (offering.currency === CurrencyType.USD) {
+          existing.accumulatedOfferingUSD += +offering.amount;
+        } else if (offering.currency === CurrencyType.EUR) {
+          existing.accumulatedOfferingEUR += +offering.amount;
+        }
+        existing.allOfferings.push({
+          offering: +offering?.amount,
+          currency: offering?.currency,
+          date: offering?.date,
+        });
+      } else {
+        acc.push({
+          date: offering?.date,
+          category: offering.category,
+          accumulatedOfferingPEN:
+            offering.currency === CurrencyType.PEN ? +offering.amount : 0,
+          accumulatedOfferingUSD:
+            offering.currency === CurrencyType.USD ? +offering.amount : 0,
+          accumulatedOfferingEUR:
+            offering.currency === CurrencyType.EUR ? +offering.amount : 0,
+          church: {
+            isAnexe: offering?.church?.isAnexe,
+            abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
           },
-        ],
-      });
-    }
+          allOfferings: [
+            {
+              offering: +offering?.amount,
+              currency: offering?.currency,
+              date: offering?.date,
+            },
+          ],
+        });
+      }
 
-    return acc;
-  }, []);
+      return acc;
+    },
+    [],
+  );
 
   return resultData.sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),

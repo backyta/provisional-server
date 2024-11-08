@@ -36,7 +36,7 @@ import { formatDataOfferingExpense } from '@/modules/offering/expense/helpers';
 
 @Injectable()
 export class OfferingExpenseService {
-  private readonly logger = new Logger('IncomeService');
+  private readonly logger = new Logger('OfferingExpensesService');
 
   constructor(
     @InjectRepository(Church)
@@ -145,7 +145,7 @@ export class OfferingExpenseService {
     const { limit, offset = 0, order = 'ASC' } = paginationDto;
 
     try {
-      const offeringsExpenses = await this.offeringExpenseRepository.find({
+      const offeringExpenses = await this.offeringExpenseRepository.find({
         where: { recordStatus: RecordStatus.Active },
         take: limit,
         skip: offset,
@@ -153,14 +153,14 @@ export class OfferingExpenseService {
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
-      if (offeringsExpenses.length === 0) {
+      if (offeringExpenses.length === 0) {
         throw new NotFoundException(
           `No existen registros disponibles para mostrar.`,
         );
       }
 
       return formatDataOfferingExpense({
-        offeringsExpenses,
+        offeringExpenses: offeringExpenses,
       }) as any;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -175,7 +175,7 @@ export class OfferingExpenseService {
   async findByTerm(
     term: string,
     searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<OfferingExpense | OfferingExpense[]> {
+  ): Promise<OfferingExpense[]> {
     const {
       'search-type': searchType,
       'search-sub-type': searchSubType,
@@ -228,9 +228,9 @@ export class OfferingExpenseService {
         const fromDate = new Date(fromTimestamp);
         const toDate = toTimestamp ? new Date(toTimestamp) : fromDate;
 
-        let offeringsExpenses: OfferingExpense[];
+        let offeringExpenses: OfferingExpense[];
         if (searchType !== OfferingExpenseSearchType.ExpensesAdjustment) {
-          offeringsExpenses = await this.offeringExpenseRepository.find({
+          offeringExpenses = await this.offeringExpenseRepository.find({
             where: {
               type: searchType,
               subType: searchSubType ? searchSubType : null,
@@ -246,7 +246,7 @@ export class OfferingExpenseService {
         }
 
         if (searchType === OfferingExpenseSearchType.ExpensesAdjustment) {
-          offeringsExpenses = await this.offeringExpenseRepository.find({
+          offeringExpenses = await this.offeringExpenseRepository.find({
             where: {
               type: searchType,
               church: church,
@@ -260,7 +260,7 @@ export class OfferingExpenseService {
           });
         }
 
-        if (offeringsExpenses.length === 0) {
+        if (offeringExpenses.length === 0) {
           const fromDate = dateFormatterToDDMMYYYY(fromTimestamp);
           const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
@@ -270,7 +270,7 @@ export class OfferingExpenseService {
         }
 
         return formatDataOfferingExpense({
-          offeringsExpenses,
+          offeringExpenses: offeringExpenses,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -293,7 +293,7 @@ export class OfferingExpenseService {
           );
         }
 
-        const offeringsExpenses = await this.offeringExpenseRepository.find({
+        const offeringExpenses = await this.offeringExpenseRepository.find({
           where: {
             recordStatus: recordStatusTerm,
           },
@@ -303,7 +303,7 @@ export class OfferingExpenseService {
           order: { createdAt: order as FindOptionsOrderValue },
         });
 
-        if (offeringsExpenses.length === 0) {
+        if (offeringExpenses.length === 0) {
           const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
 
           throw new NotFoundException(
@@ -312,7 +312,7 @@ export class OfferingExpenseService {
         }
 
         return formatDataOfferingExpense({
-          offeringsExpenses,
+          offeringExpenses: offeringExpenses,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {

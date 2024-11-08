@@ -14,13 +14,26 @@ interface Options {
   disciples: Disciple[];
 }
 
+interface GenderCounts {
+  men: number;
+  women: number;
+  church: {
+    isAnexe: boolean;
+    abbreviatedChurchName: string;
+  };
+}
+
+interface DistrictsResult {
+  [urbanSector: string]: GenderCounts; // Resultado agrupado por sector urbano
+}
+
 export const memberFormatterByDistrictAndGender = ({
   pastors,
   copastors,
   supervisors,
   preachers,
   disciples,
-}: Options) => {
+}: Options): DistrictsResult => {
   const allMembers = [
     ...pastors,
     ...copastors,
@@ -29,12 +42,12 @@ export const memberFormatterByDistrictAndGender = ({
     ...disciples,
   ];
 
-  const result = allMembers.reduce((acc, item) => {
-    const menCount = item.gender === Gender.Male ? 1 : 0;
-    const womenCount = item.gender === Gender.Female ? 1 : 0;
+  const result: DistrictsResult = allMembers.reduce((acc, item) => {
+    const menCount = item?.member?.gender === Gender.Male ? 1 : 0;
+    const womenCount = item?.member?.gender === Gender.Female ? 1 : 0;
 
-    if (!acc[item.urbanSector]) {
-      acc[item.urbanSector] = {
+    if (!acc[item?.member?.urbanSector]) {
+      acc[item?.member?.urbanSector] = {
         men: 0,
         women: 0,
         church: {
@@ -45,31 +58,18 @@ export const memberFormatterByDistrictAndGender = ({
       };
     }
 
-    acc[item.urbanSector].men += menCount;
-    acc[item.urbanSector].women += womenCount;
+    acc[item?.member?.urbanSector].men += menCount;
+    acc[item?.member?.urbanSector].women += womenCount;
 
     return acc;
   }, {});
 
   const sortedResult = Object.keys(result)
     .sort()
-    .reduce(
-      (acc, key) => {
-        acc[key] = result[key];
-        return acc;
-      },
-      {} as Record<
-        string,
-        {
-          men: number;
-          women: number;
-          church: {
-            isAnexe: boolean;
-            abbreviatedChurchName: string;
-          };
-        }
-      >,
-    );
+    .reduce((acc, key) => {
+      acc[key] = result[key];
+      return acc;
+    }, {});
 
   return sortedResult;
 };

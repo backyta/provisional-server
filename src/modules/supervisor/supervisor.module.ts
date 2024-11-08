@@ -10,6 +10,7 @@ import { SupervisorController } from '@/modules/supervisor/supervisor.controller
 import { ZoneModule } from '@/modules/zone/zone.module';
 import { PastorModule } from '@/modules/pastor/pastor.module';
 import { ChurchModule } from '@/modules/church/church.module';
+import { MemberModule } from '@/modules/member/member.module';
 import { CopastorModule } from '@/modules/copastor/copastor.module';
 import { PreacherModule } from '@/modules/preacher/preacher.module';
 import { DiscipleModule } from '@/modules/disciple/disciple.module';
@@ -27,6 +28,7 @@ import { FamilyGroupModule } from '@/modules/family-group/family-group.module';
     forwardRef(() => PreacherModule),
     forwardRef(() => FamilyGroupModule),
     forwardRef(() => DiscipleModule),
+    MemberModule,
     AuthModule,
   ],
   exports: [TypeOrmModule, SupervisorService],

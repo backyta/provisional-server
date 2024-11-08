@@ -14,13 +14,13 @@ export const pastorDataFormatter = ({ pastors }: Options) => {
     },
     copastors: pastor?.copastors.map((copastor) => ({
       id: copastor?.id,
-      firstName: copastor?.firstName,
-      lastName: copastor?.lastName,
+      firstName: copastor?.member?.firstName,
+      lastName: copastor?.member?.lastName,
     })),
     supervisors: pastor?.supervisors.map((supervisor) => ({
       id: supervisor?.id,
-      firstName: supervisor?.firstName,
-      lastName: supervisor?.lastName,
+      firstName: supervisor?.member?.firstName,
+      lastName: supervisor?.member?.lastName,
     })),
     zones: pastor?.zones.map((zone) => ({
       id: zone?.id,
@@ -29,8 +29,8 @@ export const pastorDataFormatter = ({ pastors }: Options) => {
     })),
     preachers: pastor?.preachers.map((preacher) => ({
       id: preacher?.id,
-      firstName: preacher?.firstName,
-      lastName: preacher?.lastName,
+      firstName: preacher?.member?.firstName,
+      lastName: preacher?.member?.lastName,
     })),
     familyGroups: pastor?.familyGroups.map((familyGroup) => ({
       id: familyGroup?.id,
@@ -42,8 +42,8 @@ export const pastorDataFormatter = ({ pastors }: Options) => {
     })),
     disciples: pastor.disciples.map((disciple) => ({
       id: disciple?.id,
-      firstName: disciple?.firstName,
-      lastName: disciple?.lastName,
+      firstName: disciple?.member?.firstName,
+      lastName: disciple?.member?.lastName,
     })),
   }));
 };

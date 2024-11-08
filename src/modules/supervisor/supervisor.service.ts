@@ -40,6 +40,7 @@ import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
 import { Pastor } from '@/modules/pastor/entities';
 import { Church } from '@/modules/church/entities';
+import { Member } from '@/modules/member/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Copastor } from '@/modules/copastor/entities';
@@ -74,6 +75,9 @@ export class SupervisorService {
 
     @InjectRepository(Disciple)
     private readonly discipleRepository: Repository<Disciple>,
+
+    @InjectRepository(Member)
+    private readonly memberRepository: Repository<Member>,
   ) {}
 
   //* CREATE SUPERVISOR
@@ -81,13 +85,8 @@ export class SupervisorService {
     createSupervisorDto: CreateSupervisorDto,
     user: User,
   ): Promise<Supervisor> {
-    const {
-      roles,
-      theirPastor,
-      theirCopastor,
-      numberChildren,
-      isDirectRelationToPastor,
-    } = createSupervisorDto;
+    const { roles, theirPastor, theirCopastor, isDirectRelationToPastor } =
+      createSupervisorDto;
 
     if (
       !roles.includes(MemberRole.Disciple) &&
@@ -169,11 +168,34 @@ export class SupervisorService {
         );
       }
 
-      // Create new instance
+      //* Create new instance member and assign to new supervisor instance
       try {
+        const newMember = this.memberRepository.create({
+          firstName: createSupervisorDto.firstName,
+          lastName: createSupervisorDto.lastName,
+          gender: createSupervisorDto.gender,
+          originCountry: createSupervisorDto.originCountry,
+          birthDate: createSupervisorDto.birthDate,
+          maritalStatus: createSupervisorDto.maritalStatus,
+          numberChildren: +createSupervisorDto.numberChildren,
+          conversionDate: createSupervisorDto.conversionDate,
+          email: createSupervisorDto.email,
+          phoneNumber: createSupervisorDto.phoneNumber,
+          country: createSupervisorDto.country,
+          department: createSupervisorDto.department,
+          province: createSupervisorDto.province,
+          district: createSupervisorDto.district,
+          urbanSector: createSupervisorDto.urbanSector,
+          address: createSupervisorDto.address,
+          referenceAddress: createSupervisorDto.referenceAddress,
+          roles: createSupervisorDto.roles,
+        });
+
+        await this.memberRepository.save(newMember);
+
         const newSupervisor = this.supervisorRepository.create({
-          ...createSupervisorDto,
-          numberChildren: +numberChildren,
+          member: newMember,
+          isDirectRelationToPastor: isDirectRelationToPastor,
           theirChurch: church,
           theirPastor: pastor,
           theirCopastor: copastor,
@@ -233,9 +255,32 @@ export class SupervisorService {
 
       // Create new instance
       try {
+        const newMember = this.memberRepository.create({
+          firstName: createSupervisorDto.firstName,
+          lastName: createSupervisorDto.lastName,
+          gender: createSupervisorDto.gender,
+          originCountry: createSupervisorDto.originCountry,
+          birthDate: createSupervisorDto.birthDate,
+          maritalStatus: createSupervisorDto.maritalStatus,
+          numberChildren: +createSupervisorDto.numberChildren,
+          conversionDate: createSupervisorDto.conversionDate,
+          email: createSupervisorDto.email,
+          phoneNumber: createSupervisorDto.phoneNumber,
+          country: createSupervisorDto.country,
+          department: createSupervisorDto.department,
+          province: createSupervisorDto.province,
+          district: createSupervisorDto.district,
+          urbanSector: createSupervisorDto.urbanSector,
+          address: createSupervisorDto.address,
+          referenceAddress: createSupervisorDto.referenceAddress,
+          roles: createSupervisorDto.roles,
+        });
+
+        await this.memberRepository.save(newMember);
+
         const newSupervisor = this.supervisorRepository.create({
-          ...createSupervisorDto,
-          numberChildren: +numberChildren,
+          member: newMember,
+          isDirectRelationToPastor: isDirectRelationToPastor,
           theirChurch: church,
           theirPastor: pastor,
           theirCopastor: null,
@@ -268,6 +313,7 @@ export class SupervisorService {
             theirZone: isNullZone ? IsNull() : null,
           },
           order: { createdAt: order as FindOptionsOrderValue },
+          relations: ['member'],
         });
 
         return supervisors;
@@ -287,13 +333,14 @@ export class SupervisorService {
         relations: [
           'updatedBy',
           'createdBy',
+          'member',
           'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirZone',
-          'preachers',
+          'theirPastor.member',
+          'theirCopastor.member',
           'familyGroups',
-          'disciples',
+          'theirZone',
+          'preachers.member',
+          'disciples.member',
         ],
         relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
@@ -319,7 +366,7 @@ export class SupervisorService {
   async findByTerm(
     term: string,
     searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<Supervisor | Supervisor[]> {
+  ): Promise<Supervisor[]> {
     const {
       'search-type': searchType,
       'search-sub-type': searchSubType,
@@ -349,7 +396,9 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -357,13 +406,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -396,7 +446,9 @@ export class SupervisorService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -414,13 +466,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -453,7 +506,9 @@ export class SupervisorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -471,13 +526,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -511,7 +567,9 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -519,13 +577,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -558,7 +617,9 @@ export class SupervisorService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -576,13 +637,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -615,7 +677,9 @@ export class SupervisorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -633,13 +697,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -674,8 +739,10 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -683,13 +750,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -723,8 +791,10 @@ export class SupervisorService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -742,13 +812,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -782,8 +853,10 @@ export class SupervisorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -801,13 +874,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -843,7 +917,9 @@ export class SupervisorService {
 
         const supervisors = await this.supervisorRepository.find({
           where: {
-            birthDate: Between(fromDate, toDate),
+            member: {
+              birthDate: Between(fromDate, toDate),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -851,13 +927,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -894,13 +971,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -969,13 +1047,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1009,7 +1088,9 @@ export class SupervisorService {
 
         const supervisors = await this.supervisorRepository.find({
           where: {
-            gender: genderTerm,
+            member: {
+              gender: genderTerm,
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1017,13 +1098,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1065,7 +1147,9 @@ export class SupervisorService {
 
         const supervisors = await this.supervisorRepository.find({
           where: {
-            maritalStatus: maritalStatusTerm,
+            member: {
+              maritalStatus: maritalStatusTerm,
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1073,13 +1157,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1109,7 +1194,9 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
-            originCountry: ILike(`%${term}%`),
+            member: {
+              originCountry: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1117,13 +1204,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1150,7 +1238,9 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
-            department: ILike(`%${term}%`),
+            member: {
+              department: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1158,13 +1248,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1191,7 +1282,9 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
-            province: ILike(`%${term}%`),
+            member: {
+              province: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1199,13 +1292,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1232,7 +1326,9 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
-            district: ILike(`%${term}%`),
+            member: {
+              district: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1240,13 +1336,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1273,7 +1370,9 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
-            urbanSector: ILike(`%${term}%`),
+            member: {
+              urbanSector: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1281,13 +1380,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1314,7 +1414,9 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
-            address: ILike(`%${term}%`),
+            member: {
+              address: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1322,13 +1424,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1371,13 +1474,14 @@ export class SupervisorService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirZone',
-            'preachers',
+            'theirPastor.member',
+            'theirCopastor.member',
             'familyGroups',
-            'disciples',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1419,6 +1523,7 @@ export class SupervisorService {
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
+          relations: ['member', 'theirZone'],
         });
 
         return supervisors;
@@ -1468,7 +1573,6 @@ export class SupervisorService {
       theirPastor,
       theirCopastor,
       isDirectRelationToPastor,
-      numberChildren,
     } = updateSupervisorDto;
 
     if (!roles) {
@@ -1484,7 +1588,7 @@ export class SupervisorService {
     //* Validation supervisor
     const supervisor = await this.supervisorRepository.findOne({
       where: { id: id },
-      relations: ['theirCopastor', 'theirPastor', 'theirChurch'],
+      relations: ['theirCopastor', 'theirPastor', 'theirChurch', 'member'],
     });
 
     if (!supervisor) {
@@ -1500,20 +1604,20 @@ export class SupervisorService {
     }
 
     if (
-      (supervisor.roles.includes(MemberRole.Supervisor) &&
-        supervisor.roles.includes(MemberRole.Disciple) &&
-        !supervisor.roles.includes(MemberRole.Preacher) &&
-        !supervisor.roles.includes(MemberRole.Copastor) &&
-        !supervisor.roles.includes(MemberRole.Pastor) &&
-        !supervisor.roles.includes(MemberRole.Treasurer) &&
+      (supervisor.member.roles.includes(MemberRole.Supervisor) &&
+        supervisor.member.roles.includes(MemberRole.Disciple) &&
+        !supervisor.member.roles.includes(MemberRole.Preacher) &&
+        !supervisor.member.roles.includes(MemberRole.Copastor) &&
+        !supervisor.member.roles.includes(MemberRole.Pastor) &&
+        !supervisor.member.roles.includes(MemberRole.Treasurer) &&
         (roles.includes(MemberRole.Pastor) ||
           roles.includes(MemberRole.Preacher))) ||
-      (supervisor.roles.includes(MemberRole.Supervisor) &&
-        supervisor.roles.includes(MemberRole.Disciple) &&
-        supervisor.roles.includes(MemberRole.Treasurer) &&
-        !supervisor.roles.includes(MemberRole.Preacher) &&
-        !supervisor.roles.includes(MemberRole.Copastor) &&
-        !supervisor.roles.includes(MemberRole.Pastor) &&
+      (supervisor.member.roles.includes(MemberRole.Supervisor) &&
+        supervisor.member.roles.includes(MemberRole.Disciple) &&
+        supervisor.member.roles.includes(MemberRole.Treasurer) &&
+        !supervisor.member.roles.includes(MemberRole.Preacher) &&
+        !supervisor.member.roles.includes(MemberRole.Copastor) &&
+        !supervisor.member.roles.includes(MemberRole.Pastor) &&
         (roles.includes(MemberRole.Pastor) ||
           roles.includes(MemberRole.Preacher)))
     ) {
@@ -1524,48 +1628,48 @@ export class SupervisorService {
 
     //* Update info about Supervisor
     if (
-      (supervisor.roles.includes(MemberRole.Disciple) &&
-        supervisor.roles.includes(MemberRole.Supervisor) &&
-        !supervisor.roles.includes(MemberRole.Pastor) &&
-        !supervisor.roles.includes(MemberRole.Copastor) &&
-        !supervisor.roles.includes(MemberRole.Preacher) &&
-        !supervisor.roles.includes(MemberRole.Treasurer) &&
+      (supervisor.member.roles.includes(MemberRole.Disciple) &&
+        supervisor.member.roles.includes(MemberRole.Supervisor) &&
+        !supervisor.member.roles.includes(MemberRole.Pastor) &&
+        !supervisor.member.roles.includes(MemberRole.Copastor) &&
+        !supervisor.member.roles.includes(MemberRole.Preacher) &&
+        !supervisor.member.roles.includes(MemberRole.Treasurer) &&
         roles.includes(MemberRole.Disciple) &&
         roles.includes(MemberRole.Supervisor) &&
         !roles.includes(MemberRole.Pastor) &&
         !roles.includes(MemberRole.Copastor) &&
         !roles.includes(MemberRole.Preacher) &&
         !roles.includes(MemberRole.Treasurer)) ||
-      (supervisor.roles.includes(MemberRole.Disciple) &&
-        supervisor.roles.includes(MemberRole.Supervisor) &&
-        supervisor.roles.includes(MemberRole.Treasurer) &&
-        !supervisor.roles.includes(MemberRole.Copastor) &&
-        !supervisor.roles.includes(MemberRole.Preacher) &&
-        !supervisor.roles.includes(MemberRole.Pastor) &&
+      (supervisor.member.roles.includes(MemberRole.Disciple) &&
+        supervisor.member.roles.includes(MemberRole.Supervisor) &&
+        supervisor.member.roles.includes(MemberRole.Treasurer) &&
+        !supervisor.member.roles.includes(MemberRole.Copastor) &&
+        !supervisor.member.roles.includes(MemberRole.Preacher) &&
+        !supervisor.member.roles.includes(MemberRole.Pastor) &&
         roles.includes(MemberRole.Disciple) &&
         roles.includes(MemberRole.Supervisor) &&
         roles.includes(MemberRole.Treasurer) &&
         !roles.includes(MemberRole.Copastor) &&
         !roles.includes(MemberRole.Pastor) &&
         !roles.includes(MemberRole.Preacher)) ||
-      (supervisor.roles.includes(MemberRole.Disciple) &&
-        supervisor.roles.includes(MemberRole.Supervisor) &&
-        !supervisor.roles.includes(MemberRole.Pastor) &&
-        !supervisor.roles.includes(MemberRole.Copastor) &&
-        !supervisor.roles.includes(MemberRole.Preacher) &&
-        !supervisor.roles.includes(MemberRole.Treasurer) &&
+      (supervisor.member.roles.includes(MemberRole.Disciple) &&
+        supervisor.member.roles.includes(MemberRole.Supervisor) &&
+        !supervisor.member.roles.includes(MemberRole.Pastor) &&
+        !supervisor.member.roles.includes(MemberRole.Copastor) &&
+        !supervisor.member.roles.includes(MemberRole.Preacher) &&
+        !supervisor.member.roles.includes(MemberRole.Treasurer) &&
         roles.includes(MemberRole.Disciple) &&
         roles.includes(MemberRole.Supervisor) &&
         roles.includes(MemberRole.Treasurer) &&
         !roles.includes(MemberRole.Pastor) &&
         !roles.includes(MemberRole.Copastor) &&
         !roles.includes(MemberRole.Preacher)) ||
-      (supervisor.roles.includes(MemberRole.Disciple) &&
-        supervisor.roles.includes(MemberRole.Supervisor) &&
-        supervisor.roles.includes(MemberRole.Treasurer) &&
-        !supervisor.roles.includes(MemberRole.Pastor) &&
-        !supervisor.roles.includes(MemberRole.Copastor) &&
-        !supervisor.roles.includes(MemberRole.Preacher) &&
+      (supervisor.member.roles.includes(MemberRole.Disciple) &&
+        supervisor.member.roles.includes(MemberRole.Supervisor) &&
+        supervisor.member.roles.includes(MemberRole.Treasurer) &&
+        !supervisor.member.roles.includes(MemberRole.Pastor) &&
+        !supervisor.member.roles.includes(MemberRole.Copastor) &&
+        !supervisor.member.roles.includes(MemberRole.Preacher) &&
         roles.includes(MemberRole.Disciple) &&
         roles.includes(MemberRole.Supervisor) &&
         !roles.includes(MemberRole.Treasurer) &&
@@ -1646,15 +1750,44 @@ export class SupervisorService {
         }
 
         //* Update and save
+        let savedMember: Member;
+        try {
+          const updatedMember = await this.memberRepository.preload({
+            id: supervisor.member.id,
+            firstName: updateSupervisorDto.firstName,
+            lastName: updateSupervisorDto.lastName,
+            gender: updateSupervisorDto.gender,
+            originCountry: updateSupervisorDto.originCountry,
+            birthDate: updateSupervisorDto.birthDate,
+            maritalStatus: updateSupervisorDto.maritalStatus,
+            numberChildren: +updateSupervisorDto.numberChildren,
+            conversionDate: updateSupervisorDto.conversionDate,
+            email: updateSupervisorDto.email,
+            phoneNumber: updateSupervisorDto.phoneNumber,
+            country: updateSupervisorDto.country,
+            department: updateSupervisorDto.department,
+            province: updateSupervisorDto.province,
+            district: updateSupervisorDto.district,
+            urbanSector: updateSupervisorDto.urbanSector,
+            address: updateSupervisorDto.address,
+            referenceAddress: updateSupervisorDto.referenceAddress,
+            roles: updateSupervisorDto.roles,
+          });
+
+          savedMember = await this.memberRepository.save(updatedMember);
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+
         let savedSupervisor: Supervisor;
         try {
           const updatedSupervisor = await this.supervisorRepository.preload({
             id: supervisor.id,
-            ...updateSupervisorDto,
-            numberChildren: +numberChildren,
+            member: savedMember,
             theirChurch: newChurch,
             theirPastor: newPastor,
             theirCopastor: newCopastor,
+            isDirectRelationToPastor: isDirectRelationToPastor,
             updatedAt: new Date(),
             updatedBy: user,
             recordStatus: recordStatus,
@@ -1793,16 +1926,45 @@ export class SupervisorService {
           );
         }
 
-        // Update and save
+        //* Update and save
+        let savedMember: Member;
+        try {
+          const updatedMember = await this.memberRepository.preload({
+            id: supervisor.member.id,
+            firstName: updateSupervisorDto.firstName,
+            lastName: updateSupervisorDto.lastName,
+            gender: updateSupervisorDto.gender,
+            originCountry: updateSupervisorDto.originCountry,
+            birthDate: updateSupervisorDto.birthDate,
+            maritalStatus: updateSupervisorDto.maritalStatus,
+            numberChildren: +updateSupervisorDto.numberChildren,
+            conversionDate: updateSupervisorDto.conversionDate,
+            email: updateSupervisorDto.email,
+            phoneNumber: updateSupervisorDto.phoneNumber,
+            country: updateSupervisorDto.country,
+            department: updateSupervisorDto.department,
+            province: updateSupervisorDto.province,
+            district: updateSupervisorDto.district,
+            urbanSector: updateSupervisorDto.urbanSector,
+            address: updateSupervisorDto.address,
+            referenceAddress: updateSupervisorDto.referenceAddress,
+            roles: updateSupervisorDto.roles,
+          });
+
+          savedMember = await this.memberRepository.save(updatedMember);
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+
         let savedSupervisor: Supervisor;
         try {
           const updatedSupervisor = await this.supervisorRepository.preload({
             id: supervisor.id,
-            ...updateSupervisorDto,
-            numberChildren: +numberChildren,
+            member: savedMember,
             theirChurch: newChurch,
             theirPastor: newPastor,
             theirCopastor: null,
+            isDirectRelationToPastor: isDirectRelationToPastor,
             updatedAt: new Date(),
             updatedBy: user,
             recordStatus: recordStatus,
@@ -1901,13 +2063,37 @@ export class SupervisorService {
         !isDirectRelationToPastor
       ) {
         try {
+          const updatedMember = await this.memberRepository.preload({
+            id: supervisor.member.id,
+            firstName: updateSupervisorDto.firstName,
+            lastName: updateSupervisorDto.lastName,
+            gender: updateSupervisorDto.gender,
+            originCountry: updateSupervisorDto.originCountry,
+            birthDate: updateSupervisorDto.birthDate,
+            maritalStatus: updateSupervisorDto.maritalStatus,
+            numberChildren: +updateSupervisorDto.numberChildren,
+            conversionDate: updateSupervisorDto.conversionDate,
+            email: updateSupervisorDto.email,
+            phoneNumber: updateSupervisorDto.phoneNumber,
+            country: updateSupervisorDto.country,
+            department: updateSupervisorDto.department,
+            province: updateSupervisorDto.province,
+            district: updateSupervisorDto.district,
+            urbanSector: updateSupervisorDto.urbanSector,
+            address: updateSupervisorDto.address,
+            referenceAddress: updateSupervisorDto.referenceAddress,
+            roles: updateSupervisorDto.roles,
+          });
+
+          await this.memberRepository.save(updatedMember);
+
           const updatedSupervisor = await this.supervisorRepository.preload({
             id: supervisor.id,
-            ...updateSupervisorDto,
-            numberChildren: +numberChildren,
+            member: updatedMember,
             theirChurch: supervisor.theirChurch,
             theirPastor: supervisor.theirPastor,
             theirCopastor: supervisor.theirCopastor,
+            isDirectRelationToPastor: isDirectRelationToPastor,
             updatedAt: new Date(),
             updatedBy: user,
             recordStatus: recordStatus,
@@ -1924,19 +2110,43 @@ export class SupervisorService {
         supervisor?.theirPastor?.id === theirPastor &&
         isDirectRelationToPastor
       ) {
-        const updatedSupervisor = await this.supervisorRepository.preload({
-          id: supervisor.id,
-          ...updateSupervisorDto,
-          numberChildren: +numberChildren,
-          theirChurch: supervisor.theirChurch,
-          theirPastor: supervisor.theirPastor,
-          theirCopastor: null,
-          updatedAt: new Date(),
-          updatedBy: user,
-          recordStatus: recordStatus,
-        });
-
         try {
+          const updatedMember = await this.memberRepository.preload({
+            id: supervisor.member.id,
+            firstName: updateSupervisorDto.firstName,
+            lastName: updateSupervisorDto.lastName,
+            gender: updateSupervisorDto.gender,
+            originCountry: updateSupervisorDto.originCountry,
+            birthDate: updateSupervisorDto.birthDate,
+            maritalStatus: updateSupervisorDto.maritalStatus,
+            numberChildren: +updateSupervisorDto.numberChildren,
+            conversionDate: updateSupervisorDto.conversionDate,
+            email: updateSupervisorDto.email,
+            phoneNumber: updateSupervisorDto.phoneNumber,
+            country: updateSupervisorDto.country,
+            department: updateSupervisorDto.department,
+            province: updateSupervisorDto.province,
+            district: updateSupervisorDto.district,
+            urbanSector: updateSupervisorDto.urbanSector,
+            address: updateSupervisorDto.address,
+            referenceAddress: updateSupervisorDto.referenceAddress,
+            roles: updateSupervisorDto.roles,
+          });
+
+          await this.memberRepository.save(updatedMember);
+
+          const updatedSupervisor = await this.supervisorRepository.preload({
+            id: supervisor.id,
+            member: updatedMember,
+            theirChurch: supervisor.theirChurch,
+            theirPastor: supervisor.theirPastor,
+            theirCopastor: null,
+            isDirectRelationToPastor: isDirectRelationToPastor,
+            updatedAt: new Date(),
+            updatedBy: user,
+            recordStatus: recordStatus,
+          });
+
           return await this.supervisorRepository.save(updatedSupervisor);
         } catch (error) {
           this.handleDBExceptions(error);
@@ -1946,12 +2156,12 @@ export class SupervisorService {
 
     //* Raise Supervisor level to Co-pastor
     if (
-      (supervisor.roles.includes(MemberRole.Disciple) &&
-        supervisor.roles.includes(MemberRole.Supervisor) &&
-        !supervisor.roles.includes(MemberRole.Treasurer) &&
-        !supervisor.roles.includes(MemberRole.Copastor) &&
-        !supervisor.roles.includes(MemberRole.Preacher) &&
-        !supervisor.roles.includes(MemberRole.Pastor) &&
+      (supervisor.member.roles.includes(MemberRole.Disciple) &&
+        supervisor.member.roles.includes(MemberRole.Supervisor) &&
+        !supervisor.member.roles.includes(MemberRole.Treasurer) &&
+        !supervisor.member.roles.includes(MemberRole.Copastor) &&
+        !supervisor.member.roles.includes(MemberRole.Preacher) &&
+        !supervisor.member.roles.includes(MemberRole.Pastor) &&
         roles.includes(MemberRole.Disciple) &&
         roles.includes(MemberRole.Copastor) &&
         !roles.includes(MemberRole.Treasurer) &&
@@ -1959,12 +2169,12 @@ export class SupervisorService {
         !roles.includes(MemberRole.Pastor) &&
         !roles.includes(MemberRole.Preacher) &&
         recordStatus === RecordStatus.Active) ||
-      (supervisor.roles.includes(MemberRole.Disciple) &&
-        supervisor.roles.includes(MemberRole.Supervisor) &&
-        supervisor.roles.includes(MemberRole.Treasurer) &&
-        !supervisor.roles.includes(MemberRole.Copastor) &&
-        !supervisor.roles.includes(MemberRole.Preacher) &&
-        !supervisor.roles.includes(MemberRole.Pastor) &&
+      (supervisor.member.roles.includes(MemberRole.Disciple) &&
+        supervisor.member.roles.includes(MemberRole.Supervisor) &&
+        supervisor.member.roles.includes(MemberRole.Treasurer) &&
+        !supervisor.member.roles.includes(MemberRole.Copastor) &&
+        !supervisor.member.roles.includes(MemberRole.Preacher) &&
+        !supervisor.member.roles.includes(MemberRole.Pastor) &&
         roles.includes(MemberRole.Disciple) &&
         roles.includes(MemberRole.Copastor) &&
         !roles.includes(MemberRole.Treasurer) &&
@@ -2013,11 +2223,34 @@ export class SupervisorService {
         );
       }
 
-      // Create new instance Copastor and delete old Supervisor
+      //* Create new instance Copastor and delete old Supervisor
       try {
+        const updatedMember = await this.memberRepository.preload({
+          id: supervisor.member.id,
+          firstName: updateSupervisorDto.firstName,
+          lastName: updateSupervisorDto.lastName,
+          gender: updateSupervisorDto.gender,
+          originCountry: updateSupervisorDto.originCountry,
+          birthDate: updateSupervisorDto.birthDate,
+          maritalStatus: updateSupervisorDto.maritalStatus,
+          numberChildren: +updateSupervisorDto.numberChildren,
+          conversionDate: updateSupervisorDto.conversionDate,
+          email: updateSupervisorDto.email,
+          phoneNumber: updateSupervisorDto.phoneNumber,
+          country: updateSupervisorDto.country,
+          department: updateSupervisorDto.department,
+          province: updateSupervisorDto.province,
+          district: updateSupervisorDto.district,
+          urbanSector: updateSupervisorDto.urbanSector,
+          address: updateSupervisorDto.address,
+          referenceAddress: updateSupervisorDto.referenceAddress,
+          roles: updateSupervisorDto.roles,
+        });
+
+        await this.memberRepository.save(updatedMember);
+
         const newCopastor = this.copastorRepository.create({
-          ...updateSupervisorDto,
-          numberChildren: +numberChildren,
+          member: updatedMember,
           theirChurch: newChurch,
           theirPastor: newPastor,
           createdAt: new Date(),
@@ -2027,7 +2260,6 @@ export class SupervisorService {
         const savedPastor = await this.copastorRepository.save(newCopastor);
 
         await this.supervisorRepository.remove(supervisor); // onDelete subordinate entities (null)
-
         return savedPastor;
       } catch (error) {
         this.handleDBExceptions(error);
@@ -2054,18 +2286,18 @@ export class SupervisorService {
     }
 
     //* Update and set in Inactive on Supervisor
-    const updatedSupervisor = await this.supervisorRepository.preload({
-      id: supervisor.id,
-      theirChurch: null,
-      theirPastor: null,
-      theirCopastor: null,
-      theirZone: null,
-      updatedAt: new Date(),
-      updatedBy: user,
-      recordStatus: RecordStatus.Inactive,
-    });
-
     try {
+      const updatedSupervisor = await this.supervisorRepository.preload({
+        id: supervisor.id,
+        theirChurch: null,
+        theirPastor: null,
+        theirCopastor: null,
+        theirZone: null,
+        updatedAt: new Date(),
+        updatedBy: user,
+        recordStatus: RecordStatus.Inactive,
+      });
+
       await this.supervisorRepository.save(updatedSupervisor);
     } catch (error) {
       this.handleDBExceptions(error);

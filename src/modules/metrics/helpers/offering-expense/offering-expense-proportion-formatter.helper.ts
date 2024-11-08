@@ -5,9 +5,15 @@ interface Options {
   offeringExpenses: OfferingExpense[];
 }
 
+interface OfferingExpenseProportion {
+  totalOfferingExpenseRecordsCount: number;
+  activeOfferingExpenseRecordsCount: number;
+  inactiveOfferingExpenseRecordsCount: number;
+}
+
 export const offeringExpenseProportionFormatter = ({
   offeringExpenses,
-}: Options) => {
+}: Options): OfferingExpenseProportion => {
   const totalOfferingExpenseRecordsCount = offeringExpenses.length;
 
   const activeOfferingExpenseRecordsCount = offeringExpenses.filter(
@@ -19,8 +25,8 @@ export const offeringExpenseProportionFormatter = ({
   ).length;
 
   return {
-    totalOfferingExpenseRecordsCount: totalOfferingExpenseRecordsCount,
-    activeOfferingExpenseRecordsCount: activeOfferingExpenseRecordsCount,
-    inactiveOfferingExpenseRecordsCount: inactiveOfferingExpenseRecordsCount,
+    totalOfferingExpenseRecordsCount,
+    activeOfferingExpenseRecordsCount,
+    inactiveOfferingExpenseRecordsCount,
   };
 };

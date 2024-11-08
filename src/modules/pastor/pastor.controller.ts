@@ -94,7 +94,7 @@ export class PastorController {
   findByTerm(
     @Param('term') term: string,
     @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<Pastor | Pastor[]> {
+  ): Promise<Pastor[]> {
     return this.pastorService.findByTerm(term, searchTypeAndPaginationDto);
   }
 

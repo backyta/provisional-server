@@ -107,7 +107,7 @@ export class ChurchController {
   findByTerm(
     @Param('term') term: string,
     @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<Church | Church[]> {
+  ): Promise<Church[]> {
     return this.churchService.findByTerm(term, searchTypeAndPaginationDto);
   }
 

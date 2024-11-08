@@ -32,7 +32,7 @@ import {
 import { OfferingIncome } from '@/modules/offering/income/entities';
 import { OfferingIncomeService } from '@/modules/offering/income/offering-income.service';
 
-@Controller('offerings-income')
+@Controller('offering-income')
 export class OfferingIncomeController {
   constructor(private readonly offeringIncomeService: OfferingIncomeService) {}
 
@@ -82,7 +82,7 @@ export class OfferingIncomeController {
   findByTerm(
     @Param('term') term: string,
     @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<OfferingIncome | OfferingIncome[]> {
+  ): Promise<OfferingIncome[]> {
     return this.offeringIncomeService.findByTerm(
       term,
       searchTypeAndPaginationDto,

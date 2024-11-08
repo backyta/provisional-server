@@ -89,7 +89,7 @@ export class UserController {
   findByTerm(
     @Param('term') term: string,
     @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<User | User[]> {
+  ): Promise<User[]> {
     return this.userService.findByTerm(term, searchTypeAndPaginationDto);
   }
 

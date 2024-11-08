@@ -5,40 +5,46 @@ interface Options {
   familyGroups: FamilyGroup[];
 }
 
+interface ServiceTimeInfo {
+  serviceTimesCount: number;
+  supervisor: string;
+  church: {
+    isAnexe: boolean;
+    abbreviatedChurchName: string;
+  };
+}
+
+type ServiceTimeResult = {
+  [serviceTime: string]: ServiceTimeInfo;
+};
+
 export const familyGroupFormatterByServiceTime = ({
   familyGroups,
 }: Options) => {
-  const result = familyGroups.reduce(
-    (acc, familyGroup) => {
-      if (!acc[familyGroup.serviceTime]) {
-        acc[familyGroup.serviceTime] = {
-          serviceTimesCount: 0,
-          supervisor: familyGroup?.theirSupervisor?.firstName
-            ? `${getInitialFullNames({ firstNames: familyGroup?.theirSupervisor?.firstName ?? '', lastNames: '' })} ${familyGroup?.theirSupervisor?.lastName}`
-            : familyGroup?.theirSupervisor?.firstName === undefined
-              ? ''
-              : 'Sin Supervisor',
-          church: {
-            isAnexe: familyGroups[0]?.theirChurch?.isAnexe,
-            abbreviatedChurchName:
-              familyGroups[0]?.theirChurch?.abbreviatedChurchName,
-          },
-        };
-      }
+  const result: ServiceTimeResult = familyGroups.reduce((acc, familyGroup) => {
+    if (!acc[familyGroup.serviceTime]) {
+      acc[familyGroup.serviceTime] = {
+        serviceTimesCount: 0,
+        supervisor: familyGroup?.theirSupervisor?.member?.firstName
+          ? `${getInitialFullNames({
+              firstNames: familyGroup?.theirSupervisor?.member?.firstName ?? '',
+              lastNames: '',
+            })} ${familyGroup?.theirSupervisor?.member?.lastName}`
+          : familyGroup?.theirSupervisor?.member?.firstName === undefined
+            ? ''
+            : 'Sin Supervisor',
+        church: {
+          isAnexe: familyGroups[0]?.theirChurch?.isAnexe,
+          abbreviatedChurchName:
+            familyGroups[0]?.theirChurch?.abbreviatedChurchName,
+        },
+      };
+    }
 
-      acc[familyGroup.serviceTime].serviceTimesCount += 1;
+    acc[familyGroup.serviceTime].serviceTimesCount += 1;
 
-      return acc;
-    },
-    {} as Record<
-      string,
-      {
-        serviceTimesCount: number;
-        supervisor: string;
-        church: { isAnexe: boolean; abbreviatedChurchName: string };
-      }
-    >,
-  );
+    return acc;
+  }, {});
 
   return result;
 };

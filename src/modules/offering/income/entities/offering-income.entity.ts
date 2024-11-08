@@ -19,7 +19,7 @@ import { Preacher } from '@/modules/preacher/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
 import { FamilyGroup } from '@/modules/family-group/entities';
 
-@Entity({ name: 'offerings_income' })
+@Entity({ name: 'offering_income' })
 @Index(['type', 'subType'])
 export class OfferingIncome {
   //* General data

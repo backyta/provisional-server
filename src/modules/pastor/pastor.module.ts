@@ -8,6 +8,7 @@ import { PastorController } from '@/modules/pastor/pastor.controller';
 import { ZoneModule } from '@/modules/zone/zone.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { ChurchModule } from '@/modules/church/church.module';
+import { MemberModule } from '@/modules/member/member.module';
 import { DiscipleModule } from '@/modules/disciple/disciple.module';
 import { CopastorModule } from '@/modules/copastor/copastor.module';
 import { PreacherModule } from '@/modules/preacher/preacher.module';
@@ -26,6 +27,7 @@ import { FamilyGroupModule } from '@/modules/family-group/family-group.module';
     forwardRef(() => PreacherModule),
     forwardRef(() => FamilyGroupModule),
     forwardRef(() => DiscipleModule),
+    MemberModule,
     AuthModule,
   ],
   exports: [TypeOrmModule, PastorService],

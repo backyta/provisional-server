@@ -25,7 +25,7 @@ async function bootstrap() {
   // Config Documentation
   const config = new DocumentBuilder()
     .setTitle('ICUP Restful API')
-    .setDescription('Icup sever endpoints')
+    .setDescription('ICUP Sever Endpoints')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

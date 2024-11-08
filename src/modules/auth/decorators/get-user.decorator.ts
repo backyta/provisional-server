@@ -1,7 +1,7 @@
 import {
   ExecutionContext,
-  InternalServerErrorException,
   createParamDecorator,
+  InternalServerErrorException,
 } from '@nestjs/common';
 
 export const GetUser = createParamDecorator(

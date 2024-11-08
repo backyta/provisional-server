@@ -20,6 +20,7 @@ import { FamilyGroupService } from '@/modules/family-group/family-group.service'
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
 import { Pastor } from '@/modules/pastor/entities';
+import { Member } from '@/modules/member/entities';
 import { Church } from '@/modules/church/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Preacher } from '@/modules/preacher/entities';
@@ -39,6 +40,7 @@ import {
   dataFamilyGroups,
 } from '@/modules/seed/data';
 
+// TODO : agregar offerings mediante el id creado de la iglesia y pastores,zones etc
 @Injectable()
 export class SeedService {
   private readonly logger = new Logger('SeedService');
@@ -68,6 +70,9 @@ export class SeedService {
     @InjectRepository(Disciple)
     private readonly discipleRepository: Repository<Disciple>,
 
+    @InjectRepository(Member)
+    private readonly memberRepository: Repository<Member>,
+
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
 
@@ -85,25 +90,19 @@ export class SeedService {
 
   async runSeed(): Promise<string> {
     const queryChurches = this.churchRepository.createQueryBuilder('churches');
+    const queryMembers = this.memberRepository.createQueryBuilder('members');
     const queryPastors = this.pastorRepository.createQueryBuilder('pastors');
-
     const queryCopastor =
       this.copastorRepository.createQueryBuilder('copastors');
-
     const querySupervisors =
       this.supervisorRepository.createQueryBuilder('supervisors');
-
     const queryZones = this.zoneRepository.createQueryBuilder('zones');
-
     const queryPreachers =
       this.preacherRepository.createQueryBuilder('preachers');
-
     const queryFamilyGroups =
       this.familyGroupRepository.createQueryBuilder('family-houses');
-
     const queryDisciples =
       this.discipleRepository.createQueryBuilder('disciples');
-
     const queryUsers = this.userRepository.createQueryBuilder('users');
 
     try {
@@ -115,9 +114,10 @@ export class SeedService {
       await queryCopastor.delete().where({}).execute();
       await queryPastors.delete().where({}).execute();
       await queryChurches.delete().where({}).execute();
+      await queryMembers.delete().where({}).execute();
       await queryUsers
         .delete()
-        .where('NOT :role = ANY(roles)', { role: 'super-user' })
+        .where('NOT (:role = ANY(roles))', { role: 'super-user' }) // delete user without super user role
         .execute();
     } catch (error) {
       this.handleDBExceptions(error);
@@ -195,7 +195,7 @@ export class SeedService {
 
     //* Create Copastor
     const pastor = await this.pastorRepository.findOne({
-      where: { firstName: 'Michael Rodrigo' },
+      where: { member: { firstName: 'Michael Rodrigo' } },
     });
 
     copastors.forEach((copastor) => {
@@ -208,7 +208,7 @@ export class SeedService {
 
     //* Create Supervisor
     const copastor = await this.copastorRepository.findOne({
-      where: { firstName: 'Luz Mariella' },
+      where: { member: { firstName: 'Luz Mariella' } },
     });
 
     supervisors.forEach((supervisor) => {
@@ -233,7 +233,7 @@ export class SeedService {
 
     //* Create Preachers
     const supervisor = await this.supervisorRepository.findOne({
-      where: { lastName: 'Lopez Martinez' },
+      where: { member: { lastName: 'Lopez Martinez' } },
     });
 
     preachers.forEach((preacher) => {

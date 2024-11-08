@@ -6,14 +6,16 @@ import { ApiProperty } from '@nestjs/swagger';
 export class PaginationDto {
   @ApiProperty({
     default: 10,
+    example: 5,
     description: 'How many rows do you need?',
   })
   @IsOptional()
-  @Type(() => Number) // No use GlobalPipes with properties transform (enableImplicitConventions)
+  @Type(() => Number)
   limit?: number;
 
   @ApiProperty({
     default: 0,
+    example: 2,
     description: 'How many rows do you want to skip?',
   })
   @IsOptional()
@@ -23,7 +25,8 @@ export class PaginationDto {
 
   @ApiProperty({
     default: 'ASC',
-    description: 'En que tipo de orden necesitas los registros?',
+    example: 'DESC',
+    description: 'What type of order do you need the records in?',
   })
   @IsOptional()
   @IsString()
@@ -32,7 +35,7 @@ export class PaginationDto {
 
   //* For zone module when search supervisors and return supervisors with zone or not
   @ApiProperty({
-    default: 'ASC',
+    example: 'true',
     description: 'Do you want null relationships to be returned?',
   })
   @IsOptional()
@@ -43,9 +46,9 @@ export class PaginationDto {
   isNullZone?: boolean;
 
   @ApiProperty({
-    default: 'ASC',
+    example: 'true',
     description:
-      'Es un consulta simple(no necesita cargar relaciones) o completa(si necesita cargar relaciones)?',
+      'Is it a simple query (does not need to load relationships) or a complete query (does need to load relationships)?',
   })
   @IsOptional()
   @IsBoolean()
@@ -55,8 +58,8 @@ export class PaginationDto {
   isSimpleQuery?: boolean;
 
   @ApiProperty({
-    default: '1221312-123j34-34',
-    description: 'Iglesia',
+    description: 'ID of the church that is part of the search.',
+    example: 'b740f708-f19d-4116-82b5-3d7b5653be9b',
   })
   @IsOptional()
   @IsString()

@@ -32,7 +32,7 @@ export const getBirthDateByMonth = ({ month, data }: Options) => {
   }
 
   const result = data.filter((person) => {
-    const birthMonth = String(person.birthDate).split('-')[1];
+    const birthMonth = String(person?.member?.birthDate).split('-')[1];
     return birthMonth === monthString;
   });
 

@@ -13,13 +13,31 @@ interface Options {
   disciples: Disciple[];
 }
 
+interface RecordStatusCounts {
+  church: {
+    isAnexe: boolean;
+    abbreviatedChurchName: string;
+  };
+  active: number;
+  inactive: number;
+}
+
+// Interfaz para el resultado de la función
+interface MembersByRecordStatus {
+  pastor: RecordStatusCounts;
+  copastor: RecordStatusCounts;
+  supervisor: RecordStatusCounts;
+  preacher: RecordStatusCounts;
+  disciple: RecordStatusCounts;
+}
+
 export const memberFormatterByRecordStatus = ({
   pastors,
   copastors,
   supervisors,
   preachers,
   disciples,
-}: Options) => {
+}: Options): MembersByRecordStatus => {
   const allMembers = [
     ...pastors,
     ...copastors,
@@ -28,7 +46,7 @@ export const memberFormatterByRecordStatus = ({
     ...disciples,
   ];
 
-  const membersByRecordStatus = {
+  const membersByRecordStatus: MembersByRecordStatus = {
     pastor: {
       church: {
         isAnexe: allMembers[0]?.theirChurch?.isAnexe,
@@ -36,14 +54,14 @@ export const memberFormatterByRecordStatus = ({
           allMembers[0]?.theirChurch?.abbreviatedChurchName,
       },
       active: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Pastor) &&
-          member.recordStatus === RecordStatus.Active,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Pastor) &&
+          item.recordStatus === RecordStatus.Active,
       ).length,
       inactive: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Pastor) &&
-          member.recordStatus === RecordStatus.Inactive,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Pastor) &&
+          item.recordStatus === RecordStatus.Inactive,
       ).length,
     },
     copastor: {
@@ -53,14 +71,14 @@ export const memberFormatterByRecordStatus = ({
           allMembers[0]?.theirChurch?.abbreviatedChurchName,
       },
       active: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Copastor) &&
-          member.recordStatus === RecordStatus.Active,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Copastor) &&
+          item.recordStatus === RecordStatus.Active,
       ).length,
       inactive: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Copastor) &&
-          member.recordStatus === RecordStatus.Inactive,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Copastor) &&
+          item.recordStatus === RecordStatus.Inactive,
       ).length,
     },
     supervisor: {
@@ -70,14 +88,14 @@ export const memberFormatterByRecordStatus = ({
           allMembers[0]?.theirChurch?.abbreviatedChurchName,
       },
       active: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Supervisor) &&
-          member.recordStatus === RecordStatus.Active,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Supervisor) &&
+          item.recordStatus === RecordStatus.Active,
       ).length,
       inactive: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Supervisor) &&
-          member.recordStatus === RecordStatus.Inactive,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Supervisor) &&
+          item.recordStatus === RecordStatus.Inactive,
       ).length,
     },
     preacher: {
@@ -87,14 +105,14 @@ export const memberFormatterByRecordStatus = ({
           allMembers[0]?.theirChurch?.abbreviatedChurchName,
       },
       active: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Preacher) &&
-          member.recordStatus === RecordStatus.Active,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Preacher) &&
+          item.recordStatus === RecordStatus.Active,
       ).length,
       inactive: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Preacher) &&
-          member.recordStatus === RecordStatus.Inactive,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Preacher) &&
+          item.recordStatus === RecordStatus.Inactive,
       ).length,
     },
     disciple: {
@@ -104,24 +122,24 @@ export const memberFormatterByRecordStatus = ({
           allMembers[0]?.theirChurch?.abbreviatedChurchName,
       },
       active: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Disciple) &&
-          !member.roles.includes(MemberRole.Pastor) &&
-          !member.roles.includes(MemberRole.Copastor) &&
-          !member.roles.includes(MemberRole.Supervisor) &&
-          !member.roles.includes(MemberRole.Preacher) &&
-          !member.roles.includes(MemberRole.Treasurer) &&
-          member.recordStatus === RecordStatus.Active,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Disciple) &&
+          !item?.member?.roles.includes(MemberRole.Pastor) &&
+          !item?.member?.roles.includes(MemberRole.Copastor) &&
+          !item?.member?.roles.includes(MemberRole.Supervisor) &&
+          !item?.member?.roles.includes(MemberRole.Preacher) &&
+          !item?.member?.roles.includes(MemberRole.Treasurer) &&
+          item.recordStatus === RecordStatus.Active,
       ).length,
       inactive: allMembers.filter(
-        (member) =>
-          member.roles.includes(MemberRole.Disciple) &&
-          !member.roles.includes(MemberRole.Pastor) &&
-          !member.roles.includes(MemberRole.Copastor) &&
-          !member.roles.includes(MemberRole.Supervisor) &&
-          !member.roles.includes(MemberRole.Preacher) &&
-          !member.roles.includes(MemberRole.Treasurer) &&
-          member.recordStatus === RecordStatus.Inactive,
+        (item) =>
+          item?.member?.roles.includes(MemberRole.Disciple) &&
+          !item?.member?.roles.includes(MemberRole.Pastor) &&
+          !item?.member?.roles.includes(MemberRole.Copastor) &&
+          !item?.member?.roles.includes(MemberRole.Supervisor) &&
+          !item?.member?.roles.includes(MemberRole.Preacher) &&
+          !item?.member?.roles.includes(MemberRole.Treasurer) &&
+          item.recordStatus === RecordStatus.Inactive,
       ).length,
     },
   };

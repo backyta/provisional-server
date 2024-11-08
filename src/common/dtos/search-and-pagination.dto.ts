@@ -15,8 +15,8 @@ import { SearchType, SearchSubType } from '@/common/enums';
 export class SearchAndPaginationDto {
   @ApiProperty({
     enum: SearchType,
-    description:
-      'Choose one of types, to search for types (different entities).',
+    description: 'Choose one of the types to perform a search.',
+    example: SearchType.ChurchName,
   })
   @IsEnum(SearchType)
   @IsNotEmpty({ message: 'El tipo de búsqueda es requerido.' })
@@ -25,7 +25,8 @@ export class SearchAndPaginationDto {
 
   @ApiProperty({
     enum: SearchSubType,
-    description: 'Choose one sub type.',
+    description: 'Choose one of the sub types to perform a search.',
+    example: SearchSubType.KitchenFurniture,
   })
   @IsEnum(SearchSubType)
   @IsOptional()
@@ -34,14 +35,16 @@ export class SearchAndPaginationDto {
 
   @ApiProperty({
     default: 10,
+    example: 2,
     description: 'How many rows do you need?',
   })
   @IsOptional()
-  @Type(() => Number) // No use GlobalPipes with properties transform (enableImplicitConventions)
+  @Type(() => Number)
   limit?: number;
 
   @ApiProperty({
     default: 0,
+    example: 3,
     description: 'How many rows do you want to skip?',
   })
   @IsOptional()
@@ -60,7 +63,7 @@ export class SearchAndPaginationDto {
 
   //* For preacher module when search by zone id and return preacher with family groups or not
   @ApiProperty({
-    default: 'ASC',
+    example: 'true',
     description: 'Do you want null relationships to be returned?',
   })
   @IsOptional()
@@ -71,7 +74,7 @@ export class SearchAndPaginationDto {
   isNullFamilyGroup?: boolean;
 
   @ApiProperty({
-    default: 'ASC',
+    example: 'true',
     description: 'Do you want null relationships to be returned?',
   })
   @IsOptional()
@@ -81,9 +84,9 @@ export class SearchAndPaginationDto {
   )
   isNullZone?: boolean;
 
-  //* For Zones in metrics
+  //* For Zones and Family groups in metrics
   @ApiProperty({
-    default: 'ASC',
+    example: 'true',
     description: 'Do you want returned all zones?',
   })
   @IsOptional()
@@ -95,7 +98,7 @@ export class SearchAndPaginationDto {
 
   //* For Family groups in metrics
   @ApiProperty({
-    default: 'ASC',
+    example: 'true',
     description: 'Do you want returned all family groups?',
   })
   @IsOptional()

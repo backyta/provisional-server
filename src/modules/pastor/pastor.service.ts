@@ -28,6 +28,7 @@ import { dateFormatterToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
 import { Church } from '@/modules/church/entities';
+import { Member } from '@/modules/member/entities';
 import { Pastor } from '@/modules/pastor/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Copastor } from '@/modules/copastor/entities';
@@ -63,11 +64,14 @@ export class PastorService {
 
     @InjectRepository(Disciple)
     private readonly discipleRepository: Repository<Disciple>,
+
+    @InjectRepository(Member)
+    private readonly memberRepository: Repository<Member>,
   ) {}
 
   //* CREATE PASTOR
   async create(createPastorDto: CreatePastorDto, user: User): Promise<Pastor> {
-    const { roles, numberChildren, theirChurch } = createPastorDto;
+    const { roles, theirChurch } = createPastorDto;
 
     if (
       !roles.includes(MemberRole.Disciple) &&
@@ -112,11 +116,33 @@ export class PastorService {
       );
     }
 
-    // Create new instance
+    //* Create new instance member and assign to new pastor instance
     try {
+      const newMember = this.memberRepository.create({
+        firstName: createPastorDto.firstName,
+        lastName: createPastorDto.lastName,
+        gender: createPastorDto.gender,
+        originCountry: createPastorDto.originCountry,
+        birthDate: createPastorDto.birthDate,
+        maritalStatus: createPastorDto.maritalStatus,
+        numberChildren: +createPastorDto.numberChildren,
+        conversionDate: createPastorDto.conversionDate,
+        email: createPastorDto.email,
+        phoneNumber: createPastorDto.phoneNumber,
+        country: createPastorDto.country,
+        department: createPastorDto.department,
+        province: createPastorDto.province,
+        district: createPastorDto.district,
+        urbanSector: createPastorDto.urbanSector,
+        address: createPastorDto.address,
+        referenceAddress: createPastorDto.referenceAddress,
+        roles: createPastorDto.roles,
+      });
+
+      await this.memberRepository.save(newMember);
+
       const newPastor = this.pastorRepository.create({
-        ...createPastorDto,
-        numberChildren: +numberChildren,
+        member: newMember,
         theirChurch: church,
         createdAt: new Date(),
         createdBy: user,
@@ -137,6 +163,7 @@ export class PastorService {
         const pastors = await this.pastorRepository.find({
           where: { recordStatus: RecordStatus.Active },
           order: { createdAt: order as FindOptionsOrderValue },
+          relations: ['member'],
         });
 
         return pastors;
@@ -154,12 +181,13 @@ export class PastorService {
           'updatedBy',
           'createdBy',
           'theirChurch',
-          'copastors',
-          'supervisors',
           'zones',
-          'preachers',
           'familyGroups',
-          'disciples',
+          'member',
+          'copastors.member',
+          'supervisors.member',
+          'preachers.member',
+          'disciples.member',
         ],
         relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
@@ -185,7 +213,7 @@ export class PastorService {
   async findByTerm(
     term: string,
     searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<Pastor | Pastor[]> {
+  ): Promise<Pastor[]> {
     const {
       'search-type': searchType,
       limit,
@@ -208,7 +236,9 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -217,12 +247,13 @@ export class PastorService {
             'updatedBy',
             'createdBy',
             'theirChurch',
-            'copastors',
-            'supervisors',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'member',
+            'copastors.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -251,7 +282,9 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -260,12 +293,13 @@ export class PastorService {
             'updatedBy',
             'createdBy',
             'theirChurch',
-            'copastors',
-            'supervisors',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'member',
+            'copastors.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -295,8 +329,10 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -305,12 +341,13 @@ export class PastorService {
             'updatedBy',
             'createdBy',
             'theirChurch',
-            'copastors',
-            'supervisors',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'member',
+            'copastors.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -346,7 +383,9 @@ export class PastorService {
 
         const pastors = await this.pastorRepository.find({
           where: {
-            birthDate: Between(fromDate, toDate),
+            member: {
+              birthDate: Between(fromDate, toDate),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -355,12 +394,13 @@ export class PastorService {
             'updatedBy',
             'createdBy',
             'theirChurch',
-            'copastors',
-            'supervisors',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'member',
+            'copastors.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -398,12 +438,13 @@ export class PastorService {
             'updatedBy',
             'createdBy',
             'theirChurch',
-            'copastors',
-            'supervisors',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'member',
+            'copastors.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -461,7 +502,9 @@ export class PastorService {
 
         const pastors = await this.pastorRepository.find({
           where: {
-            gender: genderTerm,
+            member: {
+              gender: genderTerm,
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -470,12 +513,13 @@ export class PastorService {
             'updatedBy',
             'createdBy',
             'theirChurch',
-            'copastors',
-            'supervisors',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'member',
+            'copastors.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -517,7 +561,9 @@ export class PastorService {
 
         const pastors = await this.pastorRepository.find({
           where: {
-            maritalStatus: maritalStatusTerm,
+            member: {
+              maritalStatus: maritalStatusTerm,
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -526,12 +572,13 @@ export class PastorService {
             'updatedBy',
             'createdBy',
             'theirChurch',
-            'copastors',
-            'supervisors',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'member',
+            'copastors.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -561,7 +608,9 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            originCountry: ILike(`%${term}%`),
+            member: {
+              originCountry: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -570,12 +619,13 @@ export class PastorService {
             'updatedBy',
             'createdBy',
             'theirChurch',
-            'copastors',
-            'supervisors',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'member',
+            'copastors.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -602,7 +652,9 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            department: ILike(`%${term}%`),
+            member: {
+              department: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -611,12 +663,13 @@ export class PastorService {
             'updatedBy',
             'createdBy',
             'theirChurch',
-            'copastors',
-            'supervisors',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'member',
+            'copastors.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -643,7 +696,9 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            province: ILike(`%${term}%`),
+            member: {
+              province: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -652,12 +707,13 @@ export class PastorService {
             'updatedBy',
             'createdBy',
             'theirChurch',
-            'copastors',
-            'supervisors',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'member',
+            'copastors.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -684,7 +740,9 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            district: ILike(`%${term}%`),
+            member: {
+              district: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -693,12 +751,13 @@ export class PastorService {
             'updatedBy',
             'createdBy',
             'theirChurch',
-            'copastors',
-            'supervisors',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'member',
+            'copastors.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -725,7 +784,9 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            urbanSector: ILike(`%${term}%`),
+            member: {
+              urbanSector: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -734,12 +795,13 @@ export class PastorService {
             'updatedBy',
             'createdBy',
             'theirChurch',
-            'copastors',
-            'supervisors',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'member',
+            'copastors.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -766,7 +828,9 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            address: ILike(`%${term}%`),
+            member: {
+              address: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -775,12 +839,13 @@ export class PastorService {
             'updatedBy',
             'createdBy',
             'theirChurch',
-            'copastors',
-            'supervisors',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'member',
+            'copastors.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -824,12 +889,13 @@ export class PastorService {
             'updatedBy',
             'createdBy',
             'theirChurch',
-            'copastors',
-            'supervisors',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'member',
+            'copastors.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -870,8 +936,7 @@ export class PastorService {
     updatePastorDto: UpdatePastorDto,
     user: User,
   ): Promise<Pastor> {
-    const { roles, recordStatus, numberChildren, theirChurch } =
-      updatePastorDto;
+    const { roles, recordStatus, theirChurch } = updatePastorDto;
 
     if (!roles) {
       throw new BadRequestException(
@@ -885,7 +950,7 @@ export class PastorService {
 
     const pastor = await this.pastorRepository.findOne({
       where: { id: id },
-      relations: ['theirChurch'],
+      relations: ['theirChurch', 'member'],
     });
 
     if (!pastor) {
@@ -899,12 +964,12 @@ export class PastorService {
     }
 
     if (
-      pastor.roles.includes(MemberRole.Pastor) &&
-      pastor.roles.includes(MemberRole.Disciple) &&
-      !pastor.roles.includes(MemberRole.Preacher) &&
-      !pastor.roles.includes(MemberRole.Supervisor) &&
-      !pastor.roles.includes(MemberRole.Copastor) &&
-      !pastor.roles.includes(MemberRole.Treasurer) &&
+      pastor.member.roles.includes(MemberRole.Pastor) &&
+      pastor.member.roles.includes(MemberRole.Disciple) &&
+      !pastor.member.roles.includes(MemberRole.Preacher) &&
+      !pastor.member.roles.includes(MemberRole.Supervisor) &&
+      !pastor.member.roles.includes(MemberRole.Copastor) &&
+      !pastor.member.roles.includes(MemberRole.Treasurer) &&
       (roles.includes(MemberRole.Supervisor) ||
         roles.includes(MemberRole.Copastor) ||
         roles.includes(MemberRole.Preacher) ||
@@ -917,12 +982,12 @@ export class PastorService {
 
     //* Update info about Pastor
     if (
-      pastor.roles.includes(MemberRole.Disciple) &&
-      pastor.roles.includes(MemberRole.Pastor) &&
-      !pastor.roles.includes(MemberRole.Copastor) &&
-      !pastor.roles.includes(MemberRole.Supervisor) &&
-      !pastor.roles.includes(MemberRole.Preacher) &&
-      !pastor.roles.includes(MemberRole.Treasurer) &&
+      pastor.member.roles.includes(MemberRole.Disciple) &&
+      pastor.member.roles.includes(MemberRole.Pastor) &&
+      !pastor.member.roles.includes(MemberRole.Copastor) &&
+      !pastor.member.roles.includes(MemberRole.Supervisor) &&
+      !pastor.member.roles.includes(MemberRole.Preacher) &&
+      !pastor.member.roles.includes(MemberRole.Treasurer) &&
       roles.includes(MemberRole.Disciple) &&
       roles.includes(MemberRole.Pastor) &&
       !roles.includes(MemberRole.Copastor) &&
@@ -964,19 +1029,47 @@ export class PastorService {
           );
         }
 
-        // Update and save
-        const updatedPastor = await this.pastorRepository.preload({
-          id: pastor.id,
-          ...updatePastorDto,
-          numberChildren: +numberChildren,
-          theirChurch: newChurch,
-          updatedAt: new Date(),
-          updatedBy: user,
-          recordStatus: recordStatus,
-        });
+        //* Update and save
+        let savedMember: Member;
+        try {
+          const updatedMember = await this.memberRepository.preload({
+            id: pastor.member.id,
+            firstName: updatePastorDto.firstName,
+            lastName: updatePastorDto.lastName,
+            gender: updatePastorDto.gender,
+            originCountry: updatePastorDto.originCountry,
+            birthDate: updatePastorDto.birthDate,
+            maritalStatus: updatePastorDto.maritalStatus,
+            numberChildren: +updatePastorDto.numberChildren,
+            conversionDate: updatePastorDto.conversionDate,
+            email: updatePastorDto.email,
+            phoneNumber: updatePastorDto.phoneNumber,
+            country: updatePastorDto.country,
+            department: updatePastorDto.department,
+            province: updatePastorDto.province,
+            district: updatePastorDto.district,
+            urbanSector: updatePastorDto.urbanSector,
+            address: updatePastorDto.address,
+            referenceAddress: updatePastorDto.referenceAddress,
+            roles: updatePastorDto.roles,
+          });
+
+          savedMember = await this.memberRepository.save(updatedMember);
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
 
         let savedPastor: Pastor;
         try {
+          const updatedPastor = await this.pastorRepository.preload({
+            id: pastor.id,
+            member: savedMember,
+            theirChurch: newChurch,
+            updatedAt: new Date(),
+            updatedBy: user,
+            recordStatus: recordStatus,
+          });
+
           savedPastor = await this.pastorRepository.save(updatedPastor);
         } catch (error) {
           this.handleDBExceptions(error);
@@ -1090,10 +1183,33 @@ export class PastorService {
       //? Update and save if is same Church
       if (pastor.theirChurch?.id === theirChurch) {
         try {
+          const updatedMember = await this.memberRepository.preload({
+            id: pastor.member.id,
+            firstName: updatePastorDto.firstName,
+            lastName: updatePastorDto.lastName,
+            gender: updatePastorDto.gender,
+            originCountry: updatePastorDto.originCountry,
+            birthDate: updatePastorDto.birthDate,
+            maritalStatus: updatePastorDto.maritalStatus,
+            numberChildren: +updatePastorDto.numberChildren,
+            conversionDate: updatePastorDto.conversionDate,
+            email: updatePastorDto.email,
+            phoneNumber: updatePastorDto.phoneNumber,
+            country: updatePastorDto.country,
+            department: updatePastorDto.department,
+            province: updatePastorDto.province,
+            district: updatePastorDto.district,
+            urbanSector: updatePastorDto.urbanSector,
+            address: updatePastorDto.address,
+            referenceAddress: updatePastorDto.referenceAddress,
+            roles: updatePastorDto.roles,
+          });
+
+          await this.memberRepository.save(updatedMember);
+
           const updatedPastor = await this.pastorRepository.preload({
             id: pastor.id,
-            ...updatePastorDto,
-            numberChildren: +numberChildren,
+            member: updatedMember,
             theirChurch: pastor.theirChurch,
             updatedAt: new Date(),
             updatedBy: user,
@@ -1117,7 +1233,7 @@ export class PastorService {
     const pastor = await this.pastorRepository.findOneBy({ id });
 
     if (!pastor) {
-      throw new NotFoundException(`Pastor con id: ${id} no fue encontrado.`);
+      throw new NotFoundException(`Pastor con iwd: ${id} no fue encontrado.`);
     }
 
     //* Update and set in Inactive on Pastor

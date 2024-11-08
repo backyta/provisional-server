@@ -6,16 +6,18 @@ interface Options {
   offeringExpenses: OfferingExpense[];
 }
 
-interface ResultDataOptions {
+interface Church {
+  isAnexe: boolean;
+  abbreviatedChurchName: string;
+}
+
+interface OfferingExpenseByMonthResult {
   month: string;
   type: string;
   accumulatedOfferingPEN: number;
   accumulatedOfferingUSD: number;
   accumulatedOfferingEUR: number;
-  church: {
-    isAnexe: boolean;
-    abbreviatedChurchName: string;
-  };
+  church: Church;
   totalAmount: number;
 }
 
@@ -36,47 +38,49 @@ const monthNames = [
 
 export const comparativeOfferingExpensesByTypeFormatter = ({
   offeringExpenses,
-}: Options) => {
-  const resultData: ResultDataOptions[] = offeringExpenses?.reduce<
-    ResultDataOptions[]
-  >((acc, offering) => {
-    const offeringDate = new Date(offering.date);
-    const offeringMonth = offeringDate.getMonth();
+}: Options): OfferingExpenseByMonthResult[] => {
+  const resultData: OfferingExpenseByMonthResult[] = offeringExpenses?.reduce(
+    (acc, offering) => {
+      const offeringDate = new Date(offering.date);
+      const offeringMonth = offeringDate.getMonth();
 
-    const existing = acc.find(
-      (item) => item?.month === monthNames[new Date(offering.date).getMonth()],
-    );
+      const existing = acc.find(
+        (item) =>
+          item?.month === monthNames[new Date(offering.date).getMonth()],
+      );
 
-    if (existing) {
-      if (offering?.currency === CurrencyType?.PEN) {
-        existing.accumulatedOfferingPEN += +offering.amount;
-      } else if (offering.currency === CurrencyType.USD) {
-        existing.accumulatedOfferingUSD += +offering.amount;
-      } else if (offering.currency === CurrencyType.EUR) {
-        existing.accumulatedOfferingEUR += +offering.amount;
+      if (existing) {
+        if (offering?.currency === CurrencyType?.PEN) {
+          existing.accumulatedOfferingPEN += +offering.amount;
+        } else if (offering.currency === CurrencyType.USD) {
+          existing.accumulatedOfferingUSD += +offering.amount;
+        } else if (offering.currency === CurrencyType.EUR) {
+          existing.accumulatedOfferingEUR += +offering.amount;
+        }
+
+        existing.totalAmount += +offering.amount;
+      } else {
+        acc.push({
+          month: monthNames[offeringMonth],
+          type: OfferingExpenseSearchTypeNames[offering?.type],
+          accumulatedOfferingPEN:
+            offering?.currency === CurrencyType.PEN ? +offering?.amount : 0,
+          accumulatedOfferingUSD:
+            offering?.currency === CurrencyType.USD ? +offering?.amount : 0,
+          accumulatedOfferingEUR:
+            offering?.currency === CurrencyType.EUR ? +offering?.amount : 0,
+          church: {
+            isAnexe: offering?.church?.isAnexe,
+            abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
+          },
+          totalAmount: +offering.amount,
+        });
       }
 
-      existing.totalAmount += +offering.amount;
-    } else {
-      acc.push({
-        month: monthNames[offeringMonth],
-        type: OfferingExpenseSearchTypeNames[offering?.type],
-        accumulatedOfferingPEN:
-          offering?.currency === CurrencyType.PEN ? +offering?.amount : 0,
-        accumulatedOfferingUSD:
-          offering?.currency === CurrencyType.USD ? +offering?.amount : 0,
-        accumulatedOfferingEUR:
-          offering?.currency === CurrencyType.EUR ? +offering?.amount : 0,
-        church: {
-          isAnexe: offering?.church?.isAnexe,
-          abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
-        },
-        totalAmount: +offering.amount,
-      });
-    }
-
-    return acc;
-  }, []);
+      return acc;
+    },
+    [],
+  );
 
   return resultData.sort(
     (a, b) => monthNames.indexOf(a.month) - monthNames.indexOf(b.month),

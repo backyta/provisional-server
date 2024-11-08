@@ -98,7 +98,7 @@ export class SupervisorController {
   findByTerm(
     @Param('term') term: string,
     @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<Supervisor | Supervisor[]> {
+  ): Promise<Supervisor[]> {
     return this.supervisorService.findByTerm(term, searchTypeAndPaginationDto);
   }
 

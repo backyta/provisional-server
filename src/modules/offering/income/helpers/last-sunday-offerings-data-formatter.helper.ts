@@ -6,7 +6,7 @@ import { CurrencyType } from '@/modules/offering/shared/enums';
 import { OfferingIncome } from '@/modules/offering/income/entities';
 
 interface Options {
-  offeringsIncome: OfferingIncome[];
+  offeringIncome: OfferingIncome[];
 }
 
 interface ResultDataOptions {
@@ -25,9 +25,9 @@ interface ResultDataOptions {
 }
 
 export const lastSundayOfferingsDataFormatter = ({
-  offeringsIncome,
+  offeringIncome,
 }: Options) => {
-  const resultData: ResultDataOptions[] = offeringsIncome?.reduce<
+  const resultData: ResultDataOptions[] = offeringIncome?.reduce<
     ResultDataOptions[]
   >((acc, offering) => {
     const existing = acc.find((item) => item.date === offering.date);

@@ -43,7 +43,7 @@ export const IncomeAndExpensesComparativeFormatter = ({
   currentYearOfferingIncome,
   previousYearOfferingIncome,
   previousYearOfferingExpenses,
-}: ResultDataOptions) => {
+}: ResultDataOptions): MonthlyResult[] => {
   const currentYearData = [
     ...currentYearOfferingIncome,
     ...currentYearOfferingExpenses,

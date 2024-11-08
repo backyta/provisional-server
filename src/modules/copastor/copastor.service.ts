@@ -30,6 +30,7 @@ import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
 import { Pastor } from '@/modules/pastor/entities';
 import { Church } from '@/modules/church/entities';
+import { Member } from '@/modules/member/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Preacher } from '@/modules/preacher/entities';
@@ -63,6 +64,9 @@ export class CopastorService {
 
     @InjectRepository(Disciple)
     private readonly discipleRepository: Repository<Disciple>,
+
+    @InjectRepository(Member)
+    private readonly memberRepository: Repository<Member>,
   ) {}
 
   //* CREATE COPASTOR
@@ -70,7 +74,7 @@ export class CopastorService {
     createCopastorDto: CreateCopastorDto,
     user: User,
   ): Promise<Copastor> {
-    const { roles, theirPastor, numberChildren } = createCopastorDto;
+    const { roles, theirPastor } = createCopastorDto;
 
     if (
       !roles.includes(MemberRole.Disciple) &&
@@ -132,11 +136,33 @@ export class CopastorService {
       );
     }
 
-    // Create new instance
+    //* Create new instance member and assign to new copastor instance
     try {
+      const newMember = this.memberRepository.create({
+        firstName: createCopastorDto.firstName,
+        lastName: createCopastorDto.lastName,
+        gender: createCopastorDto.gender,
+        originCountry: createCopastorDto.originCountry,
+        birthDate: createCopastorDto.birthDate,
+        maritalStatus: createCopastorDto.maritalStatus,
+        numberChildren: +createCopastorDto.numberChildren,
+        conversionDate: createCopastorDto.conversionDate,
+        email: createCopastorDto.email,
+        phoneNumber: createCopastorDto.phoneNumber,
+        country: createCopastorDto.country,
+        department: createCopastorDto.department,
+        province: createCopastorDto.province,
+        district: createCopastorDto.district,
+        urbanSector: createCopastorDto.urbanSector,
+        address: createCopastorDto.address,
+        referenceAddress: createCopastorDto.referenceAddress,
+        roles: createCopastorDto.roles,
+      });
+
+      await this.memberRepository.save(newMember);
+
       const newCopastor = this.copastorRepository.create({
-        ...createCopastorDto,
-        numberChildren: +numberChildren,
+        member: newMember,
         theirChurch: church,
         theirPastor: pastor,
         createdAt: new Date(),
@@ -176,6 +202,7 @@ export class CopastorService {
         const copastors = await this.copastorRepository.find({
           where: { theirChurch: church, recordStatus: RecordStatus.Active },
           order: { createdAt: order as FindOptionsOrderValue },
+          relations: ['member'],
         });
 
         return copastors;
@@ -192,13 +219,14 @@ export class CopastorService {
         relations: [
           'updatedBy',
           'createdBy',
-          'theirPastor',
-          'theirChurch',
-          'supervisors',
+          'member',
           'zones',
-          'preachers',
           'familyGroups',
-          'disciples',
+          'theirChurch',
+          'theirPastor.member',
+          'supervisors.member',
+          'preachers.member',
+          'disciples.member',
         ],
         relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
@@ -224,7 +252,7 @@ export class CopastorService {
   async findByTerm(
     term: string,
     searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<Copastor | Copastor[]> {
+  ): Promise<Copastor[]> {
     const {
       'search-type': searchType,
       'search-sub-type': searchSubType,
@@ -253,7 +281,9 @@ export class CopastorService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -261,13 +291,14 @@ export class CopastorService {
           relations: [
             'updatedBy',
             'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'supervisors',
+            'member',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'theirChurch',
+            'theirPastor.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -300,7 +331,9 @@ export class CopastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -318,13 +351,14 @@ export class CopastorService {
           relations: [
             'updatedBy',
             'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'supervisors',
+            'member',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'theirChurch',
+            'theirPastor.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -358,7 +392,9 @@ export class CopastorService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -366,13 +402,14 @@ export class CopastorService {
           relations: [
             'updatedBy',
             'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'supervisors',
+            'member',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'theirChurch',
+            'theirPastor.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -405,7 +442,9 @@ export class CopastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -423,13 +462,14 @@ export class CopastorService {
           relations: [
             'updatedBy',
             'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'supervisors',
+            'member',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'theirChurch',
+            'theirPastor.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -464,8 +504,10 @@ export class CopastorService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -473,13 +515,14 @@ export class CopastorService {
           relations: [
             'updatedBy',
             'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'supervisors',
+            'member',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'theirChurch',
+            'theirPastor.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -513,8 +556,10 @@ export class CopastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -532,13 +577,14 @@ export class CopastorService {
           relations: [
             'updatedBy',
             'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'supervisors',
+            'member',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'theirChurch',
+            'theirPastor.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -574,7 +620,9 @@ export class CopastorService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            birthDate: Between(fromDate, toDate),
+            member: {
+              birthDate: Between(fromDate, toDate),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -582,13 +630,14 @@ export class CopastorService {
           relations: [
             'updatedBy',
             'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'supervisors',
+            'member',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'theirChurch',
+            'theirPastor.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -625,13 +674,14 @@ export class CopastorService {
           relations: [
             'updatedBy',
             'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'supervisors',
+            'member',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'theirChurch',
+            'theirPastor.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -689,7 +739,9 @@ export class CopastorService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            gender: genderTerm,
+            member: {
+              gender: genderTerm,
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -697,13 +749,14 @@ export class CopastorService {
           relations: [
             'updatedBy',
             'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'supervisors',
+            'member',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'theirChurch',
+            'theirPastor.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -745,7 +798,9 @@ export class CopastorService {
 
         const copastors = await this.copastorRepository.find({
           where: {
-            maritalStatus: maritalStatusTerm,
+            member: {
+              maritalStatus: maritalStatusTerm,
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -753,13 +808,14 @@ export class CopastorService {
           relations: [
             'updatedBy',
             'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'supervisors',
+            'member',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'theirChurch',
+            'theirPastor.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -789,7 +845,9 @@ export class CopastorService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            originCountry: ILike(`%${term}%`),
+            member: {
+              originCountry: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -797,13 +855,14 @@ export class CopastorService {
           relations: [
             'updatedBy',
             'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'supervisors',
+            'member',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'theirChurch',
+            'theirPastor.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -830,7 +889,9 @@ export class CopastorService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            department: ILike(`%${term}%`),
+            member: {
+              department: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -838,13 +899,14 @@ export class CopastorService {
           relations: [
             'updatedBy',
             'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'supervisors',
+            'member',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'theirChurch',
+            'theirPastor.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -871,7 +933,9 @@ export class CopastorService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            province: ILike(`%${term}%`),
+            member: {
+              province: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -879,13 +943,14 @@ export class CopastorService {
           relations: [
             'updatedBy',
             'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'supervisors',
+            'member',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'theirChurch',
+            'theirPastor.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -912,7 +977,9 @@ export class CopastorService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            district: ILike(`%${term}%`),
+            member: {
+              district: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -920,13 +987,14 @@ export class CopastorService {
           relations: [
             'updatedBy',
             'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'supervisors',
+            'member',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'theirChurch',
+            'theirPastor.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -953,7 +1021,9 @@ export class CopastorService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            urbanSector: ILike(`%${term}%`),
+            member: {
+              urbanSector: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -961,13 +1031,14 @@ export class CopastorService {
           relations: [
             'updatedBy',
             'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'supervisors',
+            'member',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'theirChurch',
+            'theirPastor.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -994,7 +1065,9 @@ export class CopastorService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            address: ILike(`%${term}%`),
+            member: {
+              address: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1002,13 +1075,14 @@ export class CopastorService {
           relations: [
             'updatedBy',
             'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'supervisors',
+            'member',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'theirChurch',
+            'theirPastor.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1049,13 +1123,14 @@ export class CopastorService {
           relations: [
             'updatedBy',
             'createdBy',
-            'theirChurch',
-            'theirPastor',
-            'supervisors',
+            'member',
             'zones',
-            'preachers',
             'familyGroups',
-            'disciples',
+            'theirChurch',
+            'theirPastor.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
           ],
           relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1110,8 +1185,7 @@ export class CopastorService {
     updateCopastorDto: UpdateCopastorDto,
     user: User,
   ): Promise<Copastor | Pastor> {
-    const { roles, recordStatus, numberChildren, theirPastor, theirChurch } =
-      updateCopastorDto;
+    const { roles, recordStatus, theirPastor, theirChurch } = updateCopastorDto;
 
     if (!roles) {
       throw new BadRequestException(
@@ -1125,7 +1199,7 @@ export class CopastorService {
 
     const copastor = await this.copastorRepository.findOne({
       where: { id: id },
-      relations: ['theirPastor', 'theirChurch'],
+      relations: ['theirPastor', 'theirChurch', 'member'],
     });
 
     if (!copastor) {
@@ -1139,12 +1213,12 @@ export class CopastorService {
     }
 
     if (
-      copastor.roles.includes(MemberRole.Copastor) &&
-      copastor.roles.includes(MemberRole.Disciple) &&
-      !copastor.roles.includes(MemberRole.Preacher) &&
-      !copastor.roles.includes(MemberRole.Supervisor) &&
-      !copastor.roles.includes(MemberRole.Pastor) &&
-      !copastor.roles.includes(MemberRole.Treasurer) &&
+      copastor.member.roles.includes(MemberRole.Copastor) &&
+      copastor.member.roles.includes(MemberRole.Disciple) &&
+      !copastor.member.roles.includes(MemberRole.Preacher) &&
+      !copastor.member.roles.includes(MemberRole.Supervisor) &&
+      !copastor.member.roles.includes(MemberRole.Pastor) &&
+      !copastor.member.roles.includes(MemberRole.Treasurer) &&
       (roles.includes(MemberRole.Supervisor) ||
         roles.includes(MemberRole.Preacher) ||
         roles.includes(MemberRole.Treasurer))
@@ -1156,12 +1230,12 @@ export class CopastorService {
 
     //* Update info about Copastor
     if (
-      copastor.roles.includes(MemberRole.Disciple) &&
-      copastor.roles.includes(MemberRole.Copastor) &&
-      !copastor.roles.includes(MemberRole.Pastor) &&
-      !copastor.roles.includes(MemberRole.Supervisor) &&
-      !copastor.roles.includes(MemberRole.Preacher) &&
-      !copastor.roles.includes(MemberRole.Treasurer) &&
+      copastor.member.roles.includes(MemberRole.Disciple) &&
+      copastor.member.roles.includes(MemberRole.Copastor) &&
+      !copastor.member.roles.includes(MemberRole.Pastor) &&
+      !copastor.member.roles.includes(MemberRole.Supervisor) &&
+      !copastor.member.roles.includes(MemberRole.Preacher) &&
+      !copastor.member.roles.includes(MemberRole.Treasurer) &&
       roles.includes(MemberRole.Disciple) &&
       roles.includes(MemberRole.Copastor) &&
       !roles.includes(MemberRole.Pastor) &&
@@ -1222,13 +1296,41 @@ export class CopastorService {
           );
         }
 
-        // Update and save
+        //* Update and save
+        let savedMember: Member;
+        try {
+          const updatedMember = await this.memberRepository.preload({
+            id: copastor.member.id,
+            firstName: updateCopastorDto.firstName,
+            lastName: updateCopastorDto.lastName,
+            gender: updateCopastorDto.gender,
+            originCountry: updateCopastorDto.originCountry,
+            birthDate: updateCopastorDto.birthDate,
+            maritalStatus: updateCopastorDto.maritalStatus,
+            numberChildren: +updateCopastorDto.numberChildren,
+            conversionDate: updateCopastorDto.conversionDate,
+            email: updateCopastorDto.email,
+            phoneNumber: updateCopastorDto.phoneNumber,
+            country: updateCopastorDto.country,
+            department: updateCopastorDto.department,
+            province: updateCopastorDto.province,
+            district: updateCopastorDto.district,
+            urbanSector: updateCopastorDto.urbanSector,
+            address: updateCopastorDto.address,
+            referenceAddress: updateCopastorDto.referenceAddress,
+            roles: updateCopastorDto.roles,
+          });
+
+          savedMember = await this.memberRepository.save(updatedMember);
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+
         let savedCopastor: Copastor;
         try {
           const updatedCopastor = await this.copastorRepository.preload({
             id: copastor.id,
-            ...updateCopastorDto,
-            numberChildren: +numberChildren,
+            member: savedMember,
             theirChurch: newChurch,
             theirPastor: newPastor,
             updatedAt: new Date(),
@@ -1345,18 +1447,41 @@ export class CopastorService {
 
       //? Update and save if is same Pastor
       if (copastor?.theirPastor?.id === theirPastor) {
-        const updatedCopastor = await this.copastorRepository.preload({
-          id: copastor.id,
-          ...updateCopastorDto,
-          numberChildren: +numberChildren,
-          theirChurch: copastor.theirChurch,
-          theirPastor: copastor.theirPastor,
-          updatedAt: new Date(),
-          updatedBy: user,
-          recordStatus: recordStatus,
-        });
-
         try {
+          const updatedMember = await this.memberRepository.preload({
+            id: copastor.member.id,
+            firstName: updateCopastorDto.firstName,
+            lastName: updateCopastorDto.lastName,
+            gender: updateCopastorDto.gender,
+            originCountry: updateCopastorDto.originCountry,
+            birthDate: updateCopastorDto.birthDate,
+            maritalStatus: updateCopastorDto.maritalStatus,
+            numberChildren: +updateCopastorDto.numberChildren,
+            conversionDate: updateCopastorDto.conversionDate,
+            email: updateCopastorDto.email,
+            phoneNumber: updateCopastorDto.phoneNumber,
+            country: updateCopastorDto.country,
+            department: updateCopastorDto.department,
+            province: updateCopastorDto.province,
+            district: updateCopastorDto.district,
+            urbanSector: updateCopastorDto.urbanSector,
+            address: updateCopastorDto.address,
+            referenceAddress: updateCopastorDto.referenceAddress,
+            roles: updateCopastorDto.roles,
+          });
+
+          await this.memberRepository.save(updatedMember);
+
+          const updatedCopastor = await this.copastorRepository.preload({
+            id: copastor.id,
+            member: updatedMember,
+            theirChurch: copastor.theirChurch,
+            theirPastor: copastor.theirPastor,
+            updatedAt: new Date(),
+            updatedBy: user,
+            recordStatus: recordStatus,
+          });
+
           return await this.copastorRepository.save(updatedCopastor);
         } catch (error) {
           if (error instanceof NotFoundException) {
@@ -1370,12 +1495,12 @@ export class CopastorService {
 
     //* Raise Co-pastor level to Pastor
     if (
-      copastor.roles.includes(MemberRole.Disciple) &&
-      copastor.roles.includes(MemberRole.Copastor) &&
-      !copastor.roles.includes(MemberRole.Treasurer) &&
-      !copastor.roles.includes(MemberRole.Supervisor) &&
-      !copastor.roles.includes(MemberRole.Preacher) &&
-      !copastor.roles.includes(MemberRole.Pastor) &&
+      copastor.member.roles.includes(MemberRole.Disciple) &&
+      copastor.member.roles.includes(MemberRole.Copastor) &&
+      !copastor.member.roles.includes(MemberRole.Treasurer) &&
+      !copastor.member.roles.includes(MemberRole.Supervisor) &&
+      !copastor.member.roles.includes(MemberRole.Preacher) &&
+      !copastor.member.roles.includes(MemberRole.Pastor) &&
       roles.includes(MemberRole.Disciple) &&
       roles.includes(MemberRole.Pastor) &&
       !roles.includes(MemberRole.Treasurer) &&
@@ -1406,10 +1531,34 @@ export class CopastorService {
         );
       }
 
+      //? Create new instance Pastor and delete old Copastor
       try {
+        const updatedMember = await this.memberRepository.preload({
+          id: copastor.member.id,
+          firstName: updateCopastorDto.firstName,
+          lastName: updateCopastorDto.lastName,
+          gender: updateCopastorDto.gender,
+          originCountry: updateCopastorDto.originCountry,
+          birthDate: updateCopastorDto.birthDate,
+          maritalStatus: updateCopastorDto.maritalStatus,
+          numberChildren: +updateCopastorDto.numberChildren,
+          conversionDate: updateCopastorDto.conversionDate,
+          email: updateCopastorDto.email,
+          phoneNumber: updateCopastorDto.phoneNumber,
+          country: updateCopastorDto.country,
+          department: updateCopastorDto.department,
+          province: updateCopastorDto.province,
+          district: updateCopastorDto.district,
+          urbanSector: updateCopastorDto.urbanSector,
+          address: updateCopastorDto.address,
+          referenceAddress: updateCopastorDto.referenceAddress,
+          roles: updateCopastorDto.roles,
+        });
+
+        await this.memberRepository.save(updatedMember);
+
         const newPastor = this.pastorRepository.create({
-          ...updateCopastorDto,
-          numberChildren: +numberChildren,
+          member: updatedMember,
           theirChurch: newChurch,
           createdAt: new Date(),
           createdBy: user,

@@ -24,20 +24,22 @@ interface Options {
   inactiveMembers: [Pastor[], Copastor[], Supervisor[], Preacher[], Disciple[]];
 }
 
-interface ResultDataOptions {
+interface ChurchInfo {
+  isAnexe: boolean;
+  abbreviatedChurchName: string;
+}
+
+interface MonthlyMemberFluctuationData {
   month: string;
   newMembers: number;
   inactiveMembers: number;
-  church: {
-    isAnexe: boolean;
-    abbreviatedChurchName: string;
-  };
+  church: ChurchInfo;
 }
 
 export const memberFluctuationFormatter = ({
   newMembers,
   inactiveMembers,
-}: Options) => {
+}: Options): MonthlyMemberFluctuationData[] => {
   const flattenMembers = (
     members: [Pastor[], Copastor[], Supervisor[], Preacher[], Disciple[]],
   ) => members.flat();
@@ -53,18 +55,20 @@ export const memberFluctuationFormatter = ({
       (member) => new Date(member.createdAt).getMonth() === monthIndex,
     );
 
-  const resultData: ResultDataOptions[] = monthNames.map((_, index) => {
-    return {
-      month: monthNames[index],
-      newMembers: filterMembersByMonth(allNewMembers, index).length,
-      inactiveMembers: filterMembersByMonth(allInactiveMembers, index).length,
-      church: {
-        isAnexe: allNewMembers[0]?.theirChurch?.isAnexe,
-        abbreviatedChurchName:
-          allNewMembers[0]?.theirChurch?.abbreviatedChurchName,
-      },
-    };
-  });
+  const resultData: MonthlyMemberFluctuationData[] = monthNames.map(
+    (_, index) => {
+      return {
+        month: monthNames[index],
+        newMembers: filterMembersByMonth(allNewMembers, index).length,
+        inactiveMembers: filterMembersByMonth(allInactiveMembers, index).length,
+        church: {
+          isAnexe: allNewMembers[0]?.theirChurch?.isAnexe,
+          abbreviatedChurchName:
+            allNewMembers[0]?.theirChurch?.abbreviatedChurchName,
+        },
+      };
+    },
+  );
 
   return resultData;
 };

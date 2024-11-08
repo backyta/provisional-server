@@ -95,7 +95,7 @@ export class PreacherController {
   findByTerm(
     @Param('term') term: string,
     @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<Preacher | Preacher[]> {
+  ): Promise<Preacher[]> {
     return this.preacherService.findByTerm(term, searchTypeAndPaginationDto);
   }
 

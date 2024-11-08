@@ -34,7 +34,7 @@ import { DeleteOfferingDto } from '@/modules/offering/shared/dto';
 import { OfferingExpense } from '@/modules/offering/expense/entities';
 import { OfferingExpenseService } from '@/modules/offering/expense/offering-expense.service';
 
-@Controller('offerings-expenses')
+@Controller('offering-expenses')
 export class OfferingExpenseController {
   constructor(
     private readonly offeringExpenseService: OfferingExpenseService,
@@ -86,7 +86,7 @@ export class OfferingExpenseController {
   findByTerm(
     @Param('term') term: string,
     @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<OfferingExpense | OfferingExpense[]> {
+  ): Promise<OfferingExpense[]> {
     return this.offeringExpenseService.findByTerm(
       term,
       searchTypeAndPaginationDto,

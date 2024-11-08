@@ -221,7 +221,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { createdAt: order as FindOptionsOrderValue },
-            relations: ['theirChurch'],
+            relations: ['member', 'theirChurch'],
           }),
           this.copastorRepository.find({
             where: {
@@ -230,7 +230,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { createdAt: order as FindOptionsOrderValue },
-            relations: ['theirChurch'],
+            relations: ['member', 'theirChurch'],
           }),
           this.supervisorRepository.find({
             where: {
@@ -239,7 +239,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { createdAt: order as FindOptionsOrderValue },
-            relations: ['theirChurch'],
+            relations: ['member', 'theirChurch'],
           }),
           this.preacherRepository.find({
             where: {
@@ -248,7 +248,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { createdAt: order as FindOptionsOrderValue },
-            relations: ['theirChurch'],
+            relations: ['member', 'theirChurch'],
           }),
           this.discipleRepository.find({
             where: {
@@ -257,7 +257,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { createdAt: order as FindOptionsOrderValue },
-            relations: ['theirChurch'],
+            relations: ['member', 'theirChurch'],
           }),
         ]);
 
@@ -270,7 +270,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Inactive,
             },
             order: { updatedAt: order as FindOptionsOrderValue },
-            relations: ['theirChurch'],
+            relations: ['member', 'theirChurch'],
           }),
           this.copastorRepository.find({
             where: {
@@ -279,7 +279,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Inactive,
             },
             order: { updatedAt: order as FindOptionsOrderValue },
-            relations: ['theirChurch'],
+            relations: ['member', 'theirChurch'],
           }),
           this.supervisorRepository.find({
             where: {
@@ -288,7 +288,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Inactive,
             },
             order: { updatedAt: order as FindOptionsOrderValue },
-            relations: ['theirChurch'],
+            relations: ['member', 'theirChurch'],
           }),
           this.preacherRepository.find({
             where: {
@@ -297,7 +297,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Inactive,
             },
             order: { updatedAt: order as FindOptionsOrderValue },
-            relations: ['theirChurch'],
+            relations: ['member', 'theirChurch'],
           }),
           this.discipleRepository.find({
             where: {
@@ -306,7 +306,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Inactive,
             },
             order: { updatedAt: order as FindOptionsOrderValue },
-            relations: ['theirChurch'],
+            relations: ['member', 'theirChurch'],
           }),
         ]);
 
@@ -337,27 +337,27 @@ export class MetricsService {
             this.pastorRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.copastorRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.supervisorRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.preacherRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.discipleRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
           ]);
 
@@ -391,22 +391,27 @@ export class MetricsService {
             this.pastorRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
+              relations: ['member'],
             }),
             this.copastorRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
+              relations: ['member'],
             }),
             this.supervisorRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
+              relations: ['member'],
             }),
             this.preacherRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
+              relations: ['member'],
             }),
             this.discipleRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
+              relations: ['member'],
             }),
           ]);
 
@@ -440,27 +445,27 @@ export class MetricsService {
             this.pastorRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.copastorRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.supervisorRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.preacherRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.discipleRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
           ]);
 
@@ -494,27 +499,27 @@ export class MetricsService {
             this.pastorRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.copastorRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.supervisorRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.preacherRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.discipleRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
           ]);
 
@@ -548,27 +553,27 @@ export class MetricsService {
             this.pastorRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.copastorRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.supervisorRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.preacherRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.discipleRepository.find({
               where: { theirChurch: church, recordStatus: RecordStatus.Active },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
           ]);
 
@@ -607,7 +612,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { createdAt: order as FindOptionsOrderValue },
-            relations: ['zones'],
+            relations: ['member', 'zones'],
           });
 
           const zonesId = copastor?.zones?.map((zone) => zone?.id);
@@ -618,7 +623,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { zoneName: order as FindOptionsOrderValue },
-            relations: ['theirSupervisor', 'theirChurch', 'disciples'],
+            relations: ['theirSupervisor', 'theirChurch', 'disciples.member'],
           });
 
           return memberFormatterByZoneAndGender({
@@ -651,7 +656,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { createdAt: order as FindOptionsOrderValue },
-            relations: ['zones'],
+            relations: ['member', 'zones'],
           });
 
           const zonesByCopastor = copastors
@@ -666,7 +671,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { zoneName: order as FindOptionsOrderValue },
-            relations: ['theirSupervisor', 'theirChurch', 'disciples'],
+            relations: ['theirSupervisor', 'theirChurch', 'disciples.member'],
           });
 
           return memberFormatterByZoneAndGender({
@@ -705,7 +710,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { createdAt: order as FindOptionsOrderValue },
-            relations: ['zones'],
+            relations: ['member', 'zones'],
           });
 
           const zonesId = copastor.zones.map((zone) => zone?.id);
@@ -716,7 +721,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { zoneName: order as FindOptionsOrderValue },
-            relations: ['theirSupervisor', 'theirChurch', 'preachers'],
+            relations: ['theirSupervisor', 'theirChurch', 'preachers.member'],
           });
 
           return preacherFormatterByZoneAndGender({
@@ -749,7 +754,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { createdAt: order as FindOptionsOrderValue },
-            relations: ['zones'],
+            relations: ['member', 'zones'],
           });
 
           const zonesByCopastor = copastors
@@ -764,7 +769,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { zoneName: order as FindOptionsOrderValue },
-            relations: ['theirSupervisor', 'theirChurch', 'preachers'],
+            relations: ['theirSupervisor', 'theirChurch', 'preachers.member'],
           });
 
           return preacherFormatterByZoneAndGender({
@@ -800,47 +805,57 @@ export class MetricsService {
             this.pastorRepository.find({
               where: {
                 theirChurch: church,
-                district: district,
+                member: {
+                  district: district,
+                },
                 recordStatus: RecordStatus.Active,
               },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.copastorRepository.find({
               where: {
                 theirChurch: church,
-                district: district,
+                member: {
+                  district: district,
+                },
                 recordStatus: RecordStatus.Active,
               },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.supervisorRepository.find({
               where: {
                 theirChurch: church,
-                district: district,
+                member: {
+                  district: district,
+                },
                 recordStatus: RecordStatus.Active,
               },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.preacherRepository.find({
               where: {
                 theirChurch: church,
-                district: district,
+                member: {
+                  district: district,
+                },
                 recordStatus: RecordStatus.Active,
               },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.discipleRepository.find({
               where: {
                 theirChurch: church,
-                district: district,
+                member: {
+                  district: district,
+                },
                 recordStatus: RecordStatus.Active,
               },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
           ]);
 
@@ -874,27 +889,27 @@ export class MetricsService {
             this.pastorRepository.find({
               where: { theirChurch: church },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.copastorRepository.find({
               where: { theirChurch: church },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.supervisorRepository.find({
               where: { theirChurch: church },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.preacherRepository.find({
               where: { theirChurch: church },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
             this.discipleRepository.find({
               where: { theirChurch: church },
               order: { createdAt: order as FindOptionsOrderValue },
-              relations: ['theirChurch'],
+              relations: ['member', 'theirChurch'],
             }),
           ]);
 
@@ -1021,7 +1036,11 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { createdAt: order as FindOptionsOrderValue },
-            relations: ['theirPreacher', 'theirChurch', 'disciples'],
+            relations: [
+              'theirPreacher.member',
+              'theirChurch',
+              'disciples.member',
+            ],
           });
 
           return familyGroupFormatterByCode({
@@ -1070,7 +1089,11 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { createdAt: order as FindOptionsOrderValue },
-            relations: ['theirPreacher', 'theirChurch', 'disciples'],
+            relations: [
+              'theirPreacher.member',
+              'theirChurch',
+              'disciples.member',
+            ],
           });
 
           return familyGroupFormatterByCode({
@@ -1120,7 +1143,11 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { zoneName: order as FindOptionsOrderValue },
-            relations: ['theirSupervisor', 'theirChurch', 'familyGroups'],
+            relations: [
+              'theirSupervisor.member',
+              'theirChurch',
+              'familyGroups',
+            ],
           });
 
           return familyGroupFormatterByZone({
@@ -1168,7 +1195,11 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { zoneName: order as FindOptionsOrderValue },
-            relations: ['theirSupervisor', 'theirChurch', 'familyGroups'],
+            relations: [
+              'theirSupervisor.member',
+              'theirChurch',
+              'familyGroups',
+            ],
           });
 
           return familyGroupFormatterByZone({
@@ -1247,7 +1278,7 @@ export class MetricsService {
             relations: [
               'familyGroups',
               'familyGroups.theirChurch',
-              'familyGroups.theirSupervisor',
+              'familyGroups.theirSupervisor.member',
             ],
           });
 
@@ -1351,7 +1382,7 @@ export class MetricsService {
             order: { createdAt: order as FindOptionsOrderValue },
             relations: [
               'familyGroups',
-              'familyGroups.theirSupervisor',
+              'familyGroups.theirSupervisor.member',
               'familyGroups.theirChurch',
               'familyGroups.theirZone',
             ],
@@ -1390,7 +1421,7 @@ export class MetricsService {
             order: { createdAt: order as FindOptionsOrderValue },
             relations: [
               'familyGroups',
-              'familyGroups.theirSupervisor',
+              'familyGroups.theirSupervisor.member',
               'familyGroups.theirChurch',
               'familyGroups.theirZone',
             ],
@@ -1520,8 +1551,8 @@ export class MetricsService {
           relations: [
             'church',
             'familyGroup',
-            'familyGroup.disciples',
-            'familyGroup.theirPreacher',
+            'familyGroup.disciples.member',
+            'familyGroup.theirPreacher.member',
             'familyGroup.theirZone',
           ],
         });
@@ -1569,11 +1600,11 @@ export class MetricsService {
           },
           relations: [
             'church',
-            'pastor',
-            'copastor',
-            'supervisor',
-            'preacher',
-            'disciple',
+            'pastor.member',
+            'copastor.member',
+            'supervisor.member',
+            'preacher.member',
+            'disciple.member',
           ],
         });
 
@@ -1642,8 +1673,8 @@ export class MetricsService {
             relations: [
               'church',
               'zone',
-              'zone.theirSupervisor',
-              'zone.disciples',
+              'zone.theirSupervisor.member',
+              'zone.disciples.member',
             ],
           });
 
@@ -1688,11 +1719,11 @@ export class MetricsService {
           },
           relations: [
             'church',
-            'pastor',
-            'copastor',
-            'supervisor',
-            'preacher',
-            'disciple',
+            'pastor.member',
+            'copastor.member',
+            'supervisor.member',
+            'preacher.member',
+            'disciple.member',
           ],
         });
 
@@ -1738,11 +1769,11 @@ export class MetricsService {
             },
             relations: [
               'church',
-              'pastor',
-              'copastor',
-              'supervisor',
-              'preacher',
-              'disciple',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
             ],
           });
 
@@ -1785,11 +1816,11 @@ export class MetricsService {
             },
             relations: [
               'church',
-              'pastor',
-              'copastor',
-              'supervisor',
-              'preacher',
-              'disciple',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
             ],
           });
 

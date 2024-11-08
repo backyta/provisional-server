@@ -14,13 +14,21 @@ interface Options {
   disciples: Disciple[];
 }
 
+interface MaritalStatusCounts {
+  single: number;
+  married: number;
+  divorced: number;
+  windowed: number;
+  other: number;
+}
+
 export const memberFormatterByMaritalStatus = ({
   pastors,
   copastors,
   supervisors,
   preachers,
   disciples,
-}: Options) => {
+}: Options): MaritalStatusCounts => {
   const allMembers = [
     ...pastors,
     ...copastors,
@@ -29,21 +37,21 @@ export const memberFormatterByMaritalStatus = ({
     ...disciples,
   ];
 
-  const membersByMaritalStatus = {
+  const membersByMaritalStatus: MaritalStatusCounts = {
     single: allMembers.filter(
-      (member) => member.maritalStatus === MaritalStatus.Single,
+      (item) => item?.member?.maritalStatus === MaritalStatus.Single,
     ).length,
     married: allMembers.filter(
-      (member) => member.maritalStatus === MaritalStatus.Married,
+      (item) => item?.member?.maritalStatus === MaritalStatus.Married,
     ).length,
     divorced: allMembers.filter(
-      (member) => member.maritalStatus === MaritalStatus.Divorced,
+      (item) => item?.member?.maritalStatus === MaritalStatus.Divorced,
     ).length,
     windowed: allMembers.filter(
-      (member) => member.maritalStatus === MaritalStatus.Widowed,
+      (item) => item?.member?.maritalStatus === MaritalStatus.Widowed,
     ).length,
     other: allMembers.filter(
-      (member) => member.maritalStatus === MaritalStatus.Other,
+      (item) => item?.member?.maritalStatus === MaritalStatus.Other,
     ).length,
   };
 

@@ -6,17 +6,35 @@ interface Options {
   familyGroups: FamilyGroup[];
 }
 
+interface SupervisorInfo {
+  supervisor: string;
+  active: number;
+  inactive: number;
+  church: {
+    isAnexe: boolean;
+    abbreviatedChurchName: string;
+  };
+}
+
+type ZoneRecordStatusResult = {
+  [zoneName: string]: SupervisorInfo;
+};
+
 export const familyGroupFormatterByRecordStatus = ({
   familyGroups,
 }: Options) => {
-  const result = familyGroups.reduce(
+  const result: ZoneRecordStatusResult = familyGroups.reduce(
     (acc, familyGroup) => {
       const zoneName = familyGroup.theirZone?.zoneName;
 
       if (!acc[zoneName]) {
         acc[zoneName] = {
-          supervisor: familyGroup?.theirSupervisor?.firstName
-            ? `${getInitialFullNames({ firstNames: familyGroup?.theirSupervisor?.firstName ?? '', lastNames: '' })} ${familyGroup?.theirSupervisor?.lastName}`
+          supervisor: familyGroup?.theirSupervisor?.member?.firstName
+            ? `${getInitialFullNames({
+                firstNames:
+                  familyGroup?.theirSupervisor?.member?.firstName ?? '',
+                lastNames: '',
+              })} ${familyGroup?.theirSupervisor?.member?.lastName}`
             : 'Sin Supervisor',
           active: 0,
           inactive: 0,
@@ -35,15 +53,7 @@ export const familyGroupFormatterByRecordStatus = ({
 
       return acc;
     },
-    {} as Record<
-      string,
-      {
-        active: number;
-        inactive: number;
-        supervisor: string;
-        church: { isAnexe: boolean; abbreviatedChurchName: string };
-      }
-    >,
+    {},
   );
 
   return result;

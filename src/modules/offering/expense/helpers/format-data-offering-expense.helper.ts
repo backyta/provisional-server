@@ -1,18 +1,18 @@
 import { OfferingExpense } from '@/modules/offering/expense/entities';
 
 interface Options {
-  offeringsExpenses: OfferingExpense[];
+  offeringExpenses: OfferingExpense[];
 }
 
-export const formatDataOfferingExpense = ({ offeringsExpenses }: Options) => {
-  return offeringsExpenses.map((offeringExpense) => ({
-    ...offeringExpense,
+export const formatDataOfferingExpense = ({ offeringExpenses }: Options) => {
+  return offeringExpenses.map((offering) => ({
+    ...offering,
     church: {
-      id: offeringExpense.church?.id,
-      churchName: offeringExpense.church?.churchName,
-      abbreviatedChurchName: offeringExpense.church?.abbreviatedChurchName,
-      district: offeringExpense.church?.district,
-      urbanSector: offeringExpense.church?.urbanSector,
+      id: offering.church?.id,
+      churchName: offering.church?.churchName,
+      abbreviatedChurchName: offering.church?.abbreviatedChurchName,
+      district: offering.church?.district,
+      urbanSector: offering.church?.urbanSector,
     },
   }));
 };

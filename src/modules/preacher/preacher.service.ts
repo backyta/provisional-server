@@ -38,6 +38,7 @@ import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
 import { Church } from '@/modules/church/entities';
 import { Pastor } from '@/modules/pastor/entities';
+import { Member } from '@/modules/member/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Disciple } from '@/modules/disciple/entities/';
 import { Supervisor } from '@/modules/supervisor/entities';
@@ -71,6 +72,9 @@ export class PreacherService {
 
     @InjectRepository(Disciple)
     private readonly discipleRepository: Repository<Disciple>,
+
+    @InjectRepository(Member)
+    private readonly memberRepository: Repository<Member>,
   ) {}
 
   //* CREATE PREACHER
@@ -78,7 +82,7 @@ export class PreacherService {
     createPreacherDto: CreatePreacherDto,
     user: User,
   ): Promise<Preacher> {
-    const { roles, theirSupervisor, numberChildren } = createPreacherDto;
+    const { roles, theirSupervisor } = createPreacherDto;
 
     if (
       !roles.includes(MemberRole.Disciple) &&
@@ -191,11 +195,33 @@ export class PreacherService {
       );
     }
 
-    //* Create new instance
+    //* Create new instance member and assign to new preacher instance
     try {
+      const newMember = this.memberRepository.create({
+        firstName: createPreacherDto.firstName,
+        lastName: createPreacherDto.lastName,
+        gender: createPreacherDto.gender,
+        originCountry: createPreacherDto.originCountry,
+        birthDate: createPreacherDto.birthDate,
+        maritalStatus: createPreacherDto.maritalStatus,
+        numberChildren: +createPreacherDto.numberChildren,
+        conversionDate: createPreacherDto.conversionDate,
+        email: createPreacherDto.email,
+        phoneNumber: createPreacherDto.phoneNumber,
+        country: createPreacherDto.country,
+        department: createPreacherDto.department,
+        province: createPreacherDto.province,
+        district: createPreacherDto.district,
+        urbanSector: createPreacherDto.urbanSector,
+        address: createPreacherDto.address,
+        referenceAddress: createPreacherDto.referenceAddress,
+        roles: createPreacherDto.roles,
+      });
+
+      await this.memberRepository.save(newMember);
+
       const newPreacher = this.preacherRepository.create({
-        ...createPreacherDto,
-        numberChildren: +numberChildren,
+        member: newMember,
         theirChurch: church,
         theirPastor: pastor,
         theirCopastor: copastor,
@@ -220,6 +246,7 @@ export class PreacherService {
         const preachers = await this.preacherRepository.find({
           where: { recordStatus: RecordStatus.Active },
           order: { createdAt: order as FindOptionsOrderValue },
+          relations: ['member'],
         });
 
         return preachers;
@@ -236,13 +263,14 @@ export class PreacherService {
         relations: [
           'updatedBy',
           'createdBy',
+          'member',
           'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
+          'theirPastor.member',
+          'theirCopastor.member',
+          'theirSupervisor.member',
           'theirZone',
           'theirFamilyGroup',
-          'disciples',
+          'disciples.member',
         ],
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -267,7 +295,7 @@ export class PreacherService {
   async findByTerm(
     term: string,
     searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<Preacher | Preacher[]> {
+  ): Promise<Preacher[]> {
     const {
       'search-type': searchType,
       'search-sub-type': searchSubType,
@@ -297,7 +325,9 @@ export class PreacherService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -305,13 +335,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -343,7 +374,9 @@ export class PreacherService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -361,13 +394,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -399,7 +433,9 @@ export class PreacherService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -417,13 +453,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -455,7 +492,9 @@ export class PreacherService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -473,13 +512,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -512,7 +552,9 @@ export class PreacherService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -520,13 +562,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -558,7 +601,9 @@ export class PreacherService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -576,13 +621,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -614,7 +660,9 @@ export class PreacherService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -632,13 +680,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -670,7 +719,9 @@ export class PreacherService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -688,13 +739,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -728,8 +780,10 @@ export class PreacherService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -737,13 +791,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -776,8 +831,10 @@ export class PreacherService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -795,13 +852,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -834,8 +892,10 @@ export class PreacherService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -853,13 +913,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -892,8 +953,10 @@ export class PreacherService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -911,13 +974,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -952,7 +1016,9 @@ export class PreacherService {
 
         const preachers = await this.preacherRepository.find({
           where: {
-            birthDate: Between(fromDate, toDate),
+            member: {
+              birthDate: Between(fromDate, toDate),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -960,13 +1026,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1002,13 +1069,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1078,13 +1146,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1130,13 +1199,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1180,13 +1250,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1224,7 +1295,7 @@ export class PreacherService {
             theirFamilyGroup: isNullFamilyGroup ? IsNull() : null,
             recordStatus: RecordStatus.Active,
           },
-          relations: ['theirFamilyGroup'],
+          relations: ['theirFamilyGroup', 'member'],
           order: { createdAt: order as FindOptionsOrderValue },
         });
 
@@ -1246,7 +1317,9 @@ export class PreacherService {
 
         const preachers = await this.preacherRepository.find({
           where: {
-            gender: genderTerm,
+            member: {
+              gender: genderTerm,
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1254,13 +1327,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1301,7 +1375,9 @@ export class PreacherService {
 
         const preachers = await this.preacherRepository.find({
           where: {
-            maritalStatus: maritalStatusTerm,
+            member: {
+              maritalStatus: maritalStatusTerm,
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1309,13 +1385,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1344,7 +1421,9 @@ export class PreacherService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
-            originCountry: ILike(`%${term}%`),
+            member: {
+              originCountry: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1352,13 +1431,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1384,7 +1464,9 @@ export class PreacherService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
-            department: ILike(`%${term}%`),
+            member: {
+              department: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1392,13 +1474,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1424,7 +1507,9 @@ export class PreacherService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
-            province: ILike(`%${term}%`),
+            member: {
+              province: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1432,13 +1517,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1464,7 +1550,9 @@ export class PreacherService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
-            district: ILike(`%${term}%`),
+            member: {
+              district: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1472,13 +1560,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1504,7 +1593,9 @@ export class PreacherService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
-            urbanSector: ILike(`%${term}%`),
+            member: {
+              urbanSector: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1512,13 +1603,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1544,7 +1636,9 @@ export class PreacherService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
-            address: ILike(`%${term}%`),
+            member: {
+              address: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1552,13 +1646,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1600,13 +1695,14 @@ export class PreacherService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
             'theirFamilyGroup',
-            'disciples',
+            'disciples.member',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1666,7 +1762,6 @@ export class PreacherService {
       theirSupervisor,
       theirCopastor,
       theirPastor,
-      numberChildren,
       isDirectRelationToPastor,
     } = updatePreacherDto;
 
@@ -1684,6 +1779,7 @@ export class PreacherService {
     const preacher = await this.preacherRepository.findOne({
       where: { id: id },
       relations: [
+        'member',
         'theirChurch',
         'theirPastor',
         'theirCopastor',
@@ -1705,20 +1801,20 @@ export class PreacherService {
     }
 
     if (
-      (preacher.roles.includes(MemberRole.Preacher) &&
-        preacher.roles.includes(MemberRole.Disciple) &&
-        !preacher.roles.includes(MemberRole.Supervisor) &&
-        !preacher.roles.includes(MemberRole.Copastor) &&
-        !preacher.roles.includes(MemberRole.Pastor) &&
-        !preacher.roles.includes(MemberRole.Treasurer) &&
+      (preacher.member.roles.includes(MemberRole.Preacher) &&
+        preacher.member.roles.includes(MemberRole.Disciple) &&
+        !preacher.member.roles.includes(MemberRole.Supervisor) &&
+        !preacher.member.roles.includes(MemberRole.Copastor) &&
+        !preacher.member.roles.includes(MemberRole.Pastor) &&
+        !preacher.member.roles.includes(MemberRole.Treasurer) &&
         (roles.includes(MemberRole.Copastor) ||
           roles.includes(MemberRole.Pastor))) ||
-      (preacher.roles.includes(MemberRole.Preacher) &&
-        preacher.roles.includes(MemberRole.Disciple) &&
-        preacher.roles.includes(MemberRole.Treasurer) &&
-        !preacher.roles.includes(MemberRole.Supervisor) &&
-        !preacher.roles.includes(MemberRole.Copastor) &&
-        !preacher.roles.includes(MemberRole.Pastor) &&
+      (preacher.member.roles.includes(MemberRole.Preacher) &&
+        preacher.member.roles.includes(MemberRole.Disciple) &&
+        preacher.member.roles.includes(MemberRole.Treasurer) &&
+        !preacher.member.roles.includes(MemberRole.Supervisor) &&
+        !preacher.member.roles.includes(MemberRole.Copastor) &&
+        !preacher.member.roles.includes(MemberRole.Pastor) &&
         (roles.includes(MemberRole.Copastor) ||
           roles.includes(MemberRole.Pastor)))
     ) {
@@ -1729,48 +1825,48 @@ export class PreacherService {
 
     //* Update info about Preacher
     if (
-      (preacher.roles.includes(MemberRole.Disciple) &&
-        preacher.roles.includes(MemberRole.Preacher) &&
-        !preacher.roles.includes(MemberRole.Pastor) &&
-        !preacher.roles.includes(MemberRole.Copastor) &&
-        !preacher.roles.includes(MemberRole.Supervisor) &&
-        !preacher.roles.includes(MemberRole.Treasurer) &&
+      (preacher.member.roles.includes(MemberRole.Disciple) &&
+        preacher.member.roles.includes(MemberRole.Preacher) &&
+        !preacher.member.roles.includes(MemberRole.Pastor) &&
+        !preacher.member.roles.includes(MemberRole.Copastor) &&
+        !preacher.member.roles.includes(MemberRole.Supervisor) &&
+        !preacher.member.roles.includes(MemberRole.Treasurer) &&
         roles.includes(MemberRole.Disciple) &&
         roles.includes(MemberRole.Preacher) &&
         !roles.includes(MemberRole.Pastor) &&
         !roles.includes(MemberRole.Copastor) &&
         !roles.includes(MemberRole.Supervisor) &&
         !roles.includes(MemberRole.Treasurer)) ||
-      (preacher.roles.includes(MemberRole.Disciple) &&
-        preacher.roles.includes(MemberRole.Preacher) &&
-        preacher.roles.includes(MemberRole.Treasurer) &&
-        !preacher.roles.includes(MemberRole.Copastor) &&
-        !preacher.roles.includes(MemberRole.Supervisor) &&
-        !preacher.roles.includes(MemberRole.Pastor) &&
+      (preacher.member.roles.includes(MemberRole.Disciple) &&
+        preacher.member.roles.includes(MemberRole.Preacher) &&
+        preacher.member.roles.includes(MemberRole.Treasurer) &&
+        !preacher.member.roles.includes(MemberRole.Copastor) &&
+        !preacher.member.roles.includes(MemberRole.Supervisor) &&
+        !preacher.member.roles.includes(MemberRole.Pastor) &&
         roles.includes(MemberRole.Disciple) &&
         roles.includes(MemberRole.Preacher) &&
         roles.includes(MemberRole.Treasurer) &&
         !roles.includes(MemberRole.Copastor) &&
         !roles.includes(MemberRole.Pastor) &&
         !roles.includes(MemberRole.Supervisor)) ||
-      (preacher.roles.includes(MemberRole.Disciple) &&
-        preacher.roles.includes(MemberRole.Preacher) &&
-        !preacher.roles.includes(MemberRole.Pastor) &&
-        !preacher.roles.includes(MemberRole.Copastor) &&
-        !preacher.roles.includes(MemberRole.Supervisor) &&
-        !preacher.roles.includes(MemberRole.Treasurer) &&
+      (preacher.member.roles.includes(MemberRole.Disciple) &&
+        preacher.member.roles.includes(MemberRole.Preacher) &&
+        !preacher.member.roles.includes(MemberRole.Pastor) &&
+        !preacher.member.roles.includes(MemberRole.Copastor) &&
+        !preacher.member.roles.includes(MemberRole.Supervisor) &&
+        !preacher.member.roles.includes(MemberRole.Treasurer) &&
         roles.includes(MemberRole.Disciple) &&
         roles.includes(MemberRole.Preacher) &&
         roles.includes(MemberRole.Treasurer) &&
         !roles.includes(MemberRole.Pastor) &&
         !roles.includes(MemberRole.Copastor) &&
         !roles.includes(MemberRole.Supervisor)) ||
-      (preacher.roles.includes(MemberRole.Disciple) &&
-        preacher.roles.includes(MemberRole.Preacher) &&
-        preacher.roles.includes(MemberRole.Treasurer) &&
-        !preacher.roles.includes(MemberRole.Pastor) &&
-        !preacher.roles.includes(MemberRole.Copastor) &&
-        !preacher.roles.includes(MemberRole.Supervisor) &&
+      (preacher.member.roles.includes(MemberRole.Disciple) &&
+        preacher.member.roles.includes(MemberRole.Preacher) &&
+        preacher.member.roles.includes(MemberRole.Treasurer) &&
+        !preacher.member.roles.includes(MemberRole.Pastor) &&
+        !preacher.member.roles.includes(MemberRole.Copastor) &&
+        !preacher.member.roles.includes(MemberRole.Supervisor) &&
         roles.includes(MemberRole.Disciple) &&
         roles.includes(MemberRole.Preacher) &&
         !roles.includes(MemberRole.Treasurer) &&
@@ -1887,13 +1983,41 @@ export class PreacherService {
           );
         }
 
-        // Update and save
+        //* Update and save
+        let savedMember: Member;
+        try {
+          const updatedMember = await this.memberRepository.preload({
+            id: preacher.member.id,
+            firstName: updatePreacherDto.firstName,
+            lastName: updatePreacherDto.lastName,
+            gender: updatePreacherDto.gender,
+            originCountry: updatePreacherDto.originCountry,
+            birthDate: updatePreacherDto.birthDate,
+            maritalStatus: updatePreacherDto.maritalStatus,
+            numberChildren: +updatePreacherDto.numberChildren,
+            conversionDate: updatePreacherDto.conversionDate,
+            email: updatePreacherDto.email,
+            phoneNumber: updatePreacherDto.phoneNumber,
+            country: updatePreacherDto.country,
+            department: updatePreacherDto.department,
+            province: updatePreacherDto.province,
+            district: updatePreacherDto.district,
+            urbanSector: updatePreacherDto.urbanSector,
+            address: updatePreacherDto.address,
+            referenceAddress: updatePreacherDto.referenceAddress,
+            roles: updatePreacherDto.roles,
+          });
+
+          savedMember = await this.memberRepository.save(updatedMember);
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+
         let savedPreacher: Preacher;
         try {
           const updatedPreacher = await this.preacherRepository.preload({
             id: preacher.id,
-            ...updatePreacherDto,
-            numberChildren: +numberChildren,
+            member: savedMember,
             theirChurch: newChurch,
             theirPastor: newPastor,
             theirCopastor: newCopastor,
@@ -2098,12 +2222,41 @@ export class PreacherService {
           );
         }
 
+        //* Update and save
+        let savedMember: Member;
+        try {
+          const updatedMember = await this.memberRepository.preload({
+            id: preacher.member.id,
+            firstName: updatePreacherDto.firstName,
+            lastName: updatePreacherDto.lastName,
+            gender: updatePreacherDto.gender,
+            originCountry: updatePreacherDto.originCountry,
+            birthDate: updatePreacherDto.birthDate,
+            maritalStatus: updatePreacherDto.maritalStatus,
+            numberChildren: +updatePreacherDto.numberChildren,
+            conversionDate: updatePreacherDto.conversionDate,
+            email: updatePreacherDto.email,
+            phoneNumber: updatePreacherDto.phoneNumber,
+            country: updatePreacherDto.country,
+            department: updatePreacherDto.department,
+            province: updatePreacherDto.province,
+            district: updatePreacherDto.district,
+            urbanSector: updatePreacherDto.urbanSector,
+            address: updatePreacherDto.address,
+            referenceAddress: updatePreacherDto.referenceAddress,
+            roles: updatePreacherDto.roles,
+          });
+
+          savedMember = await this.memberRepository.save(updatedMember);
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+
         let savedPreacher: Preacher;
         try {
           const updatedPreacher = await this.preacherRepository.preload({
             id: preacher.id,
-            ...updatePreacherDto,
-            numberChildren: +numberChildren,
+            member: savedMember,
             theirChurch: newChurch,
             theirPastor: newPastor,
             theirCopastor: newCopastor,
@@ -2177,12 +2330,12 @@ export class PreacherService {
 
       //* Raise Preacher level to Supervisor
       if (
-        (preacher.roles.includes(MemberRole.Disciple) &&
-          preacher.roles.includes(MemberRole.Preacher) &&
-          !preacher.roles.includes(MemberRole.Treasurer) &&
-          !preacher.roles.includes(MemberRole.Copastor) &&
-          !preacher.roles.includes(MemberRole.Supervisor) &&
-          !preacher.roles.includes(MemberRole.Pastor) &&
+        (preacher.member.roles.includes(MemberRole.Disciple) &&
+          preacher.member.roles.includes(MemberRole.Preacher) &&
+          !preacher.member.roles.includes(MemberRole.Treasurer) &&
+          !preacher.member.roles.includes(MemberRole.Copastor) &&
+          !preacher.member.roles.includes(MemberRole.Supervisor) &&
+          !preacher.member.roles.includes(MemberRole.Pastor) &&
           roles.includes(MemberRole.Disciple) &&
           roles.includes(MemberRole.Supervisor) &&
           !roles.includes(MemberRole.Treasurer) &&
@@ -2190,12 +2343,12 @@ export class PreacherService {
           !roles.includes(MemberRole.Pastor) &&
           !roles.includes(MemberRole.Preacher) &&
           recordStatus === RecordStatus.Active) ||
-        (preacher.roles.includes(MemberRole.Disciple) &&
-          preacher.roles.includes(MemberRole.Preacher) &&
-          preacher.roles.includes(MemberRole.Treasurer) &&
-          !preacher.roles.includes(MemberRole.Copastor) &&
-          !preacher.roles.includes(MemberRole.Supervisor) &&
-          !preacher.roles.includes(MemberRole.Pastor) &&
+        (preacher.member.roles.includes(MemberRole.Disciple) &&
+          preacher.member.roles.includes(MemberRole.Preacher) &&
+          preacher.member.roles.includes(MemberRole.Treasurer) &&
+          !preacher.member.roles.includes(MemberRole.Copastor) &&
+          !preacher.member.roles.includes(MemberRole.Supervisor) &&
+          !preacher.member.roles.includes(MemberRole.Pastor) &&
           roles.includes(MemberRole.Disciple) &&
           roles.includes(MemberRole.Supervisor) &&
           roles.includes(MemberRole.Treasurer) &&
@@ -2268,11 +2421,36 @@ export class PreacherService {
 
           //! Create new instance Supervisor and delete old preacher
           try {
+            const updatedMember = await this.memberRepository.preload({
+              id: preacher.member.id,
+              firstName: updatePreacherDto.firstName,
+              lastName: updatePreacherDto.lastName,
+              gender: updatePreacherDto.gender,
+              originCountry: updatePreacherDto.originCountry,
+              birthDate: updatePreacherDto.birthDate,
+              maritalStatus: updatePreacherDto.maritalStatus,
+              numberChildren: +updatePreacherDto.numberChildren,
+              conversionDate: updatePreacherDto.conversionDate,
+              email: updatePreacherDto.email,
+              phoneNumber: updatePreacherDto.phoneNumber,
+              country: updatePreacherDto.country,
+              department: updatePreacherDto.department,
+              province: updatePreacherDto.province,
+              district: updatePreacherDto.district,
+              urbanSector: updatePreacherDto.urbanSector,
+              address: updatePreacherDto.address,
+              referenceAddress: updatePreacherDto.referenceAddress,
+              roles: updatePreacherDto.roles,
+            });
+
+            await this.memberRepository.save(updatedMember);
+
             const newSupervisor = this.supervisorRepository.create({
               ...updatePreacherDto,
-              numberChildren: +numberChildren,
+              member: updatedMember,
               theirPastor: newPastor,
               theirCopastor: newCopastor,
+              isDirectRelationToPastor: isDirectRelationToPastor,
               createdAt: new Date(),
               createdBy: user,
             });
@@ -2334,12 +2512,36 @@ export class PreacherService {
 
           //! Create new instance Supervisor and delete old preacher
           try {
+            const updatedMember = await this.memberRepository.preload({
+              id: preacher.member.id,
+              firstName: updatePreacherDto.firstName,
+              lastName: updatePreacherDto.lastName,
+              gender: updatePreacherDto.gender,
+              originCountry: updatePreacherDto.originCountry,
+              birthDate: updatePreacherDto.birthDate,
+              maritalStatus: updatePreacherDto.maritalStatus,
+              numberChildren: +updatePreacherDto.numberChildren,
+              conversionDate: updatePreacherDto.conversionDate,
+              email: updatePreacherDto.email,
+              phoneNumber: updatePreacherDto.phoneNumber,
+              country: updatePreacherDto.country,
+              department: updatePreacherDto.department,
+              province: updatePreacherDto.province,
+              district: updatePreacherDto.district,
+              urbanSector: updatePreacherDto.urbanSector,
+              address: updatePreacherDto.address,
+              referenceAddress: updatePreacherDto.referenceAddress,
+              roles: updatePreacherDto.roles,
+            });
+
+            await this.memberRepository.save(updatedMember);
+
             const newSupervisor = this.supervisorRepository.create({
-              ...updatePreacherDto,
-              numberChildren: +numberChildren,
+              member: updatedMember,
               theirChurch: newChurch,
               theirPastor: newPastor,
               theirCopastor: null,
+              isDirectRelationToPastor: isDirectRelationToPastor,
               createdAt: new Date(),
               createdBy: user,
             });

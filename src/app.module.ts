@@ -21,12 +21,15 @@ import { CloudinaryModule } from '@/modules/cloudinary/cloudinary.module';
 import { FamilyGroupModule } from '@/modules/family-group/family-group.module';
 import { OfferingIncomeModule } from '@/modules/offering/income/offering-income.module';
 import { OfferingExpenseModule } from '@/modules/offering/expense/offering-expense.module';
-import { MetricsModule } from './modules/metrics/metrics.module';
+import { MetricsModule } from '@/modules/metrics/metrics.module';
+import { MemberModule } from '@/modules/member/member.module';
+import { ReportsModule } from './modules/reports/reports.module';
+import { PrinterModule } from './modules/printer/printer.module';
 
 // TODO : Probar despliegues con migraciones
 @Module({
   imports: [
-    ConfigModule.forRoot(), // access to environment variables global in all modules
+    ConfigModule.forRoot(), // Access to environment variables global in all modules
     TypeOrmModule.forRoot({
       ssl: process.env.STAGE === 'prod',
       extra: {
@@ -59,6 +62,9 @@ import { MetricsModule } from './modules/metrics/metrics.module';
     OfferingExpenseModule,
     SeedModule,
     MetricsModule,
+    MemberModule,
+    ReportsModule,
+    PrinterModule,
   ],
   providers: [SuperUserService],
 })

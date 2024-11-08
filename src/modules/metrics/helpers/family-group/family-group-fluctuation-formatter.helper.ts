@@ -20,20 +20,22 @@ const monthNames = [
   'Diciembre',
 ];
 
-interface ResultDataOptions {
+interface ChurchInfo {
+  isAnexe: boolean;
+  abbreviatedChurchName: string;
+}
+
+interface MonthlyFluctuationData {
   month: string;
   newFamilyGroups: number;
   inactiveFamilyGroups: number;
-  church: {
-    isAnexe: boolean;
-    abbreviatedChurchName: string;
-  };
+  church: ChurchInfo;
 }
 
 export const familyGroupFluctuationFormatter = ({
   activeFamilyGroups,
   inactiveFamilyGroups,
-}: Options) => {
+}: Options): MonthlyFluctuationData[] => {
   const filterFamilyGroupsByMonth = (
     familyGroups: FamilyGroup[],
     monthIndex: number,
@@ -42,7 +44,7 @@ export const familyGroupFluctuationFormatter = ({
       (member) => new Date(member.createdAt).getMonth() === monthIndex,
     );
 
-  const resultData: ResultDataOptions[] = monthNames.map((_, index) => {
+  const resultData: MonthlyFluctuationData[] = monthNames.map((_, index) => {
     return {
       month: monthNames[index],
       newFamilyGroups: filterFamilyGroupsByMonth(activeFamilyGroups, index)

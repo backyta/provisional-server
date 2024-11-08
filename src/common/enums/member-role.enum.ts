@@ -15,3 +15,5 @@ export const MemberRoleNames: Record<MemberRole, string> = {
   [MemberRole.Treasurer]: 'Tesorero',
   [MemberRole.Disciple]: 'Discípulo',
 };
+
+// NOTE : preguntar si se requeriara Disicupulo + Pastor o solo pastor porque discipulo ya esta implicito. ???

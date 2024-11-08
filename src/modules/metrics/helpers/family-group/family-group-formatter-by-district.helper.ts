@@ -4,8 +4,22 @@ interface Options {
   familyGroups: FamilyGroup[];
 }
 
+interface ChurchInfo {
+  isAnexe: boolean;
+  abbreviatedChurchName: string;
+}
+
+interface FamilyGroupDistrict {
+  familyGroupsCount: number;
+  church: ChurchInfo;
+}
+
+type DistrictResult = {
+  [urbanSector: string]: FamilyGroupDistrict;
+};
+
 export const familyGroupFormatterByDistrict = ({ familyGroups }: Options) => {
-  const result = familyGroups.reduce((acc, item) => {
+  const result: DistrictResult = familyGroups.reduce((acc, item) => {
     if (!acc[item.urbanSector]) {
       acc[item.urbanSector] = {
         familyGroupsCount: 0,
@@ -22,15 +36,12 @@ export const familyGroupFormatterByDistrict = ({ familyGroups }: Options) => {
     return acc;
   }, {});
 
-  const sortedResult = Object.keys(result)
+  const sortedResult: DistrictResult = Object.keys(result)
     .sort()
-    .reduce(
-      (acc, key) => {
-        acc[key] = result[key];
-        return acc;
-      },
-      {} as Record<string, { familyGroupsCount: number }>,
-    );
+    .reduce((acc, key) => {
+      acc[key] = result[key];
+      return acc;
+    }, {});
 
   return sortedResult;
 };

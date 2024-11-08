@@ -18,9 +18,9 @@ export enum SearchSubType {
   ByDiscipleFullName = 'by_disciple_full_name',
 
   //* Pastor
-  ByPastorNames = 'by_pastor_names',
-  ByPastorLastNames = 'by_pastor_last_names',
-  ByPastorFullName = 'by_pastor_full_name',
+  // ByPastorNames = 'by_pastor_names',
+  // ByPastorLastNames = 'by_pastor_last_names',
+  // ByPastorFullName = 'by_pastor_full_name',
 
   //* Copastor
   CopastorByPastorNames = 'copastor_by_pastor_names',
@@ -171,13 +171,209 @@ export enum SearchSubType {
   TransportationSpecialGuests = 'transportation_special_guests',
   EquipmentTransportation = 'equipment_transportation',
   RentalTechnicalEquipment = 'rental_technical_equipment',
+  PrivateMobilityRental = 'private_mobility_rental',
   EducationalMaterials = 'educational_materials',
   GiftsAndPrizesParticipants = 'gifts_and_prizes_participants',
   OtherRelatedExpenses = 'other_related_expenses',
 
   //? Users
-  UserByNames = 'user_by_names',
-  UserByLastNames = 'user_by_last_names',
-  UserByFullName = 'user_by_full_name',
-  UserByRoles = 'user_by_roles',
+  // UserByNames = 'user_by_names',
+  // UserByLastNames = 'user_by_last_names',
+  // UserByFullName = 'user_by_full_name',
+  // UserByRoles = 'user_by_roles',
 }
+
+export const SearchSubTypeNames: Record<SearchSubType, string> = {
+  [SearchSubType.DiscipleByPastorNames]: 'Por nombres de su pastor',
+  [SearchSubType.DiscipleByPastorLastNames]: 'Por apellidos de su pastor',
+  [SearchSubType.DiscipleByPastorFullName]:
+    'Por nombres y apellidos de su pastor',
+  [SearchSubType.DiscipleByCopastorNames]: 'Por nombres de su co-pastor',
+  [SearchSubType.DiscipleByCopastorLastNames]: 'Por apellidos de su co-pastor',
+  [SearchSubType.DiscipleByCopastorFullName]:
+    'Por nombres y apellidos de su co-pastor',
+  [SearchSubType.DiscipleBySupervisorNames]: 'Por nombres de su supervisor',
+  [SearchSubType.DiscipleBySupervisorLastNames]:
+    'Por apellidos de su supervisor',
+  [SearchSubType.DiscipleBySupervisorFullName]:
+    'Por nombres y apellidos de su supervisor',
+  [SearchSubType.DiscipleByPreacherNames]: 'Por nombres de su predicador',
+  [SearchSubType.DiscipleByPreacherLastNames]: 'Por apellidos de su predicador',
+  [SearchSubType.DiscipleByPreacherFullName]:
+    'Por nombres y apellidos de su predicador',
+  [SearchSubType.ByDiscipleNames]: 'Por sus nombres',
+  [SearchSubType.ByDiscipleLastNames]: 'Por sus apellidos',
+  [SearchSubType.ByDiscipleFullName]: 'Por sus nombres y apellidos',
+
+  [SearchSubType.CopastorByPastorNames]: 'Por nombres de su pastor',
+  [SearchSubType.CopastorByPastorLastNames]: 'Por apellidos de su pastor',
+  [SearchSubType.CopastorByPastorFullName]:
+    'Por nombres y apellidos de su pastor',
+  [SearchSubType.ByCopastorNames]: 'Por sus nombres',
+  [SearchSubType.ByCopastorLastNames]: 'Por sus apellidos',
+  [SearchSubType.ByCopastorFullName]: 'Por sus nombres y apellidos',
+
+  [SearchSubType.SupervisorByPastorNames]: 'Por nombres de su pastor',
+  [SearchSubType.SupervisorByPastorLastNames]: 'Por apellidos de su pastor',
+  [SearchSubType.SupervisorByPastorFullName]:
+    'Por nombres y apellidos de su pastor',
+  [SearchSubType.SupervisorByCopastorNames]: 'Por nombres de su co-pastor',
+  [SearchSubType.SupervisorByCopastorLastNames]:
+    'Por apellidos de su co-pastor',
+  [SearchSubType.SupervisorByCopastorFullName]:
+    'Por nombres y apellidos de su co-pastor',
+  [SearchSubType.BySupervisorNames]: 'Por sus nombres',
+  [SearchSubType.BySupervisorLastNames]: 'Por sus apellidos',
+  [SearchSubType.BySupervisorFullName]: 'Por sus nombres y apellidos',
+
+  [SearchSubType.PreacherByPastorNames]: 'Por nombres de su pastor',
+  [SearchSubType.PreacherByPastorLastNames]: 'Por apellidos de su pastor',
+  [SearchSubType.PreacherByPastorFullName]:
+    'Por nombres y apellidos de su pastor',
+  [SearchSubType.PreacherByCopastorNames]: 'Por nombres de su co-pastor',
+  [SearchSubType.PreacherByCopastorLastNames]: 'Por apellidos de su co-pastor',
+  [SearchSubType.PreacherByCopastorFullName]:
+    'Por nombres y apellidos de su co-pastor',
+  [SearchSubType.PreacherBySupervisorNames]: 'Por nombres de su supervisor',
+  [SearchSubType.PreacherBySupervisorLastNames]:
+    'Por apellidos de su supervisor',
+  [SearchSubType.PreacherBySupervisorFullName]:
+    'Por nombres y apellidos de su supervisor',
+  [SearchSubType.ByPreacherNames]: 'Por sus nombres',
+  [SearchSubType.ByPreacherLastNames]: 'Por sus apellidos',
+  [SearchSubType.ByPreacherFullName]: 'Por sus nombres y apellidos',
+
+  [SearchSubType.FamilyGroupByPastorNames]: 'Por nombres de su pastor',
+  [SearchSubType.FamilyGroupByPastorLastNames]: 'Por apellidos de su pastor',
+  [SearchSubType.FamilyGroupByPastorFullName]:
+    'Por nombres y apellidos de su pastor',
+  [SearchSubType.FamilyGroupByCopastorNames]: 'Por nombres de su co-pastor',
+  [SearchSubType.FamilyGroupByCopastorLastNames]:
+    'Por apellidos de su co-pastor',
+  [SearchSubType.FamilyGroupByCopastorFullName]:
+    'Por nombres y apellidos de su co-pastor',
+  [SearchSubType.FamilyGroupBySupervisorNames]: 'Por nombres de su supervisor',
+  [SearchSubType.FamilyGroupBySupervisorLastNames]:
+    'Por apellidos de su supervisor',
+  [SearchSubType.FamilyGroupBySupervisorFullName]:
+    'Por nombres y apellidos de su supervisor',
+  [SearchSubType.FamilyGroupByPreacherNames]: 'Por nombres de su predicador',
+  [SearchSubType.FamilyGroupByPreacherLastNames]:
+    'Por apellidos de su predicador',
+  [SearchSubType.FamilyGroupByPreacherFullName]:
+    'Por nombres y apellidos de su predicador',
+
+  [SearchSubType.OfferingByDate]: 'Por fecha',
+  [SearchSubType.OfferingByChurch]: 'Por iglesia',
+  [SearchSubType.OfferingByChurchDate]: 'Por fecha e iglesia',
+
+  // Sunday service, youngs, school sunday
+  [SearchSubType.OfferingByShift]: 'Por turno',
+  [SearchSubType.OfferingByShiftDate]: 'Por fecha y turno',
+
+  // Family House, Fasting Zonal, Vigil Zonal
+  [SearchSubType.OfferingByZone]: 'Por zona',
+  [SearchSubType.OfferingByZoneDate]: 'Por zona y fecha',
+
+  // Family House
+  [SearchSubType.OfferingByPreacherNames]: 'Por nombres de su predicador',
+  [SearchSubType.OfferingByPreacherLastNames]: 'Por apellidos de su predicador',
+  [SearchSubType.OfferingByPreacherFullName]:
+    'Por nombres y apellidos de su predicador',
+  [SearchSubType.OfferingByGroupCode]: 'Por código de grupo fam.',
+  [SearchSubType.OfferingByGroupCodeDate]: 'Por código de grupo fam. y fecha',
+
+  // Offering Ayuno Zonal y Vigilia Zonal
+  [SearchSubType.OfferingBySupervisorNames]: 'Por nombres de su supervisor',
+  [SearchSubType.OfferingBySupervisorLastNames]:
+    'Por apellidos de su supervisor',
+  [SearchSubType.OfferingBySupervisorFullName]:
+    'Por nombres y apellidos de su supervisor',
+
+  // Offering Ground Church and Special
+  [SearchSubType.OfferingByContributorNames]: 'Por nombres del aportante',
+  [SearchSubType.OfferingByContributorLastNames]: 'Por apellidos del aportante',
+  [SearchSubType.OfferingByContributorFullName]:
+    'Por nombres y apellidos del aportante',
+
+  // Operative Expenses
+  [SearchSubType.VenueRental]: 'Alquiler de local',
+  [SearchSubType.PublicServices]: 'Servicios públicos',
+  [SearchSubType.InsuranceAndTaxes]: 'Seguros y/o impuestos',
+  [SearchSubType.TransportationAndTravelAllowance]: 'Transporte y/o viáticos',
+  [SearchSubType.SecurityAndSurveillance]: 'Seguridad y vigilancia',
+  [SearchSubType.OtherAdministrativeExpenses]: 'Otros gastos administrativos',
+
+  // Maintenance and Repair Expenses
+  [SearchSubType.PlumbingServices]: 'Servicios de gasfiteria',
+  [SearchSubType.ElectricalServices]: 'Servicios de electricidad',
+  [SearchSubType.PaintingAndTouchUpsServices]:
+    'Servicios de pintura y retoques',
+  [SearchSubType.CleaningServices]: 'Servicios de limpieza',
+  [SearchSubType.HeatingAndACSystemMaintenance]: 'Mantenimiento de SC y AC',
+  [SearchSubType.SoundAndLightingEquipmentMaintenance]:
+    'Mant. Equipos de sonido e iluminación',
+  [SearchSubType.GardenAndExteriorMaintenance]: 'Mant. Jardines y exteriores',
+  [SearchSubType.FurnitureRepairAndMaintenance]: 'Mant. Muebles',
+  [SearchSubType.ComputerEquipmentRepairAndMaintenance]:
+    'Mant. Equipos informáticos',
+  [SearchSubType.GeneralEquipmentMaintenance]: 'Mant. Equipos en general',
+  [SearchSubType.GeneralEquipmentRepairs]: 'Rep. Equipos en general',
+  [SearchSubType.RoofAndStructuralRepairs]: 'Rep. Techo y estructuras',
+  [SearchSubType.DoorAndWindowRepairs]: 'Rep. Puertas y ventanas',
+  [SearchSubType.SoundAndLightingEquipmentRepairs]:
+    'Rep. Equipos de sonido e iluminación',
+
+  // Decoration Expenses
+  [SearchSubType.PurchaseFlowersAndPlants]: 'Adq. Flores y plantas',
+  [SearchSubType.PurchaseDecorativeFurniture]: 'Adq. Muebles decorativos',
+  [SearchSubType.PurchaseDecorativeItems]: 'Adq. Artículos decorativos',
+  [SearchSubType.DecorationServices]: 'Serv. Decoración general',
+  [SearchSubType.LightingAndIlluminationServices]:
+    'Serv. Iluminación y efectos',
+  [SearchSubType.StageSetupServices]: 'Serv. Montaje de escenario',
+  [SearchSubType.EventDecorationRentals]: 'Alq. Decoraciones especiales',
+  [SearchSubType.CleaningPostEventServices]: 'Serv. Limpieza post-evento',
+
+  // Equipment and Technology Expenses
+  [SearchSubType.SoundEquipment]: 'Equipos de sonido',
+  [SearchSubType.ProjectionEquipment]: 'Equipos de proyección',
+  [SearchSubType.HvacEquipment]: 'Equipos de ventilación, SC y AC',
+  [SearchSubType.LightingEquipment]: 'Equipos de iluminación',
+  [SearchSubType.SecurityEquipment]: 'Equipos de seguridad',
+  [SearchSubType.OfficeEquipment]: 'Equipos de oficina',
+  [SearchSubType.ComputerEquipment]: 'Equipos informáticos',
+  [SearchSubType.KitchenEquipment]: 'Equipos de cocina',
+  [SearchSubType.CleaningEquipment]: 'Equipos de limpieza',
+  [SearchSubType.AudioVideoRecordingEquipment]: 'Equipos de grabación (a/v)',
+  [SearchSubType.OfficeFurniture]: 'Mobiliarios informáticos',
+  [SearchSubType.KitchenFurniture]: 'Mobiliarios de cocina',
+  [SearchSubType.GeneralFurniture]: 'Mobiliarios en general',
+  [SearchSubType.MusicalInstruments]: 'Instrumentos musicales',
+  [SearchSubType.InternetTelephoneServices]: 'Serv. Internet y telefonía',
+  [SearchSubType.HostingSoftwareServices]: 'Serv. Hosting y software',
+
+  // Supplies Expenses
+  [SearchSubType.KitchenUtensils]: 'Utensilios de cocina',
+  [SearchSubType.CookingIngredients]: 'Insumos de cocina',
+  [SearchSubType.OfficeSupplies]: 'Utensilios de oficina',
+  [SearchSubType.CleaningMaterials]: 'Materiales de limpieza',
+  [SearchSubType.PackagingMaterials]: 'Materiales de almacenamiento',
+  [SearchSubType.SundaySchoolMaterials]: 'Material educativo (Esc. Dom.)',
+
+  // Planing Events Expenses
+  [SearchSubType.AdvertisingAndEventPromotion]:
+    'Publicidad y promoción de eventos',
+  [SearchSubType.SpecialGuestsFees]: 'Hon. Invitados especiales',
+  [SearchSubType.SupportStaffFees]: 'Hon. Personal de apoyo',
+  [SearchSubType.SecurityPersonnelFees]: 'Hon. Personal de seguridad',
+  [SearchSubType.ExternalVenueRental]: 'Alq. Local externo',
+  [SearchSubType.RentalTechnicalEquipment]: 'Alq. Equipos técnicos',
+  [SearchSubType.TransportationSpecialGuests]: 'Trans. Invitados especiales',
+  [SearchSubType.EquipmentTransportation]: 'Trans. Equipos',
+  [SearchSubType.PrivateMobilityRental]: 'Alq. Movilidad particular',
+  [SearchSubType.FoodAndBeverage]: 'Alimentación y bebida',
+  [SearchSubType.EducationalMaterials]: 'Material didáctico',
+  [SearchSubType.GiftsAndPrizesParticipants]: 'Premios y regalos',
+  [SearchSubType.OtherRelatedExpenses]: 'Otros gastos relacionados',
+};

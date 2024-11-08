@@ -94,7 +94,7 @@ export class ZoneController {
   findByTerm(
     @Param('term') term: string,
     @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<Zone | Zone[]> {
+  ): Promise<Zone[]> {
     return this.zoneService.findByTerm(term, searchTypeAndPaginationDto);
   }
 

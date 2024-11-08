@@ -16,21 +16,21 @@ export const discipleDataFormatter = ({ disciples }: Options) => {
     },
     theirPastor: {
       id: disciple?.theirPastor?.id,
-      firstName: disciple?.theirPastor?.firstName,
-      lastName: disciple?.theirPastor?.lastName,
-      roles: disciple?.theirPastor?.roles,
+      firstName: disciple?.theirPastor?.member?.firstName,
+      lastName: disciple?.theirPastor?.member?.lastName,
+      roles: disciple?.theirPastor?.member?.roles,
     },
     theirCopastor: {
       id: disciple?.theirCopastor?.id,
-      firstName: disciple?.theirCopastor?.firstName,
-      lastName: disciple?.theirCopastor?.lastName,
-      roles: disciple?.theirCopastor?.roles,
+      firstName: disciple?.theirCopastor?.member?.firstName,
+      lastName: disciple?.theirCopastor?.member?.lastName,
+      roles: disciple?.theirCopastor?.member?.roles,
     },
     theirSupervisor: {
       id: disciple?.theirSupervisor?.id,
-      firstName: disciple?.theirSupervisor?.firstName,
-      lastName: disciple?.theirSupervisor?.lastName,
-      roles: disciple?.theirSupervisor?.roles,
+      firstName: disciple?.theirSupervisor?.member?.firstName,
+      lastName: disciple?.theirSupervisor?.member?.lastName,
+      roles: disciple?.theirSupervisor?.member?.roles,
     },
     theirZone: {
       id: disciple?.theirZone?.id,
@@ -48,9 +48,9 @@ export const discipleDataFormatter = ({ disciples }: Options) => {
     },
     theirPreacher: {
       id: disciple?.theirPreacher?.id,
-      firstName: disciple?.theirPreacher?.firstName,
-      lastName: disciple?.theirPreacher?.lastName,
-      roles: disciple?.theirPreacher?.roles,
+      firstName: disciple?.theirPreacher?.member?.firstName,
+      lastName: disciple?.theirPreacher?.member?.lastName,
+      roles: disciple?.theirPreacher?.member?.roles,
     },
   }));
 };

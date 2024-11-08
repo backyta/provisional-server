@@ -7,21 +7,23 @@ interface Options {
   offeringIncome: OfferingIncome[];
 }
 
+interface Church {
+  isAnexe: boolean;
+  abbreviatedChurchName: string;
+}
+
 interface ResultDataOptions {
   date: Date;
   category: string;
   memberType: string;
   memberId: string;
   memberFullName: string;
-  allOfferings: {
+  allOfferings: Array<{
     offering: number;
     currency: string;
     date: Date;
-  }[];
-  church: {
-    isAnexe: boolean;
-    abbreviatedChurchName: string;
-  };
+  }>;
+  church: Church;
   accumulatedOfferingPEN: number;
   accumulatedOfferingUSD: number;
   accumulatedOfferingEUR: number;
@@ -29,87 +31,88 @@ interface ResultDataOptions {
 
 export const offeringIncomeBySpecialOfferingFormatter = ({
   offeringIncome,
-}: Options) => {
-  const resultData: ResultDataOptions[] = offeringIncome?.reduce<
-    ResultDataOptions[]
-  >((acc, offering) => {
-    const existingEntry = acc.find((item) => {
-      if (
-        offering.category === OfferingIncomeCreationCategory.InternalDonation
-      ) {
-        return (
-          item.category === offering.category &&
-          (item.memberId === offering?.pastor?.id ||
-            item.memberId === offering?.copastor?.id ||
-            item.memberId === offering?.supervisor?.id ||
-            item.memberId === offering?.preacher?.id ||
-            item.memberId === offering?.disciple?.id)
-        );
-      }
+}: Options): ResultDataOptions[] => {
+  const resultData: ResultDataOptions[] = offeringIncome?.reduce(
+    (acc, offering) => {
+      const existingEntry = acc.find((item) => {
+        if (
+          offering.category === OfferingIncomeCreationCategory.InternalDonation
+        ) {
+          return (
+            item.category === offering.category &&
+            (item.memberId === offering?.pastor?.id ||
+              item.memberId === offering?.copastor?.id ||
+              item.memberId === offering?.supervisor?.id ||
+              item.memberId === offering?.preacher?.id ||
+              item.memberId === offering?.disciple?.id)
+          );
+        }
 
-      return item.category === offering.category;
-    });
-
-    if (existingEntry) {
-      if (offering.currency === CurrencyType.PEN) {
-        existingEntry.accumulatedOfferingPEN += +offering.amount;
-      } else if (offering.currency === CurrencyType.USD) {
-        existingEntry.accumulatedOfferingUSD += +offering.amount;
-      } else if (offering.currency === CurrencyType.EUR) {
-        existingEntry.accumulatedOfferingEUR += +offering.amount;
-      }
-      existingEntry.allOfferings.push({
-        offering: +offering?.amount,
-        currency: offering?.currency,
-        date: offering?.date,
+        return item.category === offering.category;
       });
-    } else {
-      acc.push({
-        date: offering?.date,
-        category: offering?.category,
-        accumulatedOfferingPEN:
-          offering.currency === CurrencyType.PEN ? +offering.amount : 0,
-        accumulatedOfferingUSD:
-          offering.currency === CurrencyType.USD ? +offering.amount : 0,
-        accumulatedOfferingEUR:
-          offering.currency === CurrencyType.EUR ? +offering.amount : 0,
-        memberType: offering.memberType,
-        memberFullName: offering?.pastor
-          ? `${getInitialFullNames({ firstNames: offering?.pastor?.firstName ?? '', lastNames: '' })} ${offering?.pastor?.lastName}`
-          : offering?.copastor
-            ? `${getInitialFullNames({ firstNames: offering?.copastor?.firstName ?? '', lastNames: '' })} ${offering?.copastor?.lastName}`
-            : offering?.supervisor
-              ? `${getInitialFullNames({ firstNames: offering?.supervisor?.firstName ?? '', lastNames: '' })} ${offering?.supervisor?.lastName}`
-              : offering?.preacher
-                ? `${getInitialFullNames({ firstNames: offering?.preacher?.firstName ?? '', lastNames: '' })} ${offering?.preacher?.lastName}`
-                : offering?.disciple
-                  ? `${getInitialFullNames({ firstNames: offering?.disciple?.firstName ?? '', lastNames: '' })} ${offering?.disciple?.lastName}`
-                  : 'Donaciones Externas',
-        memberId: offering?.pastor
-          ? offering?.pastor?.id
-          : offering?.copastor
-            ? offering?.copastor?.id
-            : offering?.supervisor
-              ? offering?.supervisor?.id
-              : offering?.preacher
-                ? offering?.preacher?.id
-                : offering?.disciple?.id,
-        church: {
-          isAnexe: offering?.church?.isAnexe,
-          abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
-        },
-        allOfferings: [
-          {
-            offering: +offering?.amount,
-            currency: offering?.currency,
-            date: offering?.date,
+
+      if (existingEntry) {
+        if (offering.currency === CurrencyType.PEN) {
+          existingEntry.accumulatedOfferingPEN += +offering.amount;
+        } else if (offering.currency === CurrencyType.USD) {
+          existingEntry.accumulatedOfferingUSD += +offering.amount;
+        } else if (offering.currency === CurrencyType.EUR) {
+          existingEntry.accumulatedOfferingEUR += +offering.amount;
+        }
+        existingEntry.allOfferings.push({
+          offering: +offering?.amount,
+          currency: offering?.currency,
+          date: offering?.date,
+        });
+      } else {
+        acc.push({
+          date: offering?.date,
+          category: offering?.category,
+          accumulatedOfferingPEN:
+            offering.currency === CurrencyType.PEN ? +offering.amount : 0,
+          accumulatedOfferingUSD:
+            offering.currency === CurrencyType.USD ? +offering.amount : 0,
+          accumulatedOfferingEUR:
+            offering.currency === CurrencyType.EUR ? +offering.amount : 0,
+          memberType: offering.memberType,
+          memberFullName: offering?.pastor
+            ? `${getInitialFullNames({ firstNames: offering?.pastor?.member?.firstName ?? '', lastNames: '' })} ${offering?.pastor?.member?.lastName}`
+            : offering?.copastor
+              ? `${getInitialFullNames({ firstNames: offering?.copastor?.member?.firstName ?? '', lastNames: '' })} ${offering?.copastor?.member?.lastName}`
+              : offering?.supervisor
+                ? `${getInitialFullNames({ firstNames: offering?.supervisor?.member?.firstName ?? '', lastNames: '' })} ${offering?.supervisor?.member?.lastName}`
+                : offering?.preacher
+                  ? `${getInitialFullNames({ firstNames: offering?.preacher?.member?.firstName ?? '', lastNames: '' })} ${offering?.preacher?.member?.lastName}`
+                  : offering?.disciple
+                    ? `${getInitialFullNames({ firstNames: offering?.disciple?.member?.firstName ?? '', lastNames: '' })} ${offering?.disciple?.member?.lastName}`
+                    : 'Donaciones Externas',
+          memberId: offering?.pastor
+            ? offering?.pastor?.id
+            : offering?.copastor
+              ? offering?.copastor?.id
+              : offering?.supervisor
+                ? offering?.supervisor?.id
+                : offering?.preacher
+                  ? offering?.preacher?.id
+                  : offering?.disciple?.id,
+          church: {
+            isAnexe: offering?.church?.isAnexe,
+            abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
           },
-        ],
-      });
-    }
+          allOfferings: [
+            {
+              offering: +offering?.amount,
+              currency: offering?.currency,
+              date: offering?.date,
+            },
+          ],
+        });
+      }
 
-    return acc;
-  }, []);
+      return acc;
+    },
+    [],
+  );
 
   return resultData.sort(
     (a, b) =>

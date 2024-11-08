@@ -5,7 +5,15 @@ interface Options {
   familyGroups: FamilyGroup[];
 }
 
-export const familyGroupProportionFormatter = ({ familyGroups }: Options) => {
+interface FamilyGroupProportion {
+  totalCountFamilyGroups: number;
+  countFamilyGroupsActive: number;
+  countFamilyGroupsInactive: number;
+}
+
+export const familyGroupProportionFormatter = ({
+  familyGroups,
+}: Options): FamilyGroupProportion => {
   const totalCountFamilyGroups = familyGroups.length;
 
   const countFamilyGroupsActive = familyGroups.filter(

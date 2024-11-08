@@ -27,14 +27,16 @@ interface Options {
   disciples: Disciple[];
 }
 
-interface ResultDataOptions {
+interface ChurchInfo {
+  isAnexe: boolean;
+  abbreviatedChurchName: string;
+}
+
+interface MonthlyMemberData {
   month: string;
   membersCount: number;
   averageAge: string | number;
-  church: {
-    isAnexe: boolean;
-    abbreviatedChurchName: string;
-  };
+  church: ChurchInfo;
 }
 
 export const memberFormatterByBirthMonth = ({
@@ -43,7 +45,7 @@ export const memberFormatterByBirthMonth = ({
   supervisors,
   preachers,
   disciples,
-}: Options) => {
+}: Options): MonthlyMemberData[] => {
   const allMembers = [
     ...pastors,
     ...copastors,
@@ -54,7 +56,7 @@ export const memberFormatterByBirthMonth = ({
 
   const memberByBirthMonth = monthNames.map((_, index) =>
     allMembers.filter(
-      (member) => new Date(member.birthDate).getMonth() === index,
+      (item) => new Date(item?.member?.birthDate).getMonth() === index,
     ),
   );
 
@@ -63,13 +65,14 @@ export const memberFormatterByBirthMonth = ({
     const averageAge =
       membersCount > 0
         ? (
-            members.reduce((sum, member) => sum + member.age, 0) / membersCount
+            members.reduce((sum, item) => sum + item?.member?.age, 0) /
+            membersCount
           ).toFixed(0)
         : 0;
     return { membersCount, averageAge };
   };
 
-  const resultData: ResultDataOptions[] = monthNames.map((_, index) => {
+  const resultData: MonthlyMemberData[] = monthNames.map((_, index) => {
     return {
       month: monthNames[index],
       ...calculateMemberData(memberByBirthMonth[index]),

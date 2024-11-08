@@ -85,7 +85,7 @@ export class UserService {
   async findByTerm(
     term: string,
     searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<User | User[]> {
+  ): Promise<User[]> {
     const {
       'search-type': searchType,
       limit,

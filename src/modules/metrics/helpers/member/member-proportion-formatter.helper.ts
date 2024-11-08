@@ -14,13 +14,21 @@ interface Options {
   disciples: Disciple[];
 }
 
+export interface MemberProportionResult {
+  countMembersMale: number;
+  totalCountMembers: number;
+  countMembersFemale: number;
+  countMembersActive: number;
+  countMembersInactive: number;
+}
+
 export const memberProportionFormatter = ({
   pastors,
   copastors,
   supervisors,
   preachers,
   disciples,
-}: Options) => {
+}: Options): MemberProportionResult => {
   const allMembers = [
     ...pastors,
     ...copastors,
@@ -32,19 +40,19 @@ export const memberProportionFormatter = ({
   const totalCountMembers = allMembers.length;
 
   const countMembersMale = allMembers.filter(
-    (member) => member.gender === Gender.Male,
+    (item) => item?.member?.gender === Gender.Male,
   ).length;
 
   const countMembersFemale = allMembers.filter(
-    (member) => member.gender === Gender.Female,
+    (item) => item?.member?.gender === Gender.Female,
   ).length;
 
   const countMembersActive = allMembers.filter(
-    (member) => member.recordStatus === RecordStatus.Active,
+    (item) => item?.recordStatus === RecordStatus.Active,
   ).length;
 
   const countMembersInactive = allMembers.filter(
-    (member) => member.recordStatus === RecordStatus.Inactive,
+    (item) => item?.recordStatus === RecordStatus.Inactive,
   ).length;
 
   return {

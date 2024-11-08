@@ -16,15 +16,15 @@ export const supervisorDataFormatter = ({ supervisors }: Options) => {
     },
     theirPastor: {
       id: supervisor?.theirPastor?.id,
-      firstName: supervisor?.theirPastor?.firstName,
-      lastName: supervisor?.theirPastor?.lastName,
-      roles: supervisor?.theirPastor?.roles,
+      firstName: supervisor?.theirPastor?.member?.firstName,
+      lastName: supervisor?.theirPastor?.member?.lastName,
+      roles: supervisor?.theirPastor?.member?.roles,
     },
     theirCopastor: {
       id: supervisor?.theirCopastor?.id,
-      firstName: supervisor?.theirCopastor?.firstName,
-      lastName: supervisor?.theirCopastor?.lastName,
-      roles: supervisor?.theirCopastor?.roles,
+      firstName: supervisor?.theirCopastor?.member?.firstName,
+      lastName: supervisor?.theirCopastor?.member?.lastName,
+      roles: supervisor?.theirCopastor?.member?.roles,
     },
     theirZone: {
       id: supervisor?.theirZone?.id,
@@ -35,8 +35,8 @@ export const supervisorDataFormatter = ({ supervisors }: Options) => {
     },
     preachers: supervisor?.preachers.map((preacher) => ({
       id: preacher?.id,
-      firstName: preacher?.firstName,
-      lastName: preacher?.lastName,
+      firstName: preacher?.member?.firstName,
+      lastName: preacher?.member?.lastName,
     })),
     familyGroups: supervisor?.familyGroups.map((familyGroup) => ({
       id: familyGroup?.id,
@@ -48,8 +48,8 @@ export const supervisorDataFormatter = ({ supervisors }: Options) => {
     })),
     disciples: supervisor?.disciples.map((disciple) => ({
       id: disciple?.id,
-      firstName: disciple?.firstName,
-      lastName: disciple?.lastName,
+      firstName: disciple?.member?.firstName,
+      lastName: disciple?.member?.lastName,
     })),
   }));
 };

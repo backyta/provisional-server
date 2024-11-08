@@ -97,7 +97,7 @@ export class FamilyGroupController {
   findByTerm(
     @Param('term') term: string,
     @Query() searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<FamilyGroup | FamilyGroup[]> {
+  ): Promise<FamilyGroup[]> {
     return this.familyGroupService.findByTerm(term, searchTypeAndPaginationDto);
   }
 

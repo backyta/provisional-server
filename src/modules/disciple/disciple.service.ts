@@ -30,6 +30,7 @@ import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
 import { Church } from '@/modules/church/entities';
 import { Pastor } from '@/modules/pastor/entities';
+import { Member } from '@/modules/member/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Preacher } from '@/modules/preacher/entities';
@@ -64,6 +65,9 @@ export class DiscipleService {
 
     @InjectRepository(Disciple)
     private readonly discipleRepository: Repository<Disciple>,
+
+    @InjectRepository(Member)
+    private readonly memberRepository: Repository<Member>,
   ) {}
 
   //* CREATE DISCIPLE
@@ -71,7 +75,7 @@ export class DiscipleService {
     createDiscipleDto: CreateDiscipleDto,
     user: User,
   ): Promise<Disciple> {
-    const { roles, theirFamilyGroup, numberChildren } = createDiscipleDto;
+    const { roles, theirFamilyGroup } = createDiscipleDto;
 
     if (!roles.includes(MemberRole.Disciple)) {
       throw new BadRequestException(`El rol "Discípulo" debe ser incluido.`);
@@ -222,11 +226,33 @@ export class DiscipleService {
       );
     }
 
-    // Create new instance
+    //* Create new instance member and assign to new copastor instance
     try {
+      const newMember = this.memberRepository.create({
+        firstName: createDiscipleDto.firstName,
+        lastName: createDiscipleDto.lastName,
+        gender: createDiscipleDto.gender,
+        originCountry: createDiscipleDto.originCountry,
+        birthDate: createDiscipleDto.birthDate,
+        maritalStatus: createDiscipleDto.maritalStatus,
+        numberChildren: +createDiscipleDto.numberChildren,
+        conversionDate: createDiscipleDto.conversionDate,
+        email: createDiscipleDto.email,
+        phoneNumber: createDiscipleDto.phoneNumber,
+        country: createDiscipleDto.country,
+        department: createDiscipleDto.department,
+        province: createDiscipleDto.province,
+        district: createDiscipleDto.district,
+        urbanSector: createDiscipleDto.urbanSector,
+        address: createDiscipleDto.address,
+        referenceAddress: createDiscipleDto.referenceAddress,
+        roles: createDiscipleDto.roles,
+      });
+
+      await this.memberRepository.save(newMember);
+
       const newDisciple = this.discipleRepository.create({
-        ...createDiscipleDto,
-        numberChildren: +numberChildren,
+        member: newMember,
         theirChurch: church,
         theirPastor: pastor,
         theirCopastor: copastor,
@@ -269,12 +295,13 @@ export class DiscipleService {
         relations: [
           'updatedBy',
           'createdBy',
+          'member',
           'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
+          'theirPastor.member',
+          'theirCopastor.member',
+          'theirSupervisor.member',
           'theirZone',
-          'theirPreacher',
+          'theirPreacher.member',
           'theirFamilyGroup',
         ],
         order: { createdAt: order as FindOptionsOrderValue },
@@ -300,7 +327,7 @@ export class DiscipleService {
   async findByTerm(
     term: string,
     searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ): Promise<Disciple | Disciple[]> {
+  ): Promise<Disciple[]> {
     const {
       'search-type': searchType,
       'search-sub-type': searchSubType,
@@ -329,7 +356,9 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -337,12 +366,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -375,7 +405,9 @@ export class DiscipleService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -393,12 +425,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -431,7 +464,9 @@ export class DiscipleService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -449,12 +484,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -487,7 +523,9 @@ export class DiscipleService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -505,12 +543,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -543,7 +582,9 @@ export class DiscipleService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -561,12 +602,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -600,7 +642,9 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -608,12 +652,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -646,7 +691,9 @@ export class DiscipleService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -664,12 +711,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -702,7 +750,9 @@ export class DiscipleService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -720,12 +770,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -758,7 +809,9 @@ export class DiscipleService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -776,12 +829,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -814,7 +868,9 @@ export class DiscipleService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -832,12 +888,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -872,8 +929,10 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -881,12 +940,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -920,8 +980,10 @@ export class DiscipleService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -939,12 +1001,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -978,8 +1041,10 @@ export class DiscipleService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -997,12 +1062,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1036,8 +1102,10 @@ export class DiscipleService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1055,12 +1123,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1094,8 +1163,10 @@ export class DiscipleService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
-            lastName: ILike(`%${lastNames}%`),
+            member: {
+              firstName: ILike(`%${firstNames}%`),
+              lastName: ILike(`%${lastNames}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1113,12 +1184,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1154,7 +1226,9 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
-            birthDate: Between(fromDate, toDate),
+            member: {
+              birthDate: Between(fromDate, toDate),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1162,12 +1236,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1204,12 +1279,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1280,12 +1356,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1332,12 +1409,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1382,12 +1460,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1421,7 +1500,9 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
-            gender: genderTerm,
+            member: {
+              gender: genderTerm,
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1429,12 +1510,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1476,7 +1558,9 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
-            maritalStatus: maritalStatusTerm,
+            member: {
+              maritalStatus: maritalStatusTerm,
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1484,12 +1568,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1519,7 +1604,9 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
-            originCountry: ILike(`%${term}%`),
+            member: {
+              originCountry: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1527,12 +1614,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1559,7 +1647,9 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
-            department: ILike(`%${term}%`),
+            member: {
+              department: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1567,12 +1657,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1599,7 +1690,9 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
-            province: ILike(`%${term}%`),
+            member: {
+              province: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1607,12 +1700,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1639,7 +1733,9 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
-            district: ILike(`%${term}%`),
+            member: {
+              district: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1647,12 +1743,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1679,7 +1776,9 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
-            urbanSector: ILike(`%${term}%`),
+            member: {
+              urbanSector: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1687,12 +1786,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1719,7 +1819,9 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
-            address: ILike(`%${term}%`),
+            member: {
+              address: ILike(`%${term}%`),
+            },
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1727,12 +1829,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1773,12 +1876,13 @@ export class DiscipleService {
           relations: [
             'updatedBy',
             'createdBy',
+            'member',
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
+            'theirPreacher.member',
             'theirFamilyGroup',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
@@ -1833,13 +1937,8 @@ export class DiscipleService {
     updateDiscipleDto: UpdateDiscipleDto,
     user: User,
   ): Promise<Disciple | Preacher> {
-    const {
-      roles,
-      recordStatus,
-      theirSupervisor,
-      theirFamilyGroup,
-      numberChildren,
-    } = updateDiscipleDto;
+    const { roles, recordStatus, theirSupervisor, theirFamilyGroup } =
+      updateDiscipleDto;
 
     if (!roles) {
       throw new BadRequestException(
@@ -1854,6 +1953,7 @@ export class DiscipleService {
     const disciple = await this.discipleRepository.findOne({
       where: { id: id },
       relations: [
+        'member',
         'theirChurch',
         'theirPastor',
         'theirCopastor',
@@ -1873,21 +1973,21 @@ export class DiscipleService {
     }
 
     if (
-      (disciple.roles.includes(MemberRole.Disciple) &&
-        !disciple.roles.includes(MemberRole.Preacher) &&
-        !disciple.roles.includes(MemberRole.Preacher) &&
-        !disciple.roles.includes(MemberRole.Copastor) &&
-        !disciple.roles.includes(MemberRole.Pastor) &&
-        !disciple.roles.includes(MemberRole.Treasurer) &&
+      (disciple.member.roles.includes(MemberRole.Disciple) &&
+        !disciple.member.roles.includes(MemberRole.Preacher) &&
+        !disciple.member.roles.includes(MemberRole.Preacher) &&
+        !disciple.member.roles.includes(MemberRole.Copastor) &&
+        !disciple.member.roles.includes(MemberRole.Pastor) &&
+        !disciple.member.roles.includes(MemberRole.Treasurer) &&
         (roles.includes(MemberRole.Copastor) ||
           roles.includes(MemberRole.Pastor) ||
           roles.includes(MemberRole.Supervisor))) ||
-      (disciple.roles.includes(MemberRole.Disciple) &&
-        disciple.roles.includes(MemberRole.Treasurer) &&
-        !disciple.roles.includes(MemberRole.Preacher) &&
-        !disciple.roles.includes(MemberRole.Copastor) &&
-        !disciple.roles.includes(MemberRole.Pastor) &&
-        !disciple.roles.includes(MemberRole.Preacher) &&
+      (disciple.member.roles.includes(MemberRole.Disciple) &&
+        disciple.member.roles.includes(MemberRole.Treasurer) &&
+        !disciple.member.roles.includes(MemberRole.Preacher) &&
+        !disciple.member.roles.includes(MemberRole.Copastor) &&
+        !disciple.member.roles.includes(MemberRole.Pastor) &&
+        !disciple.member.roles.includes(MemberRole.Preacher) &&
         (roles.includes(MemberRole.Copastor) ||
           roles.includes(MemberRole.Pastor) ||
           roles.includes(MemberRole.Supervisor)))
@@ -1899,12 +1999,12 @@ export class DiscipleService {
 
     //* Update info about Disciple
     if (
-      disciple.roles.includes(MemberRole.Disciple) &&
-      !disciple.roles.includes(MemberRole.Preacher) &&
-      !disciple.roles.includes(MemberRole.Pastor) &&
-      !disciple.roles.includes(MemberRole.Copastor) &&
-      !disciple.roles.includes(MemberRole.Supervisor) &&
-      !disciple.roles.includes(MemberRole.Treasurer) &&
+      disciple.member.roles.includes(MemberRole.Disciple) &&
+      !disciple.member.roles.includes(MemberRole.Preacher) &&
+      !disciple.member.roles.includes(MemberRole.Pastor) &&
+      !disciple.member.roles.includes(MemberRole.Copastor) &&
+      !disciple.member.roles.includes(MemberRole.Supervisor) &&
+      !disciple.member.roles.includes(MemberRole.Treasurer) &&
       roles.includes(MemberRole.Disciple) &&
       !roles.includes(MemberRole.Preacher) &&
       !roles.includes(MemberRole.Pastor) &&
@@ -2056,12 +2156,40 @@ export class DiscipleService {
           );
         }
 
-        // Update and save
+        //* Update and save
+        let savedMember: Member;
+        try {
+          const updatedMember = await this.memberRepository.preload({
+            id: disciple.member.id,
+            firstName: updateDiscipleDto.firstName,
+            lastName: updateDiscipleDto.lastName,
+            gender: updateDiscipleDto.gender,
+            originCountry: updateDiscipleDto.originCountry,
+            birthDate: updateDiscipleDto.birthDate,
+            maritalStatus: updateDiscipleDto.maritalStatus,
+            numberChildren: +updateDiscipleDto.numberChildren,
+            conversionDate: updateDiscipleDto.conversionDate,
+            email: updateDiscipleDto.email,
+            phoneNumber: updateDiscipleDto.phoneNumber,
+            country: updateDiscipleDto.country,
+            department: updateDiscipleDto.department,
+            province: updateDiscipleDto.province,
+            district: updateDiscipleDto.district,
+            urbanSector: updateDiscipleDto.urbanSector,
+            address: updateDiscipleDto.address,
+            referenceAddress: updateDiscipleDto.referenceAddress,
+            roles: updateDiscipleDto.roles,
+          });
+
+          savedMember = await this.memberRepository.save(updatedMember);
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+
         try {
           const updatedDisciple = await this.discipleRepository.preload({
             id: disciple.id,
-            ...updateDiscipleDto,
-            numberChildren: +numberChildren,
+            member: savedMember,
             theirChurch: newChurch,
             theirPastor: newPastor,
             theirCopastor: newCopastor,
@@ -2083,10 +2211,33 @@ export class DiscipleService {
       //? Update and save if is same Copastor
       if (disciple?.theirFamilyGroup?.id === theirFamilyGroup) {
         try {
+          const updatedMember = await this.memberRepository.preload({
+            id: disciple.member.id,
+            firstName: updateDiscipleDto.firstName,
+            lastName: updateDiscipleDto.lastName,
+            gender: updateDiscipleDto.gender,
+            originCountry: updateDiscipleDto.originCountry,
+            birthDate: updateDiscipleDto.birthDate,
+            maritalStatus: updateDiscipleDto.maritalStatus,
+            numberChildren: +updateDiscipleDto.numberChildren,
+            conversionDate: updateDiscipleDto.conversionDate,
+            email: updateDiscipleDto.email,
+            phoneNumber: updateDiscipleDto.phoneNumber,
+            country: updateDiscipleDto.country,
+            department: updateDiscipleDto.department,
+            province: updateDiscipleDto.province,
+            district: updateDiscipleDto.district,
+            urbanSector: updateDiscipleDto.urbanSector,
+            address: updateDiscipleDto.address,
+            referenceAddress: updateDiscipleDto.referenceAddress,
+            roles: updateDiscipleDto.roles,
+          });
+
+          await this.memberRepository.save(updatedMember);
+
           const updatedDisciple = await this.discipleRepository.preload({
             id: disciple.id,
-            ...updateDiscipleDto,
-            numberChildren: +numberChildren,
+            member: updatedMember,
             theirChurch: disciple.theirChurch,
             theirPastor: disciple.theirPastor,
             theirCopastor: disciple.theirCopastor,
@@ -2108,12 +2259,12 @@ export class DiscipleService {
 
     //* Raise Disciple level to Preacher
     if (
-      disciple.roles.includes(MemberRole.Disciple) &&
-      !disciple.roles.includes(MemberRole.Preacher) &&
-      !disciple.roles.includes(MemberRole.Treasurer) &&
-      !disciple.roles.includes(MemberRole.Copastor) &&
-      !disciple.roles.includes(MemberRole.Supervisor) &&
-      !disciple.roles.includes(MemberRole.Pastor) &&
+      disciple.member.roles.includes(MemberRole.Disciple) &&
+      !disciple.member.roles.includes(MemberRole.Preacher) &&
+      !disciple.member.roles.includes(MemberRole.Treasurer) &&
+      !disciple.member.roles.includes(MemberRole.Copastor) &&
+      !disciple.member.roles.includes(MemberRole.Supervisor) &&
+      !disciple.member.roles.includes(MemberRole.Pastor) &&
       roles.includes(MemberRole.Disciple) &&
       roles.includes(MemberRole.Preacher) &&
       !roles.includes(MemberRole.Treasurer) &&
@@ -2214,11 +2365,34 @@ export class DiscipleService {
         );
       }
 
-      // Create new instance Preacher and delete old disciple
+      //? Create new instance Preacher and delete old disciple
       try {
+        const updatedMember = await this.memberRepository.preload({
+          id: disciple.member.id,
+          firstName: updateDiscipleDto.firstName,
+          lastName: updateDiscipleDto.lastName,
+          gender: updateDiscipleDto.gender,
+          originCountry: updateDiscipleDto.originCountry,
+          birthDate: updateDiscipleDto.birthDate,
+          maritalStatus: updateDiscipleDto.maritalStatus,
+          numberChildren: +updateDiscipleDto.numberChildren,
+          conversionDate: updateDiscipleDto.conversionDate,
+          email: updateDiscipleDto.email,
+          phoneNumber: updateDiscipleDto.phoneNumber,
+          country: updateDiscipleDto.country,
+          department: updateDiscipleDto.department,
+          province: updateDiscipleDto.province,
+          district: updateDiscipleDto.district,
+          urbanSector: updateDiscipleDto.urbanSector,
+          address: updateDiscipleDto.address,
+          referenceAddress: updateDiscipleDto.referenceAddress,
+          roles: updateDiscipleDto.roles,
+        });
+
+        await this.memberRepository.save(updatedMember);
+
         const newPreacher = this.preacherRepository.create({
-          ...updateDiscipleDto,
-          numberChildren: +numberChildren,
+          member: updatedMember,
           theirChurch: newChurch,
           theirPastor: newPastor,
           theirCopastor: newCopastor,
@@ -2256,22 +2430,21 @@ export class DiscipleService {
     }
 
     //* Update and set in Inactive on Preacher
-    const updatedDisciple = await this.discipleRepository.preload({
-      id: disciple.id,
-      theirChurch: null,
-      theirPastor: null,
-      theirCopastor: null,
-      theirSupervisor: null,
-      theirZone: null,
-      theirFamilyGroup: null,
-      theirPreacher: null,
-      updatedAt: new Date(),
-      updatedBy: user,
-      recordStatus: RecordStatus.Inactive,
-    });
-
-    // Update and save
     try {
+      const updatedDisciple = await this.discipleRepository.preload({
+        id: disciple.id,
+        theirChurch: null,
+        theirPastor: null,
+        theirCopastor: null,
+        theirSupervisor: null,
+        theirZone: null,
+        theirFamilyGroup: null,
+        theirPreacher: null,
+        updatedAt: new Date(),
+        updatedBy: user,
+        recordStatus: RecordStatus.Inactive,
+      });
+
       await this.discipleRepository.save(updatedDisciple);
     } catch (error) {
       this.handleDBExceptions(error);

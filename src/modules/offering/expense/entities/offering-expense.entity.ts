@@ -12,7 +12,7 @@ import { RecordStatus } from '@/common/enums';
 import { User } from '@/modules/user/entities';
 import { Church } from '@/modules/church/entities';
 
-@Entity({ name: 'offerings_expenses' })
+@Entity({ name: 'offering_expenses' })
 @Index(['type', 'subType'])
 export class OfferingExpense {
   //* General data
