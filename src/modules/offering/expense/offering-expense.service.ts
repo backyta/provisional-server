@@ -265,7 +265,7 @@ export class OfferingExpenseService {
           const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
-            `No se encontraron salidas de ofrendas (${OfferingExpenseSearchTypeNames[searchType]}) con esta iglesia: ${church?.churchName} y con este rango de fechas: ${fromDate} - ${toDate}`,
+            `No se encontraron salidas de ofrendas (${OfferingExpenseSearchTypeNames[searchType]}) con esta iglesia: ${church?.abbreviatedChurchName} y con este rango de fechas: ${fromDate} - ${toDate}`,
           );
         }
 

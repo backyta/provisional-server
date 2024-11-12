@@ -6,6 +6,7 @@ import {
   MemberType,
   MemberTypeNames,
   OfferingIncomeCreationCategoryNames,
+  OfferingIncomeCreationShiftTypeNames,
   OfferingIncomeCreationSubTypeNames,
   OfferingIncomeCreationTypeNames,
 } from '@/modules/offering/income/enums';
@@ -57,13 +58,12 @@ export const getOfferingIncomeReport = (
             'auto',
             'auto',
             'auto',
-            // 'auto',
             'auto',
             'auto',
             'auto',
             'auto',
             'auto',
-            'auto',
+            '*',
           ],
 
           body: [
@@ -130,9 +130,11 @@ export const getOfferingIncomeReport = (
               },
             ],
             ...data.map((item) => [
-              `${OfferingIncomeCreationTypeNames[item?.type]} - ${OfferingIncomeCreationSubTypeNames[item?.subType] ?? 'S/N'}`,
+              item?.subType
+                ? `${OfferingIncomeCreationTypeNames[item?.type]} - ${OfferingIncomeCreationSubTypeNames[item?.subType] ?? ''}`
+                : `${OfferingIncomeCreationTypeNames[item?.type]} `,
               OfferingIncomeCreationCategoryNames[item?.category] ?? '-',
-              item?.shift ?? '-',
+              OfferingIncomeCreationShiftTypeNames[item?.shift] ?? '-',
               `${item?.amount} ${item?.currency}`,
               format(new Date(addDays(item.date, 1)), 'dd/MM/yyyy'),
               `${item?.church?.abbreviatedChurchName ?? '-'}`,
@@ -176,12 +178,11 @@ export const getOfferingIncomeReport = (
             'auto',
             'auto',
             'auto',
-
             'auto',
             'auto',
             'auto',
             'auto',
-            'auto',
+            '*',
           ],
           body: [
             [

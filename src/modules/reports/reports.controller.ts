@@ -39,6 +39,7 @@ export class ReportsController {
     const pdfDoc = await this.reportsService.getGeneralChurches(paginationDto);
 
     response.setHeader('Content-Type', 'application/pdf');
+    response.setHeader('Content-Disposition', 'inline; filename=report.pdf');
     pdfDoc.info.Title = 'general-churches-report.pdf';
     pdfDoc.pipe(response);
     pdfDoc.end();

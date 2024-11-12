@@ -1,27 +1,46 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Logger,
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
-import { SearchSubTypeNames, SearchTypeNames } from '@/common/enums';
+import { format } from 'date-fns';
 
-import { Member } from '@/modules/member/entities';
-import { Pastor } from '@/modules/pastor/entities';
-import { Disciple } from '@/modules/disciple/entities';
+import {
+  SearchType,
+  GenderNames,
+  SearchSubType,
+  SearchTypeNames,
+  RecordStatusNames,
+  SearchSubTypeNames,
+  MaritalStatusNames,
+} from '@/common/enums';
+import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+
+import { UserRoleNames } from '@/modules/auth/enums';
+
+import {
+  MemberTypeNames,
+  OfferingIncomeCreationShiftTypeNames,
+} from '@/modules/offering/income/enums';
 
 import { DateFormatter } from '@/modules/reports/helpers';
 import { PrinterService } from '@/modules/printer/printer.service';
 import {
+  getUsersReport,
   getZonesReport,
   getMembersReport,
   getChurchesReport,
   getFamilyGroupsReport,
-  getStudyCertificateByIdReport,
   getOfferingIncomeReport,
   getOfferingExpensesReport,
-  getUsersReport,
+  getStudyCertificateByIdReport,
 } from '@/modules/reports/reports-types';
 
+import { UserService } from '@/modules/user/user.service';
 import { PastorService } from '@/modules/pastor/pastor.service';
 import { ChurchService } from '@/modules/church/church.service';
 import { DiscipleService } from '@/modules/disciple/disciple.service';
@@ -29,20 +48,22 @@ import { CopastorService } from '@/modules/copastor/copastor.service';
 import { PreacherService } from '@/modules/preacher/preacher.service';
 import { SupervisorService } from '@/modules/supervisor/supervisor.service';
 import { FamilyGroupService } from '@/modules/family-group/family-group.service';
+import { OfferingIncomeService } from '@/modules/offering/income/offering-income.service';
+import { OfferingExpenseService } from '@/modules/offering/expense/offering-expense.service';
 
 import { Zone } from '@/modules/zone/entities';
+import { User } from '@/modules/user/entities';
+import { Member } from '@/modules/member/entities';
+import { Pastor } from '@/modules/pastor/entities';
 import { Church } from '@/modules/church/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Preacher } from '@/modules/preacher/entities';
+import { Disciple } from '@/modules/disciple/entities';
 import { ZoneService } from '@/modules/zone/zone.service';
 import { Supervisor } from '@/modules/supervisor/entities';
 import { FamilyGroup } from '@/modules/family-group/entities';
-import { OfferingIncome } from '../offering/income/entities';
-import { OfferingIncomeService } from '../offering/income/offering-income.service';
-import { OfferingExpenseService } from '../offering/expense/offering-expense.service';
-import { OfferingExpense } from '../offering/expense/entities';
-import { User } from '../user/entities';
-import { UserService } from '../user/user.service';
+import { OfferingIncome } from '@/modules/offering/income/entities';
+import { OfferingExpense } from '@/modules/offering/expense/entities';
 
 @Injectable()
 export class ReportsService {
@@ -53,6 +74,9 @@ export class ReportsService {
 
     @InjectRepository(Member)
     private readonly memberRepository: Repository<Member>,
+
+    @InjectRepository(Church)
+    private readonly churchRepository: Repository<Church>,
 
     private readonly churchService: ChurchService,
     private readonly pastorService: PastorService,
@@ -143,11 +167,40 @@ export class ReportsService {
       );
     }
 
+    let newTerm: string;
+    newTerm = term;
+
+    // By Founding Date
+    if (searchType === SearchType.FoundingDate) {
+      const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
+
+      if (isNaN(fromTimestamp)) {
+        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      }
+
+      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+      newTerm = `${formattedFromDate} - ${formattedToDate}`;
+    }
+
+    // By Record Status
+    if (searchType === SearchType.RecordStatus) {
+      const recordStatusTerm = term.toLowerCase();
+      const validRecordStatus = ['active', 'inactive'];
+
+      if (!validRecordStatus.includes(recordStatusTerm)) {
+        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      }
+
+      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+    }
+
     const docDefinition = getChurchesReport({
       title: 'Reporte de Iglesias',
       subTitle: 'Resultados de Búsqueda de Iglesias',
       description: 'iglesias',
-      searchTerm: `Termino de búsqueda: ${term}`,
+      searchTerm: `Termino de búsqueda: ${newTerm}`,
       searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
       searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
       data: churches,
@@ -203,11 +256,90 @@ export class ReportsService {
       );
     }
 
+    let newTerm: string;
+    newTerm = term;
+
+    // By Birth Date
+    if (searchType === SearchType.BirthDate) {
+      const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
+
+      if (isNaN(fromTimestamp)) {
+        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      }
+
+      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+      newTerm = `${formattedFromDate} - ${formattedToDate}`;
+    }
+
+    // By Birth Month
+    if (searchType === SearchType.BirthMonth) {
+      const monthNames = {
+        january: 'Enero',
+        february: 'Febrero',
+        march: 'Marzo',
+        april: 'Abril',
+        may: 'Mayo',
+        june: 'Junio',
+        july: 'Julio',
+        august: 'Agosto',
+        september: 'Septiembre',
+        october: 'Octubre',
+        november: 'Noviembre',
+        december: 'Diciembre',
+      };
+
+      newTerm = monthNames[term.toLowerCase()] ?? term;
+    }
+
+    // By Gender
+    if (searchType === SearchType.Gender) {
+      const genderTerm = term.toLowerCase();
+      const validGenders = ['male', 'female'];
+
+      if (!validGenders.includes(genderTerm)) {
+        throw new BadRequestException(`Género no válido: ${term}`);
+      }
+
+      newTerm = `${GenderNames[genderTerm]}`;
+    }
+
+    // By Marital Status
+    if (searchType === SearchType.MaritalStatus) {
+      const maritalStatusTerm = term.toLowerCase();
+      const validMaritalStatus = [
+        'single',
+        'married',
+        'widowed',
+        'divorced',
+        'other',
+      ];
+
+      if (!validMaritalStatus.includes(maritalStatusTerm)) {
+        throw new BadRequestException(`Estado Civil no válido: ${term}`);
+      }
+
+      newTerm = `${MaritalStatusNames[maritalStatusTerm]}`;
+    }
+
+    // By Record Status
+    if (searchType === SearchType.RecordStatus) {
+      const recordStatusTerm = term.toLowerCase();
+      const validRecordStatus = ['active', 'inactive'];
+
+      if (!validRecordStatus.includes(recordStatusTerm)) {
+        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      }
+
+      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+    }
+
     const docDefinition = getMembersReport({
       title: 'Reporte de Pastores',
       subTitle: 'Resultados de Búsqueda de Pastores',
       description: 'pastores',
-      searchTerm: `Termino de búsqueda: ${term}`,
+      searchTerm: `Termino de búsqueda: ${newTerm}`,
       searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
       searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
       data: pastors,
@@ -264,11 +396,90 @@ export class ReportsService {
       );
     }
 
+    let newTerm: string;
+    newTerm = term;
+
+    // By Birth Date
+    if (searchType === SearchType.BirthDate) {
+      const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
+
+      if (isNaN(fromTimestamp)) {
+        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      }
+
+      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+      newTerm = `${formattedFromDate} - ${formattedToDate}`;
+    }
+
+    // By Birth Month
+    if (searchType === SearchType.BirthMonth) {
+      const monthNames = {
+        january: 'Enero',
+        february: 'Febrero',
+        march: 'Marzo',
+        april: 'Abril',
+        may: 'Mayo',
+        june: 'Junio',
+        july: 'Julio',
+        august: 'Agosto',
+        september: 'Septiembre',
+        october: 'Octubre',
+        november: 'Noviembre',
+        december: 'Diciembre',
+      };
+
+      newTerm = monthNames[term.toLowerCase()] ?? term;
+    }
+
+    // By Gender
+    if (searchType === SearchType.Gender) {
+      const genderTerm = term.toLowerCase();
+      const validGenders = ['male', 'female'];
+
+      if (!validGenders.includes(genderTerm)) {
+        throw new BadRequestException(`Género no válido: ${term}`);
+      }
+
+      newTerm = `${GenderNames[genderTerm]}`;
+    }
+
+    // By Marital Status
+    if (searchType === SearchType.MaritalStatus) {
+      const maritalStatusTerm = term.toLowerCase();
+      const validMaritalStatus = [
+        'single',
+        'married',
+        'widowed',
+        'divorced',
+        'other',
+      ];
+
+      if (!validMaritalStatus.includes(maritalStatusTerm)) {
+        throw new BadRequestException(`Estado Civil no válido: ${term}`);
+      }
+
+      newTerm = `${MaritalStatusNames[maritalStatusTerm]}`;
+    }
+
+    // By Record Status
+    if (searchType === SearchType.RecordStatus) {
+      const recordStatusTerm = term.toLowerCase();
+      const validRecordStatus = ['active', 'inactive'];
+
+      if (!validRecordStatus.includes(recordStatusTerm)) {
+        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      }
+
+      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+    }
+
     const docDefinition = getMembersReport({
       title: 'Reporte de Co-Pastores',
       subTitle: 'Resultados de Búsqueda de Co-Pastores',
       description: 'co-pastores',
-      searchTerm: `Termino de búsqueda: ${term}`,
+      searchTerm: `Termino de búsqueda: ${newTerm}`,
       searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
       searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
       data: copastors,
@@ -325,11 +536,90 @@ export class ReportsService {
       );
     }
 
+    let newTerm: string;
+    newTerm = term;
+
+    // By birth Date
+    if (searchType === SearchType.BirthDate) {
+      const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
+
+      if (isNaN(fromTimestamp)) {
+        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      }
+
+      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+      newTerm = `${formattedFromDate} - ${formattedToDate}`;
+    }
+
+    // By Birth Month
+    if (searchType === SearchType.BirthMonth) {
+      const monthNames = {
+        january: 'Enero',
+        february: 'Febrero',
+        march: 'Marzo',
+        april: 'Abril',
+        may: 'Mayo',
+        june: 'Junio',
+        july: 'Julio',
+        august: 'Agosto',
+        september: 'Septiembre',
+        october: 'Octubre',
+        november: 'Noviembre',
+        december: 'Diciembre',
+      };
+
+      newTerm = monthNames[term.toLowerCase()] ?? term;
+    }
+
+    // By Gender
+    if (searchType === SearchType.Gender) {
+      const genderTerm = term.toLowerCase();
+      const validGenders = ['male', 'female'];
+
+      if (!validGenders.includes(genderTerm)) {
+        throw new BadRequestException(`Género no válido: ${term}`);
+      }
+
+      newTerm = `${GenderNames[genderTerm]}`;
+    }
+
+    // By Marital Status
+    if (searchType === SearchType.MaritalStatus) {
+      const maritalStatusTerm = term.toLowerCase();
+      const validMaritalStatus = [
+        'single',
+        'married',
+        'widowed',
+        'divorced',
+        'other',
+      ];
+
+      if (!validMaritalStatus.includes(maritalStatusTerm)) {
+        throw new BadRequestException(`Estado Civil no válido: ${term}`);
+      }
+
+      newTerm = `${MaritalStatusNames[maritalStatusTerm]}`;
+    }
+
+    // By Record Status
+    if (searchType === SearchType.RecordStatus) {
+      const recordStatusTerm = term.toLowerCase();
+      const validRecordStatus = ['active', 'inactive'];
+
+      if (!validRecordStatus.includes(recordStatusTerm)) {
+        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      }
+
+      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+    }
+
     const docDefinition = getMembersReport({
       title: 'Reporte de Supervisores',
       subTitle: 'Resultados de Búsqueda de Supervisores',
       description: 'supervisores',
-      searchTerm: `Termino de búsqueda: ${term}`,
+      searchTerm: `Termino de búsqueda: ${newTerm}`,
       searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
       searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
       data: supervisors,
@@ -386,11 +676,90 @@ export class ReportsService {
       );
     }
 
+    let newTerm: string;
+    newTerm = term;
+
+    // By Birth Date
+    if (searchType === SearchType.BirthDate) {
+      const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
+
+      if (isNaN(fromTimestamp)) {
+        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      }
+
+      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+      newTerm = `${formattedFromDate} - ${formattedToDate}`;
+    }
+
+    // By Birth Month
+    if (searchType === SearchType.BirthMonth) {
+      const monthNames = {
+        january: 'Enero',
+        february: 'Febrero',
+        march: 'Marzo',
+        april: 'Abril',
+        may: 'Mayo',
+        june: 'Junio',
+        july: 'Julio',
+        august: 'Agosto',
+        september: 'Septiembre',
+        october: 'Octubre',
+        november: 'Noviembre',
+        december: 'Diciembre',
+      };
+
+      newTerm = monthNames[term.toLowerCase()] ?? term;
+    }
+
+    // By Gender
+    if (searchType === SearchType.Gender) {
+      const genderTerm = term.toLowerCase();
+      const validGenders = ['male', 'female'];
+
+      if (!validGenders.includes(genderTerm)) {
+        throw new BadRequestException(`Género no válido: ${term}`);
+      }
+
+      newTerm = `${GenderNames[genderTerm]}`;
+    }
+
+    // By Marital Status
+    if (searchType === SearchType.MaritalStatus) {
+      const maritalStatusTerm = term.toLowerCase();
+      const validMaritalStatus = [
+        'single',
+        'married',
+        'widowed',
+        'divorced',
+        'other',
+      ];
+
+      if (!validMaritalStatus.includes(maritalStatusTerm)) {
+        throw new BadRequestException(`Estado Civil no válido: ${term}`);
+      }
+
+      newTerm = `${MaritalStatusNames[maritalStatusTerm]}`;
+    }
+
+    // By Record Status
+    if (searchType === SearchType.RecordStatus) {
+      const recordStatusTerm = term.toLowerCase();
+      const validRecordStatus = ['active', 'inactive'];
+
+      if (!validRecordStatus.includes(recordStatusTerm)) {
+        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      }
+
+      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+    }
+
     const docDefinition = getMembersReport({
       title: 'Reporte de Predicadores',
       subTitle: 'Resultados de Búsqueda de Predicadores',
       description: 'predicadores',
-      searchTerm: `Termino de búsqueda: ${term}`,
+      searchTerm: `Termino de búsqueda: ${newTerm}`,
       searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
       searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
       data: preachers,
@@ -447,11 +816,90 @@ export class ReportsService {
       );
     }
 
+    let newTerm: string;
+    newTerm = term;
+
+    // By Birth Date
+    if (searchType === SearchType.BirthDate) {
+      const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
+
+      if (isNaN(fromTimestamp)) {
+        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      }
+
+      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+      newTerm = `${formattedFromDate} - ${formattedToDate}`;
+    }
+
+    // By Birth Month
+    if (searchType === SearchType.BirthMonth) {
+      const monthNames = {
+        january: 'Enero',
+        february: 'Febrero',
+        march: 'Marzo',
+        april: 'Abril',
+        may: 'Mayo',
+        june: 'Junio',
+        july: 'Julio',
+        august: 'Agosto',
+        september: 'Septiembre',
+        october: 'Octubre',
+        november: 'Noviembre',
+        december: 'Diciembre',
+      };
+
+      newTerm = monthNames[term.toLowerCase()] ?? term;
+    }
+
+    // By Gender
+    if (searchType === SearchType.Gender) {
+      const genderTerm = term.toLowerCase();
+      const validGenders = ['male', 'female'];
+
+      if (!validGenders.includes(genderTerm)) {
+        throw new BadRequestException(`Género no válido: ${term}`);
+      }
+
+      newTerm = `${GenderNames[genderTerm]}`;
+    }
+
+    // By Marital Status
+    if (searchType === SearchType.MaritalStatus) {
+      const maritalStatusTerm = term.toLowerCase();
+      const validMaritalStatus = [
+        'single',
+        'married',
+        'widowed',
+        'divorced',
+        'other',
+      ];
+
+      if (!validMaritalStatus.includes(maritalStatusTerm)) {
+        throw new BadRequestException(`Estado Civil no válido: ${term}`);
+      }
+
+      newTerm = `${MaritalStatusNames[maritalStatusTerm]}`;
+    }
+
+    // By Record Status
+    if (searchType === SearchType.RecordStatus) {
+      const recordStatusTerm = term.toLowerCase();
+      const validRecordStatus = ['active', 'inactive'];
+
+      if (!validRecordStatus.includes(recordStatusTerm)) {
+        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      }
+
+      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+    }
+
     const docDefinition = getMembersReport({
       title: 'Reporte de Discípulos',
       subTitle: 'Resultados de Búsqueda de Discípulos',
       description: 'discípulos',
-      searchTerm: `Termino de búsqueda: ${term}`,
+      searchTerm: `Termino de búsqueda: ${newTerm}`,
       searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
       searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
       data: disciples,
@@ -507,11 +955,26 @@ export class ReportsService {
       );
     }
 
+    let newTerm: string;
+    newTerm = term;
+
+    // By Record Status
+    if (searchType === SearchType.RecordStatus) {
+      const recordStatusTerm = term.toLowerCase();
+      const validRecordStatus = ['active', 'inactive'];
+
+      if (!validRecordStatus.includes(recordStatusTerm)) {
+        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      }
+
+      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+    }
+
     const docDefinition = getZonesReport({
       title: 'Reporte de Zonas',
       subTitle: 'Resultados de Búsqueda de Zonas',
       description: 'zonas',
-      searchTerm: `Termino de búsqueda: ${term}`,
+      searchTerm: `Termino de búsqueda: ${newTerm}`,
       searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
       searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
       data: zones,
@@ -569,11 +1032,26 @@ export class ReportsService {
       );
     }
 
+    let newTerm: string;
+    newTerm = term;
+
+    // By Record Status
+    if (searchType === SearchType.RecordStatus) {
+      const recordStatusTerm = term.toLowerCase();
+      const validRecordStatus = ['active', 'inactive'];
+
+      if (!validRecordStatus.includes(recordStatusTerm)) {
+        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      }
+
+      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+    }
+
     const docDefinition = getFamilyGroupsReport({
       title: 'Reporte de Grupos Familiares',
       subTitle: 'Resultados de Búsqueda de Grupos Familiares',
       description: 'grupos familiares',
-      searchTerm: `Termino de búsqueda: ${term}`,
+      searchTerm: `Termino de búsqueda: ${newTerm}`,
       searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
       searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
       data: familyGroups,
@@ -631,11 +1109,238 @@ export class ReportsService {
       );
     }
 
+    let newTerm: string;
+    newTerm = term;
+
+    // By Date
+    if (
+      (searchType === SearchType.SundayService ||
+        searchType === SearchType.SundaySchool ||
+        searchType === SearchType.FamilyGroup ||
+        searchType === SearchType.ZonalFasting ||
+        searchType === SearchType.ZonalVigil ||
+        searchType === SearchType.GeneralFasting ||
+        searchType === SearchType.GeneralVigil ||
+        searchType === SearchType.YouthService ||
+        searchType === SearchType.UnitedService ||
+        searchType === SearchType.Activities ||
+        searchType === SearchType.Special ||
+        searchType === SearchType.ChurchGround ||
+        searchType === SearchType.IncomeAdjustment) &&
+      searchSubType === SearchSubType.OfferingByDate
+    ) {
+      const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
+
+      if (isNaN(fromTimestamp)) {
+        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      }
+
+      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+      newTerm = `${formattedFromDate} - ${formattedToDate}`;
+    }
+
+    // By Church
+    if (
+      (searchType === SearchType.SundayService ||
+        searchType === SearchType.SundaySchool ||
+        searchType === SearchType.GeneralFasting ||
+        searchType === SearchType.GeneralVigil ||
+        searchType === SearchType.YouthService ||
+        searchType === SearchType.UnitedService ||
+        searchType === SearchType.Activities ||
+        searchType === SearchType.IncomeAdjustment) &&
+      searchSubType === SearchSubType.OfferingByChurch
+    ) {
+      const church = await this.churchRepository.findOne({
+        where: {
+          id: term,
+        },
+      });
+
+      if (!church) {
+        throw new NotFoundException(
+          `No se encontró ninguna iglesia con este ID: ${term}.`,
+        );
+      }
+
+      newTerm = `${church.abbreviatedChurchName}`;
+    }
+
+    // By Church And Date
+    if (
+      (searchType === SearchType.SundayService ||
+        searchType === SearchType.SundaySchool ||
+        searchType === SearchType.GeneralFasting ||
+        searchType === SearchType.GeneralVigil ||
+        searchType === SearchType.YouthService ||
+        searchType === SearchType.UnitedService ||
+        searchType === SearchType.Activities ||
+        searchType === SearchType.IncomeAdjustment) &&
+      searchSubType === SearchSubType.OfferingByChurchDate
+    ) {
+      const [churchId, date] = term.split('&');
+
+      const church = await this.churchRepository.findOne({
+        where: {
+          id: churchId,
+        },
+      });
+
+      if (!church) {
+        throw new NotFoundException(
+          `No se encontró ninguna iglesia con este ID: ${churchId}.`,
+        );
+      }
+
+      const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
+
+      if (isNaN(fromTimestamp)) {
+        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      }
+
+      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+      newTerm = `${church.abbreviatedChurchName} ~ ${formattedFromDate} - ${formattedToDate}`;
+    }
+
+    // By Shift
+    if (
+      (searchType === SearchType.SundayService ||
+        searchType === SearchType.SundaySchool) &&
+      searchSubType === SearchSubType.OfferingByShift
+    ) {
+      const shiftTerm = term.toLowerCase();
+      const validShifts = ['day', 'afternoon'];
+
+      if (!validShifts.includes(shiftTerm)) {
+        throw new BadRequestException(`Turno no válido: ${term}`);
+      }
+
+      newTerm = `${OfferingIncomeCreationShiftTypeNames[term.toLowerCase()]}`;
+    }
+
+    // By Shift and Date
+    if (
+      (searchType === SearchType.SundayService ||
+        searchType === SearchType.SundaySchool) &&
+      searchSubType === SearchSubType.OfferingByShiftDate
+    ) {
+      const [shift, date] = term.split('&');
+
+      const shiftTerm = shift.toLowerCase();
+      const validShifts = ['day', 'afternoon'];
+
+      if (!validShifts.includes(shiftTerm)) {
+        throw new BadRequestException(`Turno no válido: ${term}`);
+      }
+
+      const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
+
+      if (isNaN(fromTimestamp)) {
+        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      }
+
+      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+      newTerm = `${OfferingIncomeCreationShiftTypeNames[shift.toLowerCase()]} ~ ${formattedFromDate} - ${formattedToDate}`;
+    }
+
+    // By Zone and Date
+    if (
+      searchType === SearchType.FamilyGroup &&
+      searchSubType === SearchSubType.OfferingByZoneDate
+    ) {
+      const [zone, date] = term.split('&');
+
+      const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
+
+      if (isNaN(fromTimestamp)) {
+        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      }
+
+      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+      newTerm = `${zone} ~ ${formattedFromDate} - ${formattedToDate}`;
+    }
+
+    // By Code and Date
+    if (
+      searchType === SearchType.FamilyGroup &&
+      searchSubType === SearchSubType.OfferingByGroupCodeDate
+    ) {
+      const [code, date] = term.split('&');
+
+      const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
+
+      if (isNaN(fromTimestamp)) {
+        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      }
+
+      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+      newTerm = `${code} ~ ${formattedFromDate} - ${formattedToDate}`;
+    }
+
+    // By Contributor names
+    if (
+      (searchType === SearchType.Special ||
+        searchType === SearchType.ChurchGround) &&
+      searchSubType === SearchSubType.OfferingByContributorNames
+    ) {
+      const [memberType, names] = term.split('&');
+      const firstNames = names.replace(/\+/g, ' ');
+
+      newTerm = `${MemberTypeNames[memberType]} ~ ${firstNames}`;
+    }
+
+    // By Contributor last names
+    if (
+      (searchType === SearchType.Special ||
+        searchType === SearchType.ChurchGround) &&
+      searchSubType === SearchSubType.OfferingByContributorLastNames
+    ) {
+      const [memberType, names] = term.split('&');
+      const lastNames = names.split('-')[0].replace(/\+/g, ' ');
+
+      newTerm = `${MemberTypeNames[memberType]} ~ ${lastNames}`;
+    }
+
+    // By Contributor full names
+    if (
+      (searchType === SearchType.Special ||
+        searchType === SearchType.ChurchGround) &&
+      searchSubType === SearchSubType.OfferingByContributorFullName
+    ) {
+      const [memberType, names] = term.split('&');
+      const firstNames = names.split('-')[0].replace(/\+/g, ' ');
+      const lastNames = names.split('-')[1].replace(/\+/g, ' ');
+
+      newTerm = `${MemberTypeNames[memberType]} ~ ${firstNames} ${lastNames}`;
+    }
+
+    // By Record Status
+    if (searchType === SearchType.RecordStatus) {
+      const recordStatusTerm = term.toLowerCase();
+      const validRecordStatus = ['active', 'inactive'];
+
+      if (!validRecordStatus.includes(recordStatusTerm)) {
+        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      }
+
+      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+    }
+
     const docDefinition = getOfferingIncomeReport({
       title: 'Reporte de Ingresos de Ofrenda',
       subTitle: 'Resultados de Búsqueda de Ingresos de Ofrenda',
       description: 'registros',
-      searchTerm: `Termino de búsqueda: ${term}`,
+      searchTerm: `Termino de búsqueda: ${newTerm}`,
       searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
       searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
       data: offeringIncome,
@@ -647,7 +1352,7 @@ export class ReportsService {
   }
 
   //? OFFERING EXPENSES
-  //* GENERAL EXPENSES INCOME REPORT
+  //* GENERAL EXPENSES REPORT
   async getGeneralOfferingExpenses(paginationDto: PaginationDto) {
     const { order } = paginationDto;
 
@@ -693,11 +1398,62 @@ export class ReportsService {
       );
     }
 
+    let newTerm: string;
+    newTerm = term;
+
+    // By date and church
+    if (
+      searchType === SearchType.PlaningEventsExpenses ||
+      searchType === SearchType.DecorationExpenses ||
+      searchType === SearchType.EquipmentAndTechnologyExpenses ||
+      searchType === SearchType.MaintenanceAndRepairExpenses ||
+      searchType === SearchType.OperationalExpenses ||
+      searchType === SearchType.SuppliesExpenses ||
+      searchType === SearchType.ExpensesAdjustment
+    ) {
+      const [churchId, date] = term.split('&');
+
+      const church = await this.churchRepository.findOne({
+        where: {
+          id: churchId,
+        },
+      });
+
+      if (!church) {
+        throw new NotFoundException(
+          `No se encontró ninguna iglesia con este ID: ${churchId}.`,
+        );
+      }
+
+      const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
+
+      if (isNaN(fromTimestamp)) {
+        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      }
+
+      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+      newTerm = `${church.abbreviatedChurchName} ~ ${formattedFromDate} - ${formattedToDate}`;
+    }
+
+    // By Record Status
+    if (searchType === SearchType.RecordStatus) {
+      const recordStatusTerm = term.toLowerCase();
+      const validRecordStatus = ['active', 'inactive'];
+
+      if (!validRecordStatus.includes(recordStatusTerm)) {
+        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      }
+
+      newTerm = `${RecordStatusNames[recordStatusTerm]}`;
+    }
+
     const docDefinition = getOfferingExpensesReport({
       title: 'Reporte de Salidas de Ofrenda',
       subTitle: 'Resultados de Búsqueda de Salidas de Ofrenda',
       description: 'registros',
-      searchTerm: `Termino de búsqueda: ${term}`,
+      searchTerm: `Termino de búsqueda: ${newTerm}`,
       searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
       searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
       data: offeringExpenses,
@@ -734,7 +1490,7 @@ export class ReportsService {
     return doc;
   }
 
-  //* OFFERING EXPENSES REPORT BY TERM
+  //* USERS REPORT BY TERM
   async getUsersByTerm(
     term: string,
     searchTypeAndPaginationDto: SearchAndPaginationDto,
@@ -753,11 +1509,52 @@ export class ReportsService {
       );
     }
 
+    let newTerm: string;
+    newTerm = term;
+
+    if (searchType === SearchType.Gender) {
+      const genderTerm = term.toLowerCase();
+      const validGenders = ['male', 'female'];
+
+      if (!validGenders.includes(genderTerm)) {
+        throw new BadRequestException(`Género no válido: ${term}`);
+      }
+
+      newTerm = `${GenderNames[genderTerm]}`;
+    }
+
+    if (searchType === SearchType.Roles) {
+      const rolesArray = term.split('+');
+
+      const rolesInSpanish = rolesArray
+        .map((role) => UserRoleNames[role] ?? role)
+        .join(' ~ ');
+
+      if (rolesArray.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron usuarios con estos roles: ${rolesInSpanish}`,
+        );
+      }
+
+      newTerm = `${rolesInSpanish}`;
+    }
+
+    if (searchType === SearchType.RecordStatus) {
+      const recordStatusTerm = term.toLowerCase();
+      const validRecordStatus = ['active', 'inactive'];
+
+      if (!validRecordStatus.includes(recordStatusTerm)) {
+        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      }
+
+      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+    }
+
     const docDefinition = getUsersReport({
       title: 'Reporte de Usuarios',
       subTitle: 'Resultados de Búsqueda de Usuarios',
       description: 'usuarios',
-      searchTerm: `Termino de búsqueda: ${term}`,
+      searchTerm: `Termino de búsqueda: ${newTerm}`,
       searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
       searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
       data: users,

@@ -44,7 +44,7 @@ import {
   CreateOfferingIncomeDto,
   UpdateOfferingIncomeDto,
 } from '@/modules/offering/income/dto';
-import { RepositoryType } from '@/modules/offering/income/types';
+
 import {
   lastSundayOfferingsDataFormatter,
   offeringIncomeDataFormatter,
@@ -194,7 +194,7 @@ export class OfferingIncomeService {
           );
 
           throw new NotFoundException(
-            `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Iglesia: ${church.churchName}, Categoría: ${OfferingIncomeCreationCategoryNames[category]}, Divisa: ${currency} y Fecha: ${offeringDate}.`,
+            `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Iglesia: ${church.abbreviatedChurchName}, Categoría: ${OfferingIncomeCreationCategoryNames[category]}, Divisa: ${currency} y Fecha: ${offeringDate}.`,
           );
         }
 
@@ -266,7 +266,7 @@ export class OfferingIncomeService {
           );
 
           throw new NotFoundException(
-            `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Iglesia: ${church.churchName}, Categoría: ${OfferingIncomeCreationCategoryNames[category]}, Divisa: ${currency}, Turno: ${OfferingIncomeCreationShiftTypeNames[shift]} y Fecha: ${offeringDate}.`,
+            `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Iglesia: ${church.abbreviatedChurchName}, Categoría: ${OfferingIncomeCreationCategoryNames[category]}, Divisa: ${currency}, Turno: ${OfferingIncomeCreationShiftTypeNames[shift]} y Fecha: ${offeringDate}.`,
           );
         }
 
@@ -482,7 +482,7 @@ export class OfferingIncomeService {
 
           if (category === OfferingIncomeCreationCategory.OfferingBox) {
             throw new NotFoundException(
-              `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Iglesia: ${church.churchName}, Categoría: ${OfferingIncomeCreationCategoryNames[category]}, Divisa: ${currency}, Turno: ${OfferingIncomeCreationShiftTypeNames[shift]} y Fecha: ${offeringDate}.`,
+              `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Iglesia: ${church.abbreviatedChurchName}, Categoría: ${OfferingIncomeCreationCategoryNames[category]}, Divisa: ${currency}, Turno: ${OfferingIncomeCreationShiftTypeNames[shift]} y Fecha: ${offeringDate}.`,
             );
           }
           if (
@@ -490,12 +490,12 @@ export class OfferingIncomeService {
             category === OfferingIncomeCreationCategory.ExternalDonation
           ) {
             throw new NotFoundException(
-              `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Iglesia: ${church.churchName}, Categoría: ${OfferingIncomeCreationCategoryNames[category]}, Divisa: ${currency} y Fecha: ${offeringDate}.`,
+              `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Iglesia: ${church.abbreviatedChurchName}, Categoría: ${OfferingIncomeCreationCategoryNames[category]}, Divisa: ${currency} y Fecha: ${offeringDate}.`,
             );
           }
           if (category === OfferingIncomeCreationCategory.InternalDonation) {
             throw new NotFoundException(
-              `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Iglesia: ${church.churchName}, Categoría: ${OfferingIncomeCreationCategoryNames[category]}, Divisa: ${currency}, Tipo de miembro: ${MemberTypeNames[memberType]} (mismos nombres) y Fecha: ${offeringDate}.`,
+              `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Iglesia: ${church.abbreviatedChurchName}, Categoría: ${OfferingIncomeCreationCategoryNames[category]}, Divisa: ${currency}, Tipo de miembro: ${MemberTypeNames[memberType]} (mismos nombres) y Fecha: ${offeringDate}.`,
             );
           }
         }
@@ -615,7 +615,7 @@ export class OfferingIncomeService {
           );
 
           throw new NotFoundException(
-            `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Iglesia: ${church.churchName}, Divisa: ${currency} y Fecha: ${offeringDate}.`,
+            `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Iglesia: ${church.abbreviatedChurchName}, Divisa: ${currency} y Fecha: ${offeringDate}.`,
           );
         }
 
@@ -1002,7 +1002,7 @@ export class OfferingIncomeService {
 
         if (offeringIncome.length === 0) {
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con esta iglesia: ${church?.churchName}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con esta iglesia: ${church?.abbreviatedChurchName}`,
           );
         }
 
@@ -1113,7 +1113,7 @@ export class OfferingIncomeService {
           const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con esta iglesia: ${church?.churchName} y con este rango de fechas: ${fromDate} - ${toDate}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con esta iglesia: ${church?.abbreviatedChurchName} y con este rango de fechas: ${fromDate} - ${toDate}`,
           );
         }
 
@@ -1683,7 +1683,9 @@ export class OfferingIncomeService {
           relations: ['theirFamilyGroup'],
         });
 
-        const familyGroupsId = preachers.map((preacher) => preacher?.id);
+        const familyGroupsId = preachers.map(
+          (preacher) => preacher?.theirFamilyGroup?.id,
+        );
 
         const offeringIncome = await this.offeringIncomeRepository.find({
           where: {
@@ -2005,7 +2007,9 @@ export class OfferingIncomeService {
           relations: ['theirZone'],
         });
 
-        const zonesId = supervisors.map((supervisor) => supervisor?.id);
+        const zonesId = supervisors.map(
+          (supervisor) => supervisor?.theirZone?.id,
+        );
 
         const offeringIncome = await this.offeringIncomeRepository.find({
           where: {
@@ -2057,64 +2061,160 @@ export class OfferingIncomeService {
       searchSubType === OfferingIncomeSearchSubType.OfferingByContributorNames
     ) {
       const [memberType, names] = term.split('&');
-
       const firstNames = names.replace(/\+/g, ' ');
 
       try {
-        let repository: RepositoryType;
+        let offeringIncome: OfferingIncome[];
 
         if (memberType === MemberType.Pastor) {
-          repository = this.pastorRepository;
-        }
-        if (memberType === MemberType.Copastor) {
-          repository = this.copastorRepository;
-        }
-        if (memberType === MemberType.Supervisor) {
-          repository = this.supervisorRepository;
-        }
-        if (memberType === MemberType.Preacher) {
-          repository = this.preacherRepository;
-        }
-        if (memberType === MemberType.Disciple) {
-          repository = this.discipleRepository;
-        }
-
-        const members = await repository.find({
-          where: {
-            member: {
-              firstName: ILike(`%${names}%`),
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: searchType,
+              memberType: memberType,
+              pastor: {
+                member: {
+                  firstName: ILike(`%${firstNames}%`),
+                },
+              },
+              recordStatus: RecordStatus.Active,
             },
-          },
-          order: { createdAt: order as FindOptionsOrderValue },
-        });
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
 
-        const membersId = members.map(
-          (member: Pastor | Copastor | Supervisor | Preacher | Disciple) =>
-            member?.id,
-        );
+        if (memberType === MemberType.Copastor) {
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: searchType,
+              memberType: memberType,
+              copastor: {
+                member: {
+                  firstName: ILike(`%${firstNames}%`),
+                },
+              },
+              recordStatus: RecordStatus.Active,
+            },
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
 
-        const offeringIncome = await this.offeringIncomeRepository.find({
-          where: {
-            subType: searchType,
-            [`${memberType}`]: In(membersId),
-            recordStatus: RecordStatus.Active,
-          },
-          take: limit,
-          skip: offset,
-          relations: [
-            'updatedBy',
-            'createdBy',
-            'familyGroup',
-            'church',
-            'zone',
-            'pastor.member',
-            'copastor.member',
-            'supervisor.member',
-            'preacher.member',
-            'disciple.member',
-          ],
-          order: { createdAt: order as FindOptionsOrderValue },
-        });
+        if (memberType === MemberType.Supervisor) {
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: searchType,
+              memberType: memberType,
+              supervisor: {
+                member: {
+                  firstName: ILike(`%${firstNames}%`),
+                },
+              },
+              recordStatus: RecordStatus.Active,
+            },
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
+
+        if (memberType === MemberType.Preacher) {
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: searchType,
+              memberType: memberType,
+              preacher: {
+                member: {
+                  firstName: ILike(`%${firstNames}%`),
+                },
+              },
+              recordStatus: RecordStatus.Active,
+            },
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
+
+        if (memberType === MemberType.Disciple) {
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: searchType,
+              memberType: memberType,
+              disciple: {
+                member: {
+                  firstName: ILike(`%${firstNames}%`),
+                },
+              },
+              recordStatus: RecordStatus.Active,
+            },
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
 
         if (offeringIncome.length === 0) {
           const memberTypeInSpanish =
@@ -2145,64 +2245,160 @@ export class OfferingIncomeService {
         OfferingIncomeSearchSubType.OfferingByContributorLastNames
     ) {
       const [memberType, names] = term.split('&');
-
       const lastNames = names.replace(/\+/g, ' ');
 
       try {
-        let repository: RepositoryType;
+        let offeringIncome: OfferingIncome[];
 
         if (memberType === MemberType.Pastor) {
-          repository = this.pastorRepository;
-        }
-        if (memberType === MemberType.Copastor) {
-          repository = this.copastorRepository;
-        }
-        if (memberType === MemberType.Supervisor) {
-          repository = this.supervisorRepository;
-        }
-        if (memberType === MemberType.Preacher) {
-          repository = this.preacherRepository;
-        }
-        if (memberType === MemberType.Disciple) {
-          repository = this.discipleRepository;
-        }
-
-        const members = await repository.find({
-          where: {
-            member: {
-              lastName: ILike(`%${lastNames}%`),
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: searchType,
+              memberType: memberType,
+              pastor: {
+                member: {
+                  lastName: ILike(`%${lastNames}%`),
+                },
+              },
+              recordStatus: RecordStatus.Active,
             },
-          },
-          order: { createdAt: order as FindOptionsOrderValue },
-        });
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
 
-        const membersId = members.map(
-          (member: Pastor | Copastor | Supervisor | Preacher | Disciple) =>
-            member?.id,
-        );
+        if (memberType === MemberType.Copastor) {
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: searchType,
+              memberType: memberType,
+              copastor: {
+                member: {
+                  lastName: ILike(`%${lastNames}%`),
+                },
+              },
+              recordStatus: RecordStatus.Active,
+            },
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
 
-        const offeringIncome = await this.offeringIncomeRepository.find({
-          where: {
-            subType: searchType,
-            [`${memberType}`]: In(membersId),
-            recordStatus: RecordStatus.Active,
-          },
-          take: limit,
-          skip: offset,
-          relations: [
-            'updatedBy',
-            'createdBy',
-            'familyGroup',
-            'church',
-            'zone',
-            'pastor.member',
-            'copastor.member',
-            'supervisor.member',
-            'preacher.member',
-            'disciple.member',
-          ],
-          order: { createdAt: order as FindOptionsOrderValue },
-        });
+        if (memberType === MemberType.Supervisor) {
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: searchType,
+              memberType: memberType,
+              supervisor: {
+                member: {
+                  lastName: ILike(`%${lastNames}%`),
+                },
+              },
+              recordStatus: RecordStatus.Active,
+            },
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
+
+        if (memberType === MemberType.Preacher) {
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: searchType,
+              memberType: memberType,
+              preacher: {
+                member: {
+                  lastName: ILike(`%${lastNames}%`),
+                },
+              },
+              recordStatus: RecordStatus.Active,
+            },
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
+
+        if (memberType === MemberType.Disciple) {
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: searchType,
+              memberType: memberType,
+              disciple: {
+                member: {
+                  lastName: ILike(`%${lastNames}%`),
+                },
+              },
+              recordStatus: RecordStatus.Active,
+            },
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
 
         if (offeringIncome.length === 0) {
           const memberTypeInSpanish =
@@ -2238,61 +2434,162 @@ export class OfferingIncomeService {
       const lastNames = names.split('-')[1].replace(/\+/g, ' ');
 
       try {
-        let repository: RepositoryType;
+        let offeringIncome: OfferingIncome[];
 
         if (memberType === MemberType.Pastor) {
-          repository = this.pastorRepository;
-        }
-        if (memberType === MemberType.Copastor) {
-          repository = this.copastorRepository;
-        }
-        if (memberType === MemberType.Supervisor) {
-          repository = this.supervisorRepository;
-        }
-        if (memberType === MemberType.Preacher) {
-          repository = this.preacherRepository;
-        }
-        if (memberType === MemberType.Disciple) {
-          repository = this.discipleRepository;
-        }
-
-        const members = await repository.find({
-          where: {
-            member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: searchType,
+              memberType: memberType,
+              pastor: {
+                member: {
+                  firstName: ILike(`%${firstNames}%`),
+                  lastName: ILike(`%${lastNames}%`),
+                },
+              },
+              recordStatus: RecordStatus.Active,
             },
-          },
-          order: { createdAt: order as FindOptionsOrderValue },
-        });
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
 
-        const membersId = members.map(
-          (member: Pastor | Copastor | Supervisor | Preacher | Disciple) =>
-            member?.id,
-        );
+        if (memberType === MemberType.Copastor) {
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: searchType,
+              memberType: memberType,
+              copastor: {
+                member: {
+                  firstName: ILike(`%${firstNames}%`),
+                  lastName: ILike(`%${lastNames}%`),
+                },
+              },
+              recordStatus: RecordStatus.Active,
+            },
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
 
-        const offeringIncome = await this.offeringIncomeRepository.find({
-          where: {
-            subType: searchType,
-            [`${memberType}`]: In(membersId),
-            recordStatus: RecordStatus.Active,
-          },
-          take: limit,
-          skip: offset,
-          relations: [
-            'updatedBy',
-            'createdBy',
-            'familyGroup',
-            'church',
-            'zone',
-            'pastor.member',
-            'copastor.member',
-            'supervisor.member',
-            'preacher.member',
-            'disciple.member',
-          ],
-          order: { createdAt: order as FindOptionsOrderValue },
-        });
+        if (memberType === MemberType.Supervisor) {
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: searchType,
+              memberType: memberType,
+              supervisor: {
+                member: {
+                  firstName: ILike(`%${firstNames}%`),
+                  lastName: ILike(`%${lastNames}%`),
+                },
+              },
+              recordStatus: RecordStatus.Active,
+            },
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
+
+        if (memberType === MemberType.Preacher) {
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: searchType,
+              memberType: memberType,
+              preacher: {
+                member: {
+                  firstName: ILike(`%${firstNames}%`),
+                  lastName: ILike(`%${lastNames}%`),
+                },
+              },
+              recordStatus: RecordStatus.Active,
+            },
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
+
+        if (memberType === MemberType.Disciple) {
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              subType: searchType,
+              memberType: memberType,
+              disciple: {
+                member: {
+                  firstName: ILike(`%${firstNames}%`),
+                  lastName: ILike(`%${lastNames}%`),
+                },
+              },
+              recordStatus: RecordStatus.Active,
+            },
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
 
         if (offeringIncome.length === 0) {
           const memberTypeInSpanish =
@@ -2315,7 +2612,7 @@ export class OfferingIncomeService {
       }
     }
 
-    // ? Offerings by status --> Many
+    // ? Offerings by record status --> Many
     if (term && searchType === OfferingIncomeSearchType.RecordStatus) {
       const recordStatusTerm = term.toLowerCase();
       const validRecordStatus = ['active', 'inactive'];

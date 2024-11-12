@@ -49,7 +49,7 @@ export const getOfferingExpensesReport = (
         layout: 'customLayout01', // optional
         table: {
           headerRows: 1,
-          widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+          widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', '*'],
 
           body: [
             [
@@ -78,7 +78,7 @@ export const getOfferingExpensesReport = (
                 },
               },
               {
-                text: 'F. Deposito',
+                text: 'F. de Gasto',
                 style: {
                   bold: true,
                 },
@@ -98,7 +98,7 @@ export const getOfferingExpensesReport = (
             ],
             ...data.map((item) => [
               OfferingExpenseSearchTypeNames[item?.type],
-              OfferingExpenseSearchSubTypeNames[item?.subType] ?? 'S/N',
+              OfferingExpenseSearchSubTypeNames[item?.subType] ?? '-',
               item?.amount ?? '-',
               item?.currency ?? '-',
               format(new Date(addDays(item.date, 1)), 'dd/MM/yyyy'),
@@ -124,7 +124,7 @@ export const getOfferingExpensesReport = (
         layout: 'noBorders',
         table: {
           headerRows: 1,
-          widths: [100, 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+          widths: [100, 'auto', 'auto', 'auto', 'auto', 'auto', '*'],
           body: [
             [
               {

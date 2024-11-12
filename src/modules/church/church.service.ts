@@ -566,7 +566,7 @@ export class ChurchService {
       }
     }
 
-    //? Find by status --> Many
+    //? Find by record status --> Many
     if (term && searchType === ChurchSearchType.RecordStatus) {
       try {
         const recordStatusTerm = term.toLowerCase();

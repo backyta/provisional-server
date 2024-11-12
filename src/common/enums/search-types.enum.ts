@@ -153,7 +153,7 @@ export const SearchTypeNames: Record<SearchType, string> = {
   [SearchType.District]: 'Distrito',
   [SearchType.UrbanSector]: 'Sector Urbano',
 
-  [SearchType.RecordStatus]: 'Estado del Registro',
+  [SearchType.RecordStatus]: 'Estado de Registro',
 
   [SearchType.Roles]: 'Roles',
 

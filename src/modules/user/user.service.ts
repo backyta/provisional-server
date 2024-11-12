@@ -12,9 +12,9 @@ import { FindOptionsOrderValue, ILike, Raw, Repository } from 'typeorm';
 
 import * as bcrypt from 'bcrypt';
 
-import { UserRole } from '@/modules/auth/enums';
+import { UserRole, UserRoleNames } from '@/modules/auth/enums';
 
-import { GenderNames, RecordStatus, MemberRoleNames } from '@/common/enums';
+import { GenderNames, RecordStatus } from '@/common/enums';
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 import { User } from '@/modules/user/entities';
@@ -222,7 +222,7 @@ export class UserService {
 
       if (users.length === 0) {
         const rolesInSpanish = rolesArray
-          .map((role) => MemberRoleNames[role] ?? role)
+          .map((role) => UserRoleNames[role] ?? role)
           .join(' - ');
 
         throw new NotFoundException(
