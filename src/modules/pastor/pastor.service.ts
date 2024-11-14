@@ -1240,7 +1240,7 @@ export class PastorService {
     try {
       const updatedPastor = await this.pastorRepository.preload({
         id: pastor.id,
-        theirChurch: null,
+        // theirChurch: null,
         updatedAt: new Date(),
         updatedBy: user,
         recordStatus: RecordStatus.Inactive,

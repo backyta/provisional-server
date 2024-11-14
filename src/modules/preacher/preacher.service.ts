@@ -2582,12 +2582,12 @@ export class PreacherService {
     try {
       const updatedPreacher = await this.preacherRepository.preload({
         id: preacher.id,
-        theirChurch: null,
-        theirPastor: null,
-        theirCopastor: null,
-        theirSupervisor: null,
-        theirFamilyGroup: null,
-        theirZone: null,
+        // theirChurch: null,
+        // theirPastor: null,
+        // theirCopastor: null,
+        // theirSupervisor: null,
+        // theirFamilyGroup: null,
+        // theirZone: null,
         updatedAt: new Date(),
         updatedBy: user,
         recordStatus: RecordStatus.Inactive,

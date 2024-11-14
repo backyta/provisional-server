@@ -32,5 +32,6 @@ import { OfferingExpenseModule } from '@/modules/offering/expense/offering-expen
     OfferingExpenseModule,
     AuthModule,
   ],
+  exports: [MetricsService],
 })
 export class MetricsModule {}

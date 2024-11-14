@@ -12,7 +12,7 @@ interface Options {
   disciples: Disciple[];
 }
 
-interface MembersByCategory {
+export interface MembersByCategoryResultData {
   child: number;
   teenager: number;
   youth: number;
@@ -27,7 +27,7 @@ export const memberFormatterByCategory = ({
   supervisors,
   preachers,
   disciples,
-}: Options): MembersByCategory => {
+}: Options): MembersByCategoryResultData => {
   const allMembers = [
     ...pastors,
     ...copastors,
@@ -36,7 +36,7 @@ export const memberFormatterByCategory = ({
     ...disciples,
   ];
 
-  const membersByCategory: MembersByCategory = {
+  const membersByCategory: MembersByCategoryResultData = {
     child: allMembers.filter(
       (item) => item?.member?.age >= 0 && item?.member?.age <= 12,
     ).length,

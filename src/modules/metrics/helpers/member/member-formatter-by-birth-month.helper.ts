@@ -5,18 +5,18 @@ import { Preacher } from '@/modules/preacher/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
 
 const monthNames = [
-  'Ene',
-  'Feb',
-  'Mar',
-  'Abr',
-  'May',
-  'Jun',
-  'Jul',
-  'Ago',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dic',
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
 ];
 
 interface Options {
@@ -32,7 +32,7 @@ interface ChurchInfo {
   abbreviatedChurchName: string;
 }
 
-interface MonthlyMemberData {
+export interface MonthlyMemberResultData {
   month: string;
   membersCount: number;
   averageAge: string | number;
@@ -45,7 +45,7 @@ export const memberFormatterByBirthMonth = ({
   supervisors,
   preachers,
   disciples,
-}: Options): MonthlyMemberData[] => {
+}: Options): MonthlyMemberResultData[] => {
   const allMembers = [
     ...pastors,
     ...copastors,
@@ -72,7 +72,7 @@ export const memberFormatterByBirthMonth = ({
     return { membersCount, averageAge };
   };
 
-  const resultData: MonthlyMemberData[] = monthNames.map((_, index) => {
+  const resultData: MonthlyMemberResultData[] = monthNames.map((_, index) => {
     return {
       month: monthNames[index],
       ...calculateMemberData(memberByBirthMonth[index]),

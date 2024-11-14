@@ -26,7 +26,7 @@ interface MembersByRole {
 }
 
 // Interfaz para la estructura de salida de memberFormatterByRoleAndGender
-interface MemberFormatterResult {
+export interface MemberByRoleAndGenderResultData {
   pastor: MembersByRole;
   copastor: MembersByRole;
   supervisor: MembersByRole;
@@ -40,7 +40,7 @@ export const memberFormatterByRoleAndGender = ({
   supervisors,
   preachers,
   disciples,
-}: Options): MemberFormatterResult => {
+}: Options): MemberByRoleAndGenderResultData => {
   const allMembers = [
     ...pastors,
     ...copastors,
@@ -49,7 +49,7 @@ export const memberFormatterByRoleAndGender = ({
     ...disciples,
   ];
 
-  const membersByRole: MemberFormatterResult = {
+  const membersByRole: MemberByRoleAndGenderResultData = {
     pastor: {
       church: {
         isAnexe: allMembers[0]?.theirChurch?.isAnexe,
@@ -127,16 +127,21 @@ export const memberFormatterByRoleAndGender = ({
       men: allMembers.filter(
         (item) =>
           item?.member?.roles.includes(MemberRole.Disciple) &&
-          (!item?.member?.roles.includes(MemberRole.Pastor) ||
-            !item?.member?.roles.includes(MemberRole.Copastor) ||
-            !item?.member?.roles.includes(MemberRole.Supervisor) ||
-            !item?.member?.roles.includes(MemberRole.Preacher) ||
-            !item?.member?.roles.includes(MemberRole.Treasurer)) &&
+          !item?.member?.roles.includes(MemberRole.Pastor) &&
+          !item?.member?.roles.includes(MemberRole.Copastor) &&
+          !item?.member?.roles.includes(MemberRole.Supervisor) &&
+          !item?.member?.roles.includes(MemberRole.Preacher) &&
+          !item?.member?.roles.includes(MemberRole.Treasurer) &&
           item?.member?.gender === Gender.Male,
       ).length,
       women: allMembers.filter(
         (item) =>
           item?.member?.roles.includes(MemberRole.Disciple) &&
+          !item?.member?.roles.includes(MemberRole.Pastor) &&
+          !item?.member?.roles.includes(MemberRole.Copastor) &&
+          !item?.member?.roles.includes(MemberRole.Supervisor) &&
+          !item?.member?.roles.includes(MemberRole.Preacher) &&
+          !item?.member?.roles.includes(MemberRole.Treasurer) &&
           item?.member?.gender === Gender.Female,
       ).length,
     },

@@ -18,6 +18,7 @@ import { PrinterModule } from '@/modules/printer/printer.module';
 import { UserModule } from '@/modules/user/user.module';
 import { OfferingIncomeModule } from '@/modules/offering/income/offering-income.module';
 import { OfferingExpenseModule } from '@/modules/offering/expense/offering-expense.module';
+import { MetricsModule } from '@/modules/metrics/metrics.module';
 
 @Module({
   controllers: [ReportsController],
@@ -36,6 +37,7 @@ import { OfferingExpenseModule } from '@/modules/offering/expense/offering-expen
     OfferingIncomeModule,
     OfferingExpenseModule,
     UserModule,
+    MetricsModule,
   ],
   exports: [],
 })

@@ -14,9 +14,10 @@ interface Options {
   disciples: Disciple[];
 }
 
-interface GenderCounts {
+export interface MembersByDistrictAndGenderResultData {
   men: number;
   women: number;
+  district: string;
   church: {
     isAnexe: boolean;
     abbreviatedChurchName: string;
@@ -24,7 +25,7 @@ interface GenderCounts {
 }
 
 interface DistrictsResult {
-  [urbanSector: string]: GenderCounts; // Resultado agrupado por sector urbano
+  [urbanSector: string]: MembersByDistrictAndGenderResultData; // Resultado agrupado por sector urbano
 }
 
 export const memberFormatterByDistrictAndGender = ({
@@ -50,6 +51,7 @@ export const memberFormatterByDistrictAndGender = ({
       acc[item?.member?.urbanSector] = {
         men: 0,
         women: 0,
+        district: item.member.district,
         church: {
           isAnexe: allMembers[0]?.theirChurch?.isAnexe,
           abbreviatedChurchName:

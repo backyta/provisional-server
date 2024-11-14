@@ -18,7 +18,11 @@ import {
   SearchSubTypeNames,
   MaritalStatusNames,
 } from '@/common/enums';
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import {
+  PaginationDto,
+  MetricsPaginationDto,
+  SearchAndPaginationDto,
+} from '@/common/dtos';
 
 import { UserRoleNames } from '@/modules/auth/enums';
 
@@ -35,6 +39,7 @@ import {
   getMembersReport,
   getChurchesReport,
   getFamilyGroupsReport,
+  getMemberMetricsReport,
   getOfferingIncomeReport,
   getOfferingExpensesReport,
   getStudyCertificateByIdReport,
@@ -60,10 +65,25 @@ import { Copastor } from '@/modules/copastor/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { ZoneService } from '@/modules/zone/zone.service';
+import { MetricSearchType } from '@/modules/metrics/enums';
 import { Supervisor } from '@/modules/supervisor/entities';
 import { FamilyGroup } from '@/modules/family-group/entities';
+import { MetricsService } from '@/modules/metrics/metrics.service';
 import { OfferingIncome } from '@/modules/offering/income/entities';
 import { OfferingExpense } from '@/modules/offering/expense/entities';
+
+import {
+  MonthlyMemberResultData,
+  MembersByZoneResultData,
+  PreachersByZoneResultData,
+  MembersByCategoryResultData,
+  MembersByRecordStatusResultData,
+  MemberByRoleAndGenderResultData,
+  MembersByMaritalStatusResultData,
+  MonthlyMemberFluctuationResultData,
+  MembersByCategoryAndGenderResultData,
+  MembersByDistrictAndGenderResultData,
+} from '@/modules/metrics/helpers/member';
 
 @Injectable()
 export class ReportsService {
@@ -92,6 +112,8 @@ export class ReportsService {
     private readonly offeringExpenseService: OfferingExpenseService,
 
     private readonly userService: UserService,
+
+    private readonly metricsService: MetricsService,
   ) {}
 
   //* STUDENT CERTIFICATE
@@ -1558,6 +1580,153 @@ export class ReportsService {
       searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
       searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
       data: users,
+    });
+
+    const doc = this.printerService.createPdf(docDefinition);
+
+    return doc;
+  }
+
+  //? METRICS
+  //* MEMBER METRICS REPORT
+  async getMemberMetrics(metricsPaginationDto: MetricsPaginationDto) {
+    const { year, churchId, types } = metricsPaginationDto;
+
+    const church = await this.churchRepository.findOne({
+      where: {
+        id: churchId,
+      },
+    });
+
+    if (!church) {
+      throw new NotFoundException(
+        `No se encontró ninguna iglesia con este ID: ${churchId}.`,
+      );
+    }
+
+    const metricsTypesArray = types.split('+');
+
+    // * Search and Set Data
+    let membersFluctuationByYearResultData: MonthlyMemberFluctuationResultData[];
+    if (metricsTypesArray.includes(MetricSearchType.MembersFluctuationByYear)) {
+      membersFluctuationByYearResultData = await this.metricsService.findByTerm(
+        `${churchId}&${year}`,
+        {
+          'search-type': MetricSearchType.MembersFluctuationByYear,
+        },
+      );
+    }
+
+    let membersByBirthMonthResultData: MonthlyMemberResultData[];
+    if (metricsTypesArray.includes(MetricSearchType.MembersByBirthMonth)) {
+      membersByBirthMonthResultData = await this.metricsService.findByTerm(
+        churchId,
+        {
+          'search-type': MetricSearchType.MembersByBirthMonth,
+        },
+      );
+    }
+
+    let membersByCategoryResultData: MembersByCategoryResultData;
+    if (metricsTypesArray.includes(MetricSearchType.MembersByCategory)) {
+      membersByCategoryResultData = await this.metricsService.findByTerm(
+        churchId,
+        {
+          'search-type': MetricSearchType.MembersByCategory,
+        },
+      );
+    }
+
+    let membersByCategoryAndGenderResultData: MembersByCategoryAndGenderResultData;
+    if (
+      metricsTypesArray.includes(MetricSearchType.MembersByCategoryAndGender)
+    ) {
+      membersByCategoryAndGenderResultData =
+        await this.metricsService.findByTerm(churchId, {
+          'search-type': MetricSearchType.MembersByCategoryAndGender,
+        });
+    }
+
+    let membersByRoleAndGenderResultData: MemberByRoleAndGenderResultData;
+    if (metricsTypesArray.includes(MetricSearchType.MembersByRoleAndGender)) {
+      membersByRoleAndGenderResultData = await this.metricsService.findByTerm(
+        churchId,
+        {
+          'search-type': MetricSearchType.MembersByRoleAndGender,
+        },
+      );
+    }
+
+    let membersByMaritalStatusResultData: MembersByMaritalStatusResultData;
+    if (metricsTypesArray.includes(MetricSearchType.MembersByMaritalStatus)) {
+      membersByMaritalStatusResultData = await this.metricsService.findByTerm(
+        churchId,
+        {
+          'search-type': MetricSearchType.MembersByMaritalStatus,
+        },
+      );
+    }
+
+    let membersByZoneAndGenderResultData: MembersByZoneResultData;
+    if (metricsTypesArray.includes(MetricSearchType.MembersByZoneAndGender)) {
+      membersByZoneAndGenderResultData = await this.metricsService.findByTerm(
+        `${churchId}&{''}`,
+        {
+          'search-type': MetricSearchType.MembersByZoneAndGender,
+          allZones: true,
+        },
+      );
+    }
+
+    let preachersByZoneAndGenderResultData: PreachersByZoneResultData;
+    if (metricsTypesArray.includes(MetricSearchType.PreachersByZoneAndGender)) {
+      preachersByZoneAndGenderResultData = await this.metricsService.findByTerm(
+        `${churchId}&{''}`,
+        {
+          'search-type': MetricSearchType.PreachersByZoneAndGender,
+          allZones: true,
+        },
+      );
+    }
+
+    let membersByDistrictAndGenderResultData: MembersByDistrictAndGenderResultData;
+    if (
+      metricsTypesArray.includes(MetricSearchType.MembersByDistrictAndGender)
+    ) {
+      membersByDistrictAndGenderResultData =
+        await this.metricsService.findByTerm(churchId, {
+          'search-type': MetricSearchType.MembersByDistrictAndGender,
+        });
+    }
+
+    let membersByRecordStatusResultData: MembersByRecordStatusResultData;
+    if (metricsTypesArray.includes(MetricSearchType.MembersByRecordStatus)) {
+      membersByRecordStatusResultData = await this.metricsService.findByTerm(
+        churchId,
+        {
+          'search-type': MetricSearchType.MembersByRecordStatus,
+        },
+      );
+    }
+
+    const docDefinition = getMemberMetricsReport({
+      title: 'Reporte de Métricas de Miembro',
+      subTitle: 'Resultados de Búsqueda de Métricas de Miembros',
+      metricsTypesArray: metricsTypesArray,
+      year: year,
+      church: church,
+      membersFluctuationByYearResultData: membersFluctuationByYearResultData,
+      membersByBirthMonthResultData: membersByBirthMonthResultData,
+      membersByCategoryResultData: membersByCategoryResultData,
+      membersByCategoryAndGenderResultData:
+        membersByCategoryAndGenderResultData,
+      membersByRoleAndGenderResultData: membersByRoleAndGenderResultData,
+      membersByMaritalStatusResultData: membersByMaritalStatusResultData,
+      membersByZoneAndGenderResultData: membersByZoneAndGenderResultData,
+      preachersByZoneAndGenderResultData: preachersByZoneAndGenderResultData,
+      membersByDistrictAndGenderResultData:
+        membersByDistrictAndGenderResultData,
+      membersByRecordStatusResultData: membersByRecordStatusResultData,
     });
 
     const doc = this.printerService.createPdf(docDefinition);

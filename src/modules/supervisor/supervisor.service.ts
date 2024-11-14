@@ -2289,10 +2289,10 @@ export class SupervisorService {
     try {
       const updatedSupervisor = await this.supervisorRepository.preload({
         id: supervisor.id,
-        theirChurch: null,
-        theirPastor: null,
-        theirCopastor: null,
-        theirZone: null,
+        // theirChurch: null,
+        // theirPastor: null,
+        // theirCopastor: null,
+        // theirZone: null,
         updatedAt: new Date(),
         updatedBy: user,
         recordStatus: RecordStatus.Inactive,

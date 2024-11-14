@@ -30,7 +30,7 @@ interface MembersByCategoryAndGender {
   church: ChurchInfo;
 }
 
-interface CategoriesResult {
+export interface MembersByCategoryAndGenderResultData {
   [category: string]: MembersByCategoryAndGender; // Resultado agrupado por sector urbano
 }
 
@@ -49,7 +49,7 @@ export const memberFormatterByCategoryAndGender = ({
   supervisors,
   preachers,
   disciples,
-}: Options): CategoriesResult => {
+}: Options): MembersByCategoryAndGenderResultData => {
   const allMembers = [
     ...pastors,
     ...copastors,
@@ -58,31 +58,34 @@ export const memberFormatterByCategoryAndGender = ({
     ...disciples,
   ];
 
-  const resultData: CategoriesResult = categories.reduce((acc, category) => {
-    const [minAge, maxAge] = category.range;
+  const resultData: MembersByCategoryAndGenderResultData = categories.reduce(
+    (acc, category) => {
+      const [minAge, maxAge] = category.range;
 
-    acc[category.label] = {
-      men: allMembers.filter(
-        (item) =>
-          item?.member?.gender === Gender.Male &&
-          item?.member?.age >= minAge &&
-          (maxAge === null || item?.member?.age <= maxAge),
-      ).length,
-      women: allMembers.filter(
-        (item) =>
-          item?.member?.gender === Gender.Female &&
-          item?.member?.age >= minAge &&
-          (maxAge === null || item?.member?.age <= maxAge),
-      ).length,
-      church: {
-        isAnexe: allMembers[0]?.theirChurch?.isAnexe,
-        abbreviatedChurchName:
-          allMembers[0]?.theirChurch?.abbreviatedChurchName,
-      },
-    };
+      acc[category.label] = {
+        men: allMembers.filter(
+          (item) =>
+            item?.member?.gender === Gender.Male &&
+            item?.member?.age >= minAge &&
+            (maxAge === null || item?.member?.age <= maxAge),
+        ).length,
+        women: allMembers.filter(
+          (item) =>
+            item?.member?.gender === Gender.Female &&
+            item?.member?.age >= minAge &&
+            (maxAge === null || item?.member?.age <= maxAge),
+        ).length,
+        church: {
+          isAnexe: allMembers[0]?.theirChurch?.isAnexe,
+          abbreviatedChurchName:
+            allMembers[0]?.theirChurch?.abbreviatedChurchName,
+        },
+      };
 
-    return acc;
-  }, {});
+      return acc;
+    },
+    {},
+  );
 
   return resultData;
 };

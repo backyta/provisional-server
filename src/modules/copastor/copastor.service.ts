@@ -1598,8 +1598,8 @@ export class CopastorService {
     try {
       const updatedCopastor = await this.copastorRepository.preload({
         id: copastor.id,
-        theirChurch: null,
-        theirPastor: null,
+        // theirChurch: null,
+        // theirPastor: null,
         updatedAt: new Date(),
         updatedBy: user,
         recordStatus: RecordStatus.Inactive,

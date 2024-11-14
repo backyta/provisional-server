@@ -162,22 +162,27 @@ export class MetricsService {
               order: {
                 createdAt: order as FindOptionsOrderValue,
               },
+              relations: ['member'],
             }),
             this.copastorRepository.find({
               where: { theirChurch: church },
               order: { createdAt: order as FindOptionsOrderValue },
+              relations: ['member'],
             }),
             this.supervisorRepository.find({
               where: { theirChurch: church },
               order: { createdAt: order as FindOptionsOrderValue },
+              relations: ['member'],
             }),
             this.preacherRepository.find({
               where: { theirChurch: church },
               order: { createdAt: order as FindOptionsOrderValue },
+              relations: ['member'],
             }),
             this.discipleRepository.find({
               where: { theirChurch: church },
               order: { createdAt: order as FindOptionsOrderValue },
+              relations: ['member'],
             }),
           ]);
 
@@ -623,7 +628,11 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { zoneName: order as FindOptionsOrderValue },
-            relations: ['theirSupervisor', 'theirChurch', 'disciples.member'],
+            relations: [
+              'theirSupervisor.member',
+              'theirChurch',
+              'disciples.member',
+            ],
           });
 
           return memberFormatterByZoneAndGender({
@@ -671,7 +680,11 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { zoneName: order as FindOptionsOrderValue },
-            relations: ['theirSupervisor', 'theirChurch', 'disciples.member'],
+            relations: [
+              'theirSupervisor.member',
+              'theirChurch',
+              'disciples.member',
+            ],
           });
 
           return memberFormatterByZoneAndGender({
@@ -721,7 +734,11 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { zoneName: order as FindOptionsOrderValue },
-            relations: ['theirSupervisor', 'theirChurch', 'preachers.member'],
+            relations: [
+              'theirSupervisor.member',
+              'theirChurch',
+              'preachers.member',
+            ],
           });
 
           return preacherFormatterByZoneAndGender({
@@ -769,7 +786,11 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: { zoneName: order as FindOptionsOrderValue },
-            relations: ['theirSupervisor', 'theirChurch', 'preachers.member'],
+            relations: [
+              'theirSupervisor.member',
+              'theirChurch',
+              'preachers.member',
+            ],
           });
 
           return preacherFormatterByZoneAndGender({
@@ -892,7 +913,9 @@ export class MetricsService {
               relations: ['member', 'theirChurch'],
             }),
             this.copastorRepository.find({
-              where: { theirChurch: church },
+              where: {
+                theirChurch: church,
+              },
               order: { createdAt: order as FindOptionsOrderValue },
               relations: ['member', 'theirChurch'],
             }),
@@ -907,7 +930,9 @@ export class MetricsService {
               relations: ['member', 'theirChurch'],
             }),
             this.discipleRepository.find({
-              where: { theirChurch: church },
+              where: {
+                theirChurch: church,
+              },
               order: { createdAt: order as FindOptionsOrderValue },
               relations: ['member', 'theirChurch'],
             }),

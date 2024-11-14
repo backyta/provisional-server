@@ -55,27 +55,30 @@ export const headerSection = (options: HeaderSectionOptions): Content => {
       }
     : null;
 
-  const headerTerms: Content = searchTerm
-    ? {
-        text: `${searchType} / ${searchSubType}\n${searchTerm}`,
-        alignment: 'center',
-        margin: [35, 2, 0, 0],
-        style: {
-          color: '#3b9917',
-          bold: true,
-          fontSize: 11,
-        },
-      }
-    : {
-        text: `Tipo de búsqueda: Búsqueda general / Tipo de orden: ${RecordOrderNames[orderSearch]}`,
-        alignment: 'center',
-        margin: [35, 2, 0, 0],
-        style: {
-          color: '#3b9917',
-          bold: true,
-          fontSize: 11,
-        },
-      };
+  const headerTerms: Content =
+    searchTerm && searchSubType
+      ? {
+          text: `${searchType} / ${searchSubType}\n${searchTerm}`,
+          alignment: 'center',
+          margin: [35, 2, 0, 0],
+          style: {
+            color: '#3b9917',
+            bold: true,
+            fontSize: 11,
+          },
+        }
+      : !searchTerm && !searchSubType && orderSearch
+        ? {
+            text: `Tipo de búsqueda: Búsqueda general / Tipo de orden: ${RecordOrderNames[orderSearch]}`,
+            alignment: 'center',
+            margin: [35, 2, 0, 0],
+            style: {
+              color: '#3b9917',
+              bold: true,
+              fontSize: 11,
+            },
+          }
+        : null;
 
   const headerTitle: Content = title
     ? {

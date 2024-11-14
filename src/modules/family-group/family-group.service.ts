@@ -2183,11 +2183,11 @@ export class FamilyGroupService {
     try {
       const updatedFamilyGroup = await this.familyGroupRepository.preload({
         id: familyGroup.id,
-        theirChurch: null,
-        theirPastor: null,
-        theirCopastor: null,
-        theirSupervisor: null,
-        theirPreacher: null,
+        // theirChurch: null,
+        // theirPastor: null,
+        // theirCopastor: null,
+        // theirSupervisor: null,
+        // theirPreacher: null,
         updatedAt: new Date(),
         updatedBy: user,
         recordStatus: RecordStatus.Inactive,

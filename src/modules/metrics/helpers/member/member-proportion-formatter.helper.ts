@@ -14,7 +14,7 @@ interface Options {
   disciples: Disciple[];
 }
 
-export interface MemberProportionResult {
+export interface MemberProportionResultData {
   countMembersMale: number;
   totalCountMembers: number;
   countMembersFemale: number;
@@ -28,7 +28,7 @@ export const memberProportionFormatter = ({
   supervisors,
   preachers,
   disciples,
-}: Options): MemberProportionResult => {
+}: Options): MemberProportionResultData => {
   const allMembers = [
     ...pastors,
     ...copastors,

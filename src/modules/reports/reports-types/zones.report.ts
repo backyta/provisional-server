@@ -27,8 +27,6 @@ export const getZonesReport = (
     orderSearch,
   } = options;
 
-  console.log(searchTerm);
-
   return {
     pageOrientation: 'landscape',
     header: headerSection({
@@ -149,7 +147,7 @@ export const getZonesReport = (
             'auto',
             'auto',
             'auto',
-            'auto',
+            50,
             'auto',
             'auto',
             'auto',

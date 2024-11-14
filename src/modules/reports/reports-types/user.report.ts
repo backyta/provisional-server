@@ -15,6 +15,7 @@ interface ReportOptions {
   orderSearch?: string;
   data: User[];
 }
+// Pasar diferentes datas y si tienes contenido se renderiza segun la tabla
 
 export const getUsersReport = (
   options: ReportOptions,

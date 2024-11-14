@@ -1117,6 +1117,7 @@ export class ZoneService {
     }
   }
 
+  // TODO : revisar todos los comentario de delete si seran necesario almenos en membrsesia si.
   //! DELETE ZONE
   async remove(id: string, user: User): Promise<void> {
     if (!isUUID(id)) {
@@ -1136,10 +1137,10 @@ export class ZoneService {
     try {
       const updatedZone = await this.zoneRepository.preload({
         id: zone.id,
-        theirChurch: null,
-        theirPastor: null,
-        theirCopastor: null,
-        theirSupervisor: null,
+        // theirChurch: null,
+        // theirPastor: null,
+        // theirCopastor: null,
+        // theirSupervisor: null,
         updatedAt: new Date(),
         updatedBy: user,
         recordStatus: RecordStatus.Inactive,

@@ -9,7 +9,11 @@ import {
 import { ReportsService } from '@/modules/reports/reports.service';
 
 import { Response } from 'express';
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import {
+  MetricsPaginationDto,
+  PaginationDto,
+  SearchAndPaginationDto,
+} from '@/common/dtos';
 
 @Controller('reports')
 export class ReportsController {
@@ -39,7 +43,6 @@ export class ReportsController {
     const pdfDoc = await this.reportsService.getGeneralChurches(paginationDto);
 
     response.setHeader('Content-Type', 'application/pdf');
-    response.setHeader('Content-Disposition', 'inline; filename=report.pdf');
     pdfDoc.info.Title = 'general-churches-report.pdf';
     pdfDoc.pipe(response);
     pdfDoc.end();
@@ -393,6 +396,22 @@ export class ReportsController {
 
     response.setHeader('Content-Type', 'application/pdf');
     pdfDoc.info.Title = 'users-by-term-report.pdf';
+    pdfDoc.pipe(response);
+    pdfDoc.end();
+  }
+
+  //? METRICS
+  //* MEMBER METRICS REPORT
+  @Get('member-metrics')
+  async getMemberMetrics(
+    @Res() response: Response,
+    @Query() paginationDto: MetricsPaginationDto,
+  ) {
+    const pdfDoc = await this.reportsService.getMemberMetrics(paginationDto);
+
+    response.setHeader('Content-Type', 'application/pdf');
+
+    pdfDoc.info.Title = 'member-metrics-report.pdf';
     pdfDoc.pipe(response);
     pdfDoc.end();
   }

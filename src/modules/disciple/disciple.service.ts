@@ -2208,7 +2208,7 @@ export class DiscipleService {
         }
       }
 
-      //? Update and save if is same Copastor
+      //? Update and save if is same Family Group
       if (disciple?.theirFamilyGroup?.id === theirFamilyGroup) {
         try {
           const updatedMember = await this.memberRepository.preload({
@@ -2433,13 +2433,13 @@ export class DiscipleService {
     try {
       const updatedDisciple = await this.discipleRepository.preload({
         id: disciple.id,
-        theirChurch: null,
-        theirPastor: null,
-        theirCopastor: null,
-        theirSupervisor: null,
-        theirZone: null,
-        theirFamilyGroup: null,
-        theirPreacher: null,
+        // theirChurch: null,
+        // theirPastor: null,
+        // theirCopastor: null,
+        // theirSupervisor: null,
+        // theirZone: null,
+        // theirFamilyGroup: null,
+        // theirPreacher: null,
         updatedAt: new Date(),
         updatedBy: user,
         recordStatus: RecordStatus.Inactive,

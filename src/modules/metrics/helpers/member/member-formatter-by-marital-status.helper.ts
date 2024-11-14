@@ -14,7 +14,7 @@ interface Options {
   disciples: Disciple[];
 }
 
-interface MaritalStatusCounts {
+export interface MembersByMaritalStatusResultData {
   single: number;
   married: number;
   divorced: number;
@@ -28,7 +28,7 @@ export const memberFormatterByMaritalStatus = ({
   supervisors,
   preachers,
   disciples,
-}: Options): MaritalStatusCounts => {
+}: Options): MembersByMaritalStatusResultData => {
   const allMembers = [
     ...pastors,
     ...copastors,
@@ -37,7 +37,7 @@ export const memberFormatterByMaritalStatus = ({
     ...disciples,
   ];
 
-  const membersByMaritalStatus: MaritalStatusCounts = {
+  const membersByMaritalStatus: MembersByMaritalStatusResultData = {
     single: allMembers.filter(
       (item) => item?.member?.maritalStatus === MaritalStatus.Single,
     ).length,
