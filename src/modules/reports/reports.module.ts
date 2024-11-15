@@ -16,28 +16,28 @@ import { FamilyGroupModule } from '@/modules/family-group/family-group.module';
 import { PrinterModule } from '@/modules/printer/printer.module';
 
 import { UserModule } from '@/modules/user/user.module';
+import { MetricsModule } from '@/modules/metrics/metrics.module';
 import { OfferingIncomeModule } from '@/modules/offering/income/offering-income.module';
 import { OfferingExpenseModule } from '@/modules/offering/expense/offering-expense.module';
-import { MetricsModule } from '@/modules/metrics/metrics.module';
 
 @Module({
   controllers: [ReportsController],
   providers: [ReportsService],
   imports: [
-    PrinterModule,
+    ZoneModule,
+    UserModule,
     ChurchModule,
     MemberModule,
     PastorModule,
+    PrinterModule,
+    MetricsModule,
     CopastorModule,
-    SupervisorModule,
     PreacherModule,
     DiscipleModule,
-    ZoneModule,
+    SupervisorModule,
     FamilyGroupModule,
     OfferingIncomeModule,
     OfferingExpenseModule,
-    UserModule,
-    MetricsModule,
   ],
   exports: [],
 })

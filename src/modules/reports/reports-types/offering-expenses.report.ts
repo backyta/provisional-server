@@ -1,11 +1,13 @@
+import { addDays, format } from 'date-fns';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
-import { headerSection, footerSection } from '@/modules/reports/sections';
-import { addDays, format } from 'date-fns';
 import {
   OfferingExpenseSearchTypeNames,
   OfferingExpenseSearchSubTypeNames,
 } from '@/modules/offering/expense/enums';
+import { OfferingExpense } from '@/modules/offering/expense/entities';
+
+import { headerSection, footerSection } from '@/modules/reports/sections';
 
 interface ReportOptions {
   title?: string;
@@ -15,7 +17,7 @@ interface ReportOptions {
   searchType?: string;
   searchSubType?: string;
   orderSearch?: string;
-  data: any[];
+  data: OfferingExpense[];
 }
 
 export const getOfferingExpensesReport = (
@@ -111,15 +113,6 @@ export const getOfferingExpensesReport = (
         },
       },
 
-      // Total table
-      // {
-      //   text: 'Totales',
-      //   style: {
-      //     fontSize: 14,
-      //     bold: true,
-      //   },
-      //   margin: [0, 10, 0, 0],
-      // },
       {
         layout: 'noBorders',
         table: {

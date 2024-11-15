@@ -11,7 +11,7 @@ interface ReportOptions {
   searchType?: string;
   searchSubType?: string;
   orderSearch?: string;
-  data: any[];
+  data: any;
 }
 
 export const getFamilyGroupsReport = (

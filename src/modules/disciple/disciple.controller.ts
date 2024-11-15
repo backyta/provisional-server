@@ -116,7 +116,7 @@ export class DiscipleController {
     return this.discipleService.update(id, updateDiscipleDto, user);
   }
 
-  //* DELETE
+  //! DELETE
   @Delete(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({

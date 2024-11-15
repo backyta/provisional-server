@@ -1,6 +1,7 @@
 import type { Content } from 'pdfmake/interfaces';
-import { DateFormatter } from '@/modules/reports/helpers';
+
 import { RecordOrderNames } from '@/common/enums';
+import { DateFormatter } from '@/modules/reports/helpers';
 
 const logo: Content = {
   image: 'src/assets/logo.png',

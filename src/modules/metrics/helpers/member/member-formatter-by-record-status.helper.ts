@@ -1,9 +1,10 @@
+import { MemberRole, RecordStatus } from '@/common/enums';
+
 import { Pastor } from '@/modules/pastor/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Disciple } from '@/modules/disciple/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
-import { MemberRole, RecordStatus } from '@/common/enums';
 
 interface Options {
   pastors: Pastor[];

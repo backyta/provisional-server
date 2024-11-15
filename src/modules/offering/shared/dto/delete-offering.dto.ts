@@ -24,3 +24,5 @@ export class DeleteOfferingDto {
   @IsOptional()
   exchangeCurrencyType?: string;
 }
+
+//TODO : poner description para la doc

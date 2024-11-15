@@ -137,15 +137,6 @@ export const getMembersReport = (
         },
       },
 
-      // Total table
-      // {
-      //   text: 'Totales',
-      //   style: {
-      //     fontSize: 14,
-      //     bold: true,
-      //   },
-      //   margin: [0, 10, 0, 0],
-      // },
       {
         layout: 'noBorders',
         table: {

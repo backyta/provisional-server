@@ -3,12 +3,12 @@ import {
   IsArray,
   IsEmail,
   IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
   Matches,
+  IsString,
   MaxLength,
   MinLength,
+  IsNotEmpty,
+  IsOptional,
 } from 'class-validator';
 
 import { UserRole } from '@/modules/auth/enums';

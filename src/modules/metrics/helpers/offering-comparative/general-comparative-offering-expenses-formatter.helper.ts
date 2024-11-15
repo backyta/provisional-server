@@ -1,7 +1,5 @@
 import { CurrencyType } from '@/modules/offering/shared/enums';
-
 import { OfferingExpense } from '@/modules/offering/expense/entities';
-
 import { OfferingExpenseSearchTypeNames } from '@/modules/offering/expense/enums';
 
 interface Options {

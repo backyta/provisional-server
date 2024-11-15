@@ -24,7 +24,7 @@ interface ChurchInfo {
   isAnexe: boolean;
   abbreviatedChurchName: string;
 }
-
+//TODO : cambiar por ResultData
 interface MonthlyFluctuationData {
   month: string;
   newFamilyGroups: number;

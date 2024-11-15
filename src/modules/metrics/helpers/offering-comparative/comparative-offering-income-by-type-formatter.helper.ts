@@ -1,11 +1,10 @@
 import { CurrencyType } from '@/modules/offering/shared/enums';
 
-import { OfferingIncome } from '@/modules/offering/income/entities';
-
 import {
   OfferingIncomeCreationTypeNames,
   OfferingIncomeCreationSubTypeNames,
 } from '@/modules/offering/income/enums';
+import { OfferingIncome } from '@/modules/offering/income/entities';
 
 interface Options {
   offeringIncome: OfferingIncome[];

@@ -43,3 +43,5 @@ export class CreateFileDto {
   @MaxLength(40)
   offeringSubType?: string;
 }
+
+// TODO : hacer description para la documentacion

@@ -1,6 +1,7 @@
+import { getInitialFullNames } from '@/common/helpers';
+
 import { CurrencyType } from '@/modules/offering/shared/enums';
 import { OfferingIncome } from '@/modules/offering/income/entities';
-import { getInitialFullNames } from '@/common/helpers';
 import { OfferingIncomeCreationCategory } from '@/modules/offering/income/enums';
 
 interface Options {

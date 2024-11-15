@@ -1,15 +1,15 @@
+import { addDays, format } from 'date-fns';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
-import { headerSection, footerSection } from '@/modules/reports/sections';
-import { addDays, format } from 'date-fns';
 import {
   MemberType,
   MemberTypeNames,
+  OfferingIncomeCreationTypeNames,
+  OfferingIncomeCreationSubTypeNames,
   OfferingIncomeCreationCategoryNames,
   OfferingIncomeCreationShiftTypeNames,
-  OfferingIncomeCreationSubTypeNames,
-  OfferingIncomeCreationTypeNames,
 } from '@/modules/offering/income/enums';
+import { headerSection, footerSection } from '@/modules/reports/sections';
 
 interface ReportOptions {
   title?: string;
@@ -19,7 +19,7 @@ interface ReportOptions {
   searchType?: string;
   searchSubType?: string;
   orderSearch?: string;
-  data: any[];
+  data: any;
 }
 
 export const getOfferingIncomeReport = (

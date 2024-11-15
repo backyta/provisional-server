@@ -1,19 +1,19 @@
 import {
-  Controller,
   Get,
-  Param,
-  ParseUUIDPipe,
-  Query,
   Res,
+  Param,
+  Query,
+  Controller,
+  ParseUUIDPipe,
 } from '@nestjs/common';
-import { ReportsService } from '@/modules/reports/reports.service';
-
 import { Response } from 'express';
+
 import {
-  MetricsPaginationDto,
   PaginationDto,
+  MetricsPaginationDto,
   SearchAndPaginationDto,
 } from '@/common/dtos';
+import { ReportsService } from '@/modules/reports/reports.service';
 
 @Controller('reports')
 export class ReportsController {

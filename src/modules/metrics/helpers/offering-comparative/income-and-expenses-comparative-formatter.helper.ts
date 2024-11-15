@@ -1,6 +1,5 @@
 import { OfferingIncome } from '@/modules/offering/income/entities';
 import { OfferingExpense } from '@/modules/offering/expense/entities';
-
 import { OfferingIncomeCreationType } from '@/modules/offering/income/enums';
 
 interface ResultDataOptions {

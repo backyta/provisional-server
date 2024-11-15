@@ -27,8 +27,8 @@ import { CreatePreacherDto, UpdatePreacherDto } from '@/modules/preacher/dto';
 
 import {
   MemberRole,
-  RecordStatus,
   GenderNames,
+  RecordStatus,
   MaritalStatusNames,
 } from '@/common/enums';
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';

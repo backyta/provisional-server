@@ -1,9 +1,11 @@
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
-import { headerSection, footerSection } from '@/modules/reports/sections';
-import { User } from '@/modules/user/entities';
 import { GenderNames } from '@/common/enums';
+
+import { User } from '@/modules/user/entities';
 import { UserRoleNames } from '@/modules/auth/enums';
+
+import { headerSection, footerSection } from '@/modules/reports/sections';
 
 interface ReportOptions {
   title?: string;
@@ -15,7 +17,6 @@ interface ReportOptions {
   orderSearch?: string;
   data: User[];
 }
-// Pasar diferentes datas y si tienes contenido se renderiza segun la tabla
 
 export const getUsersReport = (
   options: ReportOptions,
@@ -98,15 +99,6 @@ export const getUsersReport = (
         },
       },
 
-      // Total table
-      // {
-      //   text: 'Totales',
-      //   style: {
-      //     fontSize: 14,
-      //     bold: true,
-      //   },
-      //   margin: [0, 10, 0, 0],
-      // },
       {
         layout: 'noBorders',
         table: {
