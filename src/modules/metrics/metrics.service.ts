@@ -132,6 +132,8 @@ export class MetricsService {
       order = 'DESC',
       allZones,
       allFamilyGroups,
+      allDistricts,
+      isSingleMonth,
     } = searchTypeAndPaginationDto;
 
     if (!term) {
@@ -629,6 +631,7 @@ export class MetricsService {
             },
             order: { zoneName: order as FindOptionsOrderValue },
             relations: [
+              'theirCopastor.member',
               'theirSupervisor.member',
               'theirChurch',
               'disciples.member',
@@ -681,6 +684,7 @@ export class MetricsService {
             },
             order: { zoneName: order as FindOptionsOrderValue },
             relations: [
+              'theirCopastor.member',
               'theirSupervisor.member',
               'theirChurch',
               'disciples.member',
@@ -735,6 +739,7 @@ export class MetricsService {
             },
             order: { zoneName: order as FindOptionsOrderValue },
             relations: [
+              'theirCopastor.member',
               'theirSupervisor.member',
               'theirChurch',
               'preachers.member',
@@ -787,6 +792,7 @@ export class MetricsService {
             },
             order: { zoneName: order as FindOptionsOrderValue },
             relations: [
+              'theirCopastor.member',
               'theirSupervisor.member',
               'theirChurch',
               'preachers.member',
@@ -1169,6 +1175,7 @@ export class MetricsService {
             },
             order: { zoneName: order as FindOptionsOrderValue },
             relations: [
+              'theirCopastor.member',
               'theirSupervisor.member',
               'theirChurch',
               'familyGroups',
@@ -1221,6 +1228,7 @@ export class MetricsService {
             },
             order: { zoneName: order as FindOptionsOrderValue },
             relations: [
+              'theirCopastor.member',
               'theirSupervisor.member',
               'theirChurch',
               'familyGroups',
@@ -1244,36 +1252,71 @@ export class MetricsService {
     if (term && searchType === MetricSearchType.FamilyGroupsByDistrict) {
       const [churchId, district] = term.split('&');
 
-      try {
-        const church = await this.churchRepository.findOne({
-          where: {
-            id: churchId,
-            recordStatus: RecordStatus.Active,
-          },
-          order: { createdAt: order as FindOptionsOrderValue },
-        });
+      if (!allDistricts) {
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
 
-        if (!church) return [];
+          if (!church) return [];
 
-        const familyGroups = await this.familyGroupRepository.find({
-          where: {
-            theirChurch: church,
-            district: district,
-            recordStatus: RecordStatus.Active,
-          },
-          order: { createdAt: order as FindOptionsOrderValue },
-          relations: ['theirChurch'],
-        });
+          const familyGroups = await this.familyGroupRepository.find({
+            where: {
+              theirChurch: church,
+              district: district,
+              recordStatus: RecordStatus.Active,
+            },
+            order: { createdAt: order as FindOptionsOrderValue },
+            relations: ['theirChurch'],
+          });
 
-        return familyGroupFormatterByDistrict({
-          familyGroups,
-        }) as any;
-      } catch (error) {
-        if (error instanceof NotFoundException) {
-          throw error;
+          return familyGroupFormatterByDistrict({
+            familyGroups,
+          }) as any;
+        } catch (error) {
+          if (error instanceof NotFoundException) {
+            throw error;
+          }
+
+          this.handleDBExceptions(error);
         }
+      }
 
-        this.handleDBExceptions(error);
+      if (allDistricts) {
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+
+          if (!church) return [];
+
+          const familyGroups = await this.familyGroupRepository.find({
+            where: {
+              theirChurch: church,
+              recordStatus: RecordStatus.Active,
+            },
+            order: { createdAt: order as FindOptionsOrderValue },
+            relations: ['theirChurch'],
+          });
+
+          return familyGroupFormatterByDistrict({
+            familyGroups,
+          }) as any;
+        } catch (error) {
+          if (error instanceof NotFoundException) {
+            throw error;
+          }
+
+          this.handleDBExceptions(error);
+        }
       }
     }
 
@@ -1408,6 +1451,7 @@ export class MetricsService {
             relations: [
               'familyGroups',
               'familyGroups.theirSupervisor.member',
+              'familyGroups.theirCopastor.member',
               'familyGroups.theirChurch',
               'familyGroups.theirZone',
             ],
@@ -1447,6 +1491,7 @@ export class MetricsService {
             relations: [
               'familyGroups',
               'familyGroups.theirSupervisor.member',
+              'familyGroups.theirCopastor.member',
               'familyGroups.theirChurch',
               'familyGroups.theirZone',
             ],
@@ -1499,178 +1544,67 @@ export class MetricsService {
 
     //* Offering income by sunday service
     if (term && searchType === MetricSearchType.OfferingIncomeBySundayService) {
-      const [churchId, monthName, year] = term.split('&');
+      if (isSingleMonth) {
+        const [churchId, startMonthName, year] = term.split('&');
 
-      const monthDate = new Date(`${monthName} 1, ${year}`);
-      const startDate = startOfMonth(monthDate);
-      const endDate = endOfMonth(monthDate);
+        const monthDate = new Date(`${startMonthName} 1, ${year}`);
+        const startDate = startOfMonth(monthDate);
+        const endDate = endOfMonth(monthDate);
 
-      try {
-        const church = await this.churchRepository.findOne({
-          where: {
-            id: churchId,
-            recordStatus: RecordStatus.Active,
-          },
-        });
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
 
-        if (!church) return [];
+          if (!church) return [];
 
-        const offeringIncome = await this.offeringIncomeRepository.find({
-          where: {
-            church: church,
-            subType: OfferingIncomeSearchType.SundayService,
-            date: Between(startDate, endDate),
-            recordStatus: RecordStatus.Active,
-          },
-          order: {
-            createdAt: order as FindOptionsOrderValue,
-          },
-          relations: ['church'],
-        });
-
-        return offeringIncomeBySundayServiceFormatter({
-          offeringIncome: offeringIncome,
-        }) as any;
-      } catch (error) {
-        this.handleDBExceptions(error);
-      }
-    }
-
-    //* Offering income by family groups
-    if (term && searchType === MetricSearchType.OfferingIncomeByFamilyGroup) {
-      const [churchId, zoneId, monthName, year] = term.split('&');
-
-      const monthDate = new Date(`${monthName} 1, ${year}`);
-      const startDate = startOfMonth(monthDate);
-      const endDate = endOfMonth(monthDate);
-
-      try {
-        const church = await this.churchRepository.findOne({
-          where: {
-            id: churchId,
-            recordStatus: RecordStatus.Active,
-          },
-        });
-
-        if (!church) return [];
-
-        const zone = await this.zoneRepository.findOne({
-          where: {
-            id: zoneId,
-            recordStatus: RecordStatus.Active,
-          },
-        });
-
-        if (!zone) return [];
-
-        const offeringIncome = await this.offeringIncomeRepository.find({
-          where: {
-            church: church,
-            subType: OfferingIncomeSearchType.FamilyGroup,
-            date: Between(startDate, endDate),
-            recordStatus: RecordStatus.Active,
-          },
-          order: {
-            createdAt: order as FindOptionsOrderValue,
-          },
-          relations: [
-            'church',
-            'familyGroup',
-            'familyGroup.disciples.member',
-            'familyGroup.theirPreacher.member',
-            'familyGroup.theirZone',
-          ],
-        });
-
-        const offeringIncomeByZone = offeringIncome.filter(
-          (offeringIncome) =>
-            offeringIncome?.familyGroup?.theirZone?.id === zone?.id,
-        );
-
-        return offeringIncomeByFamilyGroupFormatter({
-          offeringIncome: offeringIncomeByZone,
-        }) as any;
-      } catch (error) {
-        this.handleDBExceptions(error);
-      }
-    }
-
-    //* Offering income by sunday school
-    if (term && searchType === MetricSearchType.OfferingIncomeBySundaySchool) {
-      const [churchId, monthName, year] = term.split('&');
-
-      const monthDate = new Date(`${monthName} 1, ${year}`);
-      const startDate = startOfMonth(monthDate);
-      const endDate = endOfMonth(monthDate);
-
-      try {
-        const church = await this.churchRepository.findOne({
-          where: {
-            id: churchId,
-            recordStatus: RecordStatus.Active,
-          },
-        });
-
-        if (!church) return [];
-
-        const offeringIncome = await this.offeringIncomeRepository.find({
-          where: {
-            church: church,
-            subType: OfferingIncomeSearchType.SundaySchool,
-            date: Between(startDate, endDate),
-            recordStatus: RecordStatus.Active,
-          },
-          order: {
-            createdAt: order as FindOptionsOrderValue,
-          },
-          relations: [
-            'church',
-            'pastor.member',
-            'copastor.member',
-            'supervisor.member',
-            'preacher.member',
-            'disciple.member',
-          ],
-        });
-
-        return offeringIncomeBySundaySchoolFormatter({
-          offeringIncome: offeringIncome,
-        }) as any;
-      } catch (error) {
-        this.handleDBExceptions(error);
-      }
-    }
-
-    //* Offering income by fasting and vigil
-    if (
-      term &&
-      searchType === MetricSearchType.OfferingIncomeByFastingAndVigil
-    ) {
-      const [churchId, monthName, year] = term.split('&');
-
-      const monthDate = new Date(`${monthName} 1, ${year}`);
-      const startDate = startOfMonth(monthDate);
-      const endDate = endOfMonth(monthDate);
-
-      try {
-        const church = await this.churchRepository.findOne({
-          where: {
-            id: churchId,
-            recordStatus: RecordStatus.Active,
-          },
-        });
-
-        if (!church) return [];
-
-        const OfferingIncomeByGeneralFastingAndGeneralVigilAndChurch =
-          await this.offeringIncomeRepository.find({
+          const offeringIncome = await this.offeringIncomeRepository.find({
             where: {
               church: church,
-              subType: In([
-                OfferingIncomeSearchType.GeneralFasting,
-                OfferingIncomeSearchType.GeneralVigil,
-              ]),
+              subType: OfferingIncomeSearchType.SundayService,
+              date: Between(startDate, endDate),
+              recordStatus: RecordStatus.Active,
+            },
+            order: {
+              createdAt: order as FindOptionsOrderValue,
+            },
+            relations: ['church'],
+          });
 
+          return offeringIncomeBySundayServiceFormatter({
+            offeringIncome: offeringIncome,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+      }
+
+      if (!isSingleMonth) {
+        const [churchId, startMonthName, endMonthName, year] = term.split('&');
+
+        const startMonthDate = new Date(`${startMonthName} 1, ${year}`);
+        const endMonthDate = new Date(`${endMonthName} 1, ${year}`);
+
+        const startDate = startOfMonth(startMonthDate);
+        const endDate = endOfMonth(endMonthDate);
+
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (!church) return [];
+
+          const offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              church: church,
+              subType: OfferingIncomeSearchType.SundayService,
               date: Between(startDate, endDate),
               recordStatus: RecordStatus.Active,
             },
@@ -1680,15 +1614,386 @@ export class MetricsService {
             relations: ['church'],
           });
 
-        const OfferingIncomeByZonalFastingAndZonalVigil =
-          await this.offeringIncomeRepository.find({
+          return offeringIncomeBySundayServiceFormatter({
+            offeringIncome: offeringIncome,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+      }
+    }
+
+    //* Offering income by family groups
+    if (term && searchType === MetricSearchType.OfferingIncomeByFamilyGroup) {
+      if (isSingleMonth) {
+        const [churchId, zoneId, monthName, year] = term.split('&');
+
+        const monthDate = new Date(`${monthName} 1, ${year}`);
+        const startDate = startOfMonth(monthDate);
+        const endDate = endOfMonth(monthDate);
+
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (!church) return [];
+
+          const zone = await this.zoneRepository.findOne({
+            where: {
+              id: zoneId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (!zone) return [];
+
+          const offeringIncome = await this.offeringIncomeRepository.find({
             where: {
               church: church,
-              subType: In([
-                OfferingIncomeSearchType.ZonalVigil,
-                OfferingIncomeSearchType.ZonalFasting,
-              ]),
+              subType: OfferingIncomeSearchType.FamilyGroup,
+              date: Between(startDate, endDate),
+              recordStatus: RecordStatus.Active,
+            },
+            order: {
+              createdAt: order as FindOptionsOrderValue,
+            },
+            relations: [
+              'church',
+              'familyGroup',
+              'familyGroup.disciples.member',
+              'familyGroup.theirPreacher.member',
+              'familyGroup.theirZone',
+            ],
+          });
 
+          const offeringIncomeByZone = offeringIncome.filter(
+            (offeringIncome) =>
+              offeringIncome?.familyGroup?.theirZone?.id === zone?.id,
+          );
+
+          return offeringIncomeByFamilyGroupFormatter({
+            offeringIncome: offeringIncomeByZone,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+      }
+
+      if (!isSingleMonth) {
+        const [churchId, startMonthName, endMonthName, year] = term.split('&');
+
+        const startMonthDate = new Date(`${startMonthName} 1, ${year}`);
+        const endMonthDate = new Date(`${endMonthName} 1, ${year}`);
+
+        const startDate = startOfMonth(startMonthDate);
+        const endDate = endOfMonth(endMonthDate);
+
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (!church) return [];
+
+          const offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              church: church,
+              subType: OfferingIncomeSearchType.FamilyGroup,
+              date: Between(startDate, endDate),
+              recordStatus: RecordStatus.Active,
+            },
+            order: {
+              createdAt: order as FindOptionsOrderValue,
+            },
+            relations: [
+              'church',
+              'familyGroup',
+              'familyGroup.disciples.member',
+              'familyGroup.theirPreacher.member',
+              'familyGroup.theirZone',
+            ],
+          });
+
+          return offeringIncomeByFamilyGroupFormatter({
+            offeringIncome: offeringIncome,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+      }
+    }
+
+    //* Offering income by sunday school
+    if (term && searchType === MetricSearchType.OfferingIncomeBySundaySchool) {
+      if (isSingleMonth) {
+        const [churchId, monthName, year] = term.split('&');
+
+        const monthDate = new Date(`${monthName} 1, ${year}`);
+        const startDate = startOfMonth(monthDate);
+        const endDate = endOfMonth(monthDate);
+
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (!church) return [];
+
+          const offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              church: church,
+              subType: OfferingIncomeSearchType.SundaySchool,
+              date: Between(startDate, endDate),
+              recordStatus: RecordStatus.Active,
+            },
+            order: {
+              createdAt: order as FindOptionsOrderValue,
+            },
+            relations: [
+              'church',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+          });
+
+          return offeringIncomeBySundaySchoolFormatter({
+            offeringIncome: offeringIncome,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+      }
+
+      if (!isSingleMonth) {
+        const [churchId, startMonthName, endMonthName, year] = term.split('&');
+
+        const startMonthDate = new Date(`${startMonthName} 1, ${year}`);
+        const endMonthDate = new Date(`${endMonthName} 1, ${year}`);
+
+        const startDate = startOfMonth(startMonthDate);
+        const endDate = endOfMonth(endMonthDate);
+
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (!church) return [];
+
+          const offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              church: church,
+              subType: OfferingIncomeSearchType.SundaySchool,
+              date: Between(startDate, endDate),
+              recordStatus: RecordStatus.Active,
+            },
+            order: {
+              createdAt: order as FindOptionsOrderValue,
+            },
+            relations: [
+              'church',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+          });
+
+          return offeringIncomeBySundaySchoolFormatter({
+            offeringIncome: offeringIncome,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+      }
+    }
+
+    //* Offering income by fasting and vigil
+    if (
+      term &&
+      searchType === MetricSearchType.OfferingIncomeByFastingAndVigil
+    ) {
+      if (isSingleMonth) {
+        const [churchId, monthName, year] = term.split('&');
+
+        const monthDate = new Date(`${monthName} 1, ${year}`);
+        const startDate = startOfMonth(monthDate);
+        const endDate = endOfMonth(monthDate);
+
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (!church) return [];
+
+          const OfferingIncomeByGeneralFastingAndGeneralVigilAndChurch =
+            await this.offeringIncomeRepository.find({
+              where: {
+                church: church,
+                subType: In([
+                  OfferingIncomeSearchType.GeneralFasting,
+                  OfferingIncomeSearchType.GeneralVigil,
+                ]),
+
+                date: Between(startDate, endDate),
+                recordStatus: RecordStatus.Active,
+              },
+              order: {
+                date: order as FindOptionsOrderValue,
+              },
+              relations: ['church'],
+            });
+
+          const OfferingIncomeByZonalFastingAndZonalVigil =
+            await this.offeringIncomeRepository.find({
+              where: {
+                church: church,
+                subType: In([
+                  OfferingIncomeSearchType.ZonalVigil,
+                  OfferingIncomeSearchType.ZonalFasting,
+                ]),
+
+                date: Between(startDate, endDate),
+                recordStatus: RecordStatus.Active,
+              },
+              order: {
+                date: order as FindOptionsOrderValue,
+              },
+              relations: [
+                'church',
+                'zone',
+                'zone.theirSupervisor.member',
+                'zone.disciples.member',
+              ],
+            });
+
+          return offeringIncomeByFastingAndVigilFormatter({
+            offeringIncome: [
+              ...OfferingIncomeByGeneralFastingAndGeneralVigilAndChurch,
+              ...OfferingIncomeByZonalFastingAndZonalVigil,
+            ],
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+      }
+
+      if (!isSingleMonth) {
+        const [churchId, startMonthName, endMonthName, year] = term.split('&');
+
+        const startMonthDate = new Date(`${startMonthName} 1, ${year}`);
+        const endMonthDate = new Date(`${endMonthName} 1, ${year}`);
+
+        const startDate = startOfMonth(startMonthDate);
+        const endDate = endOfMonth(endMonthDate);
+
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (!church) return [];
+
+          const OfferingIncomeByGeneralFastingAndGeneralVigilAndChurch =
+            await this.offeringIncomeRepository.find({
+              where: {
+                church: church,
+                subType: In([
+                  OfferingIncomeSearchType.GeneralFasting,
+                  OfferingIncomeSearchType.GeneralVigil,
+                ]),
+
+                date: Between(startDate, endDate),
+                recordStatus: RecordStatus.Active,
+              },
+              order: {
+                date: order as FindOptionsOrderValue,
+              },
+              relations: ['church'],
+            });
+
+          const OfferingIncomeByZonalFastingAndZonalVigil =
+            await this.offeringIncomeRepository.find({
+              where: {
+                church: church,
+                subType: In([
+                  OfferingIncomeSearchType.ZonalVigil,
+                  OfferingIncomeSearchType.ZonalFasting,
+                ]),
+
+                date: Between(startDate, endDate),
+                recordStatus: RecordStatus.Active,
+              },
+              order: {
+                date: order as FindOptionsOrderValue,
+              },
+              relations: [
+                'church',
+                'zone',
+                'zone.theirSupervisor.member',
+                'zone.disciples.member',
+              ],
+            });
+
+          return offeringIncomeByFastingAndVigilFormatter({
+            offeringIncome: [
+              ...OfferingIncomeByGeneralFastingAndGeneralVigilAndChurch,
+              ...OfferingIncomeByZonalFastingAndZonalVigil,
+            ],
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+      }
+    }
+
+    //* Offering income by youth service
+    if (term && searchType === MetricSearchType.OfferingIncomeByYouthService) {
+      if (isSingleMonth) {
+        const [churchId, monthName, year] = term.split('&');
+
+        const monthDate = new Date(`${monthName} 1, ${year}`);
+        const startDate = startOfMonth(monthDate);
+        const endDate = endOfMonth(monthDate);
+
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (!church) return [];
+
+          const offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              church: church,
+              subType: OfferingIncomeSearchType.YouthService,
               date: Between(startDate, endDate),
               recordStatus: RecordStatus.Active,
             },
@@ -1697,66 +2002,67 @@ export class MetricsService {
             },
             relations: [
               'church',
-              'zone',
-              'zone.theirSupervisor.member',
-              'zone.disciples.member',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
             ],
           });
 
-        return offeringIncomeByFastingAndVigilFormatter({
-          offeringIncome: [
-            ...OfferingIncomeByGeneralFastingAndGeneralVigilAndChurch,
-            ...OfferingIncomeByZonalFastingAndZonalVigil,
-          ],
-        }) as any;
-      } catch (error) {
-        this.handleDBExceptions(error);
+          return offeringIncomeByYouthServiceFormatter({
+            offeringIncome: offeringIncome,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
       }
-    }
 
-    //* Offering income by youth service
-    if (term && searchType === MetricSearchType.OfferingIncomeByYouthService) {
-      const [churchId, monthName, year] = term.split('&');
+      if (!isSingleMonth) {
+        const [churchId, startMonthName, endMonthName, year] = term.split('&');
 
-      const monthDate = new Date(`${monthName} 1, ${year}`);
-      const startDate = startOfMonth(monthDate);
-      const endDate = endOfMonth(monthDate);
+        const startMonthDate = new Date(`${startMonthName} 1, ${year}`);
+        const endMonthDate = new Date(`${endMonthName} 1, ${year}`);
 
-      try {
-        const church = await this.churchRepository.findOne({
-          where: {
-            id: churchId,
-            recordStatus: RecordStatus.Active,
-          },
-        });
+        const startDate = startOfMonth(startMonthDate);
+        const endDate = endOfMonth(endMonthDate);
 
-        if (!church) return [];
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
 
-        const offeringIncome = await this.offeringIncomeRepository.find({
-          where: {
-            church: church,
-            subType: OfferingIncomeSearchType.YouthService,
-            date: Between(startDate, endDate),
-            recordStatus: RecordStatus.Active,
-          },
-          order: {
-            date: order as FindOptionsOrderValue,
-          },
-          relations: [
-            'church',
-            'pastor.member',
-            'copastor.member',
-            'supervisor.member',
-            'preacher.member',
-            'disciple.member',
-          ],
-        });
+          if (!church) return [];
 
-        return offeringIncomeByYouthServiceFormatter({
-          offeringIncome: offeringIncome,
-        }) as any;
-      } catch (error) {
-        this.handleDBExceptions(error);
+          const offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              church: church,
+              subType: OfferingIncomeSearchType.YouthService,
+              date: Between(startDate, endDate),
+              recordStatus: RecordStatus.Active,
+            },
+            order: {
+              date: order as FindOptionsOrderValue,
+            },
+            relations: [
+              'church',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+            ],
+          });
+
+          return offeringIncomeByYouthServiceFormatter({
+            offeringIncome: offeringIncome,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
       }
     }
 
@@ -1765,212 +2071,438 @@ export class MetricsService {
       term &&
       searchType === MetricSearchType.OfferingIncomeBySpecialOffering
     ) {
-      const [churchId, monthName, year] = term.split('&');
+      if (isSingleMonth) {
+        const [churchId, monthName, year] = term.split('&');
 
-      const monthDate = new Date(`${monthName} 1, ${year}`);
-      const startDate = startOfMonth(monthDate);
-      const endDate = endOfMonth(monthDate);
+        const monthDate = new Date(`${monthName} 1, ${year}`);
+        const startDate = startOfMonth(monthDate);
+        const endDate = endOfMonth(monthDate);
 
-      try {
-        const church = await this.churchRepository.findOne({
-          where: {
-            id: churchId,
-            recordStatus: RecordStatus.Active,
-          },
-        });
-
-        if (!church) return [];
-
-        const offeringIncomeBySpecialOffering =
-          await this.offeringIncomeRepository.find({
+        try {
+          const church = await this.churchRepository.findOne({
             where: {
-              church: church,
-              subType: OfferingIncomeSearchType.Special,
-              date: Between(startDate, endDate),
+              id: churchId,
               recordStatus: RecordStatus.Active,
             },
-            order: {
-              date: order as FindOptionsOrderValue,
-            },
-            relations: [
-              'church',
-              'pastor.member',
-              'copastor.member',
-              'supervisor.member',
-              'preacher.member',
-              'disciple.member',
-            ],
           });
 
-        return offeringIncomeBySpecialOfferingFormatter({
-          offeringIncome: offeringIncomeBySpecialOffering,
-        }) as any;
-      } catch (error) {
-        this.handleDBExceptions(error);
+          if (!church) return [];
+
+          const offeringIncomeBySpecialOffering =
+            await this.offeringIncomeRepository.find({
+              where: {
+                church: church,
+                subType: OfferingIncomeSearchType.Special,
+                date: Between(startDate, endDate),
+                recordStatus: RecordStatus.Active,
+              },
+              order: {
+                date: order as FindOptionsOrderValue,
+              },
+              relations: [
+                'church',
+                'pastor.member',
+                'copastor.member',
+                'supervisor.member',
+                'preacher.member',
+                'disciple.member',
+              ],
+            });
+
+          return offeringIncomeBySpecialOfferingFormatter({
+            offeringIncome: offeringIncomeBySpecialOffering,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+      }
+
+      if (!isSingleMonth) {
+        const [churchId, startMonthName, endMonthName, year] = term.split('&');
+
+        const startMonthDate = new Date(`${startMonthName} 1, ${year}`);
+        const endMonthDate = new Date(`${endMonthName} 1, ${year}`);
+
+        const startDate = startOfMonth(startMonthDate);
+        const endDate = endOfMonth(endMonthDate);
+
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (!church) return [];
+
+          const offeringIncomeBySpecialOffering =
+            await this.offeringIncomeRepository.find({
+              where: {
+                church: church,
+                subType: OfferingIncomeSearchType.Special,
+                date: Between(startDate, endDate),
+                recordStatus: RecordStatus.Active,
+              },
+              order: {
+                date: order as FindOptionsOrderValue,
+              },
+              relations: [
+                'church',
+                'pastor.member',
+                'copastor.member',
+                'supervisor.member',
+                'preacher.member',
+                'disciple.member',
+              ],
+            });
+
+          return offeringIncomeBySpecialOfferingFormatter({
+            offeringIncome: offeringIncomeBySpecialOffering,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
       }
     }
 
     //* Offering income by church ground
     if (term && searchType === MetricSearchType.OfferingIncomeByChurchGround) {
-      const [churchId, monthName, year] = term.split('&');
+      if (isSingleMonth) {
+        const [churchId, monthName, year] = term.split('&');
 
-      const monthDate = new Date(`${monthName} 1, ${year}`);
-      const startDate = startOfMonth(monthDate);
-      const endDate = endOfMonth(monthDate);
+        const monthDate = new Date(`${monthName} 1, ${year}`);
+        const startDate = startOfMonth(monthDate);
+        const endDate = endOfMonth(monthDate);
 
-      try {
-        const church = await this.churchRepository.findOne({
-          where: {
-            id: churchId,
-            recordStatus: RecordStatus.Active,
-          },
-        });
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
 
-        if (!church) return [];
+          if (!church) return [];
 
-        const offeringIncomeBySpecialOffering =
-          await this.offeringIncomeRepository.find({
+          const offeringIncomeBySpecialOffering =
+            await this.offeringIncomeRepository.find({
+              where: {
+                church: church,
+                subType: OfferingIncomeSearchType.ChurchGround,
+                date: Between(startDate, endDate),
+                recordStatus: RecordStatus.Active,
+              },
+              order: {
+                date: order as FindOptionsOrderValue,
+              },
+              relations: [
+                'church',
+                'pastor.member',
+                'copastor.member',
+                'supervisor.member',
+                'preacher.member',
+                'disciple.member',
+              ],
+            });
+
+          return offeringIncomeByChurchGroundFormatter({
+            offeringIncome: offeringIncomeBySpecialOffering,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+      }
+
+      if (!isSingleMonth) {
+        const [churchId, startMonthName, endMonthName, year] = term.split('&');
+
+        const startMonthDate = new Date(`${startMonthName} 1, ${year}`);
+        const endMonthDate = new Date(`${endMonthName} 1, ${year}`);
+
+        const startDate = startOfMonth(startMonthDate);
+        const endDate = endOfMonth(endMonthDate);
+
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (!church) return [];
+
+          const offeringIncomeBySpecialOffering =
+            await this.offeringIncomeRepository.find({
+              where: {
+                church: church,
+                subType: OfferingIncomeSearchType.ChurchGround,
+                date: Between(startDate, endDate),
+                recordStatus: RecordStatus.Active,
+              },
+              order: {
+                date: order as FindOptionsOrderValue,
+              },
+              relations: [
+                'church',
+                'pastor.member',
+                'copastor.member',
+                'supervisor.member',
+                'preacher.member',
+                'disciple.member',
+              ],
+            });
+
+          return offeringIncomeByChurchGroundFormatter({
+            offeringIncome: offeringIncomeBySpecialOffering,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+      }
+    }
+
+    //* Offering income by united service
+    if (term && searchType === MetricSearchType.OfferingIncomeByUnitedService) {
+      if (isSingleMonth) {
+        const [churchId, monthName, year] = term.split('&');
+
+        const monthDate = new Date(`${monthName} 1, ${year}`);
+        const startDate = startOfMonth(monthDate);
+        const endDate = endOfMonth(monthDate);
+
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (!church) return [];
+
+          const offeringIncome = await this.offeringIncomeRepository.find({
             where: {
               church: church,
-              subType: OfferingIncomeSearchType.ChurchGround,
+              subType: OfferingIncomeSearchType.UnitedService,
               date: Between(startDate, endDate),
               recordStatus: RecordStatus.Active,
             },
             order: {
               date: order as FindOptionsOrderValue,
             },
-            relations: [
-              'church',
-              'pastor.member',
-              'copastor.member',
-              'supervisor.member',
-              'preacher.member',
-              'disciple.member',
-            ],
+            relations: ['church'],
           });
 
-        return offeringIncomeByChurchGroundFormatter({
-          offeringIncome: offeringIncomeBySpecialOffering,
-        }) as any;
-      } catch (error) {
-        this.handleDBExceptions(error);
+          return offeringIncomeByUnitedServiceFormatter({
+            offeringIncome: offeringIncome,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
       }
-    }
 
-    //* Offering income by united service
-    if (term && searchType === MetricSearchType.OfferingIncomeByUnitedService) {
-      const [churchId, monthName, year] = term.split('&');
+      if (!isSingleMonth) {
+        const [churchId, startMonthName, endMonthName, year] = term.split('&');
 
-      const monthDate = new Date(`${monthName} 1, ${year}`);
-      const startDate = startOfMonth(monthDate);
-      const endDate = endOfMonth(monthDate);
+        const startMonthDate = new Date(`${startMonthName} 1, ${year}`);
+        const endMonthDate = new Date(`${endMonthName} 1, ${year}`);
 
-      try {
-        const church = await this.churchRepository.findOne({
-          where: {
-            id: churchId,
-            recordStatus: RecordStatus.Active,
-          },
-        });
+        const startDate = startOfMonth(startMonthDate);
+        const endDate = endOfMonth(endMonthDate);
 
-        if (!church) return [];
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
 
-        const offeringIncome = await this.offeringIncomeRepository.find({
-          where: {
-            church: church,
-            subType: OfferingIncomeSearchType.UnitedService,
-            date: Between(startDate, endDate),
-            recordStatus: RecordStatus.Active,
-          },
-          order: {
-            date: order as FindOptionsOrderValue,
-          },
-          relations: ['church'],
-        });
+          if (!church) return [];
 
-        return offeringIncomeByUnitedServiceFormatter({
-          offeringIncome: offeringIncome,
-        }) as any;
-      } catch (error) {
-        this.handleDBExceptions(error);
+          const offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              church: church,
+              subType: OfferingIncomeSearchType.UnitedService,
+              date: Between(startDate, endDate),
+              recordStatus: RecordStatus.Active,
+            },
+            order: {
+              date: order as FindOptionsOrderValue,
+            },
+            relations: ['church'],
+          });
+
+          return offeringIncomeByUnitedServiceFormatter({
+            offeringIncome: offeringIncome,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
       }
     }
 
     //* Offering income by activities
     if (term && searchType === MetricSearchType.OfferingIncomeByActivities) {
-      const [churchId, monthName, year] = term.split('&');
+      if (isSingleMonth) {
+        const [churchId, monthName, year] = term.split('&');
 
-      const monthDate = new Date(`${monthName} 1, ${year}`);
-      const startDate = startOfMonth(monthDate);
-      const endDate = endOfMonth(monthDate);
+        const monthDate = new Date(`${monthName} 1, ${year}`);
+        const startDate = startOfMonth(monthDate);
+        const endDate = endOfMonth(monthDate);
 
-      try {
-        const church = await this.churchRepository.findOne({
-          where: {
-            id: churchId,
-            recordStatus: RecordStatus.Active,
-          },
-        });
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
 
-        if (!church) return [];
+          if (!church) return [];
 
-        const offeringIncome = await this.offeringIncomeRepository.find({
-          where: {
-            church: church,
-            subType: OfferingIncomeSearchType.Activities,
-            date: Between(startDate, endDate),
-            recordStatus: RecordStatus.Active,
-          },
-          order: {
-            date: order as FindOptionsOrderValue,
-          },
-          relations: ['church'],
-        });
+          const offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              church: church,
+              subType: OfferingIncomeSearchType.Activities,
+              date: Between(startDate, endDate),
+              recordStatus: RecordStatus.Active,
+            },
+            order: {
+              date: order as FindOptionsOrderValue,
+            },
+            relations: ['church'],
+          });
 
-        return offeringIncomeByActivitiesFormatter({
-          offeringIncome: offeringIncome,
-        }) as any;
-      } catch (error) {
-        this.handleDBExceptions(error);
+          return offeringIncomeByActivitiesFormatter({
+            offeringIncome: offeringIncome,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+      }
+
+      if (!isSingleMonth) {
+        const [churchId, startMonthName, endMonthName, year] = term.split('&');
+
+        const startMonthDate = new Date(`${startMonthName} 1, ${year}`);
+        const endMonthDate = new Date(`${endMonthName} 1, ${year}`);
+
+        const startDate = startOfMonth(startMonthDate);
+        const endDate = endOfMonth(endMonthDate);
+
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (!church) return [];
+
+          const offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              church: church,
+              subType: OfferingIncomeSearchType.Activities,
+              date: Between(startDate, endDate),
+              recordStatus: RecordStatus.Active,
+            },
+            order: {
+              date: order as FindOptionsOrderValue,
+            },
+            relations: ['church'],
+          });
+
+          return offeringIncomeByActivitiesFormatter({
+            offeringIncome: offeringIncome,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
       }
     }
 
     //* Offering income by income adjustment
     if (term && searchType === MetricSearchType.OfferingIncomeAdjustment) {
-      const [churchId, monthName, year] = term.split('&');
+      if (isSingleMonth) {
+        const [churchId, monthName, year] = term.split('&');
 
-      const monthDate = new Date(`${monthName} 1, ${year}`);
-      const startDate = startOfMonth(monthDate);
-      const endDate = endOfMonth(monthDate);
+        const monthDate = new Date(`${monthName} 1, ${year}`);
+        const startDate = startOfMonth(monthDate);
+        const endDate = endOfMonth(monthDate);
 
-      try {
-        const church = await this.churchRepository.findOne({
-          where: {
-            id: churchId,
-            recordStatus: RecordStatus.Active,
-          },
-        });
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
 
-        if (!church) return [];
+          if (!church) return [];
 
-        const offeringIncome = await this.offeringIncomeRepository.find({
-          where: {
-            church: church,
-            type: OfferingIncomeSearchType.IncomeAdjustment,
-            date: Between(startDate, endDate),
-            recordStatus: RecordStatus.Active,
-          },
-          order: {
-            date: order as FindOptionsOrderValue,
-          },
-          relations: ['church'],
-        });
+          const offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              church: church,
+              type: OfferingIncomeSearchType.IncomeAdjustment,
+              date: Between(startDate, endDate),
+              recordStatus: RecordStatus.Active,
+            },
+            order: {
+              date: order as FindOptionsOrderValue,
+            },
+            relations: ['church'],
+          });
 
-        return offeringIncomeByIncomeAdjustmentFormatter({
-          offeringIncome: offeringIncome,
-        }) as any;
-      } catch (error) {
-        this.handleDBExceptions(error);
+          return offeringIncomeByIncomeAdjustmentFormatter({
+            offeringIncome: offeringIncome,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
+      }
+
+      if (!isSingleMonth) {
+        const [churchId, startMonthName, endMonthName, year] = term.split('&');
+
+        const startMonthDate = new Date(`${startMonthName} 1, ${year}`);
+        const endMonthDate = new Date(`${endMonthName} 1, ${year}`);
+
+        const startDate = startOfMonth(startMonthDate);
+        const endDate = endOfMonth(endMonthDate);
+
+        try {
+          const church = await this.churchRepository.findOne({
+            where: {
+              id: churchId,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+
+          if (!church) return [];
+
+          const offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              church: church,
+              type: OfferingIncomeSearchType.IncomeAdjustment,
+              date: Between(startDate, endDate),
+              recordStatus: RecordStatus.Active,
+            },
+            order: {
+              date: order as FindOptionsOrderValue,
+            },
+            relations: ['church'],
+          });
+
+          return offeringIncomeByIncomeAdjustmentFormatter({
+            offeringIncome: offeringIncome,
+          }) as any;
+        } catch (error) {
+          this.handleDBExceptions(error);
+        }
       }
     }
 
@@ -2652,6 +3184,8 @@ export class MetricsService {
     if (error.code === '23505') {
       throw new BadRequestException(`${error.message}`);
     }
+
+    // console.log(error);
 
     this.logger.error(error);
 

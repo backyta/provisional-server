@@ -13,6 +13,22 @@ export class MetricsPaginationDto {
   year?: string;
 
   @ApiProperty({
+    example: 'January',
+    description: 'Start month in which metrics reports will be generated.',
+  })
+  @IsOptional()
+  @Type(() => String)
+  startMonth?: string;
+
+  @ApiProperty({
+    example: 'March',
+    description: 'End month in which metrics reports will be generated.',
+  })
+  @IsOptional()
+  @Type(() => String)
+  endMonth?: string;
+
+  @ApiProperty({
     example: ['members_by_category', 'members_by_category_and_gender'],
     description: 'Types of metrics that will be generated in the report.',
   })

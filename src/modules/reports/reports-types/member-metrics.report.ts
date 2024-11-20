@@ -65,6 +65,8 @@ export const getMemberMetricsReport = (
     header: headerSection({
       title: title,
       subTitle: subTitle,
+      yearSearch: year,
+      startMonthSearch: '',
     }),
     footer: footerSection,
     pageMargins: [20, 110, 20, 60],
@@ -83,7 +85,7 @@ export const getMemberMetricsReport = (
                     {
                       text: `Fluctuación de Miembros por Año`,
                       color: '#1d96d3',
-                      fontSize: 19,
+                      fontSize: 20,
                       bold: true,
                       alignment: 'center',
                       margin: [0, -10, 0, 0],
@@ -935,12 +937,18 @@ export const getMemberMetricsReport = (
               layout: 'customLayout01', // optional
               table: {
                 headerRows: 1,
-                widths: ['*', '*', '*', '*', '*'],
+                widths: [100, '*', '*', 100, '*', '*'],
 
                 body: [
                   [
                     {
                       text: 'Iglesia',
+                      style: {
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Co-Pastor',
                       style: {
                         bold: true,
                       },
@@ -958,13 +966,13 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: 'Nro. Miembros Varones',
+                      text: 'Nro. M. Varones',
                       style: {
                         bold: true,
                       },
                     },
                     {
-                      text: 'Nro. Miembros Mujeres',
+                      text: 'Nro. M. Mujeres',
                       style: {
                         bold: true,
                       },
@@ -973,6 +981,7 @@ export const getMemberMetricsReport = (
                   ...Object.entries(membersByZoneAndGenderResultData).map(
                     ([key, value]) => [
                       value?.church?.abbreviatedChurchName,
+                      value.copastor,
                       value.supervisor,
                       `${key} (${calculatePercentage(
                         value.men + value.women,
@@ -991,9 +1000,10 @@ export const getMemberMetricsReport = (
                       )}%)`,
                     ],
                   ),
-                  ['', '', '', '', ''],
-                  ['', '', '', '', ''],
+                  ['', '', '', '', '', ''],
+                  ['', '', '', '', '', ''],
                   [
+                    '',
                     '',
                     '',
                     {
@@ -1078,12 +1088,18 @@ export const getMemberMetricsReport = (
               layout: 'customLayout01', // optional
               table: {
                 headerRows: 1,
-                widths: ['*', '*', '*', '*', '*'],
+                widths: [100, '*', '*', 100, '*', '*'],
 
                 body: [
                   [
                     {
                       text: 'Iglesia',
+                      style: {
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Co-Pastor',
                       style: {
                         bold: true,
                       },
@@ -1101,13 +1117,13 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: 'Nro. Miembros Varones',
+                      text: 'Nro. M. Varones',
                       style: {
                         bold: true,
                       },
                     },
                     {
-                      text: 'Nro. Miembros Mujeres',
+                      text: 'Nro. M. Mujeres',
                       style: {
                         bold: true,
                       },
@@ -1116,6 +1132,7 @@ export const getMemberMetricsReport = (
                   ...Object.entries(preachersByZoneAndGenderResultData).map(
                     ([key, value]) => [
                       value?.church?.abbreviatedChurchName,
+                      value.copastor,
                       value.supervisor,
                       `${key} (${calculatePercentage(
                         value.men + value.women,
@@ -1133,9 +1150,10 @@ export const getMemberMetricsReport = (
                       )}%)`,
                     ],
                   ),
-                  ['', '', '', '', ''],
-                  ['', '', '', '', ''],
+                  ['', '', '', '', '', ''],
+                  ['', '', '', '', '', ''],
                   [
+                    '',
                     '',
                     '',
                     {

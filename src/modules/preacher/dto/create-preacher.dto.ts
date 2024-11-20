@@ -149,7 +149,7 @@ export class CreatePreacherDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(1)
-  @MaxLength(50)
+  @MaxLength(80)
   address: string;
 
   @ApiProperty({
@@ -158,7 +158,7 @@ export class CreatePreacherDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(1)
-  @MaxLength(100)
+  @MaxLength(150)
   referenceAddress: string;
 
   //* Roles and Status

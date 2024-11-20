@@ -7,7 +7,7 @@ interface Options {
   familyGroups: FamilyGroup[];
 }
 
-interface FamilyGroupDetails {
+export interface FamilyGroupsByCodeResultData {
   preacher: string;
   familyGroupCode: string;
   men: number;
@@ -19,7 +19,7 @@ interface FamilyGroupDetails {
 }
 
 type FamilyGroupResult = {
-  [key: string]: FamilyGroupDetails;
+  [key: string]: FamilyGroupsByCodeResultData;
 };
 
 export const familyGroupFormatterByCode = ({ familyGroups }: Options) => {

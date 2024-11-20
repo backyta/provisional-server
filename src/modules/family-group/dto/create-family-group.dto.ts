@@ -72,6 +72,8 @@ export class CreateFamilyGroupDto {
   })
   @IsString()
   @IsNotEmpty()
+  @MinLength(1)
+  @MaxLength(80)
   address: string;
 
   @ApiProperty({
@@ -79,6 +81,8 @@ export class CreateFamilyGroupDto {
   })
   @IsString()
   @IsNotEmpty()
+  @MinLength(1)
+  @MaxLength(150)
   referenceAddress: string;
 
   @ApiProperty({

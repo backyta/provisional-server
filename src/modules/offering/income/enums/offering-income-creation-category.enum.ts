@@ -13,6 +13,6 @@ export const OfferingIncomeCreationCategoryNames: Record<
   [OfferingIncomeCreationCategory.General]: 'General',
   [OfferingIncomeCreationCategory.OfferingBox]: 'Alfolí',
   [OfferingIncomeCreationCategory.Activities]: 'Actividades',
-  [OfferingIncomeCreationCategory.InternalDonation]: 'Personal',
-  [OfferingIncomeCreationCategory.ExternalDonation]: 'Donación',
+  [OfferingIncomeCreationCategory.InternalDonation]: 'Donación Interna',
+  [OfferingIncomeCreationCategory.ExternalDonation]: 'Donación Externa',
 };

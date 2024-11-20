@@ -279,6 +279,7 @@ export class DiscipleService {
         const disciples = await this.discipleRepository.find({
           where: { recordStatus: RecordStatus.Active },
           order: { createdAt: order as FindOptionsOrderValue },
+          relations: ['member'],
         });
 
         return disciples;

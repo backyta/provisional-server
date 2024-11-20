@@ -107,4 +107,27 @@ export class SearchAndPaginationDto {
     value === 'true' ? true : value === 'false' ? false : value,
   )
   allFamilyGroups?: boolean;
+
+  @ApiProperty({
+    example: 'true',
+    description: 'Do you want returned all family districts?',
+  })
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) =>
+    value === 'true' ? true : value === 'false' ? false : value,
+  )
+  allDistricts?: boolean;
+
+  //* For Offerings (income and expenses) and Metrics
+  @ApiProperty({
+    example: 'true',
+    description: 'Do you want search by simple month or range months?',
+  })
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) =>
+    value === 'true' ? true : value === 'false' ? false : value,
+  )
+  isSingleMonth?: boolean;
 }

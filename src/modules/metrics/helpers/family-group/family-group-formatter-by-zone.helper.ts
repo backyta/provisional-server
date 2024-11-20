@@ -14,21 +14,28 @@ interface ZoneChurchInfo {
 
 interface ZoneInfo {
   supervisor: string;
+  copastor: string;
   familyGroupsCount: number;
   church: ZoneChurchInfo;
 }
 
-type ZoneResult = {
+export type FamilyGroupsByZoneResultData = {
   [zoneName: string]: ZoneInfo;
 };
 
 export const familyGroupFormatterByZone = ({ zones }: Options) => {
-  const result: ZoneResult = zones.reduce((acc, zone) => {
+  const result: FamilyGroupsByZoneResultData = zones.reduce((acc, zone) => {
     const filteredFamilyGroups = zone.familyGroups.filter(
       (zone) => zone.recordStatus === RecordStatus.Active,
     ).length;
 
     acc[zone.zoneName] = {
+      copastor: zone?.theirCopastor?.member?.firstName
+        ? `${getInitialFullNames({
+            firstNames: zone?.theirCopastor?.member?.firstName ?? '',
+            lastNames: '',
+          })} ${zone?.theirCopastor?.member?.lastName}`
+        : 'Sin Co-Pastor',
       supervisor: zone?.theirSupervisor?.member?.firstName
         ? `${getInitialFullNames({
             firstNames: zone?.theirSupervisor?.member?.firstName ?? '',

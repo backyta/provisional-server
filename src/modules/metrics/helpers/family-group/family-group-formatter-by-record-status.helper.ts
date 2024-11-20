@@ -8,6 +8,7 @@ interface Options {
 
 interface SupervisorInfo {
   supervisor: string;
+  copastor: string;
   active: number;
   inactive: number;
   church: {
@@ -16,19 +17,25 @@ interface SupervisorInfo {
   };
 }
 
-type ZoneRecordStatusResult = {
+export type FamilyGroupsByRecordStatusResultData = {
   [zoneName: string]: SupervisorInfo;
 };
 
 export const familyGroupFormatterByRecordStatus = ({
   familyGroups,
 }: Options) => {
-  const result: ZoneRecordStatusResult = familyGroups.reduce(
+  const result: FamilyGroupsByRecordStatusResultData = familyGroups.reduce(
     (acc, familyGroup) => {
       const zoneName = familyGroup.theirZone?.zoneName;
 
       if (!acc[zoneName]) {
         acc[zoneName] = {
+          copastor: familyGroup?.theirCopastor?.member?.firstName
+            ? `${getInitialFullNames({
+                firstNames: familyGroup?.theirCopastor?.member?.firstName ?? '',
+                lastNames: '',
+              })} ${familyGroup?.theirCopastor?.member?.lastName}`
+            : 'Sin Co-Pastor',
           supervisor: familyGroup?.theirSupervisor?.member?.firstName
             ? `${getInitialFullNames({
                 firstNames:

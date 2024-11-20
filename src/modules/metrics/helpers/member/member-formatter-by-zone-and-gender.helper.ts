@@ -14,6 +14,7 @@ interface Church {
 
 export interface MembersByZoneResultData {
   [zoneName: string]: {
+    copastor: string;
     supervisor: string;
     men: number;
     women: number;
@@ -32,6 +33,9 @@ export const memberFormatterByZoneAndGender = ({ zones }: Options) => {
     ).length;
 
     acc[zone.zoneName] = {
+      copastor: zone?.theirCopastor?.member?.firstName
+        ? `${getInitialFullNames({ firstNames: zone?.theirCopastor?.member?.firstName ?? '', lastNames: '' })} ${zone?.theirCopastor?.member?.lastName}`
+        : 'Sin Co-Pastor',
       supervisor: zone?.theirSupervisor?.member?.firstName
         ? `${getInitialFullNames({ firstNames: zone?.theirSupervisor?.member?.firstName ?? '', lastNames: '' })} ${zone?.theirSupervisor?.member?.lastName}`
         : 'Sin Supervisor',

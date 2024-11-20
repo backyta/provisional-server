@@ -15,7 +15,7 @@ interface Church {
   abbreviatedChurchName: string;
 }
 
-interface ResultDataOptions {
+export interface OfferingIncomeBySundaySchoolResultData {
   date: Date;
   category: string;
   dayPEN: number;
@@ -40,9 +40,9 @@ interface ResultDataOptions {
 
 export const offeringIncomeBySundaySchoolFormatter = ({
   offeringIncome,
-}: Options): ResultDataOptions[] => {
-  const resultData: ResultDataOptions[] = offeringIncome?.reduce(
-    (acc, offering) => {
+}: Options): OfferingIncomeBySundaySchoolResultData[] => {
+  const resultData: OfferingIncomeBySundaySchoolResultData[] =
+    offeringIncome?.reduce((acc, offering) => {
       const existingEntry = acc.find((item) => {
         if (
           offering.category === OfferingIncomeCreationCategory.InternalDonation
@@ -185,9 +185,7 @@ export const offeringIncomeBySundaySchoolFormatter = ({
       }
 
       return acc;
-    },
-    [],
-  );
+    }, []);
 
   // Ordenar los resultados por fecha
   const resultSorted = resultData.sort((a, b) => {

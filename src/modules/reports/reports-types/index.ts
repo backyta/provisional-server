@@ -7,3 +7,5 @@ export * from './offering-income.report';
 export * from './offering-expenses.report';
 export * from './user.report';
 export * from './member-metrics.report';
+export * from './family-group-metrics.report';
+export * from './offering-income-metrics.report';

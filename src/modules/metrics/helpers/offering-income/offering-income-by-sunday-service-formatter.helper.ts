@@ -14,7 +14,7 @@ interface Church {
   abbreviatedChurchName: string;
 }
 
-interface ResultDataOptions {
+export interface OfferingIncomeBySundayServiceResultData {
   date: Date;
   category: string;
   dayPEN: number;
@@ -28,12 +28,12 @@ interface ResultDataOptions {
 
 export const offeringIncomeBySundayServiceFormatter = ({
   offeringIncome,
-}: Options): ResultDataOptions[] => {
-  const resultData: ResultDataOptions[] = offeringIncome.reduce(
-    (acc, offering) => {
+}: Options): OfferingIncomeBySundayServiceResultData[] => {
+  const resultData: OfferingIncomeBySundayServiceResultData[] =
+    offeringIncome.reduce((acc, offering) => {
       const existingEntry = acc.find((item) => item.date === offering.date);
 
-      const updateValues = (entry: ResultDataOptions) => {
+      const updateValues = (entry: OfferingIncomeBySundayServiceResultData) => {
         const isDayShift = offering.shift === 'day';
         switch (offering.currency) {
           case CurrencyType.PEN:
@@ -57,7 +57,7 @@ export const offeringIncomeBySundayServiceFormatter = ({
       if (existingEntry) {
         updateValues(existingEntry);
       } else {
-        const newEntry: ResultDataOptions = {
+        const newEntry: OfferingIncomeBySundayServiceResultData = {
           date: offering.date,
           category: offering.category,
           dayPEN:
@@ -96,9 +96,7 @@ export const offeringIncomeBySundayServiceFormatter = ({
       }
 
       return acc;
-    },
-    [],
-  );
+    }, []);
 
   return resultData.sort((a, b) => {
     const dateA = parse(dateFormatterToDDMMYY(a.date), 'dd/MM/yy', new Date());

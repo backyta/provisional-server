@@ -10,8 +10,9 @@ interface Church {
   abbreviatedChurchName: string;
 }
 
-interface ResultDataOptions {
+export interface OfferingIncomeByIncomeAdjustmentResultData {
   date: Date;
+  comments: string;
   accumulatedOfferingPEN: number;
   accumulatedOfferingUSD: number;
   accumulatedOfferingEUR: number;
@@ -25,9 +26,9 @@ interface ResultDataOptions {
 
 export const offeringIncomeByIncomeAdjustmentFormatter = ({
   offeringIncome,
-}: Options): ResultDataOptions[] => {
-  const resultData: ResultDataOptions[] = offeringIncome?.reduce(
-    (acc, offering) => {
+}: Options): OfferingIncomeByIncomeAdjustmentResultData[] => {
+  const resultData: OfferingIncomeByIncomeAdjustmentResultData[] =
+    offeringIncome?.reduce((acc, offering) => {
       const existing = acc.find((item) => item.date === offering.date);
 
       if (existing) {
@@ -46,6 +47,7 @@ export const offeringIncomeByIncomeAdjustmentFormatter = ({
       } else {
         acc.push({
           date: offering?.date,
+          comments: offering.comments,
           accumulatedOfferingPEN:
             offering.currency === CurrencyType.PEN ? +offering.amount : 0,
           accumulatedOfferingUSD:
@@ -67,9 +69,7 @@ export const offeringIncomeByIncomeAdjustmentFormatter = ({
       }
 
       return acc;
-    },
-    [],
-  );
+    }, []);
 
   return resultData.sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),

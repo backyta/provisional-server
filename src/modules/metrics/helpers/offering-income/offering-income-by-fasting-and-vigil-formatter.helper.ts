@@ -26,7 +26,7 @@ interface Supervisor {
   lastName: string;
 }
 
-interface ResultDataOptions {
+export interface OfferingIncomeByFastingAndVigilResultData {
   type: string;
   date: Date;
   category: string;
@@ -45,9 +45,9 @@ interface ResultDataOptions {
 
 export const offeringIncomeByFastingAndVigilFormatter = ({
   offeringIncome,
-}: Options): ResultDataOptions[] => {
-  const resultData: ResultDataOptions[] = offeringIncome?.reduce(
-    (acc, offering) => {
+}: Options): OfferingIncomeByFastingAndVigilResultData[] => {
+  const resultData: OfferingIncomeByFastingAndVigilResultData[] =
+    offeringIncome?.reduce((acc, offering) => {
       const existing = acc.find(
         (item) => item.date === offering.date && item.type === offering.subType,
       );
@@ -83,7 +83,7 @@ export const offeringIncomeByFastingAndVigilFormatter = ({
             disciples: offering?.zone?.disciples?.length,
           },
           supervisor: {
-            id: offering?.supervisor?.id,
+            id: offering?.zone?.theirSupervisor?.id,
             firstName: getInitialFullNames({
               firstNames:
                 offering?.zone?.theirSupervisor?.member?.firstName ?? '',
@@ -106,9 +106,7 @@ export const offeringIncomeByFastingAndVigilFormatter = ({
       }
 
       return acc;
-    },
-    [],
-  );
+    }, []);
 
   return resultData.sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),

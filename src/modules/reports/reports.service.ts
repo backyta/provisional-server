@@ -42,7 +42,9 @@ import {
   getMemberMetricsReport,
   getOfferingIncomeReport,
   getOfferingExpensesReport,
+  getFamilyGroupMetricsReport,
   getStudyCertificateByIdReport,
+  getOfferingIncomeMetricsReport,
 } from '@/modules/reports/reports-types';
 
 import { UserService } from '@/modules/user/user.service';
@@ -84,6 +86,29 @@ import {
   MembersByCategoryAndGenderResultData,
   MembersByDistrictAndGenderResultData,
 } from '@/modules/metrics/helpers/member';
+import {
+  FamilyGroupsByCodeResultData,
+  FamilyGroupsByZoneResultData,
+  FamilyGroupsByDistrictResultData,
+  FamilyGroupsByServiceTimeResultData,
+  FamilyGroupsByRecordStatusResultData,
+  MonthlyFamilyGroupsFluctuationResultData,
+} from '@/modules/metrics/helpers/family-group';
+import {
+  OfferingIncomeByActivitiesResultData,
+  OfferingIncomeByFamilyGroupResultData,
+  OfferingIncomeByChurchGroundResultData,
+  OfferingIncomeBySundaySchoolResultData,
+  OfferingIncomeByYouthServiceResultData,
+  OfferingIncomeBySundayServiceResultData,
+  OfferingIncomeByUnitedServiceResultData,
+  OfferingIncomeByFastingAndVigilResultData,
+  OfferingIncomeByIncomeAdjustmentResultData,
+  OfferingIncomeBySpecialOfferingResultData,
+} from '@/modules/metrics/helpers/offering-income';
+
+//TODO : ver si se usar try catch, si es que el error revienta aqui o en servicio que se consume.
+// Hacerlo!!!!!
 
 @Injectable()
 export class ReportsService {
@@ -1727,6 +1752,323 @@ export class ReportsService {
       membersByDistrictAndGenderResultData:
         membersByDistrictAndGenderResultData,
       membersByRecordStatusResultData: membersByRecordStatusResultData,
+    });
+
+    const doc = this.printerService.createPdf(docDefinition);
+
+    return doc;
+  }
+
+  //* FAMILY GROUP METRICS REPORT
+  async getFamilyGroupMetrics(metricsPaginationDto: MetricsPaginationDto) {
+    const { year, churchId, types } = metricsPaginationDto;
+
+    const church = await this.churchRepository.findOne({
+      where: {
+        id: churchId,
+      },
+    });
+
+    if (!church) {
+      throw new NotFoundException(
+        `No se encontró ninguna iglesia con este ID: ${churchId}.`,
+      );
+    }
+
+    const metricsTypesArray = types.split('+');
+
+    // * Search and Set Data
+    let familyGroupsFluctuationByYearResultData: MonthlyFamilyGroupsFluctuationResultData[];
+    if (
+      metricsTypesArray.includes(MetricSearchType.FamilyGroupsFluctuationByYear)
+    ) {
+      familyGroupsFluctuationByYearResultData =
+        await this.metricsService.findByTerm(`${churchId}&${year}`, {
+          'search-type': MetricSearchType.FamilyGroupsFluctuationByYear,
+        });
+    }
+
+    let familyGroupsByCodeResultData: FamilyGroupsByCodeResultData;
+    if (metricsTypesArray.includes(MetricSearchType.FamilyGroupsByCode)) {
+      familyGroupsByCodeResultData = await this.metricsService.findByTerm(
+        `${churchId}&{''}`,
+        {
+          'search-type': MetricSearchType.FamilyGroupsByCode,
+          allFamilyGroups: true,
+          order: 'ASC',
+        },
+      );
+    }
+
+    let familyGroupsByZoneDataResult: FamilyGroupsByZoneResultData;
+    if (metricsTypesArray.includes(MetricSearchType.FamilyGroupsByZone)) {
+      familyGroupsByZoneDataResult = await this.metricsService.findByTerm(
+        `${churchId}&{''}`,
+        {
+          'search-type': MetricSearchType.FamilyGroupsByZone,
+          allZones: true,
+          order: 'DESC',
+        },
+      );
+    }
+
+    let familyGroupsByDistrictResultData: FamilyGroupsByDistrictResultData;
+    if (metricsTypesArray.includes(MetricSearchType.FamilyGroupsByDistrict)) {
+      familyGroupsByDistrictResultData = await this.metricsService.findByTerm(
+        `${churchId}&${''}`,
+        {
+          'search-type': MetricSearchType.FamilyGroupsByDistrict,
+          allDistricts: true,
+          order: 'DESC',
+        },
+      );
+    }
+
+    let familyGroupsByServiceTimeResultData: FamilyGroupsByServiceTimeResultData;
+    if (
+      metricsTypesArray.includes(MetricSearchType.FamilyGroupsByServiceTime)
+    ) {
+      familyGroupsByServiceTimeResultData =
+        await this.metricsService.findByTerm(`${churchId}&${''}`, {
+          'search-type': MetricSearchType.FamilyGroupsByServiceTime,
+          allZones: true,
+          order: 'DESC',
+        });
+    }
+
+    let familyGroupsByRecordStatusResultData: FamilyGroupsByRecordStatusResultData;
+    if (
+      metricsTypesArray.includes(MetricSearchType.FamilyGroupsByRecordStatus)
+    ) {
+      familyGroupsByRecordStatusResultData =
+        await this.metricsService.findByTerm(`${churchId}&${''}`, {
+          'search-type': MetricSearchType.FamilyGroupsByRecordStatus,
+          allZones: true,
+        });
+    }
+
+    const docDefinition = getFamilyGroupMetricsReport({
+      title: 'Reporte de Métricas de Grupo Familiar',
+      subTitle: 'Resultados de Búsqueda de Métricas de Grupo Familiar',
+      metricsTypesArray: metricsTypesArray,
+      year: year,
+      familyGroupsFluctuationByYearResultData:
+        familyGroupsFluctuationByYearResultData,
+      familyGroupsByCodeResultData: familyGroupsByCodeResultData,
+      familyGroupsByZoneDataResult: familyGroupsByZoneDataResult,
+      familyGroupsByDistrictResultData: familyGroupsByDistrictResultData,
+      familyGroupsByServiceTimeResultData: familyGroupsByServiceTimeResultData,
+      familyGroupsByRecordStatusResultData:
+        familyGroupsByRecordStatusResultData,
+    });
+
+    const doc = this.printerService.createPdf(docDefinition);
+
+    return doc;
+  }
+
+  //* OFFERING INCOME METRICS REPORT
+  async getOfferingIncomeMetrics(metricsPaginationDto: MetricsPaginationDto) {
+    const { year, startMonth, endMonth, churchId, types } =
+      metricsPaginationDto;
+
+    // console.log(year, startMonth, endMonth, churchId, types);
+
+    const church = await this.churchRepository.findOne({
+      where: {
+        id: churchId,
+      },
+    });
+
+    if (!church) {
+      throw new NotFoundException(
+        `No se encontró ninguna iglesia con este ID: ${churchId}.`,
+      );
+    }
+
+    const metricsTypesArray = types.split('+');
+
+    // OfferingIncomeBySundayService
+    // OfferingIncomeByFamilyGroup
+    // OfferingIncomeBySundaySchool
+    // OfferingIncomeByFastingAndVigil
+    // OfferingIncomeByYouthService
+    // OfferingIncomeBySpecialOffering
+    // OfferingIncomeByChurchGround
+    // OfferingIncomeByUnitedService
+    // OfferingIncomeByActivities
+    // OfferingIncomeAdjustment
+
+    // * Search and Set Data
+    let offeringIncomeBySundayServiceResultData: OfferingIncomeBySundayServiceResultData[];
+    if (
+      metricsTypesArray.includes(MetricSearchType.OfferingIncomeBySundayService)
+    ) {
+      offeringIncomeBySundayServiceResultData =
+        await this.metricsService.findByTerm(
+          `${churchId}&${startMonth}&${endMonth}&${year}`,
+          {
+            'search-type': MetricSearchType.OfferingIncomeBySundayService,
+            isSingleMonth: false,
+          },
+        );
+    }
+
+    let offeringIncomeByFamilyGroupResultData: OfferingIncomeByFamilyGroupResultData[];
+    if (
+      metricsTypesArray.includes(MetricSearchType.OfferingIncomeBySundayService)
+    ) {
+      offeringIncomeByFamilyGroupResultData =
+        await this.metricsService.findByTerm(
+          `${churchId}&${startMonth}&${endMonth}&${year}`,
+          {
+            'search-type': MetricSearchType.OfferingIncomeByFamilyGroup,
+            isSingleMonth: false,
+          },
+        );
+    }
+
+    let offeringIncomeBySundaySchoolResultData: OfferingIncomeBySundaySchoolResultData[];
+    if (
+      metricsTypesArray.includes(MetricSearchType.OfferingIncomeBySundaySchool)
+    ) {
+      offeringIncomeBySundaySchoolResultData =
+        await this.metricsService.findByTerm(
+          `${churchId}&${startMonth}&${endMonth}&${year}`,
+          {
+            'search-type': MetricSearchType.OfferingIncomeBySundaySchool,
+            isSingleMonth: false,
+          },
+        );
+    }
+
+    let offeringIncomeByUnitedServiceResultData: OfferingIncomeByUnitedServiceResultData[];
+    if (
+      metricsTypesArray.includes(MetricSearchType.OfferingIncomeByUnitedService)
+    ) {
+      offeringIncomeByUnitedServiceResultData =
+        await this.metricsService.findByTerm(
+          `${churchId}&${startMonth}&${endMonth}&${year}`,
+          {
+            'search-type': MetricSearchType.OfferingIncomeByUnitedService,
+            isSingleMonth: false,
+          },
+        );
+    }
+
+    let offeringIncomeByFastingAndVigilResultData: OfferingIncomeByFastingAndVigilResultData[];
+    if (
+      metricsTypesArray.includes(
+        MetricSearchType.OfferingIncomeByFastingAndVigil,
+      )
+    ) {
+      offeringIncomeByFastingAndVigilResultData =
+        await this.metricsService.findByTerm(
+          `${churchId}&${startMonth}&${endMonth}&${year}`,
+          {
+            'search-type': MetricSearchType.OfferingIncomeByFastingAndVigil,
+            isSingleMonth: false,
+          },
+        );
+    }
+
+    let offeringIncomeByYouthServiceResultData: OfferingIncomeByYouthServiceResultData[];
+    if (
+      metricsTypesArray.includes(MetricSearchType.OfferingIncomeByYouthService)
+    ) {
+      offeringIncomeByYouthServiceResultData =
+        await this.metricsService.findByTerm(
+          `${churchId}&${startMonth}&${endMonth}&${year}`,
+          {
+            'search-type': MetricSearchType.OfferingIncomeByYouthService,
+            isSingleMonth: false,
+          },
+        );
+    }
+
+    let offeringIncomeBySpecialOfferingResultData: OfferingIncomeBySpecialOfferingResultData[];
+    if (
+      metricsTypesArray.includes(
+        MetricSearchType.OfferingIncomeBySpecialOffering,
+      )
+    ) {
+      offeringIncomeBySpecialOfferingResultData =
+        await this.metricsService.findByTerm(
+          `${churchId}&${startMonth}&${endMonth}&${year}`,
+          {
+            'search-type': MetricSearchType.OfferingIncomeBySpecialOffering,
+            isSingleMonth: false,
+          },
+        );
+    }
+
+    let offeringIncomeByChurchGroundResultData: OfferingIncomeByChurchGroundResultData[];
+    if (
+      metricsTypesArray.includes(MetricSearchType.OfferingIncomeByChurchGround)
+    ) {
+      offeringIncomeByChurchGroundResultData =
+        await this.metricsService.findByTerm(
+          `${churchId}&${startMonth}&${endMonth}&${year}`,
+          {
+            'search-type': MetricSearchType.OfferingIncomeByChurchGround,
+            isSingleMonth: false,
+          },
+        );
+    }
+
+    let offeringIncomeByActivitiesResultData: OfferingIncomeByActivitiesResultData[];
+    if (
+      metricsTypesArray.includes(MetricSearchType.OfferingIncomeByActivities)
+    ) {
+      offeringIncomeByActivitiesResultData =
+        await this.metricsService.findByTerm(
+          `${churchId}&${startMonth}&${endMonth}&${year}`,
+          {
+            'search-type': MetricSearchType.OfferingIncomeByActivities,
+            isSingleMonth: false,
+          },
+        );
+    }
+
+    let offeringIncomeByIncomeAdjustmentResultData: OfferingIncomeByIncomeAdjustmentResultData[];
+    if (metricsTypesArray.includes(MetricSearchType.OfferingIncomeAdjustment)) {
+      offeringIncomeByIncomeAdjustmentResultData =
+        await this.metricsService.findByTerm(
+          `${churchId}&${startMonth}&${endMonth}&${year}`,
+          {
+            'search-type': MetricSearchType.OfferingIncomeAdjustment,
+            isSingleMonth: false,
+          },
+        );
+    }
+
+    const docDefinition = getOfferingIncomeMetricsReport({
+      title: 'Reporte de Métricas de Ingresos de Ofrenda',
+      subTitle: 'Resultados de Búsqueda de Métricas de Ingresos de Ofrendas',
+      metricsTypesArray: metricsTypesArray,
+      year: year,
+      startMonth: startMonth,
+      endMonth: endMonth,
+      offeringIncomeBySundayServiceResultData:
+        offeringIncomeBySundayServiceResultData,
+      offeringIncomeByFamilyGroupResultData:
+        offeringIncomeByFamilyGroupResultData,
+      offeringIncomeBySundaySchoolResultData:
+        offeringIncomeBySundaySchoolResultData,
+      offeringIncomeByUnitedServiceResultData:
+        offeringIncomeByUnitedServiceResultData,
+      offeringIncomeByFastingAndVigilResultData:
+        offeringIncomeByFastingAndVigilResultData,
+      offeringIncomeByYouthServiceResultData:
+        offeringIncomeByYouthServiceResultData,
+      offeringIncomeBySpecialOfferingResultData:
+        offeringIncomeBySpecialOfferingResultData,
+      offeringIncomeByChurchGroundResultData:
+        offeringIncomeByChurchGroundResultData,
+      offeringIncomeByActivitiesResultData:
+        offeringIncomeByActivitiesResultData,
+      offeringIncomeByIncomeAdjustmentResultData:
+        offeringIncomeByIncomeAdjustmentResultData,
     });
 
     const doc = this.printerService.createPdf(docDefinition);

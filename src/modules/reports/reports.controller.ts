@@ -415,4 +415,36 @@ export class ReportsController {
     pdfDoc.pipe(response);
     pdfDoc.end();
   }
+
+  //* FAMILY GROUP METRICS REPORT
+  @Get('family-group-metrics')
+  async getFamilyGroupMetrics(
+    @Res() response: Response,
+    @Query() paginationDto: MetricsPaginationDto,
+  ) {
+    const pdfDoc =
+      await this.reportsService.getFamilyGroupMetrics(paginationDto);
+
+    response.setHeader('Content-Type', 'application/pdf');
+
+    pdfDoc.info.Title = 'family-group-metrics-report.pdf';
+    pdfDoc.pipe(response);
+    pdfDoc.end();
+  }
+
+  //* OFFERING INCOME METRICS REPORT
+  @Get('offering-income-metrics')
+  async getOfferingIncomeMetrics(
+    @Res() response: Response,
+    @Query() paginationDto: MetricsPaginationDto,
+  ) {
+    const pdfDoc =
+      await this.reportsService.getOfferingIncomeMetrics(paginationDto);
+
+    response.setHeader('Content-Type', 'application/pdf');
+
+    pdfDoc.info.Title = 'offering-income-metrics-report.pdf';
+    pdfDoc.pipe(response);
+    pdfDoc.end();
+  }
 }
