@@ -19,12 +19,12 @@ interface ZoneInfo {
   church: ZoneChurchInfo;
 }
 
-export type FamilyGroupsByZoneResultData = {
+export type FamilyGroupsByZoneDataResult = {
   [zoneName: string]: ZoneInfo;
 };
 
 export const familyGroupFormatterByZone = ({ zones }: Options) => {
-  const result: FamilyGroupsByZoneResultData = zones.reduce((acc, zone) => {
+  const result: FamilyGroupsByZoneDataResult = zones.reduce((acc, zone) => {
     const filteredFamilyGroups = zone.familyGroups.filter(
       (zone) => zone.recordStatus === RecordStatus.Active,
     ).length;

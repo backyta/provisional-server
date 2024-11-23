@@ -30,7 +30,7 @@ interface MembersByCategoryAndGender {
   church: ChurchInfo;
 }
 
-export interface MembersByCategoryAndGenderResultData {
+export interface MembersByCategoryAndGenderDataResult {
   [category: string]: MembersByCategoryAndGender; // Resultado agrupado por sector urbano
 }
 
@@ -49,7 +49,7 @@ export const memberFormatterByCategoryAndGender = ({
   supervisors,
   preachers,
   disciples,
-}: Options): MembersByCategoryAndGenderResultData => {
+}: Options): MembersByCategoryAndGenderDataResult => {
   const allMembers = [
     ...pastors,
     ...copastors,
@@ -58,7 +58,7 @@ export const memberFormatterByCategoryAndGender = ({
     ...disciples,
   ];
 
-  const resultData: MembersByCategoryAndGenderResultData = categories.reduce(
+  const dataResult: MembersByCategoryAndGenderDataResult = categories.reduce(
     (acc, category) => {
       const [minAge, maxAge] = category.range;
 
@@ -87,5 +87,5 @@ export const memberFormatterByCategoryAndGender = ({
     {},
   );
 
-  return resultData;
+  return dataResult;
 };

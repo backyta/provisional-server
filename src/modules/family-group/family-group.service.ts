@@ -1443,12 +1443,12 @@ export class FamilyGroupService {
           throw new NotFoundException(`No se encontraron grupos familiares`);
         }
 
-        const resultData = familyGroups
+        const dataResult = familyGroups
           .sort((a, b) => b.disciples.length - a.disciples.length)
           .slice(0, 7);
 
         return familyGroupDataFormatter({
-          familyGroups: resultData,
+          familyGroups: dataResult,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {
@@ -1486,12 +1486,12 @@ export class FamilyGroupService {
           throw new NotFoundException(`No se encontraron grupos familiares`);
         }
 
-        const resultData = familyGroups
+        const dataResult = familyGroups
           .sort((a, b) => a.disciples.length - b.disciples.length)
           .slice(0, 7);
 
         return familyGroupDataFormatter({
-          familyGroups: resultData,
+          familyGroups: dataResult,
         }) as any;
       } catch (error) {
         if (error instanceof NotFoundException) {

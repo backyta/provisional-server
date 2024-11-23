@@ -2,16 +2,16 @@ import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 import { headerSection, footerSection } from '@/modules/reports/sections';
 
 import {
-  MonthlyMemberResultData,
-  MembersByZoneResultData,
-  PreachersByZoneResultData,
-  MembersByCategoryResultData,
-  MemberByRoleAndGenderResultData,
-  MembersByRecordStatusResultData,
-  MembersByMaritalStatusResultData,
-  MonthlyMemberFluctuationResultData,
-  MembersByCategoryAndGenderResultData,
-  MembersByDistrictAndGenderResultData,
+  MonthlyMemberDataResult,
+  MembersByZoneDataResult,
+  PreachersByZoneDataResult,
+  MembersByCategoryDataResult,
+  MemberByRoleAndGenderDataResult,
+  MembersByRecordStatusDataResult,
+  MembersByMaritalStatusDataResult,
+  MonthlyMemberFluctuationDataResult,
+  MembersByCategoryAndGenderDataResult,
+  MembersByDistrictAndGenderDataResult,
 } from '@/modules/metrics/helpers/member';
 import { MetricSearchType } from '@/modules/metrics/enums';
 import { Church } from '@/modules/church/entities';
@@ -22,16 +22,16 @@ interface ReportOptions {
   year: string;
   church: Church;
   metricsTypesArray: string[];
-  membersByBirthMonthResultData: MonthlyMemberResultData[];
-  membersByCategoryResultData: MembersByCategoryResultData;
-  membersByZoneAndGenderResultData: MembersByZoneResultData;
-  preachersByZoneAndGenderResultData: PreachersByZoneResultData;
-  membersByRecordStatusResultData: MembersByRecordStatusResultData;
-  membersByRoleAndGenderResultData: MemberByRoleAndGenderResultData;
-  membersByMaritalStatusResultData: MembersByMaritalStatusResultData;
-  membersFluctuationByYearResultData: MonthlyMemberFluctuationResultData[];
-  membersByCategoryAndGenderResultData: MembersByCategoryAndGenderResultData;
-  membersByDistrictAndGenderResultData: MembersByDistrictAndGenderResultData;
+  membersByBirthMonthDataResult: MonthlyMemberDataResult[];
+  membersByCategoryDataResult: MembersByCategoryDataResult;
+  membersByZoneAndGenderDataResult: MembersByZoneDataResult;
+  preachersByZoneAndGenderDataResult: PreachersByZoneDataResult;
+  membersByRecordStatusDataResult: MembersByRecordStatusDataResult;
+  membersByRoleAndGenderDataResult: MemberByRoleAndGenderDataResult;
+  membersByMaritalStatusDataResult: MembersByMaritalStatusDataResult;
+  membersFluctuationByYearDataResult: MonthlyMemberFluctuationDataResult[];
+  membersByCategoryAndGenderDataResult: MembersByCategoryAndGenderDataResult;
+  membersByDistrictAndGenderDataResult: MembersByDistrictAndGenderDataResult;
 }
 
 function calculatePercentage(part: number, total: number) {
@@ -48,16 +48,16 @@ export const getMemberMetricsReport = (
     year,
     church,
     metricsTypesArray,
-    membersByCategoryResultData,
-    membersByBirthMonthResultData,
-    membersByRecordStatusResultData,
-    membersByRoleAndGenderResultData,
-    membersByZoneAndGenderResultData,
-    membersByMaritalStatusResultData,
-    membersFluctuationByYearResultData,
-    preachersByZoneAndGenderResultData,
-    membersByCategoryAndGenderResultData,
-    membersByDistrictAndGenderResultData,
+    membersByCategoryDataResult,
+    membersByBirthMonthDataResult,
+    membersByRecordStatusDataResult,
+    membersByRoleAndGenderDataResult,
+    membersByZoneAndGenderDataResult,
+    membersByMaritalStatusDataResult,
+    membersFluctuationByYearDataResult,
+    preachersByZoneAndGenderDataResult,
+    membersByCategoryAndGenderDataResult,
+    membersByDistrictAndGenderDataResult,
   } = options;
 
   return {
@@ -136,7 +136,7 @@ export const getMemberMetricsReport = (
                       },
                     },
                   ],
-                  ...membersFluctuationByYearResultData.map((item) => [
+                  ...membersFluctuationByYearDataResult.map((item) => [
                     item?.church?.abbreviatedChurchName,
                     year,
                     item?.month,
@@ -158,7 +158,7 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${membersFluctuationByYearResultData.reduce((acc, item) => acc + item?.newMembers, 0)} miembros`,
+                      text: `${membersFluctuationByYearDataResult.reduce((acc, item) => acc + item?.newMembers, 0)} miembros`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -167,7 +167,7 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${membersFluctuationByYearResultData.reduce((acc, item) => acc + item?.inactiveMembers, 0)} miembros`,
+                      text: `${membersFluctuationByYearDataResult.reduce((acc, item) => acc + item?.inactiveMembers, 0)} miembros`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -241,12 +241,12 @@ export const getMemberMetricsReport = (
                       },
                     },
                   ],
-                  ...membersByBirthMonthResultData.map((item) => [
+                  ...membersByBirthMonthDataResult.map((item) => [
                     item?.church?.abbreviatedChurchName,
                     `${item?.month}`,
                     `${item?.membersCount} (${calculatePercentage(
                       item?.membersCount,
-                      membersByBirthMonthResultData.reduce(
+                      membersByBirthMonthDataResult.reduce(
                         (acc, item) => acc + item?.membersCount,
                         0,
                       ),
@@ -267,7 +267,7 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${membersByBirthMonthResultData.reduce((acc, item) => acc + item?.membersCount, 0)} miembros`,
+                      text: `${membersByBirthMonthDataResult.reduce((acc, item) => acc + item?.membersCount, 0)} miembros`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -276,7 +276,7 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${(membersByBirthMonthResultData.reduce((acc, item) => acc + +item?.averageAge, 0) / membersByBirthMonthResultData.length).toFixed(2)} años`,
+                      text: `${(membersByBirthMonthDataResult.reduce((acc, item) => acc + +item?.averageAge, 0) / membersByBirthMonthDataResult.length).toFixed(2)} años`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -350,7 +350,7 @@ export const getMemberMetricsReport = (
                       },
                     },
                   ],
-                  ...Object.entries(membersByCategoryResultData).map(
+                  ...Object.entries(membersByCategoryDataResult).map(
                     ([key, value]) => [
                       church?.abbreviatedChurchName,
                       key === 'child'
@@ -378,7 +378,7 @@ export const getMemberMetricsReport = (
                                 : '+75 años',
                       `${value} (${calculatePercentage(
                         value,
-                        Object.values(membersByCategoryResultData).reduce(
+                        Object.values(membersByCategoryDataResult).reduce(
                           (acc, item) => acc + item,
                           0,
                         ),
@@ -400,7 +400,7 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(membersByCategoryResultData).reduce((acc, item) => acc + item, 0)} miembros`,
+                      text: `${Object.values(membersByCategoryDataResult).reduce((acc, item) => acc + item, 0)} miembros`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -480,14 +480,14 @@ export const getMemberMetricsReport = (
                       },
                     },
                   ],
-                  ...Object.entries(membersByCategoryAndGenderResultData).map(
+                  ...Object.entries(membersByCategoryAndGenderDataResult).map(
                     ([key, value]) => [
                       church?.abbreviatedChurchName,
                       key === 'child'
                         ? `Niños (${calculatePercentage(
                             value.men + value.women,
                             Object.values(
-                              membersByCategoryAndGenderResultData,
+                              membersByCategoryAndGenderDataResult,
                             ).reduce(
                               (acc, item) => acc + item?.men + item?.women,
                               0,
@@ -497,7 +497,7 @@ export const getMemberMetricsReport = (
                           ? `Adolescentes (${calculatePercentage(
                               value.men + value.women,
                               Object.values(
-                                membersByCategoryAndGenderResultData,
+                                membersByCategoryAndGenderDataResult,
                               ).reduce(
                                 (acc, item) => acc + item?.men + item?.women,
                                 0,
@@ -507,7 +507,7 @@ export const getMemberMetricsReport = (
                             ? `Jóvenes (${calculatePercentage(
                                 value.men + value.women,
                                 Object.values(
-                                  membersByCategoryAndGenderResultData,
+                                  membersByCategoryAndGenderDataResult,
                                 ).reduce(
                                   (acc, item) => acc + item?.men + item?.women,
                                   0,
@@ -517,7 +517,7 @@ export const getMemberMetricsReport = (
                               ? `Adultos (${calculatePercentage(
                                   value.men + value.women,
                                   Object.values(
-                                    membersByCategoryAndGenderResultData,
+                                    membersByCategoryAndGenderDataResult,
                                   ).reduce(
                                     (acc, item) =>
                                       acc + item?.men + item?.women,
@@ -528,7 +528,7 @@ export const getMemberMetricsReport = (
                                 ? `Adulto Mayor (${calculatePercentage(
                                     value.men + value.women,
                                     Object.values(
-                                      membersByCategoryAndGenderResultData,
+                                      membersByCategoryAndGenderDataResult,
                                     ).reduce(
                                       (acc, item) =>
                                         acc + item?.men + item?.women,
@@ -538,7 +538,7 @@ export const getMemberMetricsReport = (
                                 : `Ancianos (${calculatePercentage(
                                     value.men + value.women,
                                     Object.values(
-                                      membersByCategoryAndGenderResultData,
+                                      membersByCategoryAndGenderDataResult,
                                     ).reduce(
                                       (acc, item) =>
                                         acc + item?.men + item?.women,
@@ -583,12 +583,12 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(membersByCategoryAndGenderResultData).reduce((acc, item) => acc + item?.men, 0)} varones (${calculatePercentage(
+                      text: `${Object.values(membersByCategoryAndGenderDataResult).reduce((acc, item) => acc + item?.men, 0)} varones (${calculatePercentage(
                         Object.values(
-                          membersByCategoryAndGenderResultData,
+                          membersByCategoryAndGenderDataResult,
                         ).reduce((acc, item) => acc + item?.men, 0),
                         Object.values(
-                          membersByCategoryAndGenderResultData,
+                          membersByCategoryAndGenderDataResult,
                         ).reduce(
                           (acc, item) => acc + item?.men + item.women,
                           0,
@@ -602,12 +602,12 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(membersByCategoryAndGenderResultData).reduce((acc, item) => acc + item?.women, 0)} mujeres (${calculatePercentage(
+                      text: `${Object.values(membersByCategoryAndGenderDataResult).reduce((acc, item) => acc + item?.women, 0)} mujeres (${calculatePercentage(
                         Object.values(
-                          membersByCategoryAndGenderResultData,
+                          membersByCategoryAndGenderDataResult,
                         ).reduce((acc, item) => acc + item?.women, 0),
                         Object.values(
-                          membersByCategoryAndGenderResultData,
+                          membersByCategoryAndGenderDataResult,
                         ).reduce(
                           (acc, item) => acc + item?.men + item.women,
                           0,
@@ -686,14 +686,14 @@ export const getMemberMetricsReport = (
                       },
                     },
                   ],
-                  ...Object.entries(membersByRoleAndGenderResultData).map(
+                  ...Object.entries(membersByRoleAndGenderDataResult).map(
                     ([key, value]) => [
                       value?.church?.abbreviatedChurchName,
                       key === 'pastor'
                         ? `Pastor (${calculatePercentage(
                             value.men + value.women,
                             Object.values(
-                              membersByRoleAndGenderResultData,
+                              membersByRoleAndGenderDataResult,
                             ).reduce(
                               (acc, item) => acc + item?.men + item?.women,
                               0,
@@ -703,7 +703,7 @@ export const getMemberMetricsReport = (
                           ? `Co-Pastor (${calculatePercentage(
                               value.men + value.women,
                               Object.values(
-                                membersByRoleAndGenderResultData,
+                                membersByRoleAndGenderDataResult,
                               ).reduce(
                                 (acc, item) => acc + item?.men + item?.women,
                                 0,
@@ -713,7 +713,7 @@ export const getMemberMetricsReport = (
                             ? `Supervisor (${calculatePercentage(
                                 value.men + value.women,
                                 Object.values(
-                                  membersByRoleAndGenderResultData,
+                                  membersByRoleAndGenderDataResult,
                                 ).reduce(
                                   (acc, item) => acc + item?.men + item?.women,
                                   0,
@@ -723,7 +723,7 @@ export const getMemberMetricsReport = (
                               ? `Predicador (${calculatePercentage(
                                   value.men + value.women,
                                   Object.values(
-                                    membersByRoleAndGenderResultData,
+                                    membersByRoleAndGenderDataResult,
                                   ).reduce(
                                     (acc, item) =>
                                       acc + item?.men + item?.women,
@@ -733,7 +733,7 @@ export const getMemberMetricsReport = (
                               : `Discípulo (${calculatePercentage(
                                   value.men + value.women,
                                   Object.values(
-                                    membersByRoleAndGenderResultData,
+                                    membersByRoleAndGenderDataResult,
                                   ).reduce(
                                     (acc, item) =>
                                       acc + item?.men + item?.women,
@@ -763,12 +763,12 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(membersByRoleAndGenderResultData).reduce((acc, item) => acc + item?.men, 0)} varones (${calculatePercentage(
-                        Object.values(membersByRoleAndGenderResultData).reduce(
+                      text: `${Object.values(membersByRoleAndGenderDataResult).reduce((acc, item) => acc + item?.men, 0)} varones (${calculatePercentage(
+                        Object.values(membersByRoleAndGenderDataResult).reduce(
                           (acc, item) => acc + item?.men,
                           0,
                         ),
-                        Object.values(membersByRoleAndGenderResultData).reduce(
+                        Object.values(membersByRoleAndGenderDataResult).reduce(
                           (acc, item) => acc + item?.men + item.women,
                           0,
                         ),
@@ -781,12 +781,12 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(membersByRoleAndGenderResultData).reduce((acc, item) => acc + item?.women, 0)} mujeres (${calculatePercentage(
-                        Object.values(membersByRoleAndGenderResultData).reduce(
+                      text: `${Object.values(membersByRoleAndGenderDataResult).reduce((acc, item) => acc + item?.women, 0)} mujeres (${calculatePercentage(
+                        Object.values(membersByRoleAndGenderDataResult).reduce(
                           (acc, item) => acc + item?.women,
                           0,
                         ),
-                        Object.values(membersByRoleAndGenderResultData).reduce(
+                        Object.values(membersByRoleAndGenderDataResult).reduce(
                           (acc, item) => acc + item?.men + item.women,
                           0,
                         ),
@@ -858,7 +858,7 @@ export const getMemberMetricsReport = (
                       },
                     },
                   ],
-                  ...Object.entries(membersByMaritalStatusResultData).map(
+                  ...Object.entries(membersByMaritalStatusDataResult).map(
                     ([key, value]) => [
                       church.abbreviatedChurchName,
                       key === 'single'
@@ -872,7 +872,7 @@ export const getMemberMetricsReport = (
                               : `Otro(a)`,
                       `${value} (${calculatePercentage(
                         value,
-                        Object.values(membersByMaritalStatusResultData).reduce(
+                        Object.values(membersByMaritalStatusDataResult).reduce(
                           (acc, item) => acc + item,
                           0,
                         ),
@@ -892,7 +892,7 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(membersByMaritalStatusResultData).reduce((acc, item) => acc + item, 0)} miembros`,
+                      text: `${Object.values(membersByMaritalStatusDataResult).reduce((acc, item) => acc + item, 0)} miembros`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -978,14 +978,14 @@ export const getMemberMetricsReport = (
                       },
                     },
                   ],
-                  ...Object.entries(membersByZoneAndGenderResultData).map(
+                  ...Object.entries(membersByZoneAndGenderDataResult).map(
                     ([key, value]) => [
                       value?.church?.abbreviatedChurchName,
                       value.copastor,
                       value.supervisor,
                       `${key} (${calculatePercentage(
                         value.men + value.women,
-                        Object.values(membersByZoneAndGenderResultData).reduce(
+                        Object.values(membersByZoneAndGenderDataResult).reduce(
                           (acc, item) => acc + item.men + item.women,
                           0,
                         ),
@@ -1016,12 +1016,12 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(membersByZoneAndGenderResultData).reduce((acc, item) => acc + item.men, 0)} varones (${calculatePercentage(
-                        Object.values(membersByZoneAndGenderResultData).reduce(
+                      text: `${Object.values(membersByZoneAndGenderDataResult).reduce((acc, item) => acc + item.men, 0)} varones (${calculatePercentage(
+                        Object.values(membersByZoneAndGenderDataResult).reduce(
                           (acc, item) => acc + item?.men,
                           0,
                         ),
-                        Object.values(membersByZoneAndGenderResultData).reduce(
+                        Object.values(membersByZoneAndGenderDataResult).reduce(
                           (acc, item) => acc + item?.men + item.women,
                           0,
                         ),
@@ -1034,12 +1034,12 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(membersByZoneAndGenderResultData).reduce((acc, item) => acc + item.women, 0)} mujeres (${calculatePercentage(
-                        Object.values(membersByZoneAndGenderResultData).reduce(
+                      text: `${Object.values(membersByZoneAndGenderDataResult).reduce((acc, item) => acc + item.women, 0)} mujeres (${calculatePercentage(
+                        Object.values(membersByZoneAndGenderDataResult).reduce(
                           (acc, item) => acc + item?.women,
                           0,
                         ),
-                        Object.values(membersByZoneAndGenderResultData).reduce(
+                        Object.values(membersByZoneAndGenderDataResult).reduce(
                           (acc, item) => acc + item?.men + item.women,
                           0,
                         ),
@@ -1129,7 +1129,7 @@ export const getMemberMetricsReport = (
                       },
                     },
                   ],
-                  ...Object.entries(preachersByZoneAndGenderResultData).map(
+                  ...Object.entries(preachersByZoneAndGenderDataResult).map(
                     ([key, value]) => [
                       value?.church?.abbreviatedChurchName,
                       value.copastor,
@@ -1137,7 +1137,7 @@ export const getMemberMetricsReport = (
                       `${key} (${calculatePercentage(
                         value.men + value.women,
                         Object.values(
-                          preachersByZoneAndGenderResultData,
+                          preachersByZoneAndGenderDataResult,
                         ).reduce((acc, item) => acc + item.men + item.women, 0),
                       )}%)`,
                       `${value.men} (${calculatePercentage(
@@ -1166,12 +1166,12 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(preachersByZoneAndGenderResultData).reduce((acc, item) => acc + item.men, 0)} varones (${calculatePercentage(
+                      text: `${Object.values(preachersByZoneAndGenderDataResult).reduce((acc, item) => acc + item.men, 0)} varones (${calculatePercentage(
                         Object.values(
-                          preachersByZoneAndGenderResultData,
+                          preachersByZoneAndGenderDataResult,
                         ).reduce((acc, item) => acc + item?.men, 0),
                         Object.values(
-                          preachersByZoneAndGenderResultData,
+                          preachersByZoneAndGenderDataResult,
                         ).reduce(
                           (acc, item) => acc + item?.men + item.women,
                           0,
@@ -1185,12 +1185,12 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(preachersByZoneAndGenderResultData).reduce((acc, item) => acc + item.women, 0)} mujeres (${calculatePercentage(
+                      text: `${Object.values(preachersByZoneAndGenderDataResult).reduce((acc, item) => acc + item.women, 0)} mujeres (${calculatePercentage(
                         Object.values(
-                          preachersByZoneAndGenderResultData,
+                          preachersByZoneAndGenderDataResult,
                         ).reduce((acc, item) => acc + item?.women, 0),
                         Object.values(
-                          preachersByZoneAndGenderResultData,
+                          preachersByZoneAndGenderDataResult,
                         ).reduce(
                           (acc, item) => acc + item?.men + item.women,
                           0,
@@ -1275,14 +1275,14 @@ export const getMemberMetricsReport = (
                       },
                     },
                   ],
-                  ...Object.entries(membersByDistrictAndGenderResultData).map(
+                  ...Object.entries(membersByDistrictAndGenderDataResult).map(
                     ([key, value]) => [
                       value?.church?.abbreviatedChurchName,
                       value?.district,
                       `${key} (${calculatePercentage(
                         value.men + value.women,
                         Object.values(
-                          membersByDistrictAndGenderResultData,
+                          membersByDistrictAndGenderDataResult,
                         ).reduce(
                           (acc, item) => acc + item?.men + item?.women,
                           0,
@@ -1313,12 +1313,12 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(membersByDistrictAndGenderResultData).reduce((acc, item) => acc + item?.men, 0)} varones (${calculatePercentage(
+                      text: `${Object.values(membersByDistrictAndGenderDataResult).reduce((acc, item) => acc + item?.men, 0)} varones (${calculatePercentage(
                         Object.values(
-                          membersByDistrictAndGenderResultData,
+                          membersByDistrictAndGenderDataResult,
                         ).reduce((acc, item) => acc + item?.men, 0),
                         Object.values(
-                          membersByDistrictAndGenderResultData,
+                          membersByDistrictAndGenderDataResult,
                         ).reduce(
                           (acc, item) => acc + item?.men + item.women,
                           0,
@@ -1332,12 +1332,12 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(membersByDistrictAndGenderResultData).reduce((acc, item) => acc + item?.women, 0)} mujeres (${calculatePercentage(
+                      text: `${Object.values(membersByDistrictAndGenderDataResult).reduce((acc, item) => acc + item?.women, 0)} mujeres (${calculatePercentage(
                         Object.values(
-                          membersByDistrictAndGenderResultData,
+                          membersByDistrictAndGenderDataResult,
                         ).reduce((acc, item) => acc + item?.women, 0),
                         Object.values(
-                          membersByDistrictAndGenderResultData,
+                          membersByDistrictAndGenderDataResult,
                         ).reduce(
                           (acc, item) => acc + item?.men + item.women,
                           0,
@@ -1416,14 +1416,14 @@ export const getMemberMetricsReport = (
                       },
                     },
                   ],
-                  ...Object.entries(membersByRecordStatusResultData).map(
+                  ...Object.entries(membersByRecordStatusDataResult).map(
                     ([key, value]) => [
                       value?.church?.abbreviatedChurchName,
                       key === 'pastor'
                         ? `Pastor (${calculatePercentage(
                             value.active + value.inactive,
                             Object.values(
-                              membersByRecordStatusResultData,
+                              membersByRecordStatusDataResult,
                             ).reduce(
                               (acc, item) =>
                                 acc + item?.active + item?.inactive,
@@ -1434,7 +1434,7 @@ export const getMemberMetricsReport = (
                           ? `Co-Pastor (${calculatePercentage(
                               value.active + value.inactive,
                               Object.values(
-                                membersByRecordStatusResultData,
+                                membersByRecordStatusDataResult,
                               ).reduce(
                                 (acc, item) =>
                                   acc + item?.active + item?.inactive,
@@ -1445,7 +1445,7 @@ export const getMemberMetricsReport = (
                             ? `Supervisor (${calculatePercentage(
                                 value.active + value.inactive,
                                 Object.values(
-                                  membersByRecordStatusResultData,
+                                  membersByRecordStatusDataResult,
                                 ).reduce(
                                   (acc, item) =>
                                     acc + item?.active + item?.inactive,
@@ -1456,7 +1456,7 @@ export const getMemberMetricsReport = (
                               ? `Predicador (${calculatePercentage(
                                   value.active + value.inactive,
                                   Object.values(
-                                    membersByRecordStatusResultData,
+                                    membersByRecordStatusDataResult,
                                   ).reduce(
                                     (acc, item) =>
                                       acc + item?.active + item?.inactive,
@@ -1466,7 +1466,7 @@ export const getMemberMetricsReport = (
                               : `Discípulo (${calculatePercentage(
                                   value.active + value.inactive,
                                   Object.values(
-                                    membersByRecordStatusResultData,
+                                    membersByRecordStatusDataResult,
                                   ).reduce(
                                     (acc, item) =>
                                       acc + item?.active + item?.inactive,
@@ -1496,12 +1496,12 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(membersByRecordStatusResultData).reduce((acc, item) => acc + item?.active, 0)} varones (${calculatePercentage(
-                        Object.values(membersByRecordStatusResultData).reduce(
+                      text: `${Object.values(membersByRecordStatusDataResult).reduce((acc, item) => acc + item?.active, 0)} varones (${calculatePercentage(
+                        Object.values(membersByRecordStatusDataResult).reduce(
                           (acc, item) => acc + item?.active,
                           0,
                         ),
-                        Object.values(membersByRecordStatusResultData).reduce(
+                        Object.values(membersByRecordStatusDataResult).reduce(
                           (acc, item) => acc + item?.active + item.inactive,
                           0,
                         ),
@@ -1514,12 +1514,12 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(membersByRecordStatusResultData).reduce((acc, item) => acc + item?.inactive, 0)} mujeres (${calculatePercentage(
-                        Object.values(membersByRecordStatusResultData).reduce(
+                      text: `${Object.values(membersByRecordStatusDataResult).reduce((acc, item) => acc + item?.inactive, 0)} mujeres (${calculatePercentage(
+                        Object.values(membersByRecordStatusDataResult).reduce(
                           (acc, item) => acc + item?.inactive,
                           0,
                         ),
-                        Object.values(membersByRecordStatusResultData).reduce(
+                        Object.values(membersByRecordStatusDataResult).reduce(
                           (acc, item) => acc + item?.active + item.inactive,
                           0,
                         ),

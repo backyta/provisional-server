@@ -24,7 +24,7 @@ interface FamilyGroup {
   familyGroupCode: string;
 }
 
-export interface OfferingIncomeByFamilyGroupResultData {
+export interface OfferingIncomeByFamilyGroupDataResult {
   date: Date;
   category: string;
   accumulatedOfferingPEN: number;
@@ -39,8 +39,8 @@ export interface OfferingIncomeByFamilyGroupResultData {
 
 export const offeringIncomeByFamilyGroupFormatter = ({
   offeringIncome,
-}: Options): OfferingIncomeByFamilyGroupResultData[] => {
-  const resultData: OfferingIncomeByFamilyGroupResultData[] =
+}: Options): OfferingIncomeByFamilyGroupDataResult[] => {
+  const dataResult: OfferingIncomeByFamilyGroupDataResult[] =
     offeringIncome?.reduce((acc, offering) => {
       const existing = acc.find(
         (item) => item?.familyGroup?.id === offering?.familyGroup?.id,
@@ -102,5 +102,5 @@ export const offeringIncomeByFamilyGroupFormatter = ({
       return acc;
     }, []);
 
-  return resultData;
+  return dataResult;
 };

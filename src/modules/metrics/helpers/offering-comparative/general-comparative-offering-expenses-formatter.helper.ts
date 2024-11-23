@@ -11,7 +11,7 @@ interface Church {
   abbreviatedChurchName: string;
 }
 
-interface OfferingExpenseResult {
+export interface GeneralOfferingExpensesComparativeDataResult {
   type: string;
   accumulatedOfferingPEN: number;
   accumulatedOfferingUSD: number;
@@ -22,9 +22,9 @@ interface OfferingExpenseResult {
 
 export const generalComparativeOfferingExpensesFormatter = ({
   offeringExpenses,
-}: Options): OfferingExpenseResult[] => {
-  const resultData: OfferingExpenseResult[] = offeringExpenses?.reduce(
-    (acc, offering) => {
+}: Options): GeneralOfferingExpensesComparativeDataResult[] => {
+  const dataResult: GeneralOfferingExpensesComparativeDataResult[] =
+    offeringExpenses?.reduce((acc, offering) => {
       const existing = acc.find(
         (item) => item?.type === OfferingExpenseSearchTypeNames[offering?.type],
       );
@@ -57,9 +57,7 @@ export const generalComparativeOfferingExpensesFormatter = ({
       }
 
       return acc;
-    },
-    [],
-  );
+    }, []);
 
-  return resultData;
+  return dataResult;
 };

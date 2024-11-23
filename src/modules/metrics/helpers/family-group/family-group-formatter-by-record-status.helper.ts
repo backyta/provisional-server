@@ -17,14 +17,14 @@ interface SupervisorInfo {
   };
 }
 
-export type FamilyGroupsByRecordStatusResultData = {
+export type FamilyGroupsByRecordStatusDataResult = {
   [zoneName: string]: SupervisorInfo;
 };
 
 export const familyGroupFormatterByRecordStatus = ({
   familyGroups,
 }: Options) => {
-  const result: FamilyGroupsByRecordStatusResultData = familyGroups.reduce(
+  const result: FamilyGroupsByRecordStatusDataResult = familyGroups.reduce(
     (acc, familyGroup) => {
       const zoneName = familyGroup.theirZone?.zoneName;
 

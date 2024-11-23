@@ -22,7 +22,7 @@ interface OfferingExpenseResult {
 export const ComparativeOfferingExpensesBySubTypeFormatter = ({
   offeringExpenses,
 }: Options): OfferingExpenseResult[] => {
-  const resultData: OfferingExpenseResult[] = offeringExpenses?.reduce(
+  const dataResult: OfferingExpenseResult[] = offeringExpenses?.reduce(
     (acc, offering) => {
       const existing = acc.find(
         (item) =>
@@ -62,5 +62,5 @@ export const ComparativeOfferingExpensesBySubTypeFormatter = ({
     [],
   );
 
-  return resultData;
+  return dataResult;
 };

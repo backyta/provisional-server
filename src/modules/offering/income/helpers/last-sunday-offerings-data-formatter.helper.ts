@@ -9,7 +9,7 @@ interface Options {
   offeringIncome: OfferingIncome[];
 }
 
-interface ResultDataOptions {
+interface DataResultOptions {
   date: Date;
   category: string;
   dayPEN: number;
@@ -27,8 +27,8 @@ interface ResultDataOptions {
 export const lastSundayOfferingsDataFormatter = ({
   offeringIncome,
 }: Options) => {
-  const resultData: ResultDataOptions[] = offeringIncome?.reduce<
-    ResultDataOptions[]
+  const dataResult: DataResultOptions[] = offeringIncome?.reduce<
+    DataResultOptions[]
   >((acc, offering) => {
     const existing = acc.find((item) => item.date === offering.date);
 
@@ -102,7 +102,7 @@ export const lastSundayOfferingsDataFormatter = ({
     return acc;
   }, []);
 
-  const resultSorted = resultData.sort((a, b) => {
+  const resultSorted = dataResult.sort((a, b) => {
     const dateA = parse(dateFormatterToDDMMYY(a.date), 'dd/MM/yy', new Date());
     const dateB = parse(dateFormatterToDDMMYY(b.date), 'dd/MM/yy', new Date());
     return compareAsc(dateA, dateB);

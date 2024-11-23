@@ -14,7 +14,7 @@ interface Church {
   isAnexe: boolean;
   abbreviatedChurchName: string;
 }
-export interface OfferingIncomeResult {
+export interface GeneralOfferingIncomeComparativeDataResult {
   type: string;
   subType: string;
   accumulatedOfferingPEN: number;
@@ -26,9 +26,9 @@ export interface OfferingIncomeResult {
 
 export const generalComparativeOfferingIncomeFormatter = ({
   offeringIncome,
-}: Options): OfferingIncomeResult[] => {
-  const resultData: OfferingIncomeResult[] = offeringIncome?.reduce(
-    (acc, offering) => {
+}: Options): GeneralOfferingIncomeComparativeDataResult[] => {
+  const dataResult: GeneralOfferingIncomeComparativeDataResult[] =
+    offeringIncome?.reduce((acc, offering) => {
       const existing = acc.find((item) =>
         item.subType !== 'Ajuste por Ingreso'
           ? item?.type === OfferingIncomeCreationTypeNames[offering?.type] &&
@@ -68,9 +68,7 @@ export const generalComparativeOfferingIncomeFormatter = ({
       }
 
       return acc;
-    },
-    [],
-  );
+    }, []);
 
-  return resultData;
+  return dataResult;
 };

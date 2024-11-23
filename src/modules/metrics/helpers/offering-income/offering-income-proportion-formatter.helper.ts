@@ -5,7 +5,7 @@ interface Options {
   offeringIncome: OfferingIncome[];
 }
 
-interface OfferingIncomeProportion {
+interface OfferingIncomeProportionDataResult {
   totalOfferingIncomeRecordsCount: number;
   activeOfferingIncomeRecordsCount: number;
   inactiveOfferingIncomeRecordsCount: number;
@@ -13,7 +13,7 @@ interface OfferingIncomeProportion {
 
 export const offeringIncomeProportionFormatter = ({
   offeringIncome,
-}: Options): OfferingIncomeProportion => {
+}: Options): OfferingIncomeProportionDataResult => {
   const totalOfferingIncomeRecordsCount = offeringIncome.length;
 
   const activeOfferingIncomeRecordsCount = offeringIncome.filter(

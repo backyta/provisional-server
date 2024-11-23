@@ -29,7 +29,7 @@ interface ChurchInfo {
   abbreviatedChurchName: string;
 }
 
-export interface MonthlyMemberFluctuationResultData {
+export interface MonthlyMemberFluctuationDataResult {
   month: string;
   newMembers: number;
   inactiveMembers: number;
@@ -39,7 +39,7 @@ export interface MonthlyMemberFluctuationResultData {
 export const memberFluctuationFormatter = ({
   newMembers,
   inactiveMembers,
-}: Options): MonthlyMemberFluctuationResultData[] => {
+}: Options): MonthlyMemberFluctuationDataResult[] => {
   const flattenMembers = (
     members: [Pastor[], Copastor[], Supervisor[], Preacher[], Disciple[]],
   ) => members.flat();
@@ -55,7 +55,7 @@ export const memberFluctuationFormatter = ({
       (member) => new Date(member.createdAt).getMonth() === monthIndex,
     );
 
-  const resultData: MonthlyMemberFluctuationResultData[] = monthNames.map(
+  const dataResult: MonthlyMemberFluctuationDataResult[] = monthNames.map(
     (_, index) => {
       return {
         month: monthNames[index],
@@ -70,5 +70,5 @@ export const memberFluctuationFormatter = ({
     },
   );
 
-  return resultData;
+  return dataResult;
 };

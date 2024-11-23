@@ -15,12 +15,12 @@ interface FamilyGroupDistrict {
   church: ChurchInfo;
 }
 
-export type FamilyGroupsByDistrictResultData = {
+export type FamilyGroupsByDistrictDataResult = {
   [urbanSector: string]: FamilyGroupDistrict;
 };
 
 export const familyGroupFormatterByDistrict = ({ familyGroups }: Options) => {
-  const result: FamilyGroupsByDistrictResultData = familyGroups.reduce(
+  const result: FamilyGroupsByDistrictDataResult = familyGroups.reduce(
     (acc, item) => {
       if (!acc[item.urbanSector]) {
         acc[item.urbanSector] = {
@@ -41,7 +41,7 @@ export const familyGroupFormatterByDistrict = ({ familyGroups }: Options) => {
     {},
   );
 
-  const sortedResult: FamilyGroupsByDistrictResultData = Object.keys(result)
+  const sortedResult: FamilyGroupsByDistrictDataResult = Object.keys(result)
     .sort()
     .reduce((acc, key) => {
       acc[key] = result[key];

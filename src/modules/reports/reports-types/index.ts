@@ -9,3 +9,5 @@ export * from './user.report';
 export * from './member-metrics.report';
 export * from './family-group-metrics.report';
 export * from './offering-income-metrics.report';
+export * from './offering-expense-metrics.report';
+export * from './financial-balance-comparative-metrics.report';

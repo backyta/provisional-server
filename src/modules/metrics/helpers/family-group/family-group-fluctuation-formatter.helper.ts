@@ -24,8 +24,8 @@ interface ChurchInfo {
   isAnexe: boolean;
   abbreviatedChurchName: string;
 }
-//TODO : cambiar por ResultData
-export interface MonthlyFamilyGroupsFluctuationResultData {
+
+export interface MonthlyFamilyGroupsFluctuationDataResult {
   month: string;
   newFamilyGroups: number;
   inactiveFamilyGroups: number;
@@ -35,7 +35,7 @@ export interface MonthlyFamilyGroupsFluctuationResultData {
 export const familyGroupFluctuationFormatter = ({
   activeFamilyGroups,
   inactiveFamilyGroups,
-}: Options): MonthlyFamilyGroupsFluctuationResultData[] => {
+}: Options): MonthlyFamilyGroupsFluctuationDataResult[] => {
   const filterFamilyGroupsByMonth = (
     familyGroups: FamilyGroup[],
     monthIndex: number,
@@ -44,7 +44,7 @@ export const familyGroupFluctuationFormatter = ({
       (member) => new Date(member.createdAt).getMonth() === monthIndex,
     );
 
-  const resultData: MonthlyFamilyGroupsFluctuationResultData[] = monthNames.map(
+  const dataResult: MonthlyFamilyGroupsFluctuationDataResult[] = monthNames.map(
     (_, index) => {
       return {
         month: monthNames[index],
@@ -63,5 +63,5 @@ export const familyGroupFluctuationFormatter = ({
     },
   );
 
-  return resultData;
+  return dataResult;
 };

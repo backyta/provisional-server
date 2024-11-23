@@ -25,8 +25,7 @@ interface MembersByRole {
   women: number;
 }
 
-// Interfaz para la estructura de salida de memberFormatterByRoleAndGender
-export interface MemberByRoleAndGenderResultData {
+export interface MemberByRoleAndGenderDataResult {
   pastor: MembersByRole;
   copastor: MembersByRole;
   supervisor: MembersByRole;
@@ -40,7 +39,7 @@ export const memberFormatterByRoleAndGender = ({
   supervisors,
   preachers,
   disciples,
-}: Options): MemberByRoleAndGenderResultData => {
+}: Options): MemberByRoleAndGenderDataResult => {
   const allMembers = [
     ...pastors,
     ...copastors,
@@ -49,7 +48,7 @@ export const memberFormatterByRoleAndGender = ({
     ...disciples,
   ];
 
-  const membersByRole: MemberByRoleAndGenderResultData = {
+  const membersByRole: MemberByRoleAndGenderDataResult = {
     pastor: {
       church: {
         isAnexe: allMembers[0]?.theirChurch?.isAnexe,

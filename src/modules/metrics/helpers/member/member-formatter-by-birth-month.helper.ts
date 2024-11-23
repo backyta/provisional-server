@@ -32,7 +32,7 @@ interface ChurchInfo {
   abbreviatedChurchName: string;
 }
 
-export interface MonthlyMemberResultData {
+export interface MonthlyMemberDataResult {
   month: string;
   membersCount: number;
   averageAge: string | number;
@@ -45,7 +45,7 @@ export const memberFormatterByBirthMonth = ({
   supervisors,
   preachers,
   disciples,
-}: Options): MonthlyMemberResultData[] => {
+}: Options): MonthlyMemberDataResult[] => {
   const allMembers = [
     ...pastors,
     ...copastors,
@@ -72,7 +72,7 @@ export const memberFormatterByBirthMonth = ({
     return { membersCount, averageAge };
   };
 
-  const resultData: MonthlyMemberResultData[] = monthNames.map((_, index) => {
+  const dataResult: MonthlyMemberDataResult[] = monthNames.map((_, index) => {
     return {
       month: monthNames[index],
       ...calculateMemberData(memberByBirthMonth[index]),
@@ -84,5 +84,5 @@ export const memberFormatterByBirthMonth = ({
     };
   });
 
-  return resultData;
+  return dataResult;
 };

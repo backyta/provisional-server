@@ -5,7 +5,7 @@ interface Options {
   familyGroups: FamilyGroup[];
 }
 
-interface FamilyGroupProportion {
+interface FamilyGroupProportionDataResult {
   totalCountFamilyGroups: number;
   countFamilyGroupsActive: number;
   countFamilyGroupsInactive: number;
@@ -13,7 +13,7 @@ interface FamilyGroupProportion {
 
 export const familyGroupProportionFormatter = ({
   familyGroups,
-}: Options): FamilyGroupProportion => {
+}: Options): FamilyGroupProportionDataResult => {
   const totalCountFamilyGroups = familyGroups.length;
 
   const countFamilyGroupsActive = familyGroups.filter(

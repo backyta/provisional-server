@@ -1,15 +1,16 @@
 import { OfferingIncome } from '@/modules/offering/income/entities';
 import { OfferingExpense } from '@/modules/offering/expense/entities';
 import { OfferingIncomeCreationType } from '@/modules/offering/income/enums';
+import { addDays } from 'date-fns';
 
-interface ResultDataOptions {
+interface DataResultOptions {
   currentYearOfferingIncome: OfferingIncome[];
   currentYearOfferingExpenses: OfferingExpense[];
   previousYearOfferingIncome: OfferingIncome[];
   previousYearOfferingExpenses: OfferingExpense[];
 }
 
-interface MonthlyResult {
+export interface YearlyIncomeExpenseComparativeDataResult {
   month: string;
   netResultPrevious: number | null;
   totalIncome: number;
@@ -42,7 +43,7 @@ export const IncomeAndExpensesComparativeFormatter = ({
   currentYearOfferingIncome,
   previousYearOfferingIncome,
   previousYearOfferingExpenses,
-}: ResultDataOptions): MonthlyResult[] => {
+}: DataResultOptions): YearlyIncomeExpenseComparativeDataResult[] => {
   const currentYearData = [
     ...currentYearOfferingIncome,
     ...currentYearOfferingExpenses,
@@ -80,71 +81,74 @@ export const IncomeAndExpensesComparativeFormatter = ({
   //* Filtrar los ingresos y gastos del año anterior por mes
   const previousYearDataByMonth = monthNames.map((_, index) =>
     previousYearData.filter(
-      (offering) => new Date(offering.date).getMonth() === index,
+      (offering) => new Date(addDays(offering.date, 1)).getMonth() === index,
     ),
   );
 
   let previousNetResult: number | null = null;
 
-  const previousYearResults: MonthlyResult[] = monthNames.map((_, index) => {
-    const { totalIncome, totalExpenses } = calculateIncomeAndExpenses(
-      previousYearDataByMonth[index],
-    );
+  const previousYearResults: YearlyIncomeExpenseComparativeDataResult[] =
+    monthNames.map((_, index) => {
+      const { totalIncome, totalExpenses } = calculateIncomeAndExpenses(
+        previousYearDataByMonth[index],
+      );
 
-    const previousMonthResult: MonthlyResult = {
-      month: monthNames[index],
-      currency: previousYearData[0]?.currency || 'N/A',
-      netResultPrevious: previousNetResult,
-      totalIncome,
-      totalExpenses,
-      netResult: totalIncome + previousNetResult - totalExpenses,
-      church: {
-        isAnexe: previousYearData[0]?.church?.isAnexe,
-        abbreviatedChurchName:
-          previousYearData[0]?.church?.abbreviatedChurchName,
-      },
-    };
+      const previousMonthResult: YearlyIncomeExpenseComparativeDataResult = {
+        month: monthNames[index],
+        currency: previousYearData[0]?.currency || 'S/D',
+        netResultPrevious: previousNetResult,
+        totalIncome,
+        totalExpenses,
+        netResult: totalIncome + previousNetResult - totalExpenses,
+        church: {
+          isAnexe: previousYearData[0]?.church?.isAnexe,
+          abbreviatedChurchName:
+            previousYearData[0]?.church?.abbreviatedChurchName,
+        },
+      };
 
-    previousNetResult = previousMonthResult.netResult;
-    return previousMonthResult;
-  });
+      previousNetResult = previousMonthResult.netResult;
+
+      return previousMonthResult;
+    });
 
   //? Current
   //* Filtrar los ingresos y gastos del año actual por mes
   const currentYearDataByMonth = monthNames.map((_, index) =>
     currentYearData.filter(
-      (offering) => new Date(offering.date).getMonth() === index,
+      (offering) => new Date(addDays(offering.date, 1)).getMonth() === index,
     ),
   );
 
   let currentNetResult: number | null = null;
 
-  const currentYearResults: MonthlyResult[] = monthNames.map((_, index) => {
-    const { totalIncome, totalExpenses } = calculateIncomeAndExpenses(
-      currentYearDataByMonth[index],
-    );
+  const currentYearResults: YearlyIncomeExpenseComparativeDataResult[] =
+    monthNames.map((_, index) => {
+      const { totalIncome, totalExpenses } = calculateIncomeAndExpenses(
+        currentYearDataByMonth[index],
+      );
 
-    const currentMonthResult: MonthlyResult = {
-      month: monthNames[index],
-      currency: currentYearData[0]?.currency || 'N/A',
-      netResultPrevious:
-        index === 0 ? previousYearResults.at(-1).netResult : currentNetResult,
-      totalIncome,
-      totalExpenses,
-      netResult:
-        index === 0
-          ? totalIncome + previousYearResults.at(-1).netResult - totalExpenses
-          : totalIncome + currentNetResult - totalExpenses,
-      church: {
-        isAnexe: currentYearData[0]?.church?.isAnexe,
-        abbreviatedChurchName:
-          currentYearData[0]?.church?.abbreviatedChurchName,
-      },
-    };
+      const currentMonthResult: YearlyIncomeExpenseComparativeDataResult = {
+        month: monthNames[index],
+        currency: currentYearData[0]?.currency || 'S/D',
+        netResultPrevious:
+          index === 0 ? previousYearResults.at(-1).netResult : currentNetResult,
+        totalIncome,
+        totalExpenses,
+        netResult:
+          index === 0
+            ? totalIncome + previousYearResults.at(-1).netResult - totalExpenses
+            : totalIncome + currentNetResult - totalExpenses,
+        church: {
+          isAnexe: currentYearData[0]?.church?.isAnexe,
+          abbreviatedChurchName:
+            currentYearData[0]?.church?.abbreviatedChurchName,
+        },
+      };
 
-    currentNetResult = currentMonthResult.netResult;
-    return currentMonthResult;
-  });
+      currentNetResult = currentMonthResult.netResult;
+      return currentMonthResult;
+    });
 
   return currentYearResults;
 };

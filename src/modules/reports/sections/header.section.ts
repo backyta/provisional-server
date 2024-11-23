@@ -69,7 +69,7 @@ export const headerSection = (options: HeaderSectionOptions): Content => {
     ? {
         text: subTitle,
         alignment: 'center',
-        margin: [35, 2, 0, 0],
+        margin: [20, 2, 0, 0],
         style: {
           bold: true,
           fontSize: 16,
@@ -82,7 +82,7 @@ export const headerSection = (options: HeaderSectionOptions): Content => {
       ? {
           text: `${searchType} / ${searchSubType}\n${searchTerm}`,
           alignment: 'center',
-          margin: [35, 5, 0, 0],
+          margin: [20, 5, 0, 0],
           style: {
             color: '#3b9917',
             bold: true,
@@ -93,7 +93,7 @@ export const headerSection = (options: HeaderSectionOptions): Content => {
         ? {
             text: `Tipo de búsqueda: Búsqueda general / Tipo de orden: ${RecordOrderNames[orderSearch]}`,
             alignment: 'center',
-            margin: [35, 5, 0, 0],
+            margin: [20, 5, 0, 0],
             style: {
               color: '#3b9917',
               bold: true,
@@ -104,7 +104,7 @@ export const headerSection = (options: HeaderSectionOptions): Content => {
           ? {
               text: `Año de búsqueda: ${yearSearch} / Mes de búsqueda: ${monthNames[startMonthSearch]} - ${monthNames[endMonthSearch]}`,
               alignment: 'center',
-              margin: [35, 5, 0, 0],
+              margin: [20, 5, 0, 0],
               style: {
                 color: '#3b9917',
                 bold: true,
@@ -115,7 +115,7 @@ export const headerSection = (options: HeaderSectionOptions): Content => {
             ? {
                 text: `Año de búsqueda: ${yearSearch}`,
                 alignment: 'center',
-                margin: [35, 5, 0, 0],
+                margin: [20, 5, 0, 0],
                 style: {
                   color: '#3b9917',
                   bold: true,
@@ -130,7 +130,7 @@ export const headerSection = (options: HeaderSectionOptions): Content => {
           {
             text: title,
             alignment: 'center',
-            margin: [35, 20, 0, 0],
+            margin: [20, 20, 0, 0],
             style: {
               bold: true,
               fontSize: 22,

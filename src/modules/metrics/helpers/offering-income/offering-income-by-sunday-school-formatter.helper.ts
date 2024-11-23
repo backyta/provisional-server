@@ -15,7 +15,7 @@ interface Church {
   abbreviatedChurchName: string;
 }
 
-export interface OfferingIncomeBySundaySchoolResultData {
+export interface OfferingIncomeBySundaySchoolDataResult {
   date: Date;
   category: string;
   dayPEN: number;
@@ -40,8 +40,8 @@ export interface OfferingIncomeBySundaySchoolResultData {
 
 export const offeringIncomeBySundaySchoolFormatter = ({
   offeringIncome,
-}: Options): OfferingIncomeBySundaySchoolResultData[] => {
-  const resultData: OfferingIncomeBySundaySchoolResultData[] =
+}: Options): OfferingIncomeBySundaySchoolDataResult[] => {
+  const dataResult: OfferingIncomeBySundaySchoolDataResult[] =
     offeringIncome?.reduce((acc, offering) => {
       const existingEntry = acc.find((item) => {
         if (
@@ -188,7 +188,7 @@ export const offeringIncomeBySundaySchoolFormatter = ({
     }, []);
 
   // Ordenar los resultados por fecha
-  const resultSorted = resultData.sort((a, b) => {
+  const resultSorted = dataResult.sort((a, b) => {
     const dateA = parse(dateFormatterToDDMMYY(a.date), 'dd/MM/yy', new Date());
     const dateB = parse(dateFormatterToDDMMYY(b.date), 'dd/MM/yy', new Date());
     return compareAsc(dateA, dateB);

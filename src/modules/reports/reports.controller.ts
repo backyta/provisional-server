@@ -447,4 +447,38 @@ export class ReportsController {
     pdfDoc.pipe(response);
     pdfDoc.end();
   }
+
+  //* OFFERING EXPENSE METRICS REPORT
+  @Get('offering-expense-metrics')
+  async getOfferingExpenseMetrics(
+    @Res() response: Response,
+    @Query() paginationDto: MetricsPaginationDto,
+  ) {
+    const pdfDoc =
+      await this.reportsService.getOfferingExpenseMetrics(paginationDto);
+
+    response.setHeader('Content-Type', 'application/pdf');
+
+    pdfDoc.info.Title = 'offering-expense-metrics-report.pdf';
+    pdfDoc.pipe(response);
+    pdfDoc.end();
+  }
+
+  //* FINANCIAL BALANCE COMPARATIVE METRICS REPORT
+  @Get('financial-balance-comparative-metrics')
+  async getFinancialBalanceComparativeMetrics(
+    @Res() response: Response,
+    @Query() paginationDto: MetricsPaginationDto,
+  ) {
+    const pdfDoc =
+      await this.reportsService.getFinancialBalanceComparativeMetrics(
+        paginationDto,
+      );
+
+    response.setHeader('Content-Type', 'application/pdf');
+
+    pdfDoc.info.Title = 'financial-balance-comparative-metrics-report.pdf';
+    pdfDoc.pipe(response);
+    pdfDoc.end();
+  }
 }

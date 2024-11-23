@@ -12,7 +12,7 @@ interface Church {
   abbreviatedChurchName: string;
 }
 
-export interface PreachersByZoneResultData {
+export interface PreachersByZoneDataResult {
   [zoneName: string]: {
     copastor: string;
     supervisor: string;
@@ -23,7 +23,7 @@ export interface PreachersByZoneResultData {
 }
 
 export const preacherFormatterByZoneAndGender = ({ zones }: Options) => {
-  const result: PreachersByZoneResultData = zones.reduce((acc, zone) => {
+  const result: PreachersByZoneDataResult = zones.reduce((acc, zone) => {
     const menCount = zone.preachers.filter(
       (disciple) => disciple?.member?.gender === Gender.Male,
     ).length;

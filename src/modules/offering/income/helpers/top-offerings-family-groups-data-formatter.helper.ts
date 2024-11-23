@@ -1,7 +1,7 @@
 import { CurrencyType } from '@/modules/offering/shared/enums';
 import { OfferingIncome } from '@/modules/offering/income/entities';
 
-interface ResultDataOptions {
+interface DataResultOptions {
   date: string | Date;
   category: string;
   accumulatedOfferingPEN: number;
@@ -36,8 +36,8 @@ interface Options {
 export const topOfferingsFamilyGroupsDataFormatter = ({
   offeringIncome,
 }: Options) => {
-  const resultData: ResultDataOptions[] = offeringIncome?.reduce<
-    ResultDataOptions[]
+  const dataResult: DataResultOptions[] = offeringIncome?.reduce<
+    DataResultOptions[]
   >((acc, offering) => {
     const existing = acc.find(
       (item) => item.familyGroup?.id === offering.familyGroup?.id,
@@ -95,7 +95,7 @@ export const topOfferingsFamilyGroupsDataFormatter = ({
     return acc;
   }, []);
 
-  const top10ResultData = resultData
+  const top10DataResult = dataResult
     .sort(
       (a, b) =>
         b.accumulatedOfferingPEN +
@@ -107,5 +107,5 @@ export const topOfferingsFamilyGroupsDataFormatter = ({
     )
     .slice(0, 10);
 
-  return top10ResultData;
+  return top10DataResult;
 };

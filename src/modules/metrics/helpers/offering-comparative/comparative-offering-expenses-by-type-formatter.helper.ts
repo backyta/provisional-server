@@ -1,3 +1,5 @@
+import { addDays } from 'date-fns';
+
 import { CurrencyType } from '@/modules/offering/shared/enums';
 import { OfferingExpense } from '@/modules/offering/expense/entities';
 import { OfferingExpenseSearchTypeNames } from '@/modules/offering/expense/enums';
@@ -11,7 +13,7 @@ interface Church {
   abbreviatedChurchName: string;
 }
 
-interface OfferingExpenseByMonthResult {
+export interface OfferingExpenseComparativeByTypeDataResult {
   month: string;
   type: string;
   accumulatedOfferingPEN: number;
@@ -38,15 +40,16 @@ const monthNames = [
 
 export const comparativeOfferingExpensesByTypeFormatter = ({
   offeringExpenses,
-}: Options): OfferingExpenseByMonthResult[] => {
-  const resultData: OfferingExpenseByMonthResult[] = offeringExpenses?.reduce(
-    (acc, offering) => {
-      const offeringDate = new Date(offering.date);
+}: Options): OfferingExpenseComparativeByTypeDataResult[] => {
+  const dataResult: OfferingExpenseComparativeByTypeDataResult[] =
+    offeringExpenses?.reduce((acc, offering) => {
+      const offeringDate = new Date(addDays(offering.date, 1));
       const offeringMonth = offeringDate.getMonth();
 
       const existing = acc.find(
         (item) =>
-          item?.month === monthNames[new Date(offering.date).getMonth()],
+          item?.month ===
+          monthNames[new Date(addDays(offering.date, 1)).getMonth()],
       );
 
       if (existing) {
@@ -78,11 +81,9 @@ export const comparativeOfferingExpensesByTypeFormatter = ({
       }
 
       return acc;
-    },
-    [],
-  );
+    }, []);
 
-  return resultData.sort(
+  return dataResult.sort(
     (a, b) => monthNames.indexOf(a.month) - monthNames.indexOf(b.month),
   );
 };

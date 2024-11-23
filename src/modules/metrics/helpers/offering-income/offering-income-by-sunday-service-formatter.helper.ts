@@ -14,7 +14,7 @@ interface Church {
   abbreviatedChurchName: string;
 }
 
-export interface OfferingIncomeBySundayServiceResultData {
+export interface OfferingIncomeBySundayServiceDataResult {
   date: Date;
   category: string;
   dayPEN: number;
@@ -28,12 +28,12 @@ export interface OfferingIncomeBySundayServiceResultData {
 
 export const offeringIncomeBySundayServiceFormatter = ({
   offeringIncome,
-}: Options): OfferingIncomeBySundayServiceResultData[] => {
-  const resultData: OfferingIncomeBySundayServiceResultData[] =
+}: Options): OfferingIncomeBySundayServiceDataResult[] => {
+  const dataResult: OfferingIncomeBySundayServiceDataResult[] =
     offeringIncome.reduce((acc, offering) => {
       const existingEntry = acc.find((item) => item.date === offering.date);
 
-      const updateValues = (entry: OfferingIncomeBySundayServiceResultData) => {
+      const updateValues = (entry: OfferingIncomeBySundayServiceDataResult) => {
         const isDayShift = offering.shift === 'day';
         switch (offering.currency) {
           case CurrencyType.PEN:
@@ -57,7 +57,7 @@ export const offeringIncomeBySundayServiceFormatter = ({
       if (existingEntry) {
         updateValues(existingEntry);
       } else {
-        const newEntry: OfferingIncomeBySundayServiceResultData = {
+        const newEntry: OfferingIncomeBySundayServiceDataResult = {
           date: offering.date,
           category: offering.category,
           dayPEN:
@@ -98,7 +98,7 @@ export const offeringIncomeBySundayServiceFormatter = ({
       return acc;
     }, []);
 
-  return resultData.sort((a, b) => {
+  return dataResult.sort((a, b) => {
     const dateA = parse(dateFormatterToDDMMYY(a.date), 'dd/MM/yy', new Date());
     const dateB = parse(dateFormatterToDDMMYY(b.date), 'dd/MM/yy', new Date());
     return compareAsc(dateA, dateB);

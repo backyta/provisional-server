@@ -14,7 +14,7 @@ interface Options {
   disciples: Disciple[];
 }
 
-export interface MembersByDistrictAndGenderResultData {
+export interface MembersByDistrictAndGenderDataResult {
   men: number;
   women: number;
   district: string;
@@ -25,7 +25,7 @@ export interface MembersByDistrictAndGenderResultData {
 }
 
 interface DistrictsResult {
-  [urbanSector: string]: MembersByDistrictAndGenderResultData; // Resultado agrupado por sector urbano
+  [urbanSector: string]: MembersByDistrictAndGenderDataResult; // Resultado agrupado por sector urbano
 }
 
 export const memberFormatterByDistrictAndGender = ({

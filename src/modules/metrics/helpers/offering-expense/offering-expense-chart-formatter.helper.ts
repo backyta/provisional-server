@@ -11,8 +11,9 @@ interface Church {
   abbreviatedChurchName: string;
 }
 
-interface FormattedOfferingExpense {
+export interface OfferingExpenseDataResult {
   subType: string;
+  date: Date;
   accumulatedOfferingPEN: number;
   accumulatedOfferingUSD: number;
   accumulatedOfferingEUR: number;
@@ -27,8 +28,8 @@ interface FormattedOfferingExpense {
 
 export const offeringExpenseChartFormatter = ({
   offeringExpenses,
-}: Options): FormattedOfferingExpense[] => {
-  const resultData: FormattedOfferingExpense[] = offeringExpenses?.reduce(
+}: Options): OfferingExpenseDataResult[] => {
+  const dataResult: OfferingExpenseDataResult[] = offeringExpenses?.reduce(
     (acc, offering) => {
       const existing = acc.find(
         (item) =>
@@ -56,6 +57,7 @@ export const offeringExpenseChartFormatter = ({
         acc.push({
           subType: OfferingExpenseSearchSubTypeNames[offering.subType],
           date: offering.date,
+          comments: offering.comments,
           accumulatedOfferingPEN:
             offering?.currency === CurrencyType.PEN ? +offering?.amount : 0,
           accumulatedOfferingUSD:
@@ -82,5 +84,5 @@ export const offeringExpenseChartFormatter = ({
     [],
   );
 
-  return resultData;
+  return dataResult;
 };

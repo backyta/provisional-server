@@ -10,7 +10,7 @@ interface Church {
   abbreviatedChurchName: string;
 }
 
-export interface OfferingIncomeByActivitiesResultData {
+export interface OfferingIncomeByActivitiesDataResult {
   date: string;
   category: string;
   accumulatedOfferingPEN: number;
@@ -26,8 +26,8 @@ export interface OfferingIncomeByActivitiesResultData {
 
 export const offeringIncomeByActivitiesFormatter = ({
   offeringIncome,
-}: Options): OfferingIncomeByActivitiesResultData[] => {
-  const resultData: OfferingIncomeByActivitiesResultData[] =
+}: Options): OfferingIncomeByActivitiesDataResult[] => {
+  const dataResult: OfferingIncomeByActivitiesDataResult[] =
     offeringIncome?.reduce((acc, offering) => {
       const existing = acc.find((item) => item.date === offering.date);
 
@@ -71,7 +71,7 @@ export const offeringIncomeByActivitiesFormatter = ({
       return acc;
     }, []);
 
-  return resultData.sort(
+  return dataResult.sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
   );
 };

@@ -4,12 +4,12 @@ import { headerSection, footerSection } from '@/modules/reports/sections';
 import { MetricSearchType } from '@/modules/metrics/enums';
 
 import {
-  FamilyGroupsByZoneResultData,
-  FamilyGroupsByCodeResultData,
-  FamilyGroupsByDistrictResultData,
-  FamilyGroupsByServiceTimeResultData,
-  FamilyGroupsByRecordStatusResultData,
-  MonthlyFamilyGroupsFluctuationResultData,
+  FamilyGroupsByZoneDataResult,
+  FamilyGroupsByCodeDataResult,
+  FamilyGroupsByDistrictDataResult,
+  FamilyGroupsByServiceTimeDataResult,
+  FamilyGroupsByRecordStatusDataResult,
+  MonthlyFamilyGroupsFluctuationDataResult,
 } from '@/modules/metrics/helpers/family-group';
 import { FamilyGroupServiceTimeNames } from '@/modules/family-group/enums';
 
@@ -18,12 +18,12 @@ interface ReportOptions {
   subTitle?: string;
   year: string;
   metricsTypesArray: string[];
-  familyGroupsByCodeResultData: FamilyGroupsByCodeResultData;
-  familyGroupsByZoneDataResult: FamilyGroupsByZoneResultData;
-  familyGroupsByDistrictResultData: FamilyGroupsByDistrictResultData;
-  familyGroupsByServiceTimeResultData: FamilyGroupsByServiceTimeResultData;
-  familyGroupsByRecordStatusResultData: FamilyGroupsByRecordStatusResultData;
-  familyGroupsFluctuationByYearResultData: MonthlyFamilyGroupsFluctuationResultData[];
+  familyGroupsByCodeDataResult: FamilyGroupsByCodeDataResult;
+  familyGroupsByZoneDataResult: FamilyGroupsByZoneDataResult;
+  familyGroupsByDistrictDataResult: FamilyGroupsByDistrictDataResult;
+  familyGroupsByServiceTimeDataResult: FamilyGroupsByServiceTimeDataResult;
+  familyGroupsByRecordStatusDataResult: FamilyGroupsByRecordStatusDataResult;
+  familyGroupsFluctuationByYearDataResult: MonthlyFamilyGroupsFluctuationDataResult[];
 }
 
 function calculatePercentage(part: number, total: number) {
@@ -40,11 +40,11 @@ export const getFamilyGroupMetricsReport = (
     year,
     metricsTypesArray,
     familyGroupsByZoneDataResult,
-    familyGroupsByCodeResultData,
-    familyGroupsByDistrictResultData,
-    familyGroupsByServiceTimeResultData,
-    familyGroupsByRecordStatusResultData,
-    familyGroupsFluctuationByYearResultData,
+    familyGroupsByCodeDataResult,
+    familyGroupsByDistrictDataResult,
+    familyGroupsByServiceTimeDataResult,
+    familyGroupsByRecordStatusDataResult,
+    familyGroupsFluctuationByYearDataResult,
   } = options;
 
   return {
@@ -122,7 +122,7 @@ export const getFamilyGroupMetricsReport = (
                       },
                     },
                   ],
-                  ...familyGroupsFluctuationByYearResultData.map((item) => [
+                  ...familyGroupsFluctuationByYearDataResult.map((item) => [
                     item?.church?.abbreviatedChurchName,
                     year,
                     item?.month,
@@ -144,7 +144,7 @@ export const getFamilyGroupMetricsReport = (
                       },
                     },
                     {
-                      text: `${familyGroupsFluctuationByYearResultData.reduce((acc, item) => acc + item?.newFamilyGroups, 0)} G. Familiares`,
+                      text: `${familyGroupsFluctuationByYearDataResult.reduce((acc, item) => acc + item?.newFamilyGroups, 0)} G. Familiares`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -153,7 +153,7 @@ export const getFamilyGroupMetricsReport = (
                       },
                     },
                     {
-                      text: `${familyGroupsFluctuationByYearResultData.reduce((acc, item) => acc + item?.inactiveFamilyGroups, 0)} G. Familiares`,
+                      text: `${familyGroupsFluctuationByYearDataResult.reduce((acc, item) => acc + item?.inactiveFamilyGroups, 0)} G. Familiares`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -233,7 +233,7 @@ export const getFamilyGroupMetricsReport = (
                       },
                     },
                   ],
-                  ...Object.values(familyGroupsByCodeResultData).map(
+                  ...Object.values(familyGroupsByCodeDataResult).map(
                     (payload) => [
                       payload?.church?.abbreviatedChurchName,
                       payload?.familyGroupCode,
@@ -263,12 +263,12 @@ export const getFamilyGroupMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(familyGroupsByCodeResultData).reduce((acc, payload) => acc + payload?.men, 0)} varones (${calculatePercentage(
-                        Object.values(familyGroupsByCodeResultData).reduce(
+                      text: `${Object.values(familyGroupsByCodeDataResult).reduce((acc, payload) => acc + payload?.men, 0)} varones (${calculatePercentage(
+                        Object.values(familyGroupsByCodeDataResult).reduce(
                           (acc, item) => acc + item?.men,
                           0,
                         ),
-                        Object.values(familyGroupsByCodeResultData).reduce(
+                        Object.values(familyGroupsByCodeDataResult).reduce(
                           (acc, item) => acc + item?.men + item.women,
                           0,
                         ),
@@ -281,12 +281,12 @@ export const getFamilyGroupMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(familyGroupsByCodeResultData).reduce((acc, payload) => acc + payload?.women, 0)} mujeres (${calculatePercentage(
-                        Object.values(familyGroupsByCodeResultData).reduce(
+                      text: `${Object.values(familyGroupsByCodeDataResult).reduce((acc, payload) => acc + payload?.women, 0)} mujeres (${calculatePercentage(
+                        Object.values(familyGroupsByCodeDataResult).reduce(
                           (acc, item) => acc + item?.women,
                           0,
                         ),
-                        Object.values(familyGroupsByCodeResultData).reduce(
+                        Object.values(familyGroupsByCodeDataResult).reduce(
                           (acc, item) => acc + item?.men + item.women,
                           0,
                         ),
@@ -475,7 +475,7 @@ export const getFamilyGroupMetricsReport = (
                       },
                     },
                   ],
-                  ...Object.entries(familyGroupsByDistrictResultData).map(
+                  ...Object.entries(familyGroupsByDistrictDataResult).map(
                     ([key, payload]) => [
                       payload?.church?.abbreviatedChurchName,
                       payload?.district,
@@ -504,7 +504,7 @@ export const getFamilyGroupMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(familyGroupsByDistrictResultData).reduce((acc, payload) => acc + payload.familyGroupsCount, 0)} G. Familiares`,
+                      text: `${Object.values(familyGroupsByDistrictDataResult).reduce((acc, payload) => acc + payload.familyGroupsCount, 0)} G. Familiares`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -572,14 +572,14 @@ export const getFamilyGroupMetricsReport = (
                       },
                     },
                   ],
-                  ...Object.entries(familyGroupsByServiceTimeResultData).map(
+                  ...Object.entries(familyGroupsByServiceTimeDataResult).map(
                     ([key, payload]) => [
                       payload?.church?.abbreviatedChurchName,
                       `${FamilyGroupServiceTimeNames[key]}`,
                       `${[payload?.serviceTimesCount]} (${calculatePercentage(
                         payload?.serviceTimesCount,
                         Object.values(
-                          familyGroupsByServiceTimeResultData,
+                          familyGroupsByServiceTimeDataResult,
                         ).reduce(
                           (acc, payload) => acc + payload.serviceTimesCount,
                           0,
@@ -601,7 +601,7 @@ export const getFamilyGroupMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(familyGroupsByServiceTimeResultData).reduce((acc, payload) => acc + payload.serviceTimesCount, 0)} G. Familiares`,
+                      text: `${Object.values(familyGroupsByServiceTimeDataResult).reduce((acc, payload) => acc + payload.serviceTimesCount, 0)} G. Familiares`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -687,7 +687,7 @@ export const getFamilyGroupMetricsReport = (
                       },
                     },
                   ],
-                  ...Object.entries(familyGroupsByRecordStatusResultData).map(
+                  ...Object.entries(familyGroupsByRecordStatusDataResult).map(
                     ([key, payload]) => [
                       payload?.church?.abbreviatedChurchName,
                       payload?.copastor,
@@ -719,13 +719,13 @@ export const getFamilyGroupMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(familyGroupsByRecordStatusResultData).reduce((acc, payload) => acc + payload?.active, 0)} G. Familiares (${calculatePercentage(
-                        Object.values(familyGroupsByCodeResultData).reduce(
+                      text: `${Object.values(familyGroupsByRecordStatusDataResult).reduce((acc, payload) => acc + payload?.active, 0)} G. Familiares (${calculatePercentage(
+                        Object.values(familyGroupsByCodeDataResult).reduce(
                           (acc, item) => acc + item?.men,
                           0,
                         ),
                         Object.values(
-                          familyGroupsByRecordStatusResultData,
+                          familyGroupsByRecordStatusDataResult,
                         ).reduce(
                           (acc, item) => acc + item?.active + item.inactive,
                           0,
@@ -739,12 +739,12 @@ export const getFamilyGroupMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(familyGroupsByRecordStatusResultData).reduce((acc, payload) => acc + payload?.inactive, 0)} G. Familiares (${calculatePercentage(
+                      text: `${Object.values(familyGroupsByRecordStatusDataResult).reduce((acc, payload) => acc + payload?.inactive, 0)} G. Familiares (${calculatePercentage(
                         Object.values(
-                          familyGroupsByRecordStatusResultData,
+                          familyGroupsByRecordStatusDataResult,
                         ).reduce((acc, item) => acc + item?.inactive, 0),
                         Object.values(
-                          familyGroupsByRecordStatusResultData,
+                          familyGroupsByRecordStatusDataResult,
                         ).reduce(
                           (acc, item) => acc + item?.active + item.inactive,
                           0,

@@ -14,14 +14,14 @@ interface ServiceTimeInfo {
   };
 }
 
-export type FamilyGroupsByServiceTimeResultData = {
+export type FamilyGroupsByServiceTimeDataResult = {
   [serviceTime: string]: ServiceTimeInfo;
 };
 
 export const familyGroupFormatterByServiceTime = ({
   familyGroups,
 }: Options) => {
-  const result: FamilyGroupsByServiceTimeResultData = familyGroups.reduce(
+  const result: FamilyGroupsByServiceTimeDataResult = familyGroups.reduce(
     (acc, familyGroup) => {
       if (!acc[familyGroup.serviceTime]) {
         acc[familyGroup.serviceTime] = {

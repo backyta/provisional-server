@@ -1,3 +1,5 @@
+import { addDays } from 'date-fns';
+
 import { CurrencyType } from '@/modules/offering/shared/enums';
 
 import {
@@ -15,7 +17,7 @@ interface Church {
   abbreviatedChurchName: string;
 }
 
-interface OfferingIncomeByMonthResult {
+export interface OfferingIncomeComparativeByTypeDataResult {
   month: string;
   type: string;
   subType: string;
@@ -43,15 +45,16 @@ const monthNames = [
 
 export const comparativeOfferingIncomeByTypeFormatter = ({
   offeringIncome,
-}: Options): OfferingIncomeByMonthResult[] => {
-  const resultData: OfferingIncomeByMonthResult[] = offeringIncome?.reduce(
-    (acc, offering) => {
-      const offeringDate = new Date(offering.date);
+}: Options): OfferingIncomeComparativeByTypeDataResult[] => {
+  const dataResult: OfferingIncomeComparativeByTypeDataResult[] =
+    offeringIncome?.reduce((acc, offering) => {
+      const offeringDate = new Date(addDays(offering.date, 1));
       const offeringMonth = offeringDate.getMonth();
 
       const existing = acc.find(
         (item) =>
-          item?.month === monthNames[new Date(offering.date).getMonth()],
+          item?.month ===
+          monthNames[new Date(addDays(offering.date, 1)).getMonth()],
       );
 
       if (existing) {
@@ -86,11 +89,9 @@ export const comparativeOfferingIncomeByTypeFormatter = ({
       }
 
       return acc;
-    },
-    [],
-  );
+    }, []);
 
-  return resultData.sort(
+  return dataResult.sort(
     (a, b) => monthNames.indexOf(a.month) - monthNames.indexOf(b.month),
   );
 };

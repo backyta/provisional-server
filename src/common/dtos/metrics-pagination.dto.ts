@@ -1,7 +1,8 @@
 import { Type } from 'class-transformer';
-import { IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 import { ApiProperty } from '@nestjs/swagger';
+import { CurrencyType } from '@/modules/offering/shared/enums';
 
 export class MetricsPaginationDto {
   @ApiProperty({
@@ -43,4 +44,13 @@ export class MetricsPaginationDto {
   @IsString()
   @Type(() => String)
   churchId?: string;
+
+  @ApiProperty({
+    description: 'ID of the church that is part of the search.',
+    example: 'b740f708-f19d-4116-82b5-3d7b5653be9b',
+  })
+  @IsOptional()
+  @IsEnum(CurrencyType)
+  @Type(() => String)
+  currency?: string;
 }

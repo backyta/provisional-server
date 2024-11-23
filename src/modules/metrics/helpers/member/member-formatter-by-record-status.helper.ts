@@ -24,7 +24,7 @@ interface RecordStatusCounts {
 }
 
 // Interfaz para el resultado de la función
-export interface MembersByRecordStatusResultData {
+export interface MembersByRecordStatusDataResult {
   pastor: RecordStatusCounts;
   copastor: RecordStatusCounts;
   supervisor: RecordStatusCounts;
@@ -38,7 +38,7 @@ export const memberFormatterByRecordStatus = ({
   supervisors,
   preachers,
   disciples,
-}: Options): MembersByRecordStatusResultData => {
+}: Options): MembersByRecordStatusDataResult => {
   const allMembers = [
     ...pastors,
     ...copastors,
@@ -47,7 +47,7 @@ export const memberFormatterByRecordStatus = ({
     ...disciples,
   ];
 
-  const membersByRecordStatus: MembersByRecordStatusResultData = {
+  const membersByRecordStatus: MembersByRecordStatusDataResult = {
     pastor: {
       church: {
         isAnexe: allMembers[0]?.theirChurch?.isAnexe,
