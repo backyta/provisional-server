@@ -64,7 +64,7 @@ export class CreatePastorDto {
   originCountry: string;
 
   @ApiProperty({
-    example: '1990/12/23',
+    example: '1990-12-23',
   })
   @IsString()
   @IsNotEmpty()
@@ -77,7 +77,7 @@ export class CreatePastorDto {
   numberChildren?: string | number;
 
   @ApiProperty({
-    example: '2001/12/23',
+    example: '2001-12-23',
   })
   @IsString()
   @IsOptional()
@@ -163,12 +163,11 @@ export class CreatePastorDto {
 
   //* Roles and Status
   @ApiProperty({
-    example: [MemberRole.Disciple, MemberRole.Pastor],
+    example: [MemberRole.Pastor],
   })
   @IsEnum(MemberRole, {
     each: true,
-    message:
-      'Los roles deben contener "Discípulo" y uno de los siguientes valores: Tesorero, Predicador, Supervisor, Co-Pastor, Pastor.',
+    message: 'El valor debe ser un rol válido. Solo se permite el rol "Pastor"',
   })
   @IsArray()
   @IsNotEmpty()

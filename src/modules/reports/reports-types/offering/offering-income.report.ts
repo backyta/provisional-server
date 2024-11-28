@@ -1,6 +1,14 @@
+import { addDays, format } from 'date-fns';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
-import { ChurchServiceTimeNames } from '@/modules/church/enums';
+import {
+  MemberType,
+  MemberTypeNames,
+  OfferingIncomeCreationTypeNames,
+  OfferingIncomeCreationSubTypeNames,
+  OfferingIncomeCreationCategoryNames,
+  OfferingIncomeCreationShiftTypeNames,
+} from '@/modules/offering/income/enums';
 import { headerSection, footerSection } from '@/modules/reports/sections';
 
 interface ReportOptions {
@@ -11,10 +19,11 @@ interface ReportOptions {
   searchType?: string;
   searchSubType?: string;
   orderSearch?: string;
+  churchName?: string;
   data: any;
 }
 
-export const getFamilyGroupsReport = (
+export const getOfferingIncomeReport = (
   options: ReportOptions,
 ): TDocumentDefinitions => {
   const {
@@ -26,6 +35,7 @@ export const getFamilyGroupsReport = (
     searchType,
     searchSubType,
     orderSearch,
+    churchName,
   } = options;
 
   return {
@@ -37,54 +47,57 @@ export const getFamilyGroupsReport = (
       searchType: searchType,
       searchSubType: searchSubType,
       orderSearch: orderSearch,
+      churchName: churchName,
     }),
     footer: footerSection,
-    pageMargins: [20, 110, 20, 60],
+    pageMargins: [20, 120, 20, 60],
     content: [
       {
         layout: 'customLayout01', // optional
         table: {
           headerRows: 1,
-          widths: [
-            65,
-            'auto',
-            60,
-            'auto',
-            'auto',
-            'auto',
-            'auto',
-            'auto',
-            'auto',
-          ],
+          widths: [100, 60, 50, 60, 65, 75, 60, 60, '*'],
 
           body: [
             [
               {
-                text: 'Nombre',
+                text: 'Tipo y sub-tipo',
                 style: {
                   bold: true,
                 },
               },
               {
-                text: 'Código',
+                text: 'Categoría',
                 style: {
                   bold: true,
                 },
               },
               {
-                text: 'H. Culto',
+                text: 'Turno',
                 style: {
                   bold: true,
                 },
               },
               {
-                text: 'Mbs.',
+                text: 'Monto',
                 style: {
                   bold: true,
                 },
               },
               {
-                text: 'Predicador',
+                text: 'F. Deposito',
+                style: {
+                  bold: true,
+                },
+              },
+              {
+                text: 'Iglesia',
+                style: {
+                  bold: true,
+                },
+              },
+              {
+                text: 'G. Familiar',
                 style: {
                   bold: true,
                 },
@@ -96,34 +109,37 @@ export const getFamilyGroupsReport = (
                 },
               },
               {
-                text: 'Supervisor',
-                style: {
-                  bold: true,
-                },
-              },
-              {
-                text: 'Ubicación',
-                style: {
-                  bold: true,
-                },
-              },
-              {
-                text: 'Dirección',
+                text: 'Miembro (Tipo y Datos)',
                 style: {
                   bold: true,
                 },
               },
             ],
             ...data.map((item) => [
-              item?.familyGroupName,
-              item?.familyGroupCode,
-              ChurchServiceTimeNames[item?.serviceTime],
-              item?.disciples.length,
-              `${item?.theirPreacher?.firstName} ${item?.theirPreacher?.lastName}`,
-              `${item?.theirZone?.zoneName}`,
-              `${item?.theirSupervisor?.firstName} ${item?.theirSupervisor?.lastName}`,
-              `${item?.province}-${item?.district}-${item?.urbanSector}`,
-              `${item?.address} (${item?.referenceAddress})`,
+              item?.subType
+                ? `${OfferingIncomeCreationTypeNames[item?.type]} - ${OfferingIncomeCreationSubTypeNames[item?.subType] ?? ''}`
+                : `${OfferingIncomeCreationTypeNames[item?.type]} `,
+              OfferingIncomeCreationCategoryNames[item?.category] ?? '-',
+              OfferingIncomeCreationShiftTypeNames[item?.shift] ?? '-',
+              `${item?.amount} ${item?.currency}`,
+              format(new Date(addDays(item.date, 1)), 'dd/MM/yyyy'),
+              `${item?.church?.abbreviatedChurchName ?? '-'}`,
+              `${item?.familyGroup?.familyGroupCode ?? '-'}`,
+              `${item?.zone?.zoneName ?? '-'}`,
+              `${MemberTypeNames[item?.memberType] ?? '-'}
+              ${
+                item?.memberType === MemberType.Pastor
+                  ? `${item?.pastor?.firstName} ${item?.pastor?.lastName}`
+                  : item?.memberType === MemberType.Copastor
+                    ? `${item?.copastor?.firstName} ${item?.copastor?.lastName}`
+                    : item?.memberType === MemberType.Supervisor
+                      ? `${item?.supervisor?.firstName} ${item?.supervisor?.lastName}`
+                      : item?.memberType === MemberType.Preacher
+                        ? `${item?.preacher?.firstName} ${item?.preacher?.lastName}`
+                        : item?.memberType === MemberType.Disciple
+                          ? `${item?.disciple?.firstName} ${item?.disciple?.lastName}`
+                          : '-'
+              }`,
             ]),
             ['', '', '', '', '', '', '', '', ''],
             ['', '', '', '', '', '', '', '', ''],
@@ -136,6 +152,7 @@ export const getFamilyGroupsReport = (
         table: {
           headerRows: 1,
           widths: [
+            100,
             'auto',
             'auto',
             'auto',
@@ -143,26 +160,25 @@ export const getFamilyGroupsReport = (
             'auto',
             'auto',
             'auto',
-            'auto',
-            'auto',
+            '*',
           ],
           body: [
             [
               {
                 text: `Total de ${description}:`,
-                colSpan: 1,
+                colSpan: 2,
                 fontSize: 13,
                 bold: true,
                 margin: [0, 10, 0, 0],
               },
+              {},
               {
                 text: `${data.length} ${description}.`,
                 bold: true,
                 fontSize: 13,
-                colSpan: 2,
-                margin: [0, 10, 0, 0],
+                colSpan: 1,
+                margin: [-50, 10, 0, 0],
               },
-              {},
               {},
               {},
               {},

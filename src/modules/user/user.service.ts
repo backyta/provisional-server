@@ -105,9 +105,8 @@ export class UserService {
     if (term && searchType === UserSearchType.FirstName) {
       const firstNames = term.replace(/\+/g, ' ');
 
-      let users: User[];
       try {
-        users = await this.userRepository.find({
+        const users = await this.userRepository.find({
           where: {
             firstName: ILike(`%${firstNames}%`),
             recordStatus: RecordStatus.Active,
@@ -117,28 +116,29 @@ export class UserService {
           relations: ['updatedBy', 'createdBy'],
           order: { createdAt: order as FindOptionsOrderValue },
         });
+
+        if (users.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron usuarios con estos nombres: ${firstNames}`,
+          );
+        }
+
+        return users;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
-      }
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
 
-      if (users.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron usuarios con estos nombres: ${firstNames}`,
-        );
+        this.handleDBExceptions(error);
       }
-
-      return users;
     }
 
     //? Find by last name --> Many
     if (term && searchType === UserSearchType.LastName) {
       const lastNames = term.replace(/\+/g, ' ');
 
-      let users: User[];
       try {
-        users = await this.userRepository.find({
+        const users = await this.userRepository.find({
           where: {
             lastName: ILike(`%${lastNames}%`),
             recordStatus: RecordStatus.Active,
@@ -148,19 +148,21 @@ export class UserService {
           relations: ['updatedBy', 'createdBy'],
           order: { createdAt: order as FindOptionsOrderValue },
         });
+
+        if (users.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron usuarios con estos apellidos: ${lastNames}`,
+          );
+        }
+
+        return users;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
-      }
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
 
-      if (users.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron usuarios con estos apellidos: ${lastNames}`,
-        );
+        this.handleDBExceptions(error);
       }
-
-      return users;
     }
 
     //? Find by full name --> Many
@@ -168,9 +170,8 @@ export class UserService {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
-      let users: User[];
       try {
-        users = await this.userRepository.find({
+        const users = await this.userRepository.find({
           where: {
             firstName: ILike(`%${firstNames}%`),
             lastName: ILike(`%${lastNames}%`),
@@ -181,28 +182,29 @@ export class UserService {
           relations: ['updatedBy', 'createdBy'],
           order: { createdAt: order as FindOptionsOrderValue },
         });
+
+        if (users.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron usuarios con estos nombres y apellidos: ${firstNames} ${lastNames}`,
+          );
+        }
+
+        return users;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
-      }
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
 
-      if (users.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron usuarios con estos nombres y apellidos: ${firstNames} ${lastNames}`,
-        );
+        this.handleDBExceptions(error);
       }
-
-      return users;
     }
 
     //? Find by roles --> Many
     if (term && searchType === UserSearchType.Roles) {
       const rolesArray = term.split('+');
 
-      let users: User[];
       try {
-        users = await this.userRepository.find({
+        const users = await this.userRepository.find({
           where: {
             roles: Raw((alias) => `ARRAY[:...rolesArray]::text[] && ${alias}`, {
               rolesArray,
@@ -214,23 +216,25 @@ export class UserService {
           relations: ['updatedBy', 'createdBy'],
           order: { createdAt: order as FindOptionsOrderValue },
         });
+
+        if (users.length === 0) {
+          const rolesInSpanish = rolesArray
+            .map((role) => UserRoleNames[role] ?? role)
+            .join(' - ');
+
+          throw new NotFoundException(
+            `No se encontraron usuarios con estos roles: ${rolesInSpanish}`,
+          );
+        }
+
+        return users;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
-
-      if (users.length === 0) {
-        const rolesInSpanish = rolesArray
-          .map((role) => UserRoleNames[role] ?? role)
-          .join(' - ');
-
-        throw new NotFoundException(
-          `No se encontraron usuarios con estos roles: ${rolesInSpanish}`,
-        );
-      }
-
-      return users;
     }
 
     //? Find by gender --> Many
@@ -242,9 +246,8 @@ export class UserService {
         throw new BadRequestException(`Género no válido: ${term}`);
       }
 
-      let users: User[];
       try {
-        users = await this.userRepository.find({
+        const users = await this.userRepository.find({
           where: {
             gender: genderTerm,
             recordStatus: RecordStatus.Active,
@@ -254,21 +257,23 @@ export class UserService {
           relations: ['updatedBy', 'createdBy'],
           order: { createdAt: order as FindOptionsOrderValue },
         });
+
+        if (users.length === 0) {
+          const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
+
+          throw new NotFoundException(
+            `No se encontraron usuarios con este género: ${genderInSpanish}`,
+          );
+        }
+
+        return users;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
-
-      if (users.length === 0) {
-        const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
-
-        throw new NotFoundException(
-          `No se encontraron usuarios con este género: ${genderInSpanish}`,
-        );
-      }
-
-      return users;
     }
 
     //? Find by status --> Many
@@ -280,9 +285,8 @@ export class UserService {
         throw new BadRequestException(`Estado de registro no válido: ${term}`);
       }
 
-      let users: User[];
       try {
-        users = await this.userRepository.find({
+        const users = await this.userRepository.find({
           where: {
             recordStatus: recordStatusTerm,
           },
@@ -291,21 +295,23 @@ export class UserService {
           relations: ['updatedBy', 'createdBy'],
           order: { createdAt: order as FindOptionsOrderValue },
         });
+
+        if (users.length === 0) {
+          const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
+
+          throw new NotFoundException(
+            `No se encontraron usuarios con este estado de registro: ${value}`,
+          );
+        }
+
+        return users;
       } catch (error) {
-        throw new BadRequestException(
-          `Ocurrió un error, habla con el administrador.`,
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
-
-      if (users.length === 0) {
-        const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
-
-        throw new NotFoundException(
-          `No se encontraron usuarios con este estado de registro: ${value}`,
-        );
-      }
-
-      return users;
     }
 
     //! General Exceptions
@@ -465,7 +471,7 @@ export class UserService {
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
+      'Sucedió un error inesperado, hable con el administrador.',
     );
   }
 }

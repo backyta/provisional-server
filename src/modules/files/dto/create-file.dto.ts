@@ -17,6 +17,7 @@ import { OfferingFileType } from '@/common/enums';
 export class CreateFileDto {
   @ApiProperty({
     example: OfferingFileType.Income,
+    description: 'Type of file to be used for the image path.',
   })
   @IsEnum(OfferingFileType)
   @IsNotEmpty()
@@ -26,6 +27,7 @@ export class CreateFileDto {
 
   @ApiProperty({
     example: OfferingIncomeCreationType.Offering,
+    description: 'Type of offering to be used for the image path.',
   })
   @IsString()
   @IsNotEmpty()
@@ -35,6 +37,7 @@ export class CreateFileDto {
 
   @ApiProperty({
     example: OfferingIncomeCreationSubType.ChurchGround,
+    description: 'Sub-type of offering to be used for the image path.',
   })
   @IsString()
   @IsOptional()
@@ -43,5 +46,3 @@ export class CreateFileDto {
   @MaxLength(40)
   offeringSubType?: string;
 }
-
-// TODO : hacer description para la documentacion

@@ -142,11 +142,25 @@ export class OfferingExpenseService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit, offset = 0, order = 'ASC' } = paginationDto;
+    const { limit, offset = 0, order = 'ASC', churchId } = paginationDto;
 
     try {
+      let church: Church;
+      if (churchId) {
+        church = await this.churchRepository.findOne({
+          where: { id: churchId, recordStatus: RecordStatus.Active },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (!church) {
+          throw new NotFoundException(
+            `Iglesia con id ${churchId} no fue encontrada.`,
+          );
+        }
+      }
+
       const offeringExpenses = await this.offeringExpenseRepository.find({
-        where: { recordStatus: RecordStatus.Active },
+        where: { church: church, recordStatus: RecordStatus.Active },
         take: limit,
         skip: offset,
         relations: ['updatedBy', 'createdBy', 'church'],
@@ -182,6 +196,7 @@ export class OfferingExpenseService {
       limit,
       offset = 0,
       order,
+      churchId,
     } = searchTypeAndPaginationDto;
 
     if (!term) {
@@ -190,6 +205,23 @@ export class OfferingExpenseService {
 
     if (!searchType) {
       throw new BadRequestException(`El tipo de búsqueda es requerido.`);
+    }
+
+    console.log(term);
+
+    //* Search Church
+    let church: Church;
+    if (churchId) {
+      church = await this.churchRepository.findOne({
+        where: { id: churchId, recordStatus: RecordStatus.Active },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (!church) {
+        throw new NotFoundException(
+          `Iglesia con id ${churchId} no fue encontrada.`,
+        );
+      }
     }
 
     //* By date and church
@@ -204,22 +236,22 @@ export class OfferingExpenseService {
         searchType === OfferingExpenseSearchType.SuppliesExpenses ||
         searchType === OfferingExpenseSearchType.ExpensesAdjustment)
     ) {
-      const [churchId, date] = term.split('&');
+      // const [churchId, date] = term.split('&');
 
       try {
-        const church = await this.churchRepository.findOne({
-          where: {
-            id: churchId,
-          },
-        });
+        // const church = await this.churchRepository.findOne({
+        //   where: {
+        //     id: churchId,
+        //   },
+        // });
 
-        if (!church) {
-          throw new NotFoundException(
-            `No se encontró ninguna iglesia con este ID: ${churchId}.`,
-          );
-        }
+        // if (!church) {
+        //   throw new NotFoundException(
+        //     `No se encontró ninguna iglesia con este ID: ${churchId}.`,
+        //   );
+        // }
 
-        const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
+        const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
 
         if (isNaN(fromTimestamp)) {
           throw new NotFoundException('Formato de marca de tiempo invalido.');
@@ -232,9 +264,9 @@ export class OfferingExpenseService {
         if (searchType !== OfferingExpenseSearchType.ExpensesAdjustment) {
           offeringExpenses = await this.offeringExpenseRepository.find({
             where: {
+              church: church,
               type: searchType,
               subType: searchSubType ? searchSubType : null,
-              church: church,
               date: Between(fromDate, toDate),
               recordStatus: RecordStatus.Active,
             },
@@ -248,8 +280,8 @@ export class OfferingExpenseService {
         if (searchType === OfferingExpenseSearchType.ExpensesAdjustment) {
           offeringExpenses = await this.offeringExpenseRepository.find({
             where: {
-              type: searchType,
               church: church,
+              type: searchType,
               date: Between(fromDate, toDate),
               recordStatus: RecordStatus.Active,
             },
@@ -295,6 +327,7 @@ export class OfferingExpenseService {
 
         const offeringExpenses = await this.offeringExpenseRepository.find({
           where: {
+            church: church,
             recordStatus: recordStatusTerm,
           },
           take: limit,
@@ -457,7 +490,7 @@ export class OfferingExpenseService {
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
+      'Sucedió un error inesperado, hable con el administrador.',
     );
   }
 }

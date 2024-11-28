@@ -1,12 +1,4 @@
-import { addDays, format } from 'date-fns';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
-
-import {
-  OfferingExpenseSearchTypeNames,
-  OfferingExpenseSearchSubTypeNames,
-} from '@/modules/offering/expense/enums';
-import { OfferingExpense } from '@/modules/offering/expense/entities';
-
 import { headerSection, footerSection } from '@/modules/reports/sections';
 
 interface ReportOptions {
@@ -17,10 +9,11 @@ interface ReportOptions {
   searchType?: string;
   searchSubType?: string;
   orderSearch?: string;
-  data: OfferingExpense[];
+  churchName?: string;
+  data: any[];
 }
 
-export const getOfferingExpensesReport = (
+export const getZonesReport = (
   options: ReportOptions,
 ): TDocumentDefinitions => {
   const {
@@ -32,6 +25,7 @@ export const getOfferingExpensesReport = (
     searchType,
     searchSubType,
     orderSearch,
+    churchName,
   } = options;
 
   return {
@@ -43,44 +37,21 @@ export const getOfferingExpensesReport = (
       searchType: searchType,
       searchSubType: searchSubType,
       orderSearch: orderSearch,
+      churchName: churchName,
     }),
     footer: footerSection,
-    pageMargins: [20, 110, 20, 60],
+    pageMargins: [20, 120, 20, 60],
     content: [
       {
         layout: 'customLayout01', // optional
         table: {
           headerRows: 1,
-          widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', '*'],
+          widths: [80, 60, '*', '*', '*', 85, 50, 50, 50],
 
           body: [
             [
               {
-                text: 'Tipo',
-                style: {
-                  bold: true,
-                },
-              },
-              {
-                text: 'Sub-tipo',
-                style: {
-                  bold: true,
-                },
-              },
-              {
-                text: 'Monto',
-                style: {
-                  bold: true,
-                },
-              },
-              {
-                text: 'Divisa',
-                style: {
-                  bold: true,
-                },
-              },
-              {
-                text: 'F. de Gasto',
+                text: 'Nombre',
                 style: {
                   bold: true,
                 },
@@ -92,23 +63,61 @@ export const getOfferingExpensesReport = (
                 },
               },
               {
-                text: 'Comentarios',
+                text: 'Pastor',
+                style: {
+                  bold: true,
+                },
+              },
+              {
+                text: 'Co-Pastor',
+                style: {
+                  bold: true,
+                },
+              },
+              {
+                text: 'Supervisor',
+                style: {
+                  bold: true,
+                },
+              },
+              {
+                text: 'Ubicación',
+                style: {
+                  bold: true,
+                },
+              },
+              {
+                text: 'Disc.',
+                style: {
+                  bold: true,
+                },
+              },
+              {
+                text: 'G. Fam.',
+                style: {
+                  bold: true,
+                },
+              },
+              {
+                text: 'Pred.',
                 style: {
                   bold: true,
                 },
               },
             ],
             ...data.map((item) => [
-              OfferingExpenseSearchTypeNames[item?.type],
-              OfferingExpenseSearchSubTypeNames[item?.subType] ?? '-',
-              item?.amount ?? '-',
-              item?.currency ?? '-',
-              format(new Date(addDays(item.date, 1)), 'dd/MM/yyyy'),
-              `${item?.church?.abbreviatedChurchName ?? '-'}`,
-              item?.comments ?? '-',
+              item?.zoneName,
+              `${item?.theirChurch?.abbreviatedChurchName}`,
+              `${item?.theirPastor?.firstName} ${item?.theirPastor?.lastName}`,
+              `${item?.theirCopastor?.firstName} ${item?.theirCopastor?.lastName}`,
+              `${item?.theirSupervisor?.firstName} ${item?.theirSupervisor?.lastName}`,
+              `${item?.country}-${item?.department}-${item?.province}-${item?.district}`,
+              item?.disciples.length,
+              item?.familyGroups.length,
+              item?.preachers.length,
             ]),
-            ['', '', '', '', '', '', ''],
-            ['', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', '', ''],
           ],
         },
       },
@@ -117,24 +126,36 @@ export const getOfferingExpensesReport = (
         layout: 'noBorders',
         table: {
           headerRows: 1,
-          widths: [100, 'auto', 'auto', 'auto', 'auto', 'auto', '*'],
+          widths: [
+            'auto',
+            'auto',
+            'auto',
+            50,
+            'auto',
+            'auto',
+            'auto',
+            'auto',
+            'auto',
+          ],
           body: [
             [
               {
                 text: `Total de ${description}:`,
-                colSpan: 2,
+                colSpan: 1,
                 fontSize: 13,
                 bold: true,
                 margin: [0, 10, 0, 0],
               },
-              {},
               {
                 text: `${data.length} ${description}.`,
                 bold: true,
                 fontSize: 13,
-                colSpan: 1,
-                margin: [-50, 10, 0, 0],
+                colSpan: 2,
+                margin: [0, 10, 0, 0],
               },
+              {},
+              {},
+              {},
               {},
               {},
               {},

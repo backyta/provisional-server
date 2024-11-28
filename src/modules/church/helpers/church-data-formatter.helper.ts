@@ -1,4 +1,3 @@
-import { RecordStatus } from '@/common/enums';
 import { Church } from '@/modules/church/entities';
 
 export interface Options {
@@ -9,16 +8,15 @@ export interface Options {
 export const churchDataFormatter = ({ churches, mainChurch }: Options) => {
   return churches.map((church) => ({
     ...church,
-    theirMainChurch:
-      church.isAnexe && church.recordStatus === RecordStatus.Active
-        ? {
-            id: mainChurch?.id,
-            churchName: mainChurch?.churchName,
-            abbreviatedChurchName: mainChurch?.abbreviatedChurchName,
-            district: mainChurch?.district,
-            urbanSector: mainChurch?.urbanSector,
-          }
-        : null,
+    theirMainChurch: church.isAnexe
+      ? {
+          id: mainChurch?.id,
+          churchName: mainChurch?.churchName,
+          abbreviatedChurchName: mainChurch?.abbreviatedChurchName,
+          district: mainChurch?.district,
+          urbanSector: mainChurch?.urbanSector,
+        }
+      : null,
     anexes: church.anexes.map((anexe) => ({
       id: anexe?.id,
       churchName: anexe?.churchName,

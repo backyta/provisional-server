@@ -227,7 +227,7 @@ export class FamilyGroupService {
       const savedFamilyGroup =
         await this.familyGroupRepository.save(newFamilyGroup);
 
-      // Set relationship in preacher according their family group
+      //* Set relationship in preacher according their family group
       preacher.theirFamilyGroup = savedFamilyGroup;
       await this.preacherRepository.save(preacher);
 
@@ -249,19 +249,31 @@ export class FamilyGroupService {
 
     if (isSimpleQuery || (isSimpleQuery && churchId)) {
       try {
-        const church = await this.churchRepository.findOne({
-          where: {
-            id: churchId,
-            recordStatus: RecordStatus.Active,
-          },
-          order: { createdAt: order as FindOptionsOrderValue },
-        });
+        let church: Church;
+        if (churchId) {
+          church = await this.churchRepository.findOne({
+            where: { id: churchId, recordStatus: RecordStatus.Active },
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+
+          if (!church) {
+            throw new NotFoundException(
+              `Iglesia con id ${churchId} no fue encontrada.`,
+            );
+          }
+        }
 
         const familyGroups = await this.familyGroupRepository.find({
           where: { theirChurch: church, recordStatus: RecordStatus.Active },
 
           order: { createdAt: order as FindOptionsOrderValue },
         });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No existen registros disponibles para mostrar.`,
+          );
+        }
 
         return familyGroups;
       } catch (error) {
@@ -274,8 +286,21 @@ export class FamilyGroupService {
     }
 
     try {
+      let church: Church;
+      if (churchId) {
+        church = await this.churchRepository.findOne({
+          where: { id: churchId, recordStatus: RecordStatus.Active },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (!church) {
+          throw new NotFoundException(
+            `Iglesia con id ${churchId} no fue encontrada.`,
+          );
+        }
+      }
       const familyGroups = await this.familyGroupRepository.find({
-        where: { recordStatus: RecordStatus.Active },
+        where: { theirChurch: church, recordStatus: RecordStatus.Active },
         take: limit,
         skip: offset,
         relations: [
@@ -319,6 +344,7 @@ export class FamilyGroupService {
       limit,
       offset = 0,
       order,
+      churchId,
     } = searchTypeAndPaginationDto;
 
     if (!term) {
@@ -327,6 +353,21 @@ export class FamilyGroupService {
 
     if (!searchType) {
       throw new BadRequestException(`El tipo de búsqueda es requerido.`);
+    }
+
+    //* Search Church
+    let church: Church;
+    if (churchId) {
+      church = await this.churchRepository.findOne({
+        where: { id: churchId, recordStatus: RecordStatus.Active },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (!church) {
+        throw new NotFoundException(
+          `Iglesia con id ${churchId} no fue encontrada.`,
+        );
+      }
     }
 
     //? Find by first name --> Many
@@ -353,6 +394,7 @@ export class FamilyGroupService {
 
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             theirPreacher: In(preachersId),
             recordStatus: RecordStatus.Active,
           },
@@ -411,6 +453,7 @@ export class FamilyGroupService {
 
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             theirSupervisor: In(supervisorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -469,6 +512,7 @@ export class FamilyGroupService {
 
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             theirCopastor: In(copastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -527,6 +571,7 @@ export class FamilyGroupService {
 
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             theirPastor: In(pastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -586,6 +631,7 @@ export class FamilyGroupService {
 
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             theirPreacher: In(preacherId),
             recordStatus: RecordStatus.Active,
           },
@@ -645,6 +691,7 @@ export class FamilyGroupService {
 
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             theirSupervisor: In(supervisorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -703,6 +750,7 @@ export class FamilyGroupService {
 
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             theirCopastor: In(copastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -761,6 +809,7 @@ export class FamilyGroupService {
 
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             theirPastor: In(pastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -822,6 +871,7 @@ export class FamilyGroupService {
 
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             theirPreacher: In(preachersId),
             recordStatus: RecordStatus.Active,
           },
@@ -882,6 +932,7 @@ export class FamilyGroupService {
 
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             theirSupervisor: In(supervisorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -942,6 +993,7 @@ export class FamilyGroupService {
 
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             theirCopastor: In(copastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -1002,6 +1054,7 @@ export class FamilyGroupService {
 
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             theirPastor: In(pastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -1042,6 +1095,7 @@ export class FamilyGroupService {
       try {
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             familyGroupCode: ILike(`%${term}%`),
             recordStatus: RecordStatus.Active,
           },
@@ -1058,7 +1112,6 @@ export class FamilyGroupService {
             'theirPreacher.member',
             'disciples.member',
           ],
-          relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
         });
 
@@ -1083,6 +1136,7 @@ export class FamilyGroupService {
       try {
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             familyGroupName: ILike(`%${term}%`),
             recordStatus: RecordStatus.Active,
           },
@@ -1133,6 +1187,7 @@ export class FamilyGroupService {
 
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             theirZone: In(zonesId),
             recordStatus: RecordStatus.Active,
           },
@@ -1173,6 +1228,7 @@ export class FamilyGroupService {
       try {
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             department: ILike(`%${term}%`),
             recordStatus: RecordStatus.Active,
           },
@@ -1213,6 +1269,7 @@ export class FamilyGroupService {
       try {
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             province: ILike(`%${term}%`),
             recordStatus: RecordStatus.Active,
           },
@@ -1253,6 +1310,7 @@ export class FamilyGroupService {
       try {
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             district: ILike(`%${term}%`),
             recordStatus: RecordStatus.Active,
           },
@@ -1293,6 +1351,7 @@ export class FamilyGroupService {
       try {
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             urbanSector: ILike(`%${term}%`),
             recordStatus: RecordStatus.Active,
           },
@@ -1333,6 +1392,7 @@ export class FamilyGroupService {
       try {
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             address: ILike(`%${term}%`),
             recordStatus: RecordStatus.Active,
           },
@@ -1380,6 +1440,7 @@ export class FamilyGroupService {
       try {
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             recordStatus: recordStatusTerm,
           },
           take: limit,
@@ -1416,6 +1477,7 @@ export class FamilyGroupService {
       }
     }
 
+    // TODO : colocar iglesia para pasar igual que los graficos
     //? Find family groups by most populated --> Many
     if (term && searchType === DashboardSearchType.MostPopulatedFamilyGroups) {
       try {
@@ -1545,12 +1607,12 @@ export class FamilyGroupService {
       where: { id: id },
       relations: [
         'theirChurch',
-        'theirPastor',
-        'theirCopastor',
-        'theirSupervisor',
+        'theirPastor.member',
+        'theirCopastor.member',
+        'theirSupervisor.member',
         'theirZone',
-        'theirPreacher',
-        'disciples',
+        'theirPreacher.member',
+        'disciples.member',
       ],
     });
 
@@ -1576,9 +1638,9 @@ export class FamilyGroupService {
         where: { id: newTheirPreacher },
         relations: [
           'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
+          'theirPastor.member',
+          'theirCopastor.member',
+          'theirSupervisor.member',
           'theirZone',
           'theirFamilyGroup',
         ],
@@ -1822,18 +1884,18 @@ export class FamilyGroupService {
           where: { id: newPreacher?.theirFamilyGroup?.id },
           relations: [
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
             'theirZone',
-            'theirPreacher',
-            'disciples',
+            'theirPreacher.member',
+            'disciples.member',
           ],
         });
 
         if (!newFamilyGroup) {
           throw new BadRequestException(
-            `Grupo Familiar con id: ${newPreacher?.theirFamilyGroup?.id} no fue encontrado`,
+            `Grupo Familiar con id: ${newPreacher?.theirFamilyGroup?.id} no fue encontrado.`,
           );
         }
 
@@ -2024,9 +2086,9 @@ export class FamilyGroupService {
         where: { id: theirPreacher },
         relations: [
           'theirChurch',
-          'theirPastor',
-          'theirCopastor',
-          'theirSupervisor',
+          'theirPastor.member',
+          'theirCopastor.member',
+          'theirSupervisor.member',
           'theirZone',
           'theirFamilyGroup',
         ],
@@ -2261,7 +2323,7 @@ export class FamilyGroupService {
 
     this.logger.error(error);
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
+      'Sucedió un error inesperado, hable con el administrador.',
     );
   }
 }

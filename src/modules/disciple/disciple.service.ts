@@ -104,11 +104,11 @@ export class DiscipleService {
       where: { id: theirFamilyGroup },
       relations: [
         'theirChurch',
-        'theirPastor',
-        'theirCopastor',
-        'theirSupervisor',
+        'theirPastor.member',
+        'theirCopastor.member',
+        'theirSupervisor.member',
         'theirZone',
-        'theirPreacher',
+        'theirPreacher.member',
       ],
     });
 
@@ -272,7 +272,13 @@ export class DiscipleService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit, offset = 0, order = 'ASC', isSimpleQuery } = paginationDto;
+    const {
+      limit,
+      offset = 0,
+      order = 'ASC',
+      isSimpleQuery,
+      churchId,
+    } = paginationDto;
 
     if (isSimpleQuery) {
       try {
@@ -282,15 +288,39 @@ export class DiscipleService {
           relations: ['member'],
         });
 
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No existen registros disponibles para mostrar.`,
+          );
+        }
+
         return disciples;
       } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
         this.handleDBExceptions(error);
       }
     }
 
     try {
+      let church: Church;
+      if (churchId) {
+        church = await this.churchRepository.findOne({
+          where: { id: churchId, recordStatus: RecordStatus.Active },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (!church) {
+          throw new NotFoundException(
+            `Iglesia con id ${churchId} no fue encontrada.`,
+          );
+        }
+      }
+
       const disciples = await this.discipleRepository.find({
-        where: { recordStatus: RecordStatus.Active },
+        where: { theirChurch: church, recordStatus: RecordStatus.Active },
         take: limit,
         skip: offset,
         relations: [
@@ -335,6 +365,7 @@ export class DiscipleService {
       limit,
       offset = 0,
       order,
+      churchId,
     } = searchTypeAndPaginationDto;
 
     if (!term) {
@@ -343,6 +374,21 @@ export class DiscipleService {
 
     if (!searchType) {
       throw new BadRequestException(`El tipo de búsqueda es requerido.`);
+    }
+
+    //* Search Church
+    let church: Church;
+    if (churchId) {
+      church = await this.churchRepository.findOne({
+        where: { id: churchId, recordStatus: RecordStatus.Active },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (!church) {
+        throw new NotFoundException(
+          `Iglesia con id ${churchId} no fue encontrada.`,
+        );
+      }
     }
 
     //? Find by first name --> Many
@@ -357,6 +403,7 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstName: ILike(`%${firstNames}%`),
             },
@@ -418,6 +465,7 @@ export class DiscipleService {
 
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             theirPreacher: In(preachersId),
             recordStatus: RecordStatus.Active,
           },
@@ -477,6 +525,7 @@ export class DiscipleService {
 
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             theirSupervisor: In(supervisorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -536,6 +585,7 @@ export class DiscipleService {
 
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             theirCopastor: In(copastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -595,6 +645,7 @@ export class DiscipleService {
 
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             theirPastor: In(pastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -643,6 +694,7 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             member: {
               lastName: ILike(`%${lastNames}%`),
             },
@@ -704,6 +756,7 @@ export class DiscipleService {
 
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             theirPreacher: In(preacherId),
             recordStatus: RecordStatus.Active,
           },
@@ -763,6 +816,7 @@ export class DiscipleService {
 
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             theirSupervisor: In(supervisorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -822,6 +876,7 @@ export class DiscipleService {
 
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             theirCopastor: In(copastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -881,6 +936,7 @@ export class DiscipleService {
 
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             theirPastor: In(pastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -930,6 +986,7 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstName: ILike(`%${firstNames}%`),
               lastName: ILike(`%${lastNames}%`),
@@ -994,6 +1051,7 @@ export class DiscipleService {
 
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             theirPreacher: In(preachersId),
             recordStatus: RecordStatus.Active,
           },
@@ -1055,6 +1113,7 @@ export class DiscipleService {
 
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             theirSupervisor: In(supervisorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -1116,6 +1175,7 @@ export class DiscipleService {
 
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             theirCopastor: In(copastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -1177,6 +1237,7 @@ export class DiscipleService {
 
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             theirPastor: In(pastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -1227,6 +1288,7 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             member: {
               birthDate: Between(fromDate, toDate),
             },
@@ -1273,6 +1335,7 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1349,6 +1412,7 @@ export class DiscipleService {
 
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             theirFamilyGroup: In(familyGroupsId),
             recordStatus: RecordStatus.Active,
           },
@@ -1402,6 +1466,7 @@ export class DiscipleService {
 
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             theirFamilyGroup: In(familyGroupsId),
             recordStatus: RecordStatus.Active,
           },
@@ -1453,6 +1518,7 @@ export class DiscipleService {
 
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             theirZone: In(zonesId),
             recordStatus: RecordStatus.Active,
           },
@@ -1501,6 +1567,7 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             member: {
               gender: genderTerm,
             },
@@ -1559,6 +1626,7 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             member: {
               maritalStatus: maritalStatusTerm,
             },
@@ -1605,6 +1673,7 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             member: {
               originCountry: ILike(`%${term}%`),
             },
@@ -1648,6 +1717,7 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             member: {
               department: ILike(`%${term}%`),
             },
@@ -1691,6 +1761,7 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             member: {
               province: ILike(`%${term}%`),
             },
@@ -1734,6 +1805,7 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             member: {
               district: ILike(`%${term}%`),
             },
@@ -1777,6 +1849,7 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             member: {
               urbanSector: ILike(`%${term}%`),
             },
@@ -1820,6 +1893,7 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             member: {
               address: ILike(`%${term}%`),
             },
@@ -1870,6 +1944,7 @@ export class DiscipleService {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
+            theirChurch: church,
             recordStatus: recordStatusTerm,
           },
           take: limit,
@@ -1956,10 +2031,10 @@ export class DiscipleService {
       relations: [
         'member',
         'theirChurch',
-        'theirPastor',
-        'theirCopastor',
-        'theirSupervisor',
-        'theirPreacher',
+        'theirPastor.member',
+        'theirCopastor.member',
+        'theirSupervisor.member',
+        'theirPreacher.member',
         'theirZone',
         'theirFamilyGroup',
       ],
@@ -1969,29 +2044,32 @@ export class DiscipleService {
       throw new NotFoundException(`Discípulo con id: ${id} no fue encontrado.`);
     }
 
-    if (!roles.some((role) => ['disciple'].includes(role))) {
-      throw new BadRequestException(`Los roles deben incluir "Discípulo"`);
+    if (!roles.some((role) => ['disciple', 'predicador'].includes(role))) {
+      throw new BadRequestException(
+        `Los roles deben incluir "Discípulo" o "Predicador".`,
+      );
     }
 
     if (
-      (disciple.member.roles.includes(MemberRole.Disciple) &&
-        !disciple.member.roles.includes(MemberRole.Preacher) &&
-        !disciple.member.roles.includes(MemberRole.Preacher) &&
-        !disciple.member.roles.includes(MemberRole.Copastor) &&
-        !disciple.member.roles.includes(MemberRole.Pastor) &&
-        !disciple.member.roles.includes(MemberRole.Treasurer) &&
-        (roles.includes(MemberRole.Copastor) ||
-          roles.includes(MemberRole.Pastor) ||
-          roles.includes(MemberRole.Supervisor))) ||
-      (disciple.member.roles.includes(MemberRole.Disciple) &&
-        disciple.member.roles.includes(MemberRole.Treasurer) &&
-        !disciple.member.roles.includes(MemberRole.Preacher) &&
-        !disciple.member.roles.includes(MemberRole.Copastor) &&
-        !disciple.member.roles.includes(MemberRole.Pastor) &&
-        !disciple.member.roles.includes(MemberRole.Preacher) &&
-        (roles.includes(MemberRole.Copastor) ||
-          roles.includes(MemberRole.Pastor) ||
-          roles.includes(MemberRole.Supervisor)))
+      disciple.member.roles.includes(MemberRole.Disciple) &&
+      !disciple.member.roles.includes(MemberRole.Preacher) &&
+      !disciple.member.roles.includes(MemberRole.Preacher) &&
+      !disciple.member.roles.includes(MemberRole.Copastor) &&
+      !disciple.member.roles.includes(MemberRole.Pastor) &&
+      !disciple.member.roles.includes(MemberRole.Treasurer) &&
+      (roles.includes(MemberRole.Copastor) ||
+        roles.includes(MemberRole.Pastor) ||
+        roles.includes(MemberRole.Supervisor))
+      //     ||
+      // (disciple.member.roles.includes(MemberRole.Disciple) &&
+      //   disciple.member.roles.includes(MemberRole.Treasurer) &&
+      //   !disciple.member.roles.includes(MemberRole.Preacher) &&
+      //   !disciple.member.roles.includes(MemberRole.Copastor) &&
+      //   !disciple.member.roles.includes(MemberRole.Pastor) &&
+      //   !disciple.member.roles.includes(MemberRole.Preacher) &&
+      //   (roles.includes(MemberRole.Copastor) ||
+      //     roles.includes(MemberRole.Pastor) ||
+      //     roles.includes(MemberRole.Supervisor)))
     ) {
       throw new BadRequestException(
         `No se puede asignar un rol superior sin pasar por la jerarquía: [discípulo, predicador, supervisor, copastor, pastor].`,
@@ -2035,10 +2113,10 @@ export class DiscipleService {
           where: { id: theirFamilyGroup },
           relations: [
             'theirChurch',
-            'theirPastor',
-            'theirCopastor',
-            'theirSupervisor',
-            'theirPreacher',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
+            'theirPreacher.member',
             'theirZone',
           ],
         });
@@ -2266,8 +2344,8 @@ export class DiscipleService {
       !disciple.member.roles.includes(MemberRole.Copastor) &&
       !disciple.member.roles.includes(MemberRole.Supervisor) &&
       !disciple.member.roles.includes(MemberRole.Pastor) &&
-      roles.includes(MemberRole.Disciple) &&
       roles.includes(MemberRole.Preacher) &&
+      !roles.includes(MemberRole.Disciple) &&
       !roles.includes(MemberRole.Treasurer) &&
       !roles.includes(MemberRole.Copastor) &&
       !roles.includes(MemberRole.Pastor) &&
@@ -2283,7 +2361,12 @@ export class DiscipleService {
 
       const newSupervisor = await this.supervisorRepository.findOne({
         where: { id: theirSupervisor },
-        relations: ['theirCopastor', 'theirPastor', 'theirChurch', 'theirZone'],
+        relations: [
+          'theirCopastor.member',
+          'theirPastor.member',
+          'theirChurch',
+          'theirZone',
+        ],
       });
 
       if (!newSupervisor) {
@@ -2403,6 +2486,7 @@ export class DiscipleService {
           createdAt: new Date(),
           createdBy: user,
         });
+
         const savedPreacher = await this.preacherRepository.save(newPreacher);
 
         await this.discipleRepository.remove(disciple);
@@ -2434,13 +2518,7 @@ export class DiscipleService {
     try {
       const updatedDisciple = await this.discipleRepository.preload({
         id: disciple.id,
-        // theirChurch: null,
-        // theirPastor: null,
-        // theirCopastor: null,
-        // theirSupervisor: null,
-        // theirZone: null,
-        // theirFamilyGroup: null,
-        // theirPreacher: null,
+
         updatedAt: new Date(),
         updatedBy: user,
         recordStatus: RecordStatus.Inactive,
@@ -2466,7 +2544,7 @@ export class DiscipleService {
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
+      'Sucedió un error inesperado, hable con el administrador.',
     );
   }
 }

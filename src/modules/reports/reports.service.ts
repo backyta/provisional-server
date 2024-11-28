@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -12,12 +13,13 @@ import { format } from 'date-fns';
 import {
   SearchType,
   GenderNames,
+  RecordOrder,
   SearchSubType,
   SearchTypeNames,
   RecordStatusNames,
   SearchSubTypeNames,
   MaritalStatusNames,
-  RecordOrder,
+  RecordOrderNames,
 } from '@/common/enums';
 import {
   PaginationDto,
@@ -29,27 +31,35 @@ import { UserRoleNames } from '@/modules/auth/enums';
 
 import {
   MemberTypeNames,
-  OfferingIncomeCreationShiftTypeNames,
-  OfferingIncomeCreationSubType,
   OfferingIncomeCreationType,
+  OfferingIncomeCreationSubType,
+  OfferingIncomeCreationShiftTypeNames,
 } from '@/modules/offering/income/enums';
+
+import { CurrencyType } from '@/modules/offering/shared/enums';
+import { OfferingExpenseSearchType } from '@/modules/offering/expense/enums';
 
 import { DateFormatter } from '@/modules/reports/helpers';
 import { PrinterService } from '@/modules/printer/printer.service';
+
 import {
-  getUsersReport,
-  getZonesReport,
-  getMembersReport,
-  getChurchesReport,
-  getFamilyGroupsReport,
-  getMemberMetricsReport,
   getOfferingIncomeReport,
   getOfferingExpensesReport,
+} from '@/modules/reports/reports-types/offering';
+import { getUsersReport } from '@/modules/reports/reports-types/user';
+import { getZonesReport } from '@/modules/reports/reports-types/zone';
+import { getChurchesReport } from '@/modules/reports/reports-types/church';
+import { getMembersReport } from '@/modules/reports/reports-types/membership';
+import { getFamilyGroupsReport } from '@/modules/reports/reports-types/family-group';
+import { getStudyCertificateByIdReport } from '@/modules/reports/reports-types/others';
+
+import {
+  getMemberMetricsReport,
   getFamilyGroupMetricsReport,
-  getStudyCertificateByIdReport,
   getOfferingIncomeMetricsReport,
+  getOfferingExpensesMetricsReport,
   getFinancialBalanceComparativeMetricsReport,
-} from '@/modules/reports/reports-types';
+} from '@/modules/reports/reports-types/metrics';
 
 import { UserService } from '@/modules/user/user.service';
 import { PastorService } from '@/modules/pastor/pastor.service';
@@ -90,6 +100,7 @@ import {
   MembersByCategoryAndGenderDataResult,
   MembersByDistrictAndGenderDataResult,
 } from '@/modules/metrics/helpers/member';
+
 import {
   FamilyGroupsByCodeDataResult,
   FamilyGroupsByZoneDataResult,
@@ -98,6 +109,7 @@ import {
   FamilyGroupsByRecordStatusDataResult,
   MonthlyFamilyGroupsFluctuationDataResult,
 } from '@/modules/metrics/helpers/family-group';
+
 import {
   OfferingIncomeByActivitiesDataResult,
   OfferingIncomeByFamilyGroupDataResult,
@@ -110,23 +122,20 @@ import {
   OfferingIncomeByIncomeAdjustmentDataResult,
   OfferingIncomeBySpecialOfferingDataResult,
 } from '@/modules/metrics/helpers/offering-income';
+
 import {
-  OfferingExpensesAdjustmentDataResult,
   OfferingExpenseDataResult,
-} from '../metrics/helpers/offering-expense';
-import { getOfferingExpenseMetricsReport } from './reports-types/offering-expense-metrics.report';
+  OfferingExpensesAdjustmentDataResult,
+} from '@/modules/metrics/helpers/offering-expense';
+
 import {
-  GeneralOfferingExpensesComparativeDataResult,
+  YearlyIncomeExpenseComparativeDataResult,
+  OfferingIncomeComparativeByTypeDataResult,
   GeneralOfferingIncomeComparativeDataResult,
   OfferingExpenseComparativeByTypeDataResult,
-  OfferingIncomeComparativeByTypeDataResult,
-  YearlyIncomeExpenseComparativeDataResult,
-} from '../metrics/helpers/offering-comparative';
-import { CurrencyType } from '../offering/shared/enums';
-import { OfferingExpenseSearchType } from '../offering/expense/enums';
-
-//TODO : ver si se usar try catch, si es que el error revienta aqui o en servicio que se consume.
-// Hacerlo!!!!!
+  GeneralOfferingExpensesComparativeDataResult,
+  OfferingExpenseComparativeBySubTypeDataResult,
+} from '@/modules/metrics/helpers/offering-comparative';
 
 @Injectable()
 export class ReportsService {
@@ -161,30 +170,38 @@ export class ReportsService {
 
   //* STUDENT CERTIFICATE
   async getStudyCertificateById(studentId: string) {
-    const student = await this.memberRepository.findOne({
-      where: {
-        id: studentId,
-      },
-    });
+    try {
+      const student = await this.memberRepository.findOne({
+        where: {
+          id: studentId,
+        },
+      });
 
-    if (!student) {
-      throw new NotFoundException(
-        `Estudiante con id: ${studentId}, no fue encontrado.`,
-      );
+      if (!student) {
+        throw new NotFoundException(
+          `Estudiante con id: ${studentId}, no fue encontrado.`,
+        );
+      }
+
+      const docDefinition = getStudyCertificateByIdReport({
+        studentName: `${student.firstName} ${student.lastName}`,
+        directorName: 'Marcos Alberto Reyes Quispe',
+        studyStartDate: DateFormatter.getDDMMYYYY(new Date('2024-03-07')),
+        studyEndDate: DateFormatter.getDDMMYYYY(new Date('2024-10-07')),
+        classSchedule: '17:00 a 19:00',
+        hoursNumber: 10,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getStudyCertificateByIdReport({
-      studentName: `${student.firstName} ${student.lastName}`,
-      directorName: 'Marcos Alberto Reyes Quispe',
-      studyStartDate: DateFormatter.getDDMMYYYY(new Date('2024-03-07')),
-      studyEndDate: DateFormatter.getDDMMYYYY(new Date('2024-10-07')),
-      classSchedule: '17:00 a 19:00',
-      hoursNumber: 10,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //? CHURCHES
@@ -192,25 +209,34 @@ export class ReportsService {
   async getGeneralChurches(paginationDto: PaginationDto) {
     const { order } = paginationDto;
 
-    const churches: Church[] = await this.churchService.findAll(paginationDto);
+    try {
+      const churches: Church[] =
+        await this.churchService.findAll(paginationDto);
 
-    if (!churches) {
-      throw new NotFoundException(
-        `No se encontraron iglesias con estos términos de búsqueda.`,
-      );
+      if (!churches) {
+        throw new NotFoundException(
+          `No se encontraron iglesias con estos términos de búsqueda.`,
+        );
+      }
+
+      const docDefinition = getChurchesReport({
+        title: 'Reporte de Iglesias',
+        subTitle: 'Resultados de Búsqueda de Iglesias',
+        description: 'iglesias',
+        orderSearch: order,
+        data: churches,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getChurchesReport({
-      title: 'Reporte de Iglesias',
-      subTitle: 'Resultados de Búsqueda de Iglesias',
-      description: 'iglesias',
-      orderSearch: order,
-      data: churches,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //* CHURCHES REPORT BY TERM
@@ -221,85 +247,110 @@ export class ReportsService {
     const { 'search-type': searchType, 'search-sub-type': searchSubType } =
       searchTypeAndPaginationDto;
 
-    const churches: Church[] = await this.churchService.findByTerm(
-      term,
-      searchTypeAndPaginationDto,
-    );
-
-    if (!churches) {
-      throw new NotFoundException(
-        `No se encontraron iglesias con estos términos de búsqueda.`,
+    try {
+      const churches: Church[] = await this.churchService.findByTerm(
+        term,
+        searchTypeAndPaginationDto,
       );
-    }
 
-    let newTerm: string;
-    newTerm = term;
-
-    // By Founding Date
-    if (searchType === SearchType.FoundingDate) {
-      const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
-
-      if (isNaN(fromTimestamp)) {
-        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      if (!churches) {
+        throw new NotFoundException(
+          `No se encontraron iglesias con estos términos de búsqueda.`,
+        );
       }
 
-      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
-      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+      let newTerm: string;
+      newTerm = term;
 
-      newTerm = `${formattedFromDate} - ${formattedToDate}`;
-    }
+      //* By Founding Date
+      if (searchType === SearchType.FoundingDate) {
+        const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
 
-    // By Record Status
-    if (searchType === SearchType.RecordStatus) {
-      const recordStatusTerm = term.toLowerCase();
-      const validRecordStatus = ['active', 'inactive'];
+        if (isNaN(fromTimestamp)) {
+          throw new NotFoundException('Formato de marca de tiempo invalido.');
+        }
 
-      if (!validRecordStatus.includes(recordStatusTerm)) {
-        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+        const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+        const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+        newTerm = `${formattedFromDate} - ${formattedToDate}`;
       }
 
-      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      //* By Record Status
+      if (searchType === SearchType.RecordStatus) {
+        const recordStatusTerm = term.toLowerCase();
+        const validRecordStatus = ['active', 'inactive'];
+
+        if (!validRecordStatus.includes(recordStatusTerm)) {
+          throw new BadRequestException(
+            `Estado de registro no válido: ${term}`,
+          );
+        }
+
+        newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      }
+
+      const docDefinition = getChurchesReport({
+        title: 'Reporte de Iglesias',
+        subTitle: 'Resultados de Búsqueda de Iglesias',
+        description: 'iglesias',
+        searchTerm: `Termino de búsqueda: ${newTerm}`,
+        searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
+        searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
+        data: churches,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getChurchesReport({
-      title: 'Reporte de Iglesias',
-      subTitle: 'Resultados de Búsqueda de Iglesias',
-      description: 'iglesias',
-      searchTerm: `Termino de búsqueda: ${newTerm}`,
-      searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
-      searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
-      data: churches,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //? PASTORS
   //* GENERAL PASTORS REPORT
   async getGeneralPastors(paginationDto: PaginationDto) {
-    const { order } = paginationDto;
+    const { order, churchId } = paginationDto;
 
-    const pastors: Pastor[] = await this.pastorService.findAll(paginationDto);
+    try {
+      const pastors: Pastor[] = await this.pastorService.findAll(paginationDto);
 
-    if (!pastors) {
-      throw new NotFoundException(
-        `No se encontraron pastores con estos términos de búsqueda.`,
-      );
+      if (!pastors) {
+        throw new NotFoundException(
+          `No se encontraron pastores con estos términos de búsqueda.`,
+        );
+      }
+
+      const docDefinition = getMembersReport({
+        title: 'Reporte de Pastores',
+        subTitle: 'Resultados de Búsqueda de Pastores',
+        description: 'pastores',
+        orderSearch: order,
+        churchName: churchId
+          ? pastors[0]?.theirChurch?.abbreviatedChurchName
+          : undefined,
+        data: pastors,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getMembersReport({
-      title: 'Reporte de Pastores',
-      subTitle: 'Resultados de Búsqueda de Pastores',
-      description: 'pastores',
-      orderSearch: order,
-      data: pastors,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //* PASTORS REPORT BY TERM
@@ -307,139 +358,172 @@ export class ReportsService {
     term: string,
     searchTypeAndPaginationDto: SearchAndPaginationDto,
   ) {
-    const { 'search-type': searchType, 'search-sub-type': searchSubType } =
-      searchTypeAndPaginationDto;
+    const {
+      'search-type': searchType,
+      'search-sub-type': searchSubType,
+      order,
+      churchId,
+    } = searchTypeAndPaginationDto;
 
-    const pastors: Pastor[] = await this.pastorService.findByTerm(
-      term,
-      searchTypeAndPaginationDto,
-    );
-
-    if (!pastors) {
-      throw new NotFoundException(
-        `No se encontraron pastores con estos términos de búsqueda.`,
+    try {
+      const pastors: Pastor[] = await this.pastorService.findByTerm(
+        term,
+        searchTypeAndPaginationDto,
       );
-    }
 
-    let newTerm: string;
-    newTerm = term;
-
-    // By Birth Date
-    if (searchType === SearchType.BirthDate) {
-      const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
-
-      if (isNaN(fromTimestamp)) {
-        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      if (!pastors) {
+        throw new NotFoundException(
+          `No se encontraron pastores con estos términos de búsqueda.`,
+        );
       }
 
-      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
-      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+      let newTerm: string;
+      newTerm = term;
 
-      newTerm = `${formattedFromDate} - ${formattedToDate}`;
-    }
+      //* By Birth Date
+      if (searchType === SearchType.BirthDate) {
+        const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
 
-    // By Birth Month
-    if (searchType === SearchType.BirthMonth) {
-      const monthNames = {
-        january: 'Enero',
-        february: 'Febrero',
-        march: 'Marzo',
-        april: 'Abril',
-        may: 'Mayo',
-        june: 'Junio',
-        july: 'Julio',
-        august: 'Agosto',
-        september: 'Septiembre',
-        october: 'Octubre',
-        november: 'Noviembre',
-        december: 'Diciembre',
-      };
+        if (isNaN(fromTimestamp)) {
+          throw new NotFoundException('Formato de marca de tiempo invalido.');
+        }
 
-      newTerm = monthNames[term.toLowerCase()] ?? term;
-    }
+        const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+        const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
 
-    // By Gender
-    if (searchType === SearchType.Gender) {
-      const genderTerm = term.toLowerCase();
-      const validGenders = ['male', 'female'];
-
-      if (!validGenders.includes(genderTerm)) {
-        throw new BadRequestException(`Género no válido: ${term}`);
+        newTerm = `${formattedFromDate} - ${formattedToDate}`;
       }
 
-      newTerm = `${GenderNames[genderTerm]}`;
-    }
+      //* By Birth Month
+      if (searchType === SearchType.BirthMonth) {
+        const monthNames = {
+          january: 'Enero',
+          february: 'Febrero',
+          march: 'Marzo',
+          april: 'Abril',
+          may: 'Mayo',
+          june: 'Junio',
+          july: 'Julio',
+          august: 'Agosto',
+          september: 'Septiembre',
+          october: 'Octubre',
+          november: 'Noviembre',
+          december: 'Diciembre',
+        };
 
-    // By Marital Status
-    if (searchType === SearchType.MaritalStatus) {
-      const maritalStatusTerm = term.toLowerCase();
-      const validMaritalStatus = [
-        'single',
-        'married',
-        'widowed',
-        'divorced',
-        'other',
-      ];
-
-      if (!validMaritalStatus.includes(maritalStatusTerm)) {
-        throw new BadRequestException(`Estado Civil no válido: ${term}`);
+        newTerm = monthNames[term.toLowerCase()] ?? term;
       }
 
-      newTerm = `${MaritalStatusNames[maritalStatusTerm]}`;
-    }
+      //* By Gender
+      if (searchType === SearchType.Gender) {
+        const genderTerm = term.toLowerCase();
+        const validGenders = ['male', 'female'];
 
-    // By Record Status
-    if (searchType === SearchType.RecordStatus) {
-      const recordStatusTerm = term.toLowerCase();
-      const validRecordStatus = ['active', 'inactive'];
+        if (!validGenders.includes(genderTerm)) {
+          throw new BadRequestException(`Género no válido: ${term}`);
+        }
 
-      if (!validRecordStatus.includes(recordStatusTerm)) {
-        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+        newTerm = `${GenderNames[genderTerm]}`;
       }
 
-      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      //* By Marital Status
+      if (searchType === SearchType.MaritalStatus) {
+        const maritalStatusTerm = term.toLowerCase();
+        const validMaritalStatus = [
+          'single',
+          'married',
+          'widowed',
+          'divorced',
+          'other',
+        ];
+
+        if (!validMaritalStatus.includes(maritalStatusTerm)) {
+          throw new BadRequestException(`Estado Civil no válido: ${term}`);
+        }
+
+        newTerm = `${MaritalStatusNames[maritalStatusTerm]}`;
+      }
+
+      //* By Record Status
+      if (searchType === SearchType.RecordStatus) {
+        const recordStatusTerm = term.toLowerCase();
+        const validRecordStatus = ['active', 'inactive'];
+
+        if (!validRecordStatus.includes(recordStatusTerm)) {
+          throw new BadRequestException(
+            `Estado de registro no válido: ${term}`,
+          );
+        }
+
+        newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      }
+
+      const docDefinition = getMembersReport({
+        title: 'Reporte de Pastores',
+        subTitle: 'Resultados de Búsqueda de Pastores',
+        description: 'pastores',
+        searchTerm: newTerm,
+        searchType: SearchTypeNames[searchType],
+        searchSubType: SearchSubTypeNames[searchSubType] ?? 'S/N',
+        orderSearch: RecordOrderNames[order],
+        churchName: churchId
+          ? pastors[0]?.theirChurch?.abbreviatedChurchName
+          : undefined,
+        data: pastors,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getMembersReport({
-      title: 'Reporte de Pastores',
-      subTitle: 'Resultados de Búsqueda de Pastores',
-      description: 'pastores',
-      searchTerm: `Termino de búsqueda: ${newTerm}`,
-      searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
-      searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
-      data: pastors,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //? COPASTORS
   //* GENERAL COPASTORS REPORT
   async getGeneralCopastors(paginationDto: PaginationDto) {
-    const { order } = paginationDto;
+    const { order, churchId } = paginationDto;
 
-    const copastors: Copastor[] =
-      await this.copastorService.findAll(paginationDto);
+    try {
+      const copastors: Copastor[] =
+        await this.copastorService.findAll(paginationDto);
 
-    if (!copastors) {
-      throw new NotFoundException(
-        `No se encontraron co-pastores con estos términos de búsqueda.`,
-      );
+      if (!copastors) {
+        throw new NotFoundException(
+          `No se encontraron co-pastores con estos términos de búsqueda.`,
+        );
+      }
+
+      const docDefinition = getMembersReport({
+        title: 'Reporte de Co-Pastores',
+        subTitle: 'Resultados de Búsqueda de Co-Pastores',
+        description: 'co-pastores',
+        orderSearch: order,
+        churchName: churchId
+          ? copastors[0]?.theirChurch?.abbreviatedChurchName
+          : undefined,
+        data: copastors,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getMembersReport({
-      title: 'Reporte de Co-Pastores',
-      subTitle: 'Resultados de Búsqueda de Co-Pastores',
-      description: 'co-pastores',
-      orderSearch: order,
-      data: copastors,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //* COPASTORS REPORT BY TERM
@@ -447,139 +531,172 @@ export class ReportsService {
     term: string,
     searchTypeAndPaginationDto: SearchAndPaginationDto,
   ) {
-    const { 'search-type': searchType, 'search-sub-type': searchSubType } =
-      searchTypeAndPaginationDto;
+    const {
+      'search-type': searchType,
+      'search-sub-type': searchSubType,
+      order,
+      churchId,
+    } = searchTypeAndPaginationDto;
 
-    const copastors: Copastor[] = await this.copastorService.findByTerm(
-      term,
-      searchTypeAndPaginationDto,
-    );
-
-    if (!copastors) {
-      throw new NotFoundException(
-        `No se encontraron co-pastores con estos términos de búsqueda.`,
+    try {
+      const copastors: Copastor[] = await this.copastorService.findByTerm(
+        term,
+        searchTypeAndPaginationDto,
       );
-    }
 
-    let newTerm: string;
-    newTerm = term;
-
-    // By Birth Date
-    if (searchType === SearchType.BirthDate) {
-      const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
-
-      if (isNaN(fromTimestamp)) {
-        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      if (!copastors) {
+        throw new NotFoundException(
+          `No se encontraron co-pastores con estos términos de búsqueda.`,
+        );
       }
 
-      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
-      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+      let newTerm: string;
+      newTerm = term;
 
-      newTerm = `${formattedFromDate} - ${formattedToDate}`;
-    }
+      //* By Birth Date
+      if (searchType === SearchType.BirthDate) {
+        const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
 
-    // By Birth Month
-    if (searchType === SearchType.BirthMonth) {
-      const monthNames = {
-        january: 'Enero',
-        february: 'Febrero',
-        march: 'Marzo',
-        april: 'Abril',
-        may: 'Mayo',
-        june: 'Junio',
-        july: 'Julio',
-        august: 'Agosto',
-        september: 'Septiembre',
-        october: 'Octubre',
-        november: 'Noviembre',
-        december: 'Diciembre',
-      };
+        if (isNaN(fromTimestamp)) {
+          throw new NotFoundException('Formato de marca de tiempo invalido.');
+        }
 
-      newTerm = monthNames[term.toLowerCase()] ?? term;
-    }
+        const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+        const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
 
-    // By Gender
-    if (searchType === SearchType.Gender) {
-      const genderTerm = term.toLowerCase();
-      const validGenders = ['male', 'female'];
-
-      if (!validGenders.includes(genderTerm)) {
-        throw new BadRequestException(`Género no válido: ${term}`);
+        newTerm = `${formattedFromDate} - ${formattedToDate}`;
       }
 
-      newTerm = `${GenderNames[genderTerm]}`;
-    }
+      //* By Birth Month
+      if (searchType === SearchType.BirthMonth) {
+        const monthNames = {
+          january: 'Enero',
+          february: 'Febrero',
+          march: 'Marzo',
+          april: 'Abril',
+          may: 'Mayo',
+          june: 'Junio',
+          july: 'Julio',
+          august: 'Agosto',
+          september: 'Septiembre',
+          october: 'Octubre',
+          november: 'Noviembre',
+          december: 'Diciembre',
+        };
 
-    // By Marital Status
-    if (searchType === SearchType.MaritalStatus) {
-      const maritalStatusTerm = term.toLowerCase();
-      const validMaritalStatus = [
-        'single',
-        'married',
-        'widowed',
-        'divorced',
-        'other',
-      ];
-
-      if (!validMaritalStatus.includes(maritalStatusTerm)) {
-        throw new BadRequestException(`Estado Civil no válido: ${term}`);
+        newTerm = monthNames[term.toLowerCase()] ?? term;
       }
 
-      newTerm = `${MaritalStatusNames[maritalStatusTerm]}`;
-    }
+      //* By Gender
+      if (searchType === SearchType.Gender) {
+        const genderTerm = term.toLowerCase();
+        const validGenders = ['male', 'female'];
 
-    // By Record Status
-    if (searchType === SearchType.RecordStatus) {
-      const recordStatusTerm = term.toLowerCase();
-      const validRecordStatus = ['active', 'inactive'];
+        if (!validGenders.includes(genderTerm)) {
+          throw new BadRequestException(`Género no válido: ${term}`);
+        }
 
-      if (!validRecordStatus.includes(recordStatusTerm)) {
-        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+        newTerm = `${GenderNames[genderTerm]}`;
       }
 
-      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      //* By Marital Status
+      if (searchType === SearchType.MaritalStatus) {
+        const maritalStatusTerm = term.toLowerCase();
+        const validMaritalStatus = [
+          'single',
+          'married',
+          'widowed',
+          'divorced',
+          'other',
+        ];
+
+        if (!validMaritalStatus.includes(maritalStatusTerm)) {
+          throw new BadRequestException(`Estado Civil no válido: ${term}`);
+        }
+
+        newTerm = `${MaritalStatusNames[maritalStatusTerm]}`;
+      }
+
+      //* By Record Status
+      if (searchType === SearchType.RecordStatus) {
+        const recordStatusTerm = term.toLowerCase();
+        const validRecordStatus = ['active', 'inactive'];
+
+        if (!validRecordStatus.includes(recordStatusTerm)) {
+          throw new BadRequestException(
+            `Estado de registro no válido: ${term}`,
+          );
+        }
+
+        newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      }
+
+      const docDefinition = getMembersReport({
+        title: 'Reporte de Co-Pastores',
+        subTitle: 'Resultados de Búsqueda de Co-Pastores',
+        description: 'co-pastores',
+        searchTerm: newTerm,
+        searchType: SearchTypeNames[searchType],
+        searchSubType: SearchSubTypeNames[searchSubType] ?? 'S/N',
+        orderSearch: RecordOrderNames[order],
+        churchName: churchId
+          ? copastors[0]?.theirChurch?.abbreviatedChurchName
+          : undefined,
+        data: copastors,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getMembersReport({
-      title: 'Reporte de Co-Pastores',
-      subTitle: 'Resultados de Búsqueda de Co-Pastores',
-      description: 'co-pastores',
-      searchTerm: `Termino de búsqueda: ${newTerm}`,
-      searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
-      searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
-      data: copastors,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //? SUPERVISORS
   //* GENERAL SUPERVISORS REPORT
   async getGeneralSupervisors(paginationDto: PaginationDto) {
-    const { order } = paginationDto;
+    const { order, churchId } = paginationDto;
 
-    const supervisors: Supervisor[] =
-      await this.supervisorService.findAll(paginationDto);
+    try {
+      const supervisors: Supervisor[] =
+        await this.supervisorService.findAll(paginationDto);
 
-    if (!supervisors) {
-      throw new NotFoundException(
-        `No se encontraron supervisores con estos términos de búsqueda.`,
-      );
+      if (!supervisors) {
+        throw new NotFoundException(
+          `No se encontraron supervisores con estos términos de búsqueda.`,
+        );
+      }
+
+      const docDefinition = getMembersReport({
+        title: 'Reporte de Supervisores',
+        subTitle: 'Resultados de Búsqueda de Supervisores',
+        description: 'supervisores',
+        orderSearch: order,
+        churchName: churchId
+          ? supervisors[0]?.theirChurch?.abbreviatedChurchName
+          : undefined,
+        data: supervisors,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getMembersReport({
-      title: 'Reporte de Supervisores',
-      subTitle: 'Resultados de Búsqueda de Supervisores',
-      description: 'supervisores',
-      orderSearch: order,
-      data: supervisors,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //* SUPERVISORS REPORT BY TERM
@@ -587,139 +704,172 @@ export class ReportsService {
     term: string,
     searchTypeAndPaginationDto: SearchAndPaginationDto,
   ) {
-    const { 'search-type': searchType, 'search-sub-type': searchSubType } =
-      searchTypeAndPaginationDto;
+    const {
+      'search-type': searchType,
+      'search-sub-type': searchSubType,
+      order,
+      churchId,
+    } = searchTypeAndPaginationDto;
 
-    const supervisors: Supervisor[] = await this.supervisorService.findByTerm(
-      term,
-      searchTypeAndPaginationDto,
-    );
-
-    if (!supervisors) {
-      throw new NotFoundException(
-        `No se encontraron supervisores con estos términos de búsqueda.`,
+    try {
+      const supervisors: Supervisor[] = await this.supervisorService.findByTerm(
+        term,
+        searchTypeAndPaginationDto,
       );
-    }
 
-    let newTerm: string;
-    newTerm = term;
-
-    // By birth Date
-    if (searchType === SearchType.BirthDate) {
-      const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
-
-      if (isNaN(fromTimestamp)) {
-        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      if (!supervisors) {
+        throw new NotFoundException(
+          `No se encontraron supervisores con estos términos de búsqueda.`,
+        );
       }
 
-      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
-      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+      let newTerm: string;
+      newTerm = term;
 
-      newTerm = `${formattedFromDate} - ${formattedToDate}`;
-    }
+      //* By birth Date
+      if (searchType === SearchType.BirthDate) {
+        const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
 
-    // By Birth Month
-    if (searchType === SearchType.BirthMonth) {
-      const monthNames = {
-        january: 'Enero',
-        february: 'Febrero',
-        march: 'Marzo',
-        april: 'Abril',
-        may: 'Mayo',
-        june: 'Junio',
-        july: 'Julio',
-        august: 'Agosto',
-        september: 'Septiembre',
-        october: 'Octubre',
-        november: 'Noviembre',
-        december: 'Diciembre',
-      };
+        if (isNaN(fromTimestamp)) {
+          throw new NotFoundException('Formato de marca de tiempo invalido.');
+        }
 
-      newTerm = monthNames[term.toLowerCase()] ?? term;
-    }
+        const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+        const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
 
-    // By Gender
-    if (searchType === SearchType.Gender) {
-      const genderTerm = term.toLowerCase();
-      const validGenders = ['male', 'female'];
-
-      if (!validGenders.includes(genderTerm)) {
-        throw new BadRequestException(`Género no válido: ${term}`);
+        newTerm = `${formattedFromDate} - ${formattedToDate}`;
       }
 
-      newTerm = `${GenderNames[genderTerm]}`;
-    }
+      //* By Birth Month
+      if (searchType === SearchType.BirthMonth) {
+        const monthNames = {
+          january: 'Enero',
+          february: 'Febrero',
+          march: 'Marzo',
+          april: 'Abril',
+          may: 'Mayo',
+          june: 'Junio',
+          july: 'Julio',
+          august: 'Agosto',
+          september: 'Septiembre',
+          october: 'Octubre',
+          november: 'Noviembre',
+          december: 'Diciembre',
+        };
 
-    // By Marital Status
-    if (searchType === SearchType.MaritalStatus) {
-      const maritalStatusTerm = term.toLowerCase();
-      const validMaritalStatus = [
-        'single',
-        'married',
-        'widowed',
-        'divorced',
-        'other',
-      ];
-
-      if (!validMaritalStatus.includes(maritalStatusTerm)) {
-        throw new BadRequestException(`Estado Civil no válido: ${term}`);
+        newTerm = monthNames[term.toLowerCase()] ?? term;
       }
 
-      newTerm = `${MaritalStatusNames[maritalStatusTerm]}`;
-    }
+      //* By Gender
+      if (searchType === SearchType.Gender) {
+        const genderTerm = term.toLowerCase();
+        const validGenders = ['male', 'female'];
 
-    // By Record Status
-    if (searchType === SearchType.RecordStatus) {
-      const recordStatusTerm = term.toLowerCase();
-      const validRecordStatus = ['active', 'inactive'];
+        if (!validGenders.includes(genderTerm)) {
+          throw new BadRequestException(`Género no válido: ${term}`);
+        }
 
-      if (!validRecordStatus.includes(recordStatusTerm)) {
-        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+        newTerm = `${GenderNames[genderTerm]}`;
       }
 
-      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      //* By Marital Status
+      if (searchType === SearchType.MaritalStatus) {
+        const maritalStatusTerm = term.toLowerCase();
+        const validMaritalStatus = [
+          'single',
+          'married',
+          'widowed',
+          'divorced',
+          'other',
+        ];
+
+        if (!validMaritalStatus.includes(maritalStatusTerm)) {
+          throw new BadRequestException(`Estado Civil no válido: ${term}`);
+        }
+
+        newTerm = `${MaritalStatusNames[maritalStatusTerm]}`;
+      }
+
+      //* By Record Status
+      if (searchType === SearchType.RecordStatus) {
+        const recordStatusTerm = term.toLowerCase();
+        const validRecordStatus = ['active', 'inactive'];
+
+        if (!validRecordStatus.includes(recordStatusTerm)) {
+          throw new BadRequestException(
+            `Estado de registro no válido: ${term}`,
+          );
+        }
+
+        newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      }
+
+      const docDefinition = getMembersReport({
+        title: 'Reporte de Supervisores',
+        subTitle: 'Resultados de Búsqueda de Supervisores',
+        description: 'supervisores',
+        searchTerm: newTerm,
+        searchType: SearchTypeNames[searchType],
+        searchSubType: SearchSubTypeNames[searchSubType] ?? 'S/N',
+        orderSearch: RecordOrderNames[order],
+        churchName: churchId
+          ? supervisors[0]?.theirChurch?.abbreviatedChurchName
+          : undefined,
+        data: supervisors,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getMembersReport({
-      title: 'Reporte de Supervisores',
-      subTitle: 'Resultados de Búsqueda de Supervisores',
-      description: 'supervisores',
-      searchTerm: `Termino de búsqueda: ${newTerm}`,
-      searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
-      searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
-      data: supervisors,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //? PREACHERS
   //* GENERAL PREACHERS REPORT
   async getGeneralPreachers(paginationDto: PaginationDto) {
-    const { order } = paginationDto;
+    const { order, churchId } = paginationDto;
 
-    const preachers: Preacher[] =
-      await this.preacherService.findAll(paginationDto);
+    try {
+      const preachers: Preacher[] =
+        await this.preacherService.findAll(paginationDto);
 
-    if (!preachers) {
-      throw new NotFoundException(
-        `No se encontraron predicadores con estos términos de búsqueda.`,
-      );
+      if (!preachers) {
+        throw new NotFoundException(
+          `No se encontraron predicadores con estos términos de búsqueda.`,
+        );
+      }
+
+      const docDefinition = getMembersReport({
+        title: 'Reporte de Predicadores',
+        subTitle: 'Resultados de Búsqueda de Predicadores',
+        description: 'predicadores',
+        orderSearch: order,
+        churchName: churchId
+          ? preachers[0]?.theirChurch?.abbreviatedChurchName
+          : undefined,
+        data: preachers,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getMembersReport({
-      title: 'Reporte de Predicadores',
-      subTitle: 'Resultados de Búsqueda de Predicadores',
-      description: 'predicadores',
-      orderSearch: order,
-      data: preachers,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //* PREACHERS REPORT BY TERM
@@ -727,139 +877,172 @@ export class ReportsService {
     term: string,
     searchTypeAndPaginationDto: SearchAndPaginationDto,
   ) {
-    const { 'search-type': searchType, 'search-sub-type': searchSubType } =
-      searchTypeAndPaginationDto;
+    const {
+      'search-type': searchType,
+      'search-sub-type': searchSubType,
+      order,
+      churchId,
+    } = searchTypeAndPaginationDto;
 
-    const preachers: Preacher[] = await this.preacherService.findByTerm(
-      term,
-      searchTypeAndPaginationDto,
-    );
-
-    if (!preachers) {
-      throw new NotFoundException(
-        `No se encontraron predicadores con estos términos de búsqueda.`,
+    try {
+      const preachers: Preacher[] = await this.preacherService.findByTerm(
+        term,
+        searchTypeAndPaginationDto,
       );
-    }
 
-    let newTerm: string;
-    newTerm = term;
-
-    // By Birth Date
-    if (searchType === SearchType.BirthDate) {
-      const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
-
-      if (isNaN(fromTimestamp)) {
-        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      if (!preachers) {
+        throw new NotFoundException(
+          `No se encontraron predicadores con estos términos de búsqueda.`,
+        );
       }
 
-      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
-      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+      let newTerm: string;
+      newTerm = term;
 
-      newTerm = `${formattedFromDate} - ${formattedToDate}`;
-    }
+      //* By Birth Date
+      if (searchType === SearchType.BirthDate) {
+        const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
 
-    // By Birth Month
-    if (searchType === SearchType.BirthMonth) {
-      const monthNames = {
-        january: 'Enero',
-        february: 'Febrero',
-        march: 'Marzo',
-        april: 'Abril',
-        may: 'Mayo',
-        june: 'Junio',
-        july: 'Julio',
-        august: 'Agosto',
-        september: 'Septiembre',
-        october: 'Octubre',
-        november: 'Noviembre',
-        december: 'Diciembre',
-      };
+        if (isNaN(fromTimestamp)) {
+          throw new NotFoundException('Formato de marca de tiempo invalido.');
+        }
 
-      newTerm = monthNames[term.toLowerCase()] ?? term;
-    }
+        const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+        const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
 
-    // By Gender
-    if (searchType === SearchType.Gender) {
-      const genderTerm = term.toLowerCase();
-      const validGenders = ['male', 'female'];
-
-      if (!validGenders.includes(genderTerm)) {
-        throw new BadRequestException(`Género no válido: ${term}`);
+        newTerm = `${formattedFromDate} - ${formattedToDate}`;
       }
 
-      newTerm = `${GenderNames[genderTerm]}`;
-    }
+      //* By Birth Month
+      if (searchType === SearchType.BirthMonth) {
+        const monthNames = {
+          january: 'Enero',
+          february: 'Febrero',
+          march: 'Marzo',
+          april: 'Abril',
+          may: 'Mayo',
+          june: 'Junio',
+          july: 'Julio',
+          august: 'Agosto',
+          september: 'Septiembre',
+          october: 'Octubre',
+          november: 'Noviembre',
+          december: 'Diciembre',
+        };
 
-    // By Marital Status
-    if (searchType === SearchType.MaritalStatus) {
-      const maritalStatusTerm = term.toLowerCase();
-      const validMaritalStatus = [
-        'single',
-        'married',
-        'widowed',
-        'divorced',
-        'other',
-      ];
-
-      if (!validMaritalStatus.includes(maritalStatusTerm)) {
-        throw new BadRequestException(`Estado Civil no válido: ${term}`);
+        newTerm = monthNames[term.toLowerCase()] ?? term;
       }
 
-      newTerm = `${MaritalStatusNames[maritalStatusTerm]}`;
-    }
+      //* By Gender
+      if (searchType === SearchType.Gender) {
+        const genderTerm = term.toLowerCase();
+        const validGenders = ['male', 'female'];
 
-    // By Record Status
-    if (searchType === SearchType.RecordStatus) {
-      const recordStatusTerm = term.toLowerCase();
-      const validRecordStatus = ['active', 'inactive'];
+        if (!validGenders.includes(genderTerm)) {
+          throw new BadRequestException(`Género no válido: ${term}`);
+        }
 
-      if (!validRecordStatus.includes(recordStatusTerm)) {
-        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+        newTerm = `${GenderNames[genderTerm]}`;
       }
 
-      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      //* By Marital Status
+      if (searchType === SearchType.MaritalStatus) {
+        const maritalStatusTerm = term.toLowerCase();
+        const validMaritalStatus = [
+          'single',
+          'married',
+          'widowed',
+          'divorced',
+          'other',
+        ];
+
+        if (!validMaritalStatus.includes(maritalStatusTerm)) {
+          throw new BadRequestException(`Estado Civil no válido: ${term}`);
+        }
+
+        newTerm = `${MaritalStatusNames[maritalStatusTerm]}`;
+      }
+
+      //* By Record Status
+      if (searchType === SearchType.RecordStatus) {
+        const recordStatusTerm = term.toLowerCase();
+        const validRecordStatus = ['active', 'inactive'];
+
+        if (!validRecordStatus.includes(recordStatusTerm)) {
+          throw new BadRequestException(
+            `Estado de registro no válido: ${term}`,
+          );
+        }
+
+        newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      }
+
+      const docDefinition = getMembersReport({
+        title: 'Reporte de Predicadores',
+        subTitle: 'Resultados de Búsqueda de Predicadores',
+        description: 'predicadores',
+        searchTerm: newTerm,
+        searchType: SearchTypeNames[searchType],
+        searchSubType: SearchSubTypeNames[searchSubType] ?? 'S/N',
+        orderSearch: RecordOrderNames[order],
+        churchName: churchId
+          ? preachers[0]?.theirChurch?.abbreviatedChurchName
+          : undefined,
+        data: preachers,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getMembersReport({
-      title: 'Reporte de Predicadores',
-      subTitle: 'Resultados de Búsqueda de Predicadores',
-      description: 'predicadores',
-      searchTerm: `Termino de búsqueda: ${newTerm}`,
-      searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
-      searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
-      data: preachers,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //? DISCIPLES
   //* GENERAL DISCIPLES REPORT
   async getGeneralDisciples(paginationDto: PaginationDto) {
-    const { order } = paginationDto;
+    const { order, churchId } = paginationDto;
 
-    const disciples: Disciple[] =
-      await this.discipleService.findAll(paginationDto);
+    try {
+      const disciples: Disciple[] =
+        await this.discipleService.findAll(paginationDto);
 
-    if (!disciples) {
-      throw new NotFoundException(
-        `No se encontraron discípulos con estos términos de búsqueda.`,
-      );
+      if (!disciples) {
+        throw new NotFoundException(
+          `No se encontraron discípulos con estos términos de búsqueda.`,
+        );
+      }
+
+      const docDefinition = getMembersReport({
+        title: 'Reporte de Discípulos',
+        subTitle: 'Resultados de Búsqueda de Discípulos',
+        description: 'discípulos',
+        orderSearch: order,
+        churchName: churchId
+          ? disciples[0]?.theirChurch?.abbreviatedChurchName
+          : undefined,
+        data: disciples,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getMembersReport({
-      title: 'Reporte de Discípulos',
-      subTitle: 'Resultados de Búsqueda de Discípulos',
-      description: 'discípulos',
-      orderSearch: order,
-      data: disciples,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //* DISCIPLES REPORT BY TERM
@@ -867,138 +1050,171 @@ export class ReportsService {
     term: string,
     searchTypeAndPaginationDto: SearchAndPaginationDto,
   ) {
-    const { 'search-type': searchType, 'search-sub-type': searchSubType } =
-      searchTypeAndPaginationDto;
+    const {
+      'search-type': searchType,
+      'search-sub-type': searchSubType,
+      order,
+      churchId,
+    } = searchTypeAndPaginationDto;
 
-    const disciples: Disciple[] = await this.discipleService.findByTerm(
-      term,
-      searchTypeAndPaginationDto,
-    );
-
-    if (!disciples) {
-      throw new NotFoundException(
-        `No se encontraron discípulos con estos términos de búsqueda.`,
+    try {
+      const disciples: Disciple[] = await this.discipleService.findByTerm(
+        term,
+        searchTypeAndPaginationDto,
       );
-    }
 
-    let newTerm: string;
-    newTerm = term;
-
-    // By Birth Date
-    if (searchType === SearchType.BirthDate) {
-      const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
-
-      if (isNaN(fromTimestamp)) {
-        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      if (!disciples) {
+        throw new NotFoundException(
+          `No se encontraron discípulos con estos términos de búsqueda.`,
+        );
       }
 
-      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
-      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+      let newTerm: string;
+      newTerm = term;
 
-      newTerm = `${formattedFromDate} - ${formattedToDate}`;
-    }
+      //* By Birth Date
+      if (searchType === SearchType.BirthDate) {
+        const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
 
-    // By Birth Month
-    if (searchType === SearchType.BirthMonth) {
-      const monthNames = {
-        january: 'Enero',
-        february: 'Febrero',
-        march: 'Marzo',
-        april: 'Abril',
-        may: 'Mayo',
-        june: 'Junio',
-        july: 'Julio',
-        august: 'Agosto',
-        september: 'Septiembre',
-        october: 'Octubre',
-        november: 'Noviembre',
-        december: 'Diciembre',
-      };
+        if (isNaN(fromTimestamp)) {
+          throw new NotFoundException('Formato de marca de tiempo invalido.');
+        }
 
-      newTerm = monthNames[term.toLowerCase()] ?? term;
-    }
+        const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+        const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
 
-    // By Gender
-    if (searchType === SearchType.Gender) {
-      const genderTerm = term.toLowerCase();
-      const validGenders = ['male', 'female'];
-
-      if (!validGenders.includes(genderTerm)) {
-        throw new BadRequestException(`Género no válido: ${term}`);
+        newTerm = `${formattedFromDate} - ${formattedToDate}`;
       }
 
-      newTerm = `${GenderNames[genderTerm]}`;
-    }
+      //* By Birth Month
+      if (searchType === SearchType.BirthMonth) {
+        const monthNames = {
+          january: 'Enero',
+          february: 'Febrero',
+          march: 'Marzo',
+          april: 'Abril',
+          may: 'Mayo',
+          june: 'Junio',
+          july: 'Julio',
+          august: 'Agosto',
+          september: 'Septiembre',
+          october: 'Octubre',
+          november: 'Noviembre',
+          december: 'Diciembre',
+        };
 
-    // By Marital Status
-    if (searchType === SearchType.MaritalStatus) {
-      const maritalStatusTerm = term.toLowerCase();
-      const validMaritalStatus = [
-        'single',
-        'married',
-        'widowed',
-        'divorced',
-        'other',
-      ];
-
-      if (!validMaritalStatus.includes(maritalStatusTerm)) {
-        throw new BadRequestException(`Estado Civil no válido: ${term}`);
+        newTerm = monthNames[term.toLowerCase()] ?? term;
       }
 
-      newTerm = `${MaritalStatusNames[maritalStatusTerm]}`;
-    }
+      //* By Gender
+      if (searchType === SearchType.Gender) {
+        const genderTerm = term.toLowerCase();
+        const validGenders = ['male', 'female'];
 
-    // By Record Status
-    if (searchType === SearchType.RecordStatus) {
-      const recordStatusTerm = term.toLowerCase();
-      const validRecordStatus = ['active', 'inactive'];
+        if (!validGenders.includes(genderTerm)) {
+          throw new BadRequestException(`Género no válido: ${term}`);
+        }
 
-      if (!validRecordStatus.includes(recordStatusTerm)) {
-        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+        newTerm = `${GenderNames[genderTerm]}`;
       }
 
-      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      //* By Marital Status
+      if (searchType === SearchType.MaritalStatus) {
+        const maritalStatusTerm = term.toLowerCase();
+        const validMaritalStatus = [
+          'single',
+          'married',
+          'widowed',
+          'divorced',
+          'other',
+        ];
+
+        if (!validMaritalStatus.includes(maritalStatusTerm)) {
+          throw new BadRequestException(`Estado Civil no válido: ${term}`);
+        }
+
+        newTerm = `${MaritalStatusNames[maritalStatusTerm]}`;
+      }
+
+      //* By Record Status
+      if (searchType === SearchType.RecordStatus) {
+        const recordStatusTerm = term.toLowerCase();
+        const validRecordStatus = ['active', 'inactive'];
+
+        if (!validRecordStatus.includes(recordStatusTerm)) {
+          throw new BadRequestException(
+            `Estado de registro no válido: ${term}`,
+          );
+        }
+
+        newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      }
+
+      const docDefinition = getMembersReport({
+        title: 'Reporte de Discípulos',
+        subTitle: 'Resultados de Búsqueda de Discípulos',
+        description: 'discípulos',
+        searchTerm: newTerm,
+        searchType: SearchTypeNames[searchType],
+        searchSubType: SearchSubTypeNames[searchSubType] ?? 'S/N',
+        orderSearch: RecordOrderNames[order],
+        churchName: churchId
+          ? disciples[0]?.theirChurch?.abbreviatedChurchName
+          : undefined,
+        data: disciples,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getMembersReport({
-      title: 'Reporte de Discípulos',
-      subTitle: 'Resultados de Búsqueda de Discípulos',
-      description: 'discípulos',
-      searchTerm: `Termino de búsqueda: ${newTerm}`,
-      searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
-      searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
-      data: disciples,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //? ZONES
   //* GENERAL ZONES REPORT
   async getGeneralZones(paginationDto: PaginationDto) {
-    const { order } = paginationDto;
+    const { order, churchId } = paginationDto;
 
-    const zones: Zone[] = await this.zoneService.findAll(paginationDto);
+    try {
+      const zones: Zone[] = await this.zoneService.findAll(paginationDto);
 
-    if (!zones) {
-      throw new NotFoundException(
-        `No se encontraron zonas con estos términos de búsqueda.`,
-      );
+      if (!zones) {
+        throw new NotFoundException(
+          `No se encontraron zonas con estos términos de búsqueda.`,
+        );
+      }
+
+      const docDefinition = getZonesReport({
+        title: 'Reporte de Zonas',
+        subTitle: 'Resultados de Búsqueda de Zonas',
+        description: 'zonas',
+        orderSearch: order,
+        churchName: churchId
+          ? zones[0]?.theirChurch?.abbreviatedChurchName
+          : undefined,
+        data: zones,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getZonesReport({
-      title: 'Reporte de Zonas',
-      subTitle: 'Resultados de Búsqueda de Zonas',
-      description: 'zonas',
-      orderSearch: order,
-      data: zones,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //* ZONES REPORT BY TERM
@@ -1006,75 +1222,108 @@ export class ReportsService {
     term: string,
     searchTypeAndPaginationDto: SearchAndPaginationDto,
   ) {
-    const { 'search-type': searchType, 'search-sub-type': searchSubType } =
-      searchTypeAndPaginationDto;
+    const {
+      'search-type': searchType,
+      'search-sub-type': searchSubType,
+      order,
+      churchId,
+    } = searchTypeAndPaginationDto;
 
-    const zones: Zone[] = await this.zoneService.findByTerm(
-      term,
-      searchTypeAndPaginationDto,
-    );
-
-    if (!zones) {
-      throw new NotFoundException(
-        `No se encontraron zonas con estos términos de búsqueda.`,
+    try {
+      const zones: Zone[] = await this.zoneService.findByTerm(
+        term,
+        searchTypeAndPaginationDto,
       );
-    }
 
-    let newTerm: string;
-    newTerm = term;
-
-    // By Record Status
-    if (searchType === SearchType.RecordStatus) {
-      const recordStatusTerm = term.toLowerCase();
-      const validRecordStatus = ['active', 'inactive'];
-
-      if (!validRecordStatus.includes(recordStatusTerm)) {
-        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      if (!zones) {
+        throw new NotFoundException(
+          `No se encontraron zonas con estos términos de búsqueda.`,
+        );
       }
 
-      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      let newTerm: string;
+      newTerm = term;
+
+      //* By Record Status
+      if (searchType === SearchType.RecordStatus) {
+        const recordStatusTerm = term.toLowerCase();
+        const validRecordStatus = ['active', 'inactive'];
+
+        if (!validRecordStatus.includes(recordStatusTerm)) {
+          throw new BadRequestException(
+            `Estado de registro no válido: ${term}`,
+          );
+        }
+
+        newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      }
+
+      const docDefinition = getZonesReport({
+        title: 'Reporte de Zonas',
+        subTitle: 'Resultados de Búsqueda de Zonas',
+        description: 'zonas',
+        searchTerm: newTerm,
+        searchType: SearchTypeNames[searchType],
+        searchSubType: SearchSubTypeNames[searchSubType] ?? 'S/N',
+        orderSearch: RecordOrderNames[order],
+        churchName: churchId
+          ? zones[0]?.theirChurch?.abbreviatedChurchName
+          : undefined,
+        data: zones,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getZonesReport({
-      title: 'Reporte de Zonas',
-      subTitle: 'Resultados de Búsqueda de Zonas',
-      description: 'zonas',
-      searchTerm: `Termino de búsqueda: ${newTerm}`,
-      searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
-      searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
-      data: zones,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //? FAMILY GROUPS
   //* GENERAL FAMILY GROUPS REPORT
   async getGeneralFamilyGroups(paginationDto: PaginationDto) {
-    const { order } = paginationDto;
+    const { order, churchId } = paginationDto;
 
-    const familyGroups: FamilyGroup[] =
-      await this.familyGroupService.findAll(paginationDto);
+    try {
+      const familyGroups: FamilyGroup[] =
+        await this.familyGroupService.findAll(paginationDto);
 
-    if (!familyGroups) {
-      throw new NotFoundException(
-        `No se encontraron grupos familiares con estos términos de búsqueda.`,
-      );
+      if (!familyGroups) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares con estos términos de búsqueda.`,
+        );
+      }
+
+      const docDefinition = getFamilyGroupsReport({
+        title: 'Reporte de Grupos Familiares',
+        subTitle: 'Resultados de Búsqueda de Grupos Familiares',
+        description: 'grupos familiares',
+        churchName: churchId
+          ? familyGroups[0]?.theirChurch?.abbreviatedChurchName
+          : undefined,
+        orderSearch: order,
+        data: familyGroups,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getFamilyGroupsReport({
-      title: 'Reporte de Grupos Familiares',
-      subTitle: 'Resultados de Búsqueda de Grupos Familiares',
-      description: 'grupos familiares',
-      orderSearch: order,
-      data: familyGroups,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //* FAMILY GROUPS REPORT BY TERM
@@ -1082,76 +1331,109 @@ export class ReportsService {
     term: string,
     searchTypeAndPaginationDto: SearchAndPaginationDto,
   ) {
-    const { 'search-type': searchType, 'search-sub-type': searchSubType } =
-      searchTypeAndPaginationDto;
+    const {
+      'search-type': searchType,
+      'search-sub-type': searchSubType,
+      order,
+      churchId,
+    } = searchTypeAndPaginationDto;
 
-    const familyGroups: FamilyGroup[] =
-      await this.familyGroupService.findByTerm(
-        term,
-        searchTypeAndPaginationDto,
-      );
+    try {
+      const familyGroups: FamilyGroup[] =
+        await this.familyGroupService.findByTerm(
+          term,
+          searchTypeAndPaginationDto,
+        );
 
-    if (!familyGroups) {
-      throw new NotFoundException(
-        `No se encontraron grupos familiares con estos términos de búsqueda.`,
-      );
-    }
-
-    let newTerm: string;
-    newTerm = term;
-
-    // By Record Status
-    if (searchType === SearchType.RecordStatus) {
-      const recordStatusTerm = term.toLowerCase();
-      const validRecordStatus = ['active', 'inactive'];
-
-      if (!validRecordStatus.includes(recordStatusTerm)) {
-        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      if (!familyGroups) {
+        throw new NotFoundException(
+          `No se encontraron grupos familiares con estos términos de búsqueda.`,
+        );
       }
 
-      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      let newTerm: string;
+      newTerm = term;
+
+      //* By Record Status
+      if (searchType === SearchType.RecordStatus) {
+        const recordStatusTerm = term.toLowerCase();
+        const validRecordStatus = ['active', 'inactive'];
+
+        if (!validRecordStatus.includes(recordStatusTerm)) {
+          throw new BadRequestException(
+            `Estado de registro no válido: ${term}`,
+          );
+        }
+
+        newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      }
+
+      const docDefinition = getFamilyGroupsReport({
+        title: 'Reporte de Grupos Familiares',
+        subTitle: 'Resultados de Búsqueda de Grupos Familiares',
+        description: 'grupos familiares',
+        searchTerm: newTerm,
+        searchType: SearchTypeNames[searchType],
+        searchSubType: SearchSubTypeNames[searchSubType] ?? 'S/N',
+        orderSearch: RecordOrderNames[order],
+        churchName: churchId
+          ? familyGroups[0]?.theirChurch?.abbreviatedChurchName
+          : undefined,
+        data: familyGroups,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getFamilyGroupsReport({
-      title: 'Reporte de Grupos Familiares',
-      subTitle: 'Resultados de Búsqueda de Grupos Familiares',
-      description: 'grupos familiares',
-      searchTerm: `Termino de búsqueda: ${newTerm}`,
-      searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
-      searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
-      data: familyGroups,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //? OFFERING INCOME
   //* GENERAL OFFERING INCOME REPORT
   async getGeneralOfferingIncome(paginationDto: PaginationDto) {
-    const { order } = paginationDto;
+    const { order, churchId } = paginationDto;
 
-    const offeringIncome: OfferingIncome[] =
-      await this.offeringIncomeService.findAll(paginationDto);
+    try {
+      const offeringIncome: OfferingIncome[] =
+        await this.offeringIncomeService.findAll(paginationDto);
 
-    if (!offeringIncome) {
-      throw new NotFoundException(
-        `No se encontraron ingresos de ofrenda con estos términos de búsqueda.`,
-      );
+      if (!offeringIncome) {
+        throw new NotFoundException(
+          `No se encontraron ingresos de ofrenda con estos términos de búsqueda.`,
+        );
+      }
+
+      const docDefinition = getOfferingIncomeReport({
+        title: 'Reporte de Ingresos de Ofrenda',
+        subTitle: 'Resultados de Búsqueda de Ingresos de Ofrenda',
+        description: 'registros',
+        churchName: churchId
+          ? offeringIncome[0]?.church?.abbreviatedChurchName
+          : undefined,
+        orderSearch: order,
+        data: offeringIncome,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getOfferingIncomeReport({
-      title: 'Reporte de Ingresos de Ofrenda',
-      subTitle: 'Resultados de Búsqueda de Ingresos de Ofrenda',
-      description: 'registros',
-      orderSearch: order,
-      data: offeringIncome,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //* OFFERING INCOME REPORT BY TERM
@@ -1159,288 +1441,321 @@ export class ReportsService {
     term: string,
     searchTypeAndPaginationDto: SearchAndPaginationDto,
   ) {
-    const { 'search-type': searchType, 'search-sub-type': searchSubType } =
-      searchTypeAndPaginationDto;
+    const {
+      'search-type': searchType,
+      'search-sub-type': searchSubType,
+      order,
+      churchId,
+    } = searchTypeAndPaginationDto;
 
-    const offeringIncome: OfferingIncome[] =
-      await this.offeringIncomeService.findByTerm(
-        term,
-        searchTypeAndPaginationDto,
-      );
+    try {
+      const offeringIncome: OfferingIncome[] =
+        await this.offeringIncomeService.findByTerm(
+          term,
+          searchTypeAndPaginationDto,
+        );
 
-    if (!offeringIncome) {
-      throw new NotFoundException(
-        `No se encontraron ingresos de ofrenda con estos términos de búsqueda.`,
-      );
-    }
-
-    let newTerm: string;
-    newTerm = term;
-
-    // By Date
-    if (
-      (searchType === SearchType.SundayService ||
-        searchType === SearchType.SundaySchool ||
-        searchType === SearchType.FamilyGroup ||
-        searchType === SearchType.ZonalFasting ||
-        searchType === SearchType.ZonalVigil ||
-        searchType === SearchType.GeneralFasting ||
-        searchType === SearchType.GeneralVigil ||
-        searchType === SearchType.YouthService ||
-        searchType === SearchType.UnitedService ||
-        searchType === SearchType.Activities ||
-        searchType === SearchType.Special ||
-        searchType === SearchType.ChurchGround ||
-        searchType === SearchType.IncomeAdjustment) &&
-      searchSubType === SearchSubType.OfferingByDate
-    ) {
-      const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
-
-      if (isNaN(fromTimestamp)) {
-        throw new NotFoundException('Formato de marca de tiempo invalido.');
-      }
-
-      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
-      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
-
-      newTerm = `${formattedFromDate} - ${formattedToDate}`;
-    }
-
-    // By Church
-    if (
-      (searchType === SearchType.SundayService ||
-        searchType === SearchType.SundaySchool ||
-        searchType === SearchType.GeneralFasting ||
-        searchType === SearchType.GeneralVigil ||
-        searchType === SearchType.YouthService ||
-        searchType === SearchType.UnitedService ||
-        searchType === SearchType.Activities ||
-        searchType === SearchType.IncomeAdjustment) &&
-      searchSubType === SearchSubType.OfferingByChurch
-    ) {
-      const church = await this.churchRepository.findOne({
-        where: {
-          id: term,
-        },
-      });
-
-      if (!church) {
+      if (!offeringIncome) {
         throw new NotFoundException(
-          `No se encontró ninguna iglesia con este ID: ${term}.`,
+          `No se encontraron ingresos de ofrenda con estos términos de búsqueda.`,
         );
       }
 
-      newTerm = `${church.abbreviatedChurchName}`;
-    }
+      let newTerm: string;
+      newTerm = term;
 
-    // By Church And Date
-    if (
-      (searchType === SearchType.SundayService ||
-        searchType === SearchType.SundaySchool ||
-        searchType === SearchType.GeneralFasting ||
-        searchType === SearchType.GeneralVigil ||
-        searchType === SearchType.YouthService ||
-        searchType === SearchType.UnitedService ||
-        searchType === SearchType.Activities ||
-        searchType === SearchType.IncomeAdjustment) &&
-      searchSubType === SearchSubType.OfferingByChurchDate
-    ) {
-      const [churchId, date] = term.split('&');
+      //* By Date
+      if (
+        (searchType === SearchType.SundayService ||
+          searchType === SearchType.SundaySchool ||
+          searchType === SearchType.FamilyGroup ||
+          searchType === SearchType.ZonalFasting ||
+          searchType === SearchType.ZonalVigil ||
+          searchType === SearchType.GeneralFasting ||
+          searchType === SearchType.GeneralVigil ||
+          searchType === SearchType.YouthService ||
+          searchType === SearchType.UnitedService ||
+          searchType === SearchType.Activities ||
+          searchType === SearchType.Special ||
+          searchType === SearchType.ChurchGround ||
+          searchType === SearchType.IncomeAdjustment) &&
+        searchSubType === SearchSubType.OfferingByDate
+      ) {
+        const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
 
-      const church = await this.churchRepository.findOne({
-        where: {
-          id: churchId,
-        },
+        if (isNaN(fromTimestamp)) {
+          throw new NotFoundException('Formato de marca de tiempo invalido.');
+        }
+
+        const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+        const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+        newTerm = `${formattedFromDate} - ${formattedToDate}`;
+      }
+
+      // //* By Church
+      // if (
+      //   (searchType === SearchType.SundayService ||
+      //     searchType === SearchType.SundaySchool ||
+      //     searchType === SearchType.GeneralFasting ||
+      //     searchType === SearchType.GeneralVigil ||
+      //     searchType === SearchType.YouthService ||
+      //     searchType === SearchType.UnitedService ||
+      //     searchType === SearchType.Activities ||
+      //     searchType === SearchType.IncomeAdjustment) &&
+      //   searchSubType === SearchSubType.OfferingByChurch
+      // ) {
+      //   const church = await this.churchRepository.findOne({
+      //     where: {
+      //       id: term,
+      //     },
+      //   });
+
+      //   if (!church) {
+      //     throw new NotFoundException(
+      //       `No se encontró ninguna iglesia con este ID: ${term}.`,
+      //     );
+      //   }
+
+      //   newTerm = `${church.abbreviatedChurchName}`;
+      // }
+
+      // //* By Church And Date
+      // if (
+      //   (searchType === SearchType.SundayService ||
+      //     searchType === SearchType.SundaySchool ||
+      //     searchType === SearchType.GeneralFasting ||
+      //     searchType === SearchType.GeneralVigil ||
+      //     searchType === SearchType.YouthService ||
+      //     searchType === SearchType.UnitedService ||
+      //     searchType === SearchType.Activities ||
+      //     searchType === SearchType.IncomeAdjustment) &&
+      //   searchSubType === SearchSubType.OfferingByChurchDate
+      // ) {
+      //   const [churchId, date] = term.split('&');
+
+      //   const church = await this.churchRepository.findOne({
+      //     where: {
+      //       id: churchId,
+      //     },
+      //   });
+
+      //   if (!church) {
+      //     throw new NotFoundException(
+      //       `No se encontró ninguna iglesia con este ID: ${churchId}.`,
+      //     );
+      //   }
+
+      //   const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
+
+      //   if (isNaN(fromTimestamp)) {
+      //     throw new NotFoundException('Formato de marca de tiempo invalido.');
+      //   }
+
+      //   const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+      //   const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+      //   newTerm = `${church.abbreviatedChurchName} ~ ${formattedFromDate} - ${formattedToDate}`;
+      // }
+
+      //* By Shift
+      if (
+        (searchType === SearchType.SundayService ||
+          searchType === SearchType.SundaySchool) &&
+        searchSubType === SearchSubType.OfferingByShift
+      ) {
+        const shiftTerm = term.toLowerCase();
+        const validShifts = ['day', 'afternoon'];
+
+        if (!validShifts.includes(shiftTerm)) {
+          throw new BadRequestException(`Turno no válido: ${term}`);
+        }
+
+        newTerm = `${OfferingIncomeCreationShiftTypeNames[term.toLowerCase()]}`;
+      }
+
+      //* By Shift and Date
+      if (
+        (searchType === SearchType.SundayService ||
+          searchType === SearchType.SundaySchool) &&
+        searchSubType === SearchSubType.OfferingByShiftDate
+      ) {
+        const [shift, date] = term.split('&');
+
+        const shiftTerm = shift.toLowerCase();
+        const validShifts = ['day', 'afternoon'];
+
+        if (!validShifts.includes(shiftTerm)) {
+          throw new BadRequestException(`Turno no válido: ${term}`);
+        }
+
+        const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
+
+        if (isNaN(fromTimestamp)) {
+          throw new NotFoundException('Formato de marca de tiempo invalido.');
+        }
+
+        const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+        const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+        newTerm = `${OfferingIncomeCreationShiftTypeNames[shift.toLowerCase()]} ~ ${formattedFromDate} - ${formattedToDate}`;
+      }
+
+      //* By Zone and Date
+      if (
+        searchType === SearchType.FamilyGroup &&
+        searchSubType === SearchSubType.OfferingByZoneDate
+      ) {
+        const [zone, date] = term.split('&');
+
+        const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
+
+        if (isNaN(fromTimestamp)) {
+          throw new NotFoundException('Formato de marca de tiempo invalido.');
+        }
+
+        const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+        const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+        newTerm = `${zone} ~ ${formattedFromDate} - ${formattedToDate}`;
+      }
+
+      //* By Code and Date
+      if (
+        searchType === SearchType.FamilyGroup &&
+        searchSubType === SearchSubType.OfferingByGroupCodeDate
+      ) {
+        const [code, date] = term.split('&');
+
+        const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
+
+        if (isNaN(fromTimestamp)) {
+          throw new NotFoundException('Formato de marca de tiempo invalido.');
+        }
+
+        const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+        const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+        newTerm = `${code} ~ ${formattedFromDate} - ${formattedToDate}`;
+      }
+
+      //* By Contributor names
+      if (
+        (searchType === SearchType.Special ||
+          searchType === SearchType.ChurchGround) &&
+        searchSubType === SearchSubType.OfferingByContributorNames
+      ) {
+        const [memberType, names] = term.split('&');
+        const firstNames = names.replace(/\+/g, ' ');
+
+        newTerm = `${MemberTypeNames[memberType]} ~ ${firstNames}`;
+      }
+
+      //* By Contributor last names
+      if (
+        (searchType === SearchType.Special ||
+          searchType === SearchType.ChurchGround) &&
+        searchSubType === SearchSubType.OfferingByContributorLastNames
+      ) {
+        const [memberType, names] = term.split('&');
+        const lastNames = names.split('-')[0].replace(/\+/g, ' ');
+
+        newTerm = `${MemberTypeNames[memberType]} ~ ${lastNames}`;
+      }
+
+      //* By Contributor full names
+      if (
+        (searchType === SearchType.Special ||
+          searchType === SearchType.ChurchGround) &&
+        searchSubType === SearchSubType.OfferingByContributorFullName
+      ) {
+        const [memberType, names] = term.split('&');
+        const firstNames = names.split('-')[0].replace(/\+/g, ' ');
+        const lastNames = names.split('-')[1].replace(/\+/g, ' ');
+
+        newTerm = `${MemberTypeNames[memberType]} ~ ${firstNames} ${lastNames}`;
+      }
+
+      //* By Record Status
+      if (searchType === SearchType.RecordStatus) {
+        const recordStatusTerm = term.toLowerCase();
+        const validRecordStatus = ['active', 'inactive'];
+
+        if (!validRecordStatus.includes(recordStatusTerm)) {
+          throw new BadRequestException(
+            `Estado de registro no válido: ${term}`,
+          );
+        }
+
+        newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      }
+
+      const docDefinition = getOfferingIncomeReport({
+        title: 'Reporte de Ingresos de Ofrenda',
+        subTitle: 'Resultados de Búsqueda de Ingresos de Ofrenda',
+        description: 'registros',
+        searchTerm: newTerm,
+        searchType: SearchTypeNames[searchType],
+        searchSubType: SearchSubTypeNames[searchSubType] ?? 'S/N',
+        orderSearch: RecordOrderNames[order],
+        churchName: churchId
+          ? offeringIncome[0]?.church?.abbreviatedChurchName
+          : undefined,
+        data: offeringIncome,
       });
 
-      if (!church) {
-        throw new NotFoundException(
-          `No se encontró ninguna iglesia con este ID: ${churchId}.`,
-        );
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
       }
 
-      const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
-
-      if (isNaN(fromTimestamp)) {
-        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      if (error instanceof BadRequestException) {
+        throw error;
       }
 
-      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
-      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
-
-      newTerm = `${church.abbreviatedChurchName} ~ ${formattedFromDate} - ${formattedToDate}`;
+      this.handleDBExceptions(error);
     }
-
-    // By Shift
-    if (
-      (searchType === SearchType.SundayService ||
-        searchType === SearchType.SundaySchool) &&
-      searchSubType === SearchSubType.OfferingByShift
-    ) {
-      const shiftTerm = term.toLowerCase();
-      const validShifts = ['day', 'afternoon'];
-
-      if (!validShifts.includes(shiftTerm)) {
-        throw new BadRequestException(`Turno no válido: ${term}`);
-      }
-
-      newTerm = `${OfferingIncomeCreationShiftTypeNames[term.toLowerCase()]}`;
-    }
-
-    // By Shift and Date
-    if (
-      (searchType === SearchType.SundayService ||
-        searchType === SearchType.SundaySchool) &&
-      searchSubType === SearchSubType.OfferingByShiftDate
-    ) {
-      const [shift, date] = term.split('&');
-
-      const shiftTerm = shift.toLowerCase();
-      const validShifts = ['day', 'afternoon'];
-
-      if (!validShifts.includes(shiftTerm)) {
-        throw new BadRequestException(`Turno no válido: ${term}`);
-      }
-
-      const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
-
-      if (isNaN(fromTimestamp)) {
-        throw new NotFoundException('Formato de marca de tiempo invalido.');
-      }
-
-      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
-      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
-
-      newTerm = `${OfferingIncomeCreationShiftTypeNames[shift.toLowerCase()]} ~ ${formattedFromDate} - ${formattedToDate}`;
-    }
-
-    // By Zone and Date
-    if (
-      searchType === SearchType.FamilyGroup &&
-      searchSubType === SearchSubType.OfferingByZoneDate
-    ) {
-      const [zone, date] = term.split('&');
-
-      const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
-
-      if (isNaN(fromTimestamp)) {
-        throw new NotFoundException('Formato de marca de tiempo invalido.');
-      }
-
-      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
-      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
-
-      newTerm = `${zone} ~ ${formattedFromDate} - ${formattedToDate}`;
-    }
-
-    // By Code and Date
-    if (
-      searchType === SearchType.FamilyGroup &&
-      searchSubType === SearchSubType.OfferingByGroupCodeDate
-    ) {
-      const [code, date] = term.split('&');
-
-      const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
-
-      if (isNaN(fromTimestamp)) {
-        throw new NotFoundException('Formato de marca de tiempo invalido.');
-      }
-
-      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
-      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
-
-      newTerm = `${code} ~ ${formattedFromDate} - ${formattedToDate}`;
-    }
-
-    // By Contributor names
-    if (
-      (searchType === SearchType.Special ||
-        searchType === SearchType.ChurchGround) &&
-      searchSubType === SearchSubType.OfferingByContributorNames
-    ) {
-      const [memberType, names] = term.split('&');
-      const firstNames = names.replace(/\+/g, ' ');
-
-      newTerm = `${MemberTypeNames[memberType]} ~ ${firstNames}`;
-    }
-
-    // By Contributor last names
-    if (
-      (searchType === SearchType.Special ||
-        searchType === SearchType.ChurchGround) &&
-      searchSubType === SearchSubType.OfferingByContributorLastNames
-    ) {
-      const [memberType, names] = term.split('&');
-      const lastNames = names.split('-')[0].replace(/\+/g, ' ');
-
-      newTerm = `${MemberTypeNames[memberType]} ~ ${lastNames}`;
-    }
-
-    // By Contributor full names
-    if (
-      (searchType === SearchType.Special ||
-        searchType === SearchType.ChurchGround) &&
-      searchSubType === SearchSubType.OfferingByContributorFullName
-    ) {
-      const [memberType, names] = term.split('&');
-      const firstNames = names.split('-')[0].replace(/\+/g, ' ');
-      const lastNames = names.split('-')[1].replace(/\+/g, ' ');
-
-      newTerm = `${MemberTypeNames[memberType]} ~ ${firstNames} ${lastNames}`;
-    }
-
-    // By Record Status
-    if (searchType === SearchType.RecordStatus) {
-      const recordStatusTerm = term.toLowerCase();
-      const validRecordStatus = ['active', 'inactive'];
-
-      if (!validRecordStatus.includes(recordStatusTerm)) {
-        throw new BadRequestException(`Estado de registro no válido: ${term}`);
-      }
-
-      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
-    }
-
-    const docDefinition = getOfferingIncomeReport({
-      title: 'Reporte de Ingresos de Ofrenda',
-      subTitle: 'Resultados de Búsqueda de Ingresos de Ofrenda',
-      description: 'registros',
-      searchTerm: `Termino de búsqueda: ${newTerm}`,
-      searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
-      searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
-      data: offeringIncome,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //? OFFERING EXPENSES
   //* GENERAL EXPENSES REPORT
   async getGeneralOfferingExpenses(paginationDto: PaginationDto) {
-    const { order } = paginationDto;
+    const { order, churchId } = paginationDto;
 
-    const offeringExpenses: OfferingExpense[] =
-      await this.offeringExpenseService.findAll(paginationDto);
+    try {
+      const offeringExpenses: OfferingExpense[] =
+        await this.offeringExpenseService.findAll(paginationDto);
 
-    if (!offeringExpenses) {
-      throw new NotFoundException(
-        `No se encontraron salidas de ofrenda con estos términos de búsqueda.`,
-      );
+      if (!offeringExpenses) {
+        throw new NotFoundException(
+          `No se encontraron salidas de ofrenda con estos términos de búsqueda.`,
+        );
+      }
+
+      const docDefinition = getOfferingExpensesReport({
+        title: 'Reporte de Salidas de Ofrenda',
+        subTitle: 'Resultados de Búsqueda de Salidas de Ofrenda',
+        description: 'registros',
+        churchName: churchId
+          ? offeringExpenses[0]?.church?.abbreviatedChurchName
+          : undefined,
+        orderSearch: order,
+        data: offeringExpenses,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getOfferingExpensesReport({
-      title: 'Reporte de Salidas de Ofrenda',
-      subTitle: 'Resultados de Búsqueda de Salidas de Ofrenda',
-      description: 'registros',
-      orderSearch: order,
-      data: offeringExpenses,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //* OFFERING EXPENSES REPORT BY TERM
@@ -1448,36 +1763,243 @@ export class ReportsService {
     term: string,
     searchTypeAndPaginationDto: SearchAndPaginationDto,
   ) {
-    const { 'search-type': searchType, 'search-sub-type': searchSubType } =
-      searchTypeAndPaginationDto;
+    const {
+      'search-type': searchType,
+      'search-sub-type': searchSubType,
+      order,
+      churchId,
+    } = searchTypeAndPaginationDto;
 
-    const offeringExpenses: OfferingExpense[] =
-      await this.offeringExpenseService.findByTerm(
+    try {
+      const offeringExpenses: OfferingExpense[] =
+        await this.offeringExpenseService.findByTerm(
+          term,
+          searchTypeAndPaginationDto,
+        );
+
+      if (!offeringExpenses) {
+        throw new NotFoundException(
+          `No se encontraron salidas de ofrenda con estos términos de búsqueda.`,
+        );
+      }
+
+      console.log(offeringExpenses);
+
+      let newTerm: string;
+      newTerm = term;
+
+      //* By date and church
+      if (
+        searchType === SearchType.PlaningEventsExpenses ||
+        searchType === SearchType.DecorationExpenses ||
+        searchType === SearchType.EquipmentAndTechnologyExpenses ||
+        searchType === SearchType.MaintenanceAndRepairExpenses ||
+        searchType === SearchType.OperationalExpenses ||
+        searchType === SearchType.SuppliesExpenses ||
+        searchType === SearchType.ExpensesAdjustment
+      ) {
+        const church = await this.churchRepository.findOne({
+          where: {
+            id: churchId,
+          },
+        });
+
+        if (!church) {
+          throw new NotFoundException(
+            `No se encontró ninguna iglesia con este ID: ${churchId}.`,
+          );
+        }
+
+        const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
+
+        if (isNaN(fromTimestamp)) {
+          throw new NotFoundException('Formato de marca de tiempo invalido.');
+        }
+
+        const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
+        const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
+
+        newTerm = `${church.abbreviatedChurchName} ~ ${formattedFromDate} - ${formattedToDate}`;
+      }
+
+      //* By Record Status
+      if (searchType === SearchType.RecordStatus) {
+        const recordStatusTerm = term.toLowerCase();
+        const validRecordStatus = ['active', 'inactive'];
+
+        if (!validRecordStatus.includes(recordStatusTerm)) {
+          throw new BadRequestException(
+            `Estado de registro no válido: ${term}`,
+          );
+        }
+
+        newTerm = `${RecordStatusNames[recordStatusTerm]}`;
+      }
+
+      const docDefinition = getOfferingExpensesReport({
+        title: 'Reporte de Salidas de Ofrenda',
+        subTitle: 'Resultados de Búsqueda de Salidas de Ofrenda',
+        description: 'registros',
+        searchTerm: newTerm,
+        searchType: SearchTypeNames[searchType],
+        searchSubType: SearchSubTypeNames[searchSubType] ?? 'S/N',
+        orderSearch: RecordOrderNames[order],
+        churchName: churchId
+          ? offeringExpenses[0]?.church?.abbreviatedChurchName
+          : undefined,
+        data: offeringExpenses,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
+    }
+  }
+
+  //? USERS
+  //* GENERAL USERS REPORT
+  async getGeneralUsers(paginationDto: PaginationDto) {
+    const { order } = paginationDto;
+
+    try {
+      const users: User[] = await this.userService.findAll(paginationDto);
+
+      if (!users) {
+        throw new NotFoundException(
+          `No se encontraron usuarios con estos términos de búsqueda.`,
+        );
+      }
+
+      const docDefinition = getUsersReport({
+        title: 'Reporte de Usuarios',
+        subTitle: 'Resultados de Búsqueda de Usuarios',
+        description: 'usuarios',
+        orderSearch: order,
+        data: users,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
+    }
+  }
+
+  //* USERS REPORT BY TERM
+  async getUsersByTerm(
+    term: string,
+    searchTypeAndPaginationDto: SearchAndPaginationDto,
+  ) {
+    const {
+      'search-type': searchType,
+      'search-sub-type': searchSubType,
+      order,
+    } = searchTypeAndPaginationDto;
+
+    try {
+      const users: User[] = await this.userService.findByTerm(
         term,
         searchTypeAndPaginationDto,
       );
 
-    if (!offeringExpenses) {
-      throw new NotFoundException(
-        `No se encontraron salidas de ofrenda con estos términos de búsqueda.`,
-      );
+      if (!users) {
+        throw new NotFoundException(
+          `No se encontraron usuarios con estos términos de búsqueda.`,
+        );
+      }
+
+      let newTerm: string;
+      newTerm = term;
+
+      if (searchType === SearchType.Gender) {
+        const genderTerm = term.toLowerCase();
+        const validGenders = ['male', 'female'];
+
+        if (!validGenders.includes(genderTerm)) {
+          throw new BadRequestException(`Género no válido: ${term}`);
+        }
+
+        newTerm = `${GenderNames[genderTerm]}`;
+      }
+
+      if (searchType === SearchType.Roles) {
+        const rolesArray = term.split('+');
+
+        const rolesInSpanish = rolesArray
+          .map((role) => UserRoleNames[role] ?? role)
+          .join(' ~ ');
+
+        if (rolesArray.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron usuarios con estos roles: ${rolesInSpanish}`,
+          );
+        }
+
+        newTerm = `${rolesInSpanish}`;
+      }
+
+      if (searchType === SearchType.RecordStatus) {
+        const recordStatusTerm = term.toLowerCase();
+        const validRecordStatus = ['active', 'inactive'];
+
+        if (!validRecordStatus.includes(recordStatusTerm)) {
+          throw new BadRequestException(
+            `Estado de registro no válido: ${term}`,
+          );
+        }
+
+        newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      }
+
+      const docDefinition = getUsersReport({
+        title: 'Reporte de Usuarios',
+        subTitle: 'Resultados de Búsqueda de Usuarios',
+        description: 'usuarios',
+        searchTerm: newTerm,
+        searchType: SearchTypeNames[searchType],
+        searchSubType: SearchSubTypeNames[searchSubType] ?? 'S/N',
+        orderSearch: RecordOrderNames[order],
+
+        data: users,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
+  }
 
-    let newTerm: string;
-    newTerm = term;
+  //? METRICS
+  //* MEMBER METRICS REPORT
+  async getMemberMetrics(metricsPaginationDto: MetricsPaginationDto) {
+    const { year, churchId, types } = metricsPaginationDto;
 
-    // By date and church
-    if (
-      searchType === SearchType.PlaningEventsExpenses ||
-      searchType === SearchType.DecorationExpenses ||
-      searchType === SearchType.EquipmentAndTechnologyExpenses ||
-      searchType === SearchType.MaintenanceAndRepairExpenses ||
-      searchType === SearchType.OperationalExpenses ||
-      searchType === SearchType.SuppliesExpenses ||
-      searchType === SearchType.ExpensesAdjustment
-    ) {
-      const [churchId, date] = term.split('&');
-
+    try {
       const church = await this.churchRepository.findOne({
         where: {
           id: churchId,
@@ -1490,399 +2012,284 @@ export class ReportsService {
         );
       }
 
-      const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
+      const metricsTypesArray = types.split('+');
 
-      if (isNaN(fromTimestamp)) {
-        throw new NotFoundException('Formato de marca de tiempo invalido.');
+      //? Search and Set Data
+      //*Members fluctuation by year
+      let membersFluctuationByYearDataResult: MonthlyMemberFluctuationDataResult[];
+      if (
+        metricsTypesArray.includes(MetricSearchType.MembersFluctuationByYear)
+      ) {
+        membersFluctuationByYearDataResult =
+          await this.metricsService.findByTerm(`${churchId}&${year}`, {
+            'search-type': MetricSearchType.MembersFluctuationByYear,
+          });
       }
 
-      const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
-      const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
-
-      newTerm = `${church.abbreviatedChurchName} ~ ${formattedFromDate} - ${formattedToDate}`;
-    }
-
-    // By Record Status
-    if (searchType === SearchType.RecordStatus) {
-      const recordStatusTerm = term.toLowerCase();
-      const validRecordStatus = ['active', 'inactive'];
-
-      if (!validRecordStatus.includes(recordStatusTerm)) {
-        throw new BadRequestException(`Estado de registro no válido: ${term}`);
-      }
-
-      newTerm = `${RecordStatusNames[recordStatusTerm]}`;
-    }
-
-    const docDefinition = getOfferingExpensesReport({
-      title: 'Reporte de Salidas de Ofrenda',
-      subTitle: 'Resultados de Búsqueda de Salidas de Ofrenda',
-      description: 'registros',
-      searchTerm: `Termino de búsqueda: ${newTerm}`,
-      searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
-      searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
-      data: offeringExpenses,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
-  }
-
-  //? USERS
-  //* GENERAL USERS REPORT
-  async getGeneralUsers(paginationDto: PaginationDto) {
-    const { order } = paginationDto;
-
-    const users: User[] = await this.userService.findAll(paginationDto);
-
-    if (!users) {
-      throw new NotFoundException(
-        `No se encontraron usuarios con estos términos de búsqueda.`,
-      );
-    }
-
-    const docDefinition = getUsersReport({
-      title: 'Reporte de Usuarios',
-      subTitle: 'Resultados de Búsqueda de Usuarios',
-      description: 'usuarios',
-      orderSearch: order,
-      data: users,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
-  }
-
-  //* USERS REPORT BY TERM
-  async getUsersByTerm(
-    term: string,
-    searchTypeAndPaginationDto: SearchAndPaginationDto,
-  ) {
-    const { 'search-type': searchType, 'search-sub-type': searchSubType } =
-      searchTypeAndPaginationDto;
-
-    const users: User[] = await this.userService.findByTerm(
-      term,
-      searchTypeAndPaginationDto,
-    );
-
-    if (!users) {
-      throw new NotFoundException(
-        `No se encontraron usuarios con estos términos de búsqueda.`,
-      );
-    }
-
-    let newTerm: string;
-    newTerm = term;
-
-    if (searchType === SearchType.Gender) {
-      const genderTerm = term.toLowerCase();
-      const validGenders = ['male', 'female'];
-
-      if (!validGenders.includes(genderTerm)) {
-        throw new BadRequestException(`Género no válido: ${term}`);
-      }
-
-      newTerm = `${GenderNames[genderTerm]}`;
-    }
-
-    if (searchType === SearchType.Roles) {
-      const rolesArray = term.split('+');
-
-      const rolesInSpanish = rolesArray
-        .map((role) => UserRoleNames[role] ?? role)
-        .join(' ~ ');
-
-      if (rolesArray.length === 0) {
-        throw new NotFoundException(
-          `No se encontraron usuarios con estos roles: ${rolesInSpanish}`,
+      //*Members by birth month
+      let membersByBirthMonthDataResult: MonthlyMemberDataResult[];
+      if (metricsTypesArray.includes(MetricSearchType.MembersByBirthMonth)) {
+        membersByBirthMonthDataResult = await this.metricsService.findByTerm(
+          churchId,
+          {
+            'search-type': MetricSearchType.MembersByBirthMonth,
+          },
         );
       }
 
-      newTerm = `${rolesInSpanish}`;
-    }
-
-    if (searchType === SearchType.RecordStatus) {
-      const recordStatusTerm = term.toLowerCase();
-      const validRecordStatus = ['active', 'inactive'];
-
-      if (!validRecordStatus.includes(recordStatusTerm)) {
-        throw new BadRequestException(`Estado de registro no válido: ${term}`);
+      //*Members by category
+      let membersByCategoryDataResult: MembersByCategoryDataResult;
+      if (metricsTypesArray.includes(MetricSearchType.MembersByCategory)) {
+        membersByCategoryDataResult = await this.metricsService.findByTerm(
+          churchId,
+          {
+            'search-type': MetricSearchType.MembersByCategory,
+          },
+        );
       }
 
-      newTerm = `${RecordStatusNames[recordStatusTerm]} `;
+      //*Members by category and gender
+      let membersByCategoryAndGenderDataResult: MembersByCategoryAndGenderDataResult;
+      if (
+        metricsTypesArray.includes(MetricSearchType.MembersByCategoryAndGender)
+      ) {
+        membersByCategoryAndGenderDataResult =
+          await this.metricsService.findByTerm(churchId, {
+            'search-type': MetricSearchType.MembersByCategoryAndGender,
+          });
+      }
+
+      //*Members by role and gender
+      let membersByRoleAndGenderDataResult: MemberByRoleAndGenderDataResult;
+      if (metricsTypesArray.includes(MetricSearchType.MembersByRoleAndGender)) {
+        membersByRoleAndGenderDataResult = await this.metricsService.findByTerm(
+          churchId,
+          {
+            'search-type': MetricSearchType.MembersByRoleAndGender,
+          },
+        );
+      }
+
+      //*Members by marital status
+      let membersByMaritalStatusDataResult: MembersByMaritalStatusDataResult;
+      if (metricsTypesArray.includes(MetricSearchType.MembersByMaritalStatus)) {
+        membersByMaritalStatusDataResult = await this.metricsService.findByTerm(
+          churchId,
+          {
+            'search-type': MetricSearchType.MembersByMaritalStatus,
+          },
+        );
+      }
+
+      //*Members by zone and gender
+      let membersByZoneAndGenderDataResult: MembersByZoneDataResult;
+      if (metricsTypesArray.includes(MetricSearchType.MembersByZoneAndGender)) {
+        membersByZoneAndGenderDataResult = await this.metricsService.findByTerm(
+          `${churchId}&{''}`,
+          {
+            'search-type': MetricSearchType.MembersByZoneAndGender,
+            allZones: true,
+          },
+        );
+      }
+
+      //*Preacher by zone and gender
+      let preachersByZoneAndGenderDataResult: PreachersByZoneDataResult;
+      if (
+        metricsTypesArray.includes(MetricSearchType.PreachersByZoneAndGender)
+      ) {
+        preachersByZoneAndGenderDataResult =
+          await this.metricsService.findByTerm(`${churchId}&{''}`, {
+            'search-type': MetricSearchType.PreachersByZoneAndGender,
+            allZones: true,
+          });
+      }
+
+      //*Members by district and gender
+      let membersByDistrictAndGenderDataResult: MembersByDistrictAndGenderDataResult;
+      if (
+        metricsTypesArray.includes(MetricSearchType.MembersByDistrictAndGender)
+      ) {
+        membersByDistrictAndGenderDataResult =
+          await this.metricsService.findByTerm(churchId, {
+            'search-type': MetricSearchType.MembersByDistrictAndGender,
+          });
+      }
+
+      //*Members by record status
+      let membersByRecordStatusDataResult: MembersByRecordStatusDataResult;
+      if (metricsTypesArray.includes(MetricSearchType.MembersByRecordStatus)) {
+        membersByRecordStatusDataResult = await this.metricsService.findByTerm(
+          churchId,
+          {
+            'search-type': MetricSearchType.MembersByRecordStatus,
+          },
+        );
+      }
+
+      const docDefinition = getMemberMetricsReport({
+        title: 'Reporte de Métricas de Miembro',
+        subTitle: 'Resultados de Búsqueda de Métricas de Miembros',
+        metricsTypesArray: metricsTypesArray,
+        year: year,
+        church: church,
+        membersFluctuationByYearDataResult: membersFluctuationByYearDataResult,
+        membersByBirthMonthDataResult: membersByBirthMonthDataResult,
+        membersByCategoryDataResult: membersByCategoryDataResult,
+        membersByCategoryAndGenderDataResult:
+          membersByCategoryAndGenderDataResult,
+        membersByRoleAndGenderDataResult: membersByRoleAndGenderDataResult,
+        membersByMaritalStatusDataResult: membersByMaritalStatusDataResult,
+        membersByZoneAndGenderDataResult: membersByZoneAndGenderDataResult,
+        preachersByZoneAndGenderDataResult: preachersByZoneAndGenderDataResult,
+        membersByDistrictAndGenderDataResult:
+          membersByDistrictAndGenderDataResult,
+        membersByRecordStatusDataResult: membersByRecordStatusDataResult,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    const docDefinition = getUsersReport({
-      title: 'Reporte de Usuarios',
-      subTitle: 'Resultados de Búsqueda de Usuarios',
-      description: 'usuarios',
-      searchTerm: `Termino de búsqueda: ${newTerm}`,
-      searchType: `Tipo de búsqueda: ${SearchTypeNames[searchType]}`,
-      searchSubType: `Sub-tipo de búsqueda: ${SearchSubTypeNames[searchSubType] ?? 'S/N'}`,
-      data: users,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
-  }
-
-  //? METRICS
-  //* MEMBER METRICS REPORT
-  async getMemberMetrics(metricsPaginationDto: MetricsPaginationDto) {
-    const { year, churchId, types } = metricsPaginationDto;
-
-    const church = await this.churchRepository.findOne({
-      where: {
-        id: churchId,
-      },
-    });
-
-    if (!church) {
-      throw new NotFoundException(
-        `No se encontró ninguna iglesia con este ID: ${churchId}.`,
-      );
-    }
-
-    const metricsTypesArray = types.split('+');
-
-    // * Search and Set Data
-    let membersFluctuationByYearDataResult: MonthlyMemberFluctuationDataResult[];
-    if (metricsTypesArray.includes(MetricSearchType.MembersFluctuationByYear)) {
-      membersFluctuationByYearDataResult = await this.metricsService.findByTerm(
-        `${churchId}&${year}`,
-        {
-          'search-type': MetricSearchType.MembersFluctuationByYear,
-        },
-      );
-    }
-
-    let membersByBirthMonthDataResult: MonthlyMemberDataResult[];
-    if (metricsTypesArray.includes(MetricSearchType.MembersByBirthMonth)) {
-      membersByBirthMonthDataResult = await this.metricsService.findByTerm(
-        churchId,
-        {
-          'search-type': MetricSearchType.MembersByBirthMonth,
-        },
-      );
-    }
-
-    let membersByCategoryDataResult: MembersByCategoryDataResult;
-    if (metricsTypesArray.includes(MetricSearchType.MembersByCategory)) {
-      membersByCategoryDataResult = await this.metricsService.findByTerm(
-        churchId,
-        {
-          'search-type': MetricSearchType.MembersByCategory,
-        },
-      );
-    }
-
-    let membersByCategoryAndGenderDataResult: MembersByCategoryAndGenderDataResult;
-    if (
-      metricsTypesArray.includes(MetricSearchType.MembersByCategoryAndGender)
-    ) {
-      membersByCategoryAndGenderDataResult =
-        await this.metricsService.findByTerm(churchId, {
-          'search-type': MetricSearchType.MembersByCategoryAndGender,
-        });
-    }
-
-    let membersByRoleAndGenderDataResult: MemberByRoleAndGenderDataResult;
-    if (metricsTypesArray.includes(MetricSearchType.MembersByRoleAndGender)) {
-      membersByRoleAndGenderDataResult = await this.metricsService.findByTerm(
-        churchId,
-        {
-          'search-type': MetricSearchType.MembersByRoleAndGender,
-        },
-      );
-    }
-
-    let membersByMaritalStatusDataResult: MembersByMaritalStatusDataResult;
-    if (metricsTypesArray.includes(MetricSearchType.MembersByMaritalStatus)) {
-      membersByMaritalStatusDataResult = await this.metricsService.findByTerm(
-        churchId,
-        {
-          'search-type': MetricSearchType.MembersByMaritalStatus,
-        },
-      );
-    }
-
-    let membersByZoneAndGenderDataResult: MembersByZoneDataResult;
-    if (metricsTypesArray.includes(MetricSearchType.MembersByZoneAndGender)) {
-      membersByZoneAndGenderDataResult = await this.metricsService.findByTerm(
-        `${churchId}&{''}`,
-        {
-          'search-type': MetricSearchType.MembersByZoneAndGender,
-          allZones: true,
-        },
-      );
-    }
-
-    let preachersByZoneAndGenderDataResult: PreachersByZoneDataResult;
-    if (metricsTypesArray.includes(MetricSearchType.PreachersByZoneAndGender)) {
-      preachersByZoneAndGenderDataResult = await this.metricsService.findByTerm(
-        `${churchId}&{''}`,
-        {
-          'search-type': MetricSearchType.PreachersByZoneAndGender,
-          allZones: true,
-        },
-      );
-    }
-
-    let membersByDistrictAndGenderDataResult: MembersByDistrictAndGenderDataResult;
-    if (
-      metricsTypesArray.includes(MetricSearchType.MembersByDistrictAndGender)
-    ) {
-      membersByDistrictAndGenderDataResult =
-        await this.metricsService.findByTerm(churchId, {
-          'search-type': MetricSearchType.MembersByDistrictAndGender,
-        });
-    }
-
-    let membersByRecordStatusDataResult: MembersByRecordStatusDataResult;
-    if (metricsTypesArray.includes(MetricSearchType.MembersByRecordStatus)) {
-      membersByRecordStatusDataResult = await this.metricsService.findByTerm(
-        churchId,
-        {
-          'search-type': MetricSearchType.MembersByRecordStatus,
-        },
-      );
-    }
-
-    const docDefinition = getMemberMetricsReport({
-      title: 'Reporte de Métricas de Miembro',
-      subTitle: 'Resultados de Búsqueda de Métricas de Miembros',
-      metricsTypesArray: metricsTypesArray,
-      year: year,
-      church: church,
-      membersFluctuationByYearDataResult: membersFluctuationByYearDataResult,
-      membersByBirthMonthDataResult: membersByBirthMonthDataResult,
-      membersByCategoryDataResult: membersByCategoryDataResult,
-      membersByCategoryAndGenderDataResult:
-        membersByCategoryAndGenderDataResult,
-      membersByRoleAndGenderDataResult: membersByRoleAndGenderDataResult,
-      membersByMaritalStatusDataResult: membersByMaritalStatusDataResult,
-      membersByZoneAndGenderDataResult: membersByZoneAndGenderDataResult,
-      preachersByZoneAndGenderDataResult: preachersByZoneAndGenderDataResult,
-      membersByDistrictAndGenderDataResult:
-        membersByDistrictAndGenderDataResult,
-      membersByRecordStatusDataResult: membersByRecordStatusDataResult,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //* FAMILY GROUP METRICS REPORT
   async getFamilyGroupMetrics(metricsPaginationDto: MetricsPaginationDto) {
     const { year, churchId, types } = metricsPaginationDto;
 
-    const church = await this.churchRepository.findOne({
-      where: {
-        id: churchId,
-      },
-    });
-
-    if (!church) {
-      throw new NotFoundException(
-        `No se encontró ninguna iglesia con este ID: ${churchId}.`,
-      );
-    }
-
-    const metricsTypesArray = types.split('+');
-
-    // * Search and Set Data
-    let familyGroupsFluctuationByYearDataResult: MonthlyFamilyGroupsFluctuationDataResult[];
-    if (
-      metricsTypesArray.includes(MetricSearchType.FamilyGroupsFluctuationByYear)
-    ) {
-      familyGroupsFluctuationByYearDataResult =
-        await this.metricsService.findByTerm(`${churchId}&${year}`, {
-          'search-type': MetricSearchType.FamilyGroupsFluctuationByYear,
-        });
-    }
-
-    let familyGroupsByCodeDataResult: FamilyGroupsByCodeDataResult;
-    if (metricsTypesArray.includes(MetricSearchType.FamilyGroupsByCode)) {
-      familyGroupsByCodeDataResult = await this.metricsService.findByTerm(
-        `${churchId}&{''}`,
-        {
-          'search-type': MetricSearchType.FamilyGroupsByCode,
-          allFamilyGroups: true,
-          order: 'ASC',
+    try {
+      const church = await this.churchRepository.findOne({
+        where: {
+          id: churchId,
         },
-      );
+      });
+
+      if (!church) {
+        throw new NotFoundException(
+          `No se encontró ninguna iglesia con este ID: ${churchId}.`,
+        );
+      }
+
+      const metricsTypesArray = types.split('+');
+
+      //? Search and Set Data
+      //* Family groups by year
+      let familyGroupsFluctuationByYearDataResult: MonthlyFamilyGroupsFluctuationDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.FamilyGroupsFluctuationByYear,
+        )
+      ) {
+        familyGroupsFluctuationByYearDataResult =
+          await this.metricsService.findByTerm(`${churchId}&${year}`, {
+            'search-type': MetricSearchType.FamilyGroupsFluctuationByYear,
+          });
+      }
+
+      //* Family groups by code
+      let familyGroupsByCodeDataResult: FamilyGroupsByCodeDataResult;
+      if (metricsTypesArray.includes(MetricSearchType.FamilyGroupsByCode)) {
+        familyGroupsByCodeDataResult = await this.metricsService.findByTerm(
+          `${churchId}&{''}`,
+          {
+            'search-type': MetricSearchType.FamilyGroupsByCode,
+            allFamilyGroups: true,
+            order: 'ASC',
+          },
+        );
+      }
+
+      //* Family groups by zone
+      let familyGroupsByZoneDataResult: FamilyGroupsByZoneDataResult;
+      if (metricsTypesArray.includes(MetricSearchType.FamilyGroupsByZone)) {
+        familyGroupsByZoneDataResult = await this.metricsService.findByTerm(
+          `${churchId}&{''}`,
+          {
+            'search-type': MetricSearchType.FamilyGroupsByZone,
+            allZones: true,
+            order: 'DESC',
+          },
+        );
+      }
+
+      //* Family groups by district
+      let familyGroupsByDistrictDataResult: FamilyGroupsByDistrictDataResult;
+      if (metricsTypesArray.includes(MetricSearchType.FamilyGroupsByDistrict)) {
+        familyGroupsByDistrictDataResult = await this.metricsService.findByTerm(
+          `${churchId}&${''}`,
+          {
+            'search-type': MetricSearchType.FamilyGroupsByDistrict,
+            allDistricts: true,
+            order: 'DESC',
+          },
+        );
+      }
+
+      //* Family groups by service time
+      let familyGroupsByServiceTimeDataResult: FamilyGroupsByServiceTimeDataResult;
+      if (
+        metricsTypesArray.includes(MetricSearchType.FamilyGroupsByServiceTime)
+      ) {
+        familyGroupsByServiceTimeDataResult =
+          await this.metricsService.findByTerm(`${churchId}&${''}`, {
+            'search-type': MetricSearchType.FamilyGroupsByServiceTime,
+            allZones: true,
+            order: 'DESC',
+          });
+      }
+
+      //* Family groups by record status
+      let familyGroupsByRecordStatusDataResult: FamilyGroupsByRecordStatusDataResult;
+      if (
+        metricsTypesArray.includes(MetricSearchType.FamilyGroupsByRecordStatus)
+      ) {
+        familyGroupsByRecordStatusDataResult =
+          await this.metricsService.findByTerm(`${churchId}&${''}`, {
+            'search-type': MetricSearchType.FamilyGroupsByRecordStatus,
+            allZones: true,
+          });
+      }
+
+      const docDefinition = getFamilyGroupMetricsReport({
+        title: 'Reporte de Métricas de Grupo Familiar',
+        subTitle: 'Resultados de Búsqueda de Métricas de Grupo Familiar',
+        metricsTypesArray: metricsTypesArray,
+        year: year,
+        familyGroupsFluctuationByYearDataResult:
+          familyGroupsFluctuationByYearDataResult,
+        familyGroupsByCodeDataResult: familyGroupsByCodeDataResult,
+        familyGroupsByZoneDataResult: familyGroupsByZoneDataResult,
+        familyGroupsByDistrictDataResult: familyGroupsByDistrictDataResult,
+        familyGroupsByServiceTimeDataResult:
+          familyGroupsByServiceTimeDataResult,
+        familyGroupsByRecordStatusDataResult:
+          familyGroupsByRecordStatusDataResult,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    let familyGroupsByZoneDataResult: FamilyGroupsByZoneDataResult;
-    if (metricsTypesArray.includes(MetricSearchType.FamilyGroupsByZone)) {
-      familyGroupsByZoneDataResult = await this.metricsService.findByTerm(
-        `${churchId}&{''}`,
-        {
-          'search-type': MetricSearchType.FamilyGroupsByZone,
-          allZones: true,
-          order: 'DESC',
-        },
-      );
-    }
-
-    let familyGroupsByDistrictDataResult: FamilyGroupsByDistrictDataResult;
-    if (metricsTypesArray.includes(MetricSearchType.FamilyGroupsByDistrict)) {
-      familyGroupsByDistrictDataResult = await this.metricsService.findByTerm(
-        `${churchId}&${''}`,
-        {
-          'search-type': MetricSearchType.FamilyGroupsByDistrict,
-          allDistricts: true,
-          order: 'DESC',
-        },
-      );
-    }
-
-    let familyGroupsByServiceTimeDataResult: FamilyGroupsByServiceTimeDataResult;
-    if (
-      metricsTypesArray.includes(MetricSearchType.FamilyGroupsByServiceTime)
-    ) {
-      familyGroupsByServiceTimeDataResult =
-        await this.metricsService.findByTerm(`${churchId}&${''}`, {
-          'search-type': MetricSearchType.FamilyGroupsByServiceTime,
-          allZones: true,
-          order: 'DESC',
-        });
-    }
-
-    let familyGroupsByRecordStatusDataResult: FamilyGroupsByRecordStatusDataResult;
-    if (
-      metricsTypesArray.includes(MetricSearchType.FamilyGroupsByRecordStatus)
-    ) {
-      familyGroupsByRecordStatusDataResult =
-        await this.metricsService.findByTerm(`${churchId}&${''}`, {
-          'search-type': MetricSearchType.FamilyGroupsByRecordStatus,
-          allZones: true,
-        });
-    }
-
-    const docDefinition = getFamilyGroupMetricsReport({
-      title: 'Reporte de Métricas de Grupo Familiar',
-      subTitle: 'Resultados de Búsqueda de Métricas de Grupo Familiar',
-      metricsTypesArray: metricsTypesArray,
-      year: year,
-      familyGroupsFluctuationByYearDataResult:
-        familyGroupsFluctuationByYearDataResult,
-      familyGroupsByCodeDataResult: familyGroupsByCodeDataResult,
-      familyGroupsByZoneDataResult: familyGroupsByZoneDataResult,
-      familyGroupsByDistrictDataResult: familyGroupsByDistrictDataResult,
-      familyGroupsByServiceTimeDataResult: familyGroupsByServiceTimeDataResult,
-      familyGroupsByRecordStatusDataResult:
-        familyGroupsByRecordStatusDataResult,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //* OFFERING INCOME METRICS REPORT
@@ -1890,195 +2297,231 @@ export class ReportsService {
     const { year, startMonth, endMonth, churchId, types } =
       metricsPaginationDto;
 
-    const church = await this.churchRepository.findOne({
-      where: {
-        id: churchId,
-      },
-    });
+    try {
+      const church = await this.churchRepository.findOne({
+        where: {
+          id: churchId,
+        },
+      });
 
-    if (!church) {
-      throw new NotFoundException(
-        `No se encontró ninguna iglesia con este ID: ${churchId}.`,
-      );
-    }
-
-    const metricsTypesArray = types.split('+');
-
-    // * Search and Set Data
-    let offeringIncomeBySundayServiceDataResult: OfferingIncomeBySundayServiceDataResult[];
-    if (
-      metricsTypesArray.includes(MetricSearchType.OfferingIncomeBySundayService)
-    ) {
-      offeringIncomeBySundayServiceDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type': MetricSearchType.OfferingIncomeBySundayService,
-            isSingleMonth: false,
-          },
+      if (!church) {
+        throw new NotFoundException(
+          `No se encontró ninguna iglesia con este ID: ${churchId}.`,
         );
+      }
+
+      const metricsTypesArray = types.split('+');
+
+      //? Search and Set Data
+      //* Offering Income by Sunday Service
+      let offeringIncomeBySundayServiceDataResult: OfferingIncomeBySundayServiceDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.OfferingIncomeBySundayService,
+        )
+      ) {
+        offeringIncomeBySundayServiceDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type': MetricSearchType.OfferingIncomeBySundayService,
+              isSingleMonth: false,
+            },
+          );
+      }
+
+      //* Offering Income by Family group
+      let offeringIncomeByFamilyGroupDataResult: OfferingIncomeByFamilyGroupDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.OfferingIncomeBySundayService,
+        )
+      ) {
+        offeringIncomeByFamilyGroupDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type': MetricSearchType.OfferingIncomeByFamilyGroup,
+              isSingleMonth: false,
+            },
+          );
+      }
+
+      //* Offering Income by Sunday School
+      let offeringIncomeBySundaySchoolDataResult: OfferingIncomeBySundaySchoolDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.OfferingIncomeBySundaySchool,
+        )
+      ) {
+        offeringIncomeBySundaySchoolDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type': MetricSearchType.OfferingIncomeBySundaySchool,
+              isSingleMonth: false,
+            },
+          );
+      }
+
+      //* Offering Income by United Service
+      let offeringIncomeByUnitedServiceDataResult: OfferingIncomeByUnitedServiceDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.OfferingIncomeByUnitedService,
+        )
+      ) {
+        offeringIncomeByUnitedServiceDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type': MetricSearchType.OfferingIncomeByUnitedService,
+              isSingleMonth: false,
+            },
+          );
+      }
+
+      //* Offering Income by Fasting And Vigil
+      let offeringIncomeByFastingAndVigilDataResult: OfferingIncomeByFastingAndVigilDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.OfferingIncomeByFastingAndVigil,
+        )
+      ) {
+        offeringIncomeByFastingAndVigilDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type': MetricSearchType.OfferingIncomeByFastingAndVigil,
+              isSingleMonth: false,
+            },
+          );
+      }
+
+      //* Offering Income by Youth Service
+      let offeringIncomeByYouthServiceDataResult: OfferingIncomeByYouthServiceDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.OfferingIncomeByYouthService,
+        )
+      ) {
+        offeringIncomeByYouthServiceDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type': MetricSearchType.OfferingIncomeByYouthService,
+              isSingleMonth: false,
+            },
+          );
+      }
+
+      //* Offering Income by Special Offering
+      let offeringIncomeBySpecialOfferingDataResult: OfferingIncomeBySpecialOfferingDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.OfferingIncomeBySpecialOffering,
+        )
+      ) {
+        offeringIncomeBySpecialOfferingDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type': MetricSearchType.OfferingIncomeBySpecialOffering,
+              isSingleMonth: false,
+            },
+          );
+      }
+
+      //* Offering Income by Church Ground
+      let offeringIncomeByChurchGroundDataResult: OfferingIncomeByChurchGroundDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.OfferingIncomeByChurchGround,
+        )
+      ) {
+        offeringIncomeByChurchGroundDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type': MetricSearchType.OfferingIncomeByChurchGround,
+              isSingleMonth: false,
+            },
+          );
+      }
+
+      //* Offering Income by Activities
+      let offeringIncomeByActivitiesDataResult: OfferingIncomeByActivitiesDataResult[];
+      if (
+        metricsTypesArray.includes(MetricSearchType.OfferingIncomeByActivities)
+      ) {
+        offeringIncomeByActivitiesDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type': MetricSearchType.OfferingIncomeByActivities,
+              isSingleMonth: false,
+            },
+          );
+      }
+
+      //* Offering Income by Income Adjustment
+      let offeringIncomeByIncomeAdjustmentDataResult: OfferingIncomeByIncomeAdjustmentDataResult[];
+      if (
+        metricsTypesArray.includes(MetricSearchType.OfferingIncomeAdjustment)
+      ) {
+        offeringIncomeByIncomeAdjustmentDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type': MetricSearchType.OfferingIncomeAdjustment,
+              isSingleMonth: false,
+            },
+          );
+      }
+
+      const docDefinition = getOfferingIncomeMetricsReport({
+        title: 'Reporte de Métricas de Ingresos de Ofrenda',
+        subTitle: 'Resultados de Búsqueda de Métricas de Ingresos de Ofrendas',
+        metricsTypesArray: metricsTypesArray,
+        year: year,
+        startMonth: startMonth,
+        endMonth: endMonth,
+        offeringIncomeBySundayServiceDataResult:
+          offeringIncomeBySundayServiceDataResult,
+        offeringIncomeByFamilyGroupDataResult:
+          offeringIncomeByFamilyGroupDataResult,
+        offeringIncomeBySundaySchoolDataResult:
+          offeringIncomeBySundaySchoolDataResult,
+        offeringIncomeByUnitedServiceDataResult:
+          offeringIncomeByUnitedServiceDataResult,
+        offeringIncomeByFastingAndVigilDataResult:
+          offeringIncomeByFastingAndVigilDataResult,
+        offeringIncomeByYouthServiceDataResult:
+          offeringIncomeByYouthServiceDataResult,
+        offeringIncomeBySpecialOfferingDataResult:
+          offeringIncomeBySpecialOfferingDataResult,
+        offeringIncomeByChurchGroundDataResult:
+          offeringIncomeByChurchGroundDataResult,
+        offeringIncomeByActivitiesDataResult:
+          offeringIncomeByActivitiesDataResult,
+        offeringIncomeByIncomeAdjustmentDataResult:
+          offeringIncomeByIncomeAdjustmentDataResult,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    let offeringIncomeByFamilyGroupDataResult: OfferingIncomeByFamilyGroupDataResult[];
-    if (
-      metricsTypesArray.includes(MetricSearchType.OfferingIncomeBySundayService)
-    ) {
-      offeringIncomeByFamilyGroupDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type': MetricSearchType.OfferingIncomeByFamilyGroup,
-            isSingleMonth: false,
-          },
-        );
-    }
-
-    let offeringIncomeBySundaySchoolDataResult: OfferingIncomeBySundaySchoolDataResult[];
-    if (
-      metricsTypesArray.includes(MetricSearchType.OfferingIncomeBySundaySchool)
-    ) {
-      offeringIncomeBySundaySchoolDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type': MetricSearchType.OfferingIncomeBySundaySchool,
-            isSingleMonth: false,
-          },
-        );
-    }
-
-    let offeringIncomeByUnitedServiceDataResult: OfferingIncomeByUnitedServiceDataResult[];
-    if (
-      metricsTypesArray.includes(MetricSearchType.OfferingIncomeByUnitedService)
-    ) {
-      offeringIncomeByUnitedServiceDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type': MetricSearchType.OfferingIncomeByUnitedService,
-            isSingleMonth: false,
-          },
-        );
-    }
-
-    let offeringIncomeByFastingAndVigilDataResult: OfferingIncomeByFastingAndVigilDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.OfferingIncomeByFastingAndVigil,
-      )
-    ) {
-      offeringIncomeByFastingAndVigilDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type': MetricSearchType.OfferingIncomeByFastingAndVigil,
-            isSingleMonth: false,
-          },
-        );
-    }
-
-    let offeringIncomeByYouthServiceDataResult: OfferingIncomeByYouthServiceDataResult[];
-    if (
-      metricsTypesArray.includes(MetricSearchType.OfferingIncomeByYouthService)
-    ) {
-      offeringIncomeByYouthServiceDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type': MetricSearchType.OfferingIncomeByYouthService,
-            isSingleMonth: false,
-          },
-        );
-    }
-
-    let offeringIncomeBySpecialOfferingDataResult: OfferingIncomeBySpecialOfferingDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.OfferingIncomeBySpecialOffering,
-      )
-    ) {
-      offeringIncomeBySpecialOfferingDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type': MetricSearchType.OfferingIncomeBySpecialOffering,
-            isSingleMonth: false,
-          },
-        );
-    }
-
-    let offeringIncomeByChurchGroundDataResult: OfferingIncomeByChurchGroundDataResult[];
-    if (
-      metricsTypesArray.includes(MetricSearchType.OfferingIncomeByChurchGround)
-    ) {
-      offeringIncomeByChurchGroundDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type': MetricSearchType.OfferingIncomeByChurchGround,
-            isSingleMonth: false,
-          },
-        );
-    }
-
-    let offeringIncomeByActivitiesDataResult: OfferingIncomeByActivitiesDataResult[];
-    if (
-      metricsTypesArray.includes(MetricSearchType.OfferingIncomeByActivities)
-    ) {
-      offeringIncomeByActivitiesDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type': MetricSearchType.OfferingIncomeByActivities,
-            isSingleMonth: false,
-          },
-        );
-    }
-
-    let offeringIncomeByIncomeAdjustmentDataResult: OfferingIncomeByIncomeAdjustmentDataResult[];
-    if (metricsTypesArray.includes(MetricSearchType.OfferingIncomeAdjustment)) {
-      offeringIncomeByIncomeAdjustmentDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type': MetricSearchType.OfferingIncomeAdjustment,
-            isSingleMonth: false,
-          },
-        );
-    }
-
-    const docDefinition = getOfferingIncomeMetricsReport({
-      title: 'Reporte de Métricas de Ingresos de Ofrenda',
-      subTitle: 'Resultados de Búsqueda de Métricas de Ingresos de Ofrendas',
-      metricsTypesArray: metricsTypesArray,
-      year: year,
-      startMonth: startMonth,
-      endMonth: endMonth,
-      offeringIncomeBySundayServiceDataResult:
-        offeringIncomeBySundayServiceDataResult,
-      offeringIncomeByFamilyGroupDataResult:
-        offeringIncomeByFamilyGroupDataResult,
-      offeringIncomeBySundaySchoolDataResult:
-        offeringIncomeBySundaySchoolDataResult,
-      offeringIncomeByUnitedServiceDataResult:
-        offeringIncomeByUnitedServiceDataResult,
-      offeringIncomeByFastingAndVigilDataResult:
-        offeringIncomeByFastingAndVigilDataResult,
-      offeringIncomeByYouthServiceDataResult:
-        offeringIncomeByYouthServiceDataResult,
-      offeringIncomeBySpecialOfferingDataResult:
-        offeringIncomeBySpecialOfferingDataResult,
-      offeringIncomeByChurchGroundDataResult:
-        offeringIncomeByChurchGroundDataResult,
-      offeringIncomeByActivitiesDataResult:
-        offeringIncomeByActivitiesDataResult,
-      offeringIncomeByIncomeAdjustmentDataResult:
-        offeringIncomeByIncomeAdjustmentDataResult,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //* OFFERING EXPENSE METRICS REPORT
@@ -2086,147 +2529,171 @@ export class ReportsService {
     const { year, startMonth, endMonth, churchId, types } =
       metricsPaginationDto;
 
-    const church = await this.churchRepository.findOne({
-      where: {
-        id: churchId,
-      },
-    });
-
-    if (!church) {
-      throw new NotFoundException(
-        `No se encontró ninguna iglesia con este ID: ${churchId}.`,
-      );
-    }
-
-    const metricsTypesArray = types.split('+');
-
-    // * Search and Set Data
-    let operationalOfferingExpensesDataResult: OfferingExpenseDataResult[];
-    if (
-      metricsTypesArray.includes(MetricSearchType.OperationalOfferingExpenses)
-    ) {
-      operationalOfferingExpensesDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type': MetricSearchType.OperationalOfferingExpenses,
-            isSingleMonth: false,
-          },
-        );
-    }
-
-    let maintenanceAndRepairOfferingExpensesDataResult: OfferingExpenseDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.MaintenanceAndRepairOfferingExpenses,
-      )
-    ) {
-      maintenanceAndRepairOfferingExpensesDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type':
-              MetricSearchType.MaintenanceAndRepairOfferingExpenses,
-            isSingleMonth: false,
-          },
-        );
-    }
-
-    let decorationOfferingExpensesDataResult: OfferingExpenseDataResult[];
-    if (
-      metricsTypesArray.includes(MetricSearchType.DecorationOfferingExpenses)
-    ) {
-      decorationOfferingExpensesDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type': MetricSearchType.DecorationOfferingExpenses,
-            isSingleMonth: false,
-          },
-        );
-    }
-
-    let equipmentAndTechnologyOfferingExpensesDataResult: OfferingExpenseDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.EquipmentAndTechnologyOfferingExpenses,
-      )
-    ) {
-      equipmentAndTechnologyOfferingExpensesDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type':
-              MetricSearchType.EquipmentAndTechnologyOfferingExpenses,
-            isSingleMonth: false,
-          },
-        );
-    }
-
-    let suppliesOfferingExpensesDataResult: OfferingExpenseDataResult[];
-    if (metricsTypesArray.includes(MetricSearchType.SuppliesOfferingExpenses)) {
-      suppliesOfferingExpensesDataResult = await this.metricsService.findByTerm(
-        `${churchId}&${startMonth}&${endMonth}&${year}`,
-        {
-          'search-type': MetricSearchType.SuppliesOfferingExpenses,
-          isSingleMonth: false,
+    try {
+      const church = await this.churchRepository.findOne({
+        where: {
+          id: churchId,
         },
-      );
-    }
+      });
 
-    let planingEventsOfferingExpensesDataResult: OfferingExpenseDataResult[];
-    if (
-      metricsTypesArray.includes(MetricSearchType.PlaningEventsOfferingExpenses)
-    ) {
-      planingEventsOfferingExpensesDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type': MetricSearchType.PlaningEventsOfferingExpenses,
-            isSingleMonth: false,
-          },
+      if (!church) {
+        throw new NotFoundException(
+          `No se encontró ninguna iglesia con este ID: ${churchId}.`,
         );
+      }
+
+      const metricsTypesArray = types.split('+');
+
+      //? Search and Set Data
+      //* Offering Expense by Operational Expenses
+      let operationalOfferingExpensesDataResult: OfferingExpenseDataResult[];
+      if (
+        metricsTypesArray.includes(MetricSearchType.OperationalOfferingExpenses)
+      ) {
+        operationalOfferingExpensesDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type': MetricSearchType.OperationalOfferingExpenses,
+              isSingleMonth: false,
+            },
+          );
+      }
+
+      //* Offering Expense by Maintenance and Repair
+      let maintenanceAndRepairOfferingExpensesDataResult: OfferingExpenseDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.MaintenanceAndRepairOfferingExpenses,
+        )
+      ) {
+        maintenanceAndRepairOfferingExpensesDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type':
+                MetricSearchType.MaintenanceAndRepairOfferingExpenses,
+              isSingleMonth: false,
+            },
+          );
+      }
+
+      //* Offering Expense by Decoration Expenses
+      let decorationOfferingExpensesDataResult: OfferingExpenseDataResult[];
+      if (
+        metricsTypesArray.includes(MetricSearchType.DecorationOfferingExpenses)
+      ) {
+        decorationOfferingExpensesDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type': MetricSearchType.DecorationOfferingExpenses,
+              isSingleMonth: false,
+            },
+          );
+      }
+
+      //* Offering Expense by Equipment Expenses
+      let equipmentAndTechnologyOfferingExpensesDataResult: OfferingExpenseDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.EquipmentAndTechnologyOfferingExpenses,
+        )
+      ) {
+        equipmentAndTechnologyOfferingExpensesDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type':
+                MetricSearchType.EquipmentAndTechnologyOfferingExpenses,
+              isSingleMonth: false,
+            },
+          );
+      }
+
+      //* Offering Expense by Supplies
+      let suppliesOfferingExpensesDataResult: OfferingExpenseDataResult[];
+      if (
+        metricsTypesArray.includes(MetricSearchType.SuppliesOfferingExpenses)
+      ) {
+        suppliesOfferingExpensesDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type': MetricSearchType.SuppliesOfferingExpenses,
+              isSingleMonth: false,
+            },
+          );
+      }
+
+      //* Offering Expense by Planning Events
+      let planingEventsOfferingExpensesDataResult: OfferingExpenseDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.PlaningEventsOfferingExpenses,
+        )
+      ) {
+        planingEventsOfferingExpensesDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type': MetricSearchType.PlaningEventsOfferingExpenses,
+              isSingleMonth: false,
+            },
+          );
+      }
+
+      //* Offering Expense by Adjustment
+      let offeringExpensesAdjustmentsDataResult: OfferingExpensesAdjustmentDataResult[];
+      if (
+        metricsTypesArray.includes(MetricSearchType.OfferingExpensesAdjustment)
+      ) {
+        offeringExpensesAdjustmentsDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type': MetricSearchType.OfferingExpensesAdjustment,
+              isSingleMonth: false,
+            },
+          );
+      }
+
+      const docDefinition = getOfferingExpensesMetricsReport({
+        title: 'Reporte de Métricas de Salida de Ofrenda',
+        subTitle: 'Resultados de Búsqueda de Métricas de Salida de Ofrendas',
+        metricsTypesArray: metricsTypesArray,
+        year: year,
+        startMonth: startMonth,
+        endMonth: endMonth,
+        operationalOfferingExpensesDataResult:
+          operationalOfferingExpensesDataResult,
+        maintenanceAndRepairOfferingExpensesDataResult:
+          maintenanceAndRepairOfferingExpensesDataResult,
+        decorationOfferingExpensesDataResult:
+          decorationOfferingExpensesDataResult,
+        equipmentAndTechnologyOfferingExpensesDataResult:
+          equipmentAndTechnologyOfferingExpensesDataResult,
+        suppliesOfferingExpensesDataResult: suppliesOfferingExpensesDataResult,
+        planingEventsOfferingExpensesDataResult:
+          planingEventsOfferingExpensesDataResult,
+        offeringExpensesAdjustmentsDataResult:
+          offeringExpensesAdjustmentsDataResult,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
     }
-
-    let offeringExpensesAdjustmentsDataResult: OfferingExpensesAdjustmentDataResult[];
-    if (
-      metricsTypesArray.includes(MetricSearchType.OfferingExpensesAdjustment)
-    ) {
-      offeringExpensesAdjustmentsDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type': MetricSearchType.OfferingExpensesAdjustment,
-            isSingleMonth: false,
-          },
-        );
-    }
-
-    const docDefinition = getOfferingExpenseMetricsReport({
-      title: 'Reporte de Métricas de Salida de Ofrenda',
-      subTitle: 'Resultados de Búsqueda de Métricas de Salida de Ofrendas',
-      metricsTypesArray: metricsTypesArray,
-      year: year,
-      startMonth: startMonth,
-      endMonth: endMonth,
-      operationalOfferingExpensesDataResult:
-        operationalOfferingExpensesDataResult,
-      maintenanceAndRepairOfferingExpensesDataResult:
-        maintenanceAndRepairOfferingExpensesDataResult,
-      decorationOfferingExpensesDataResult:
-        decorationOfferingExpensesDataResult,
-      equipmentAndTechnologyOfferingExpensesDataResult:
-        equipmentAndTechnologyOfferingExpensesDataResult,
-      suppliesOfferingExpensesDataResult: suppliesOfferingExpensesDataResult,
-      planingEventsOfferingExpensesDataResult:
-        planingEventsOfferingExpensesDataResult,
-      offeringExpensesAdjustmentsDataResult:
-        offeringExpensesAdjustmentsDataResult,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
   }
 
   //* FINANCIAL BALANCE COMPARATIVE METRICS REPORT
@@ -2236,495 +2703,658 @@ export class ReportsService {
     const { year, startMonth, endMonth, churchId, types } =
       metricsPaginationDto;
 
-    const church = await this.churchRepository.findOne({
-      where: {
-        id: churchId,
-      },
-    });
+    try {
+      const church = await this.churchRepository.findOne({
+        where: {
+          id: churchId,
+        },
+      });
 
-    if (!church) {
-      throw new NotFoundException(
-        `No se encontró ninguna iglesia con este ID: ${churchId}.`,
-      );
-    }
-
-    const metricsTypesArray = types.split('+');
-
-    // ? Search and Set Data
-    //* Income vs Expenses (PEN)
-    let yearlyIncomeExpenseComparisonPenDataResult: YearlyIncomeExpenseComparativeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.IncomeAndExpensesComparativeByYear,
-      )
-    ) {
-      yearlyIncomeExpenseComparisonPenDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${CurrencyType.PEN}&${year}`,
-          {
-            'search-type': MetricSearchType.IncomeAndExpensesComparativeByYear,
-          },
+      if (!church) {
+        throw new NotFoundException(
+          `No se encontró ninguna iglesia con este ID: ${churchId}.`,
         );
+      }
+
+      const metricsTypesArray = types.split('+');
+
+      // ? Search and Set Data
+      //* Income vs Expenses (PEN)
+      let yearlyIncomeExpenseComparativePenDataResult: YearlyIncomeExpenseComparativeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.IncomeAndExpensesComparativeByYear,
+        )
+      ) {
+        yearlyIncomeExpenseComparativePenDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${CurrencyType.PEN}&${year}`,
+            {
+              'search-type':
+                MetricSearchType.IncomeAndExpensesComparativeByYear,
+            },
+          );
+      }
+
+      //* Income vs Expenses (USD)
+      let yearlyIncomeExpenseComparativeUsdDataResult: YearlyIncomeExpenseComparativeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.IncomeAndExpensesComparativeByYear,
+        )
+      ) {
+        yearlyIncomeExpenseComparativeUsdDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${CurrencyType.USD}&${year}`,
+            {
+              'search-type':
+                MetricSearchType.IncomeAndExpensesComparativeByYear,
+            },
+          );
+      }
+
+      //* Income vs Expenses (EUR)
+      let yearlyIncomeExpenseComparativeEurDataResult: YearlyIncomeExpenseComparativeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.IncomeAndExpensesComparativeByYear,
+        )
+      ) {
+        yearlyIncomeExpenseComparativeEurDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${CurrencyType.EUR}&${year}`,
+            {
+              'search-type':
+                MetricSearchType.IncomeAndExpensesComparativeByYear,
+            },
+          );
+      }
+
+      //? General Income Comparative
+      let generalOfferingIncomeComparativeDataResult: GeneralOfferingIncomeComparativeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.GeneralComparativeOfferingIncome,
+        )
+      ) {
+        generalOfferingIncomeComparativeDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type': MetricSearchType.GeneralComparativeOfferingIncome,
+              order: RecordOrder.Ascending,
+            },
+          );
+      }
+
+      //? Income Comparative By Type
+      //* Family Group
+      let offeringIncomeComparativeByFamilyGroupDataResult: OfferingIncomeComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingIncomeByType,
+        )
+      ) {
+        offeringIncomeComparativeByFamilyGroupDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingIncomeCreationSubType.FamilyGroup}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Sunday Service
+      let offeringIncomeComparativeBySundayServiceDataResult: OfferingIncomeComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingIncomeByType,
+        )
+      ) {
+        offeringIncomeComparativeBySundayServiceDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingIncomeCreationSubType.SundayService}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Sunday School
+      let offeringIncomeComparativeBySundaySchoolDataResult: OfferingIncomeComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingIncomeByType,
+        )
+      ) {
+        offeringIncomeComparativeBySundaySchoolDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingIncomeCreationSubType.SundaySchool}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* General Fasting
+      let offeringIncomeComparativeByGeneralFastingDataResult: OfferingIncomeComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingIncomeByType,
+        )
+      ) {
+        offeringIncomeComparativeByGeneralFastingDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingIncomeCreationSubType.GeneralFasting}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* General Vigil
+      let offeringIncomeComparativeByGeneralVigilDataResult: OfferingIncomeComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingIncomeByType,
+        )
+      ) {
+        offeringIncomeComparativeByGeneralVigilDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingIncomeCreationSubType.GeneralVigil}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Zonal Vigil
+      let offeringIncomeComparativeByZonalVigilDataResult: OfferingIncomeComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingIncomeByType,
+        )
+      ) {
+        offeringIncomeComparativeByZonalVigilDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingIncomeCreationSubType.ZonalVigil}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Zonal Fasting
+      let offeringIncomeComparativeByZonalFastingDataResult: OfferingIncomeComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingIncomeByType,
+        )
+      ) {
+        offeringIncomeComparativeByZonalFastingDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingIncomeCreationSubType.ZonalFasting}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Youth Service
+      let offeringIncomeComparativeByYouthServiceDataResult: OfferingIncomeComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingIncomeByType,
+        )
+      ) {
+        offeringIncomeComparativeByYouthServiceDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingIncomeCreationSubType.YouthService}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* United Service
+      let offeringIncomeComparativeByUnitedServiceDataResult: OfferingIncomeComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingIncomeByType,
+        )
+      ) {
+        offeringIncomeComparativeByUnitedServiceDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingIncomeCreationSubType.UnitedService}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Special
+      let offeringIncomeComparativeBySpecialOfferingDataResult: OfferingIncomeComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingIncomeByType,
+        )
+      ) {
+        offeringIncomeComparativeBySpecialOfferingDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingIncomeCreationSubType.Special}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Activities
+      let offeringIncomeComparativeByActivitiesDataResult: OfferingIncomeComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingIncomeByType,
+        )
+      ) {
+        offeringIncomeComparativeByActivitiesDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingIncomeCreationSubType.Activities}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Church Ground
+      let offeringIncomeComparativeByChurchGroundDataResult: OfferingIncomeComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingIncomeByType,
+        )
+      ) {
+        offeringIncomeComparativeByChurchGroundDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingIncomeCreationSubType.ChurchGround}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Income Adjustment
+      let offeringIncomeComparativeByIncomeAdjustmentDataResult: OfferingIncomeComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingIncomeByType,
+        )
+      ) {
+        offeringIncomeComparativeByIncomeAdjustmentDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingIncomeCreationType.IncomeAdjustment}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //? General Expense Comparative
+      let generalOfferingExpensesComparativeDataResult: GeneralOfferingExpensesComparativeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.GeneralComparativeOfferingExpenses,
+        )
+      ) {
+        generalOfferingExpensesComparativeDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type':
+                MetricSearchType.GeneralComparativeOfferingExpenses,
+              order: RecordOrder.Ascending,
+            },
+          );
+      }
+
+      //? Expenses Comparative By Type
+      //* Operational
+      let offeringOperationalExpensesComparativeDataResult: OfferingExpenseComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingExpensesByType,
+        )
+      ) {
+        offeringOperationalExpensesComparativeDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingExpenseSearchType.OperationalExpenses}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingExpensesByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Maintenance and RepairExpenses
+      let offeringExpensesComparativeByMaintenanceAndRepairDataResult: OfferingExpenseComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingExpensesByType,
+        )
+      ) {
+        offeringExpensesComparativeByMaintenanceAndRepairDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingExpenseSearchType.MaintenanceAndRepairExpenses}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingExpensesByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Decoration
+      let offeringExpensesComparativeByDecorationDataResult: OfferingExpenseComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingExpensesByType,
+        )
+      ) {
+        offeringExpensesComparativeByDecorationDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingExpenseSearchType.DecorationExpenses}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingExpensesByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Equipment and Technology
+      let offeringExpensesComparativeByEquipmentAndTechnologyDataResult: OfferingExpenseComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingExpensesByType,
+        )
+      ) {
+        offeringExpensesComparativeByEquipmentAndTechnologyDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingExpenseSearchType.EquipmentAndTechnologyExpenses}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingExpensesByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Supplies
+      let offeringExpensesComparativeBySuppliesDataResult: OfferingExpenseComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingExpensesByType,
+        )
+      ) {
+        offeringExpensesComparativeBySuppliesDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingExpenseSearchType.SuppliesExpenses}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingExpensesByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Planing Events
+      let offeringExpensesComparativeByPlaningEventsDataResult: OfferingExpenseComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingExpensesByType,
+        )
+      ) {
+        offeringExpensesComparativeByPlaningEventsDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingExpenseSearchType.PlaningEventsExpenses}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingExpensesByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Expenses Adjustment
+      let offeringExpensesComparativeByExpenseAdjustmentDataResult: OfferingExpenseComparativeByTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingExpensesByType,
+        )
+      ) {
+        offeringExpensesComparativeByExpenseAdjustmentDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingExpenseSearchType.ExpensesAdjustment}&${year}`,
+            {
+              'search-type': MetricSearchType.ComparativeOfferingExpensesByType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //? Expenses Comparative By Sub-Type
+      //* Operational
+      let offeringOperationalExpensesBySubTypeComparativeDataResult: OfferingExpenseComparativeBySubTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingExpensesBySubType,
+        )
+      ) {
+        offeringOperationalExpensesBySubTypeComparativeDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingExpenseSearchType.OperationalExpenses}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type':
+                MetricSearchType.ComparativeOfferingExpensesBySubType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Maintenance and RepairExpenses
+      let offeringMaintenanceAndRepairExpensesBySubTypeComparativeDataResult: OfferingExpenseComparativeBySubTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingExpensesBySubType,
+        )
+      ) {
+        offeringMaintenanceAndRepairExpensesBySubTypeComparativeDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingExpenseSearchType.MaintenanceAndRepairExpenses}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type':
+                MetricSearchType.ComparativeOfferingExpensesBySubType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Decoration
+      let offeringDecorationExpensesBySubTypeComparativeDataResult: OfferingExpenseComparativeBySubTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingExpensesBySubType,
+        )
+      ) {
+        offeringDecorationExpensesBySubTypeComparativeDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingExpenseSearchType.DecorationExpenses}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type':
+                MetricSearchType.ComparativeOfferingExpensesBySubType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Equipment And Technology
+      let offeringEquipmentAndTechnologyExpensesBySubTypeComparativeDataResult: OfferingExpenseComparativeBySubTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingExpensesBySubType,
+        )
+      ) {
+        offeringEquipmentAndTechnologyExpensesBySubTypeComparativeDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingExpenseSearchType.EquipmentAndTechnologyExpenses}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type':
+                MetricSearchType.ComparativeOfferingExpensesBySubType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Supplies
+      let offeringSuppliesExpensesBySubTypeComparativeDataResult: OfferingExpenseComparativeBySubTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingExpensesBySubType,
+        )
+      ) {
+        offeringSuppliesExpensesBySubTypeComparativeDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingExpenseSearchType.SuppliesExpenses}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type':
+                MetricSearchType.ComparativeOfferingExpensesBySubType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      //* Planing Events
+      let offeringPlaningEventsExpensesBySubTypeComparativeDataResult: OfferingExpenseComparativeBySubTypeDataResult[];
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.ComparativeOfferingExpensesBySubType,
+        )
+      ) {
+        offeringPlaningEventsExpensesBySubTypeComparativeDataResult =
+          await this.metricsService.findByTerm(
+            `${churchId}&${OfferingExpenseSearchType.PlaningEventsExpenses}&${startMonth}&${endMonth}&${year}`,
+            {
+              'search-type':
+                MetricSearchType.ComparativeOfferingExpensesBySubType,
+              order: RecordOrder.Descending,
+            },
+          );
+      }
+
+      const docDefinition = getFinancialBalanceComparativeMetricsReport({
+        title: 'Reporte de Métricas Comparativas Balance Financiero',
+        subTitle:
+          'Resultados de Búsqueda de Métricas Comparativas Balance Financiero',
+        metricsTypesArray: metricsTypesArray,
+        year: year,
+        church: church,
+        startMonth: startMonth,
+        endMonth: endMonth,
+        yearlyIncomeExpenseComparativePenDataResult,
+        yearlyIncomeExpenseComparativeUsdDataResult:
+          yearlyIncomeExpenseComparativeUsdDataResult,
+        yearlyIncomeExpenseComparativeEurDataResult:
+          yearlyIncomeExpenseComparativeEurDataResult,
+        generalOfferingIncomeComparativeDataResult:
+          generalOfferingIncomeComparativeDataResult,
+        offeringIncomeComparativeByFamilyGroupDataResult:
+          offeringIncomeComparativeByFamilyGroupDataResult,
+        offeringIncomeComparativeBySundayServiceDataResult:
+          offeringIncomeComparativeBySundayServiceDataResult,
+        offeringIncomeComparativeBySundaySchoolDataResult:
+          offeringIncomeComparativeBySundaySchoolDataResult,
+        offeringIncomeComparativeByGeneralFastingDataResult:
+          offeringIncomeComparativeByGeneralFastingDataResult,
+        offeringIncomeComparativeByGeneralVigilDataResult:
+          offeringIncomeComparativeByGeneralVigilDataResult,
+        offeringIncomeComparativeByZonalVigilDataResult:
+          offeringIncomeComparativeByZonalVigilDataResult,
+        offeringIncomeComparativeByZonalFastingDataResult:
+          offeringIncomeComparativeByZonalFastingDataResult,
+        offeringIncomeComparativeByYouthServiceDataResult:
+          offeringIncomeComparativeByYouthServiceDataResult,
+        offeringIncomeComparativeByUnitedServiceDataResult:
+          offeringIncomeComparativeByUnitedServiceDataResult,
+        offeringIncomeComparativeBySpecialOfferingDataResult:
+          offeringIncomeComparativeBySpecialOfferingDataResult,
+        offeringIncomeComparativeByActivitiesDataResult:
+          offeringIncomeComparativeByActivitiesDataResult,
+        offeringIncomeComparativeByChurchGroundDataResult:
+          offeringIncomeComparativeByChurchGroundDataResult,
+        offeringIncomeComparativeByIncomeAdjustmentDataResult:
+          offeringIncomeComparativeByIncomeAdjustmentDataResult,
+        generalOfferingExpensesComparativeDataResult:
+          generalOfferingExpensesComparativeDataResult,
+        offeringOperationalExpensesComparativeDataResult:
+          offeringOperationalExpensesComparativeDataResult,
+        offeringExpensesComparativeByMaintenanceAndRepairDataResult:
+          offeringExpensesComparativeByMaintenanceAndRepairDataResult,
+        offeringExpensesComparativeByDecorationDataResult:
+          offeringExpensesComparativeByDecorationDataResult,
+        offeringExpensesComparativeByEquipmentAndTechnologyDataResult:
+          offeringExpensesComparativeByEquipmentAndTechnologyDataResult,
+        offeringExpensesComparativeBySuppliesDataResult:
+          offeringExpensesComparativeBySuppliesDataResult,
+        offeringExpensesComparativeByPlaningEventsDataResult:
+          offeringExpensesComparativeByPlaningEventsDataResult,
+        offeringExpensesComparativeByExpenseAdjustmentDataResult:
+          offeringExpensesComparativeByExpenseAdjustmentDataResult,
+        offeringOperationalExpensesBySubTypeComparativeDataResult:
+          offeringOperationalExpensesBySubTypeComparativeDataResult,
+        offeringMaintenanceAndRepairExpensesBySubTypeComparativeDataResult:
+          offeringMaintenanceAndRepairExpensesBySubTypeComparativeDataResult,
+        offeringDecorationExpensesBySubTypeComparativeDataResult:
+          offeringDecorationExpensesBySubTypeComparativeDataResult,
+        offeringSuppliesExpensesBySubTypeComparativeDataResult:
+          offeringSuppliesExpensesBySubTypeComparativeDataResult,
+        offeringPlaningEventsExpensesBySubTypeComparativeDataResult:
+          offeringPlaningEventsExpensesBySubTypeComparativeDataResult,
+        offeringEquipmentAndTechnologyExpensesBySubTypeComparativeDataResult:
+          offeringEquipmentAndTechnologyExpensesBySubTypeComparativeDataResult,
+      });
+
+      const doc = this.printerService.createPdf(docDefinition);
+
+      return doc;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      this.handleDBExceptions(error);
+    }
+  }
+
+  //? PRIVATE METHODS
+  // For future index errors or constrains with code.
+  private handleDBExceptions(error: any): never {
+    if (error.code === '23505') {
+      throw new BadRequestException(`${error.message}`);
     }
 
-    //* Income vs Expenses (USD)
-    let yearlyIncomeExpenseComparisonUsdDataResult: YearlyIncomeExpenseComparativeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.IncomeAndExpensesComparativeByYear,
-      )
-    ) {
-      yearlyIncomeExpenseComparisonUsdDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${CurrencyType.USD}&${year}`,
-          {
-            'search-type': MetricSearchType.IncomeAndExpensesComparativeByYear,
-          },
-        );
-    }
+    this.logger.error(error);
 
-    //* Income vs Expenses (EUR)
-    let yearlyIncomeExpenseComparisonEurDataResult: YearlyIncomeExpenseComparativeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.IncomeAndExpensesComparativeByYear,
-      )
-    ) {
-      yearlyIncomeExpenseComparisonEurDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${CurrencyType.EUR}&${year}`,
-          {
-            'search-type': MetricSearchType.IncomeAndExpensesComparativeByYear,
-          },
-        );
-    }
-
-    //* General Income Comparative
-    let generalOfferingIncomeComparativeDataResult: GeneralOfferingIncomeComparativeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.GeneralComparativeOfferingIncome,
-      )
-    ) {
-      generalOfferingIncomeComparativeDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type': MetricSearchType.GeneralComparativeOfferingIncome,
-            order: RecordOrder.Ascending,
-          },
-        );
-    }
-
-    //? Income Comparative By Type
-    let offeringIncomeComparativeByFamilyGroupDataResult: OfferingIncomeComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingIncomeByType,
-      )
-    ) {
-      offeringIncomeComparativeByFamilyGroupDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingIncomeCreationSubType.FamilyGroup}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    let offeringIncomeComparativeBySundayServiceDataResult: OfferingIncomeComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingIncomeByType,
-      )
-    ) {
-      offeringIncomeComparativeBySundayServiceDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingIncomeCreationSubType.SundayService}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    let offeringIncomeComparativeBySundaySchoolDataResult: OfferingIncomeComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingIncomeByType,
-      )
-    ) {
-      offeringIncomeComparativeBySundaySchoolDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingIncomeCreationSubType.SundaySchool}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    let offeringIncomeComparativeByGeneralFastingDataResult: OfferingIncomeComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingIncomeByType,
-      )
-    ) {
-      offeringIncomeComparativeByGeneralFastingDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingIncomeCreationSubType.GeneralFasting}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    let offeringIncomeComparativeByGeneralVigilDataResult: OfferingIncomeComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingIncomeByType,
-      )
-    ) {
-      offeringIncomeComparativeByGeneralVigilDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingIncomeCreationSubType.GeneralVigil}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    let offeringIncomeComparativeByZonalVigilDataResult: OfferingIncomeComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingIncomeByType,
-      )
-    ) {
-      offeringIncomeComparativeByZonalVigilDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingIncomeCreationSubType.ZonalVigil}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    let offeringIncomeComparativeByZonalFastingDataResult: OfferingIncomeComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingIncomeByType,
-      )
-    ) {
-      offeringIncomeComparativeByZonalFastingDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingIncomeCreationSubType.ZonalFasting}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    let offeringIncomeComparativeByYouthServiceDataResult: OfferingIncomeComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingIncomeByType,
-      )
-    ) {
-      offeringIncomeComparativeByYouthServiceDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingIncomeCreationSubType.YouthService}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    let offeringIncomeComparativeByUnitedServiceDataResult: OfferingIncomeComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingIncomeByType,
-      )
-    ) {
-      offeringIncomeComparativeByUnitedServiceDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingIncomeCreationSubType.UnitedService}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    let offeringIncomeComparativeBySpecialOfferingDataResult: OfferingIncomeComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingIncomeByType,
-      )
-    ) {
-      offeringIncomeComparativeBySpecialOfferingDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingIncomeCreationSubType.Special}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    let offeringIncomeComparativeByActivitiesDataResult: OfferingIncomeComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingIncomeByType,
-      )
-    ) {
-      offeringIncomeComparativeByActivitiesDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingIncomeCreationSubType.Activities}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    let offeringIncomeComparativeByChurchGroundDataResult: OfferingIncomeComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingIncomeByType,
-      )
-    ) {
-      offeringIncomeComparativeByChurchGroundDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingIncomeCreationSubType.ChurchGround}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    let offeringIncomeComparativeByIncomeAdjustmentDataResult: OfferingIncomeComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingIncomeByType,
-      )
-    ) {
-      offeringIncomeComparativeByIncomeAdjustmentDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingIncomeCreationType.IncomeAdjustment}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingIncomeByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    //? General Expense Comparative
-    let generalOfferingExpensesComparativeDataResult: GeneralOfferingExpensesComparativeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.GeneralComparativeOfferingExpenses,
-      )
-    ) {
-      generalOfferingExpensesComparativeDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${startMonth}&${endMonth}&${year}`,
-          {
-            'search-type': MetricSearchType.GeneralComparativeOfferingExpenses,
-            order: RecordOrder.Ascending,
-          },
-        );
-    }
-
-    //? Expenses Comparative By Type
-    //* Operational
-    let offeringOperationalExpensesComparativeDataResult: OfferingExpenseComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingExpensesByType,
-      )
-    ) {
-      offeringOperationalExpensesComparativeDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingExpenseSearchType.OperationalExpenses}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingExpensesByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    //* Maintenance and RepairExpenses
-    let offeringExpensesComparativeByMaintenanceAndRepairDataResult: OfferingExpenseComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingExpensesByType,
-      )
-    ) {
-      offeringExpensesComparativeByMaintenanceAndRepairDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingExpenseSearchType.MaintenanceAndRepairExpenses}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingExpensesByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    //* Decoration
-    let offeringExpensesComparativeByDecorationDataResult: OfferingExpenseComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingExpensesByType,
-      )
-    ) {
-      offeringExpensesComparativeByDecorationDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingExpenseSearchType.DecorationExpenses}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingExpensesByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    //* Equipment and Technology
-    let offeringExpensesComparativeByEquipmentAndTechnologyDataResult: OfferingExpenseComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingExpensesByType,
-      )
-    ) {
-      offeringExpensesComparativeByEquipmentAndTechnologyDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingExpenseSearchType.EquipmentAndTechnologyExpenses}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingExpensesByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    //* Supplies
-    let offeringExpensesComparativeBySuppliesDataResult: OfferingExpenseComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingExpensesByType,
-      )
-    ) {
-      offeringExpensesComparativeBySuppliesDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingExpenseSearchType.SuppliesExpenses}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingExpensesByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    //* Planing Events
-    let offeringExpensesComparativeByPlaningEventsDataResult: OfferingExpenseComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingExpensesByType,
-      )
-    ) {
-      offeringExpensesComparativeByPlaningEventsDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingExpenseSearchType.PlaningEventsExpenses}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingExpensesByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    //* Expenses Adjustment
-    let offeringExpensesComparativeByExpenseAdjustmentDataResult: OfferingExpenseComparativeByTypeDataResult[];
-    if (
-      metricsTypesArray.includes(
-        MetricSearchType.ComparativeOfferingExpensesByType,
-      )
-    ) {
-      offeringExpensesComparativeByExpenseAdjustmentDataResult =
-        await this.metricsService.findByTerm(
-          `${churchId}&${OfferingExpenseSearchType.ExpensesAdjustment}&${year}`,
-          {
-            'search-type': MetricSearchType.ComparativeOfferingExpensesByType,
-            order: RecordOrder.Descending,
-          },
-        );
-    }
-
-    const docDefinition = getFinancialBalanceComparativeMetricsReport({
-      title: 'Reporte de Métricas Comparativas Balance Financiero',
-      subTitle:
-        'Resultados de Búsqueda de Métricas Comparativas Balance Financiero',
-      metricsTypesArray: metricsTypesArray,
-      year: year,
-      church: church,
-      startMonth: startMonth,
-      endMonth: endMonth,
-      yearlyIncomeExpenseComparisonPenDataResult:
-        yearlyIncomeExpenseComparisonPenDataResult,
-      yearlyIncomeExpenseComparisonUsdDataResult:
-        yearlyIncomeExpenseComparisonUsdDataResult,
-      yearlyIncomeExpenseComparisonEurDataResult:
-        yearlyIncomeExpenseComparisonEurDataResult,
-      generalOfferingIncomeComparativeDataResult:
-        generalOfferingIncomeComparativeDataResult,
-      offeringIncomeComparativeByFamilyGroupDataResult:
-        offeringIncomeComparativeByFamilyGroupDataResult,
-      offeringIncomeComparativeBySundayServiceDataResult:
-        offeringIncomeComparativeBySundayServiceDataResult,
-      offeringIncomeComparativeBySundaySchoolDataResult:
-        offeringIncomeComparativeBySundaySchoolDataResult,
-      offeringIncomeComparativeByGeneralFastingDataResult:
-        offeringIncomeComparativeByGeneralFastingDataResult,
-      offeringIncomeComparativeByGeneralVigilDataResult:
-        offeringIncomeComparativeByGeneralVigilDataResult,
-      offeringIncomeComparativeByZonalVigilDataResult:
-        offeringIncomeComparativeByZonalVigilDataResult,
-      offeringIncomeComparativeByZonalFastingDataResult:
-        offeringIncomeComparativeByZonalFastingDataResult,
-      offeringIncomeComparativeByYouthServiceDataResult:
-        offeringIncomeComparativeByYouthServiceDataResult,
-      offeringIncomeComparativeByUnitedServiceDataResult:
-        offeringIncomeComparativeByUnitedServiceDataResult,
-      offeringIncomeComparativeBySpecialOfferingDataResult:
-        offeringIncomeComparativeBySpecialOfferingDataResult,
-      offeringIncomeComparativeByActivitiesDataResult:
-        offeringIncomeComparativeByActivitiesDataResult,
-      offeringIncomeComparativeByChurchGroundDataResult:
-        offeringIncomeComparativeByChurchGroundDataResult,
-      offeringIncomeComparativeByIncomeAdjustmentDataResult:
-        offeringIncomeComparativeByIncomeAdjustmentDataResult,
-      generalOfferingExpensesComparativeDataResult:
-        generalOfferingExpensesComparativeDataResult,
-      offeringOperationalExpenseComparativeDataResult:
-        offeringOperationalExpensesComparativeDataResult,
-      offeringExpensesComparativeByMaintenanceAndRepairDataResult:
-        offeringExpensesComparativeByMaintenanceAndRepairDataResult,
-      offeringExpensesComparativeByDecorationDataResult:
-        offeringExpensesComparativeByDecorationDataResult,
-      offeringExpensesComparativeByEquipmentAndTechnologyDataResult:
-        offeringExpensesComparativeByEquipmentAndTechnologyDataResult,
-      offeringExpensesComparativeBySuppliesDataResult:
-        offeringExpensesComparativeBySuppliesDataResult,
-      offeringExpensesComparativeByPlaningEventsDataResult:
-        offeringExpensesComparativeByPlaningEventsDataResult,
-      offeringExpensesComparativeByExpenseAdjustmentDataResult:
-        offeringExpensesComparativeByExpenseAdjustmentDataResult,
-    });
-
-    const doc = this.printerService.createPdf(docDefinition);
-
-    return doc;
+    throw new InternalServerErrorException(
+      'Sucedió un error inesperado, hable con el administrador.',
+    );
   }
 }

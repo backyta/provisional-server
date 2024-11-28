@@ -61,6 +61,15 @@ export class SearchAndPaginationDto {
   @Type(() => String)
   order?: string;
 
+  @ApiProperty({
+    description: 'ID of the church that is part of the search.',
+    example: 'b740f708-f19d-4116-82b5-3d7b5653be9b',
+  })
+  @IsOptional()
+  @IsString()
+  @Type(() => String)
+  churchId?: string;
+
   //* For preacher module when search by zone id and return preacher with family groups or not
   @ApiProperty({
     example: 'true',

@@ -88,22 +88,18 @@ export class SupervisorService {
     const { roles, theirPastor, theirCopastor, isDirectRelationToPastor } =
       createSupervisorDto;
 
-    if (
-      !roles.includes(MemberRole.Disciple) &&
-      !roles.includes(MemberRole.Supervisor)
-    ) {
-      throw new BadRequestException(
-        `El rol "Discípulo" y "Supervisor" deben ser incluidos.`,
-      );
+    if (!roles.includes(MemberRole.Supervisor)) {
+      throw new BadRequestException(`El rol "Supervisor" deben ser incluidos.`);
     }
 
     if (
       roles.includes(MemberRole.Pastor) ||
       roles.includes(MemberRole.Copastor) ||
-      roles.includes(MemberRole.Preacher)
+      roles.includes(MemberRole.Preacher) ||
+      roles.includes(MemberRole.Disciple)
     ) {
       throw new BadRequestException(
-        `Para crear un Supervisor, solo se requiere los roles: "Discípulo" y "Supervisor" o también "Tesorero."`,
+        `Para crear un Supervisor, solo se requiere los roles: "Supervisor" o también "Tesorero."`,
       );
     }
 
@@ -303,6 +299,7 @@ export class SupervisorService {
       order = 'ASC',
       isNullZone,
       isSimpleQuery,
+      churchId,
     } = paginationDto;
 
     if (isSimpleQuery) {
@@ -316,15 +313,40 @@ export class SupervisorService {
           relations: ['member'],
         });
 
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No existen registros disponibles para mostrar.`,
+          );
+        }
+
         return supervisors;
       } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
         this.handleDBExceptions(error);
       }
     }
 
     try {
+      let church: Church;
+      if (churchId) {
+        church = await this.churchRepository.findOne({
+          where: { id: churchId, recordStatus: RecordStatus.Active },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (!church) {
+          throw new NotFoundException(
+            `Iglesia con id ${churchId} no fue encontrada.`,
+          );
+        }
+      }
+
       const supervisors = await this.supervisorRepository.find({
         where: {
+          theirChurch: church,
           recordStatus: RecordStatus.Active,
           theirZone: isNullZone ? IsNull() : null,
         },
@@ -374,6 +396,7 @@ export class SupervisorService {
       offset = 0,
       order,
       isNullZone = 'false',
+      churchId,
     } = searchTypeAndPaginationDto;
 
     if (!term) {
@@ -382,6 +405,21 @@ export class SupervisorService {
 
     if (!searchType) {
       throw new BadRequestException(`El tipo de búsqueda es requerido.`);
+    }
+
+    //* Search Church
+    let church: Church;
+    if (churchId) {
+      church = await this.churchRepository.findOne({
+        where: { id: churchId, recordStatus: RecordStatus.Active },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (!church) {
+        throw new NotFoundException(
+          `Iglesia con id ${churchId} no fue encontrada.`,
+        );
+      }
     }
 
     //? Find by first name --> Many
@@ -396,6 +434,7 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstName: ILike(`%${firstNames}%`),
             },
@@ -458,6 +497,7 @@ export class SupervisorService {
 
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             theirCopastor: In(copastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -518,6 +558,7 @@ export class SupervisorService {
 
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             theirPastor: In(pastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -567,6 +608,7 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               lastName: ILike(`%${lastNames}%`),
             },
@@ -629,6 +671,7 @@ export class SupervisorService {
 
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             theirCopastor: In(copastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -689,6 +732,7 @@ export class SupervisorService {
 
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             theirPastor: In(pastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -739,6 +783,7 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstName: ILike(`%${firstNames}%`),
               lastName: ILike(`%${lastNames}%`),
@@ -804,6 +849,7 @@ export class SupervisorService {
 
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             theirCopastor: In(copastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -866,6 +912,7 @@ export class SupervisorService {
 
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             theirPastor: In(pastorsId),
             recordStatus: RecordStatus.Active,
           },
@@ -917,6 +964,7 @@ export class SupervisorService {
 
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               birthDate: Between(fromDate, toDate),
             },
@@ -964,6 +1012,7 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1039,6 +1088,7 @@ export class SupervisorService {
 
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             theirZone: In(zonesId),
             recordStatus: RecordStatus.Active,
           },
@@ -1088,6 +1138,7 @@ export class SupervisorService {
 
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               gender: genderTerm,
             },
@@ -1147,6 +1198,7 @@ export class SupervisorService {
 
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               maritalStatus: maritalStatusTerm,
             },
@@ -1194,6 +1246,7 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               originCountry: ILike(`%${term}%`),
             },
@@ -1238,6 +1291,7 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               department: ILike(`%${term}%`),
             },
@@ -1282,6 +1336,7 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               province: ILike(`%${term}%`),
             },
@@ -1326,6 +1381,7 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               district: ILike(`%${term}%`),
             },
@@ -1370,6 +1426,7 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               urbanSector: ILike(`%${term}%`),
             },
@@ -1414,6 +1471,7 @@ export class SupervisorService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               address: ILike(`%${term}%`),
             },
@@ -1467,6 +1525,7 @@ export class SupervisorService {
 
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             recordStatus: recordStatusTerm,
           },
           take: limit,
@@ -1597,29 +1656,31 @@ export class SupervisorService {
       );
     }
 
-    if (!roles.some((role) => ['disciple', 'supervisor'].includes(role))) {
+    if (!roles.some((role) => ['supervisor', 'copastor'].includes(role))) {
       throw new BadRequestException(
-        `Los roles deben incluir "Discípulo" y "Supervisor".`,
+        `Los roles deben incluir "Supervisor" o "Co-Pastor".`,
       );
     }
 
     if (
       (supervisor.member.roles.includes(MemberRole.Supervisor) &&
-        supervisor.member.roles.includes(MemberRole.Disciple) &&
+        !supervisor.member.roles.includes(MemberRole.Disciple) &&
         !supervisor.member.roles.includes(MemberRole.Preacher) &&
         !supervisor.member.roles.includes(MemberRole.Copastor) &&
         !supervisor.member.roles.includes(MemberRole.Pastor) &&
         !supervisor.member.roles.includes(MemberRole.Treasurer) &&
         (roles.includes(MemberRole.Pastor) ||
-          roles.includes(MemberRole.Preacher))) ||
+          roles.includes(MemberRole.Preacher) ||
+          roles.includes(MemberRole.Disciple))) ||
       (supervisor.member.roles.includes(MemberRole.Supervisor) &&
-        supervisor.member.roles.includes(MemberRole.Disciple) &&
         supervisor.member.roles.includes(MemberRole.Treasurer) &&
+        !supervisor.member.roles.includes(MemberRole.Disciple) &&
         !supervisor.member.roles.includes(MemberRole.Preacher) &&
         !supervisor.member.roles.includes(MemberRole.Copastor) &&
         !supervisor.member.roles.includes(MemberRole.Pastor) &&
         (roles.includes(MemberRole.Pastor) ||
-          roles.includes(MemberRole.Preacher)))
+          roles.includes(MemberRole.Preacher) ||
+          roles.includes(MemberRole.Disciple)))
     ) {
       throw new BadRequestException(
         `No se puede asignar un rol inferior o superior sin pasar por la jerarquía: [discípulo, predicador, supervisor, copastor, pastor].`,
@@ -1628,50 +1689,50 @@ export class SupervisorService {
 
     //* Update info about Supervisor
     if (
-      (supervisor.member.roles.includes(MemberRole.Disciple) &&
-        supervisor.member.roles.includes(MemberRole.Supervisor) &&
+      (supervisor.member.roles.includes(MemberRole.Supervisor) &&
+        !supervisor.member.roles.includes(MemberRole.Disciple) &&
         !supervisor.member.roles.includes(MemberRole.Pastor) &&
         !supervisor.member.roles.includes(MemberRole.Copastor) &&
         !supervisor.member.roles.includes(MemberRole.Preacher) &&
         !supervisor.member.roles.includes(MemberRole.Treasurer) &&
-        roles.includes(MemberRole.Disciple) &&
         roles.includes(MemberRole.Supervisor) &&
+        !roles.includes(MemberRole.Disciple) &&
         !roles.includes(MemberRole.Pastor) &&
         !roles.includes(MemberRole.Copastor) &&
         !roles.includes(MemberRole.Preacher) &&
         !roles.includes(MemberRole.Treasurer)) ||
-      (supervisor.member.roles.includes(MemberRole.Disciple) &&
-        supervisor.member.roles.includes(MemberRole.Supervisor) &&
+      (supervisor.member.roles.includes(MemberRole.Supervisor) &&
         supervisor.member.roles.includes(MemberRole.Treasurer) &&
+        !supervisor.member.roles.includes(MemberRole.Disciple) &&
         !supervisor.member.roles.includes(MemberRole.Copastor) &&
         !supervisor.member.roles.includes(MemberRole.Preacher) &&
         !supervisor.member.roles.includes(MemberRole.Pastor) &&
-        roles.includes(MemberRole.Disciple) &&
         roles.includes(MemberRole.Supervisor) &&
         roles.includes(MemberRole.Treasurer) &&
+        !roles.includes(MemberRole.Disciple) &&
         !roles.includes(MemberRole.Copastor) &&
         !roles.includes(MemberRole.Pastor) &&
         !roles.includes(MemberRole.Preacher)) ||
-      (supervisor.member.roles.includes(MemberRole.Disciple) &&
-        supervisor.member.roles.includes(MemberRole.Supervisor) &&
+      (supervisor.member.roles.includes(MemberRole.Supervisor) &&
+        !supervisor.member.roles.includes(MemberRole.Disciple) &&
         !supervisor.member.roles.includes(MemberRole.Pastor) &&
         !supervisor.member.roles.includes(MemberRole.Copastor) &&
         !supervisor.member.roles.includes(MemberRole.Preacher) &&
         !supervisor.member.roles.includes(MemberRole.Treasurer) &&
-        roles.includes(MemberRole.Disciple) &&
         roles.includes(MemberRole.Supervisor) &&
         roles.includes(MemberRole.Treasurer) &&
+        !roles.includes(MemberRole.Disciple) &&
         !roles.includes(MemberRole.Pastor) &&
         !roles.includes(MemberRole.Copastor) &&
         !roles.includes(MemberRole.Preacher)) ||
-      (supervisor.member.roles.includes(MemberRole.Disciple) &&
-        supervisor.member.roles.includes(MemberRole.Supervisor) &&
+      (supervisor.member.roles.includes(MemberRole.Supervisor) &&
         supervisor.member.roles.includes(MemberRole.Treasurer) &&
+        !supervisor.member.roles.includes(MemberRole.Disciple) &&
         !supervisor.member.roles.includes(MemberRole.Pastor) &&
         !supervisor.member.roles.includes(MemberRole.Copastor) &&
         !supervisor.member.roles.includes(MemberRole.Preacher) &&
-        roles.includes(MemberRole.Disciple) &&
         roles.includes(MemberRole.Supervisor) &&
+        !roles.includes(MemberRole.Disciple) &&
         !roles.includes(MemberRole.Treasurer) &&
         !roles.includes(MemberRole.Pastor) &&
         !roles.includes(MemberRole.Copastor) &&
@@ -1880,7 +1941,7 @@ export class SupervisorService {
         return savedSupervisor;
       }
 
-      //! Update if Is Direction relation to pastor is true
+      //! Update if Is Direction relation to pastor is true and different theirPastor
       if (
         supervisor?.theirPastor?.id !== theirPastor &&
         isDirectRelationToPastor
@@ -2156,27 +2217,27 @@ export class SupervisorService {
 
     //* Raise Supervisor level to Co-pastor
     if (
-      (supervisor.member.roles.includes(MemberRole.Disciple) &&
-        supervisor.member.roles.includes(MemberRole.Supervisor) &&
-        !supervisor.member.roles.includes(MemberRole.Treasurer) &&
-        !supervisor.member.roles.includes(MemberRole.Copastor) &&
-        !supervisor.member.roles.includes(MemberRole.Preacher) &&
+      (supervisor.member.roles.includes(MemberRole.Supervisor) &&
         !supervisor.member.roles.includes(MemberRole.Pastor) &&
-        roles.includes(MemberRole.Disciple) &&
+        !supervisor.member.roles.includes(MemberRole.Copastor) &&
+        !supervisor.member.roles.includes(MemberRole.Treasurer) &&
+        !supervisor.member.roles.includes(MemberRole.Preacher) &&
+        !supervisor.member.roles.includes(MemberRole.Disciple) &&
         roles.includes(MemberRole.Copastor) &&
+        !roles.includes(MemberRole.Disciple) &&
         !roles.includes(MemberRole.Treasurer) &&
         !roles.includes(MemberRole.Supervisor) &&
         !roles.includes(MemberRole.Pastor) &&
         !roles.includes(MemberRole.Preacher) &&
         recordStatus === RecordStatus.Active) ||
-      (supervisor.member.roles.includes(MemberRole.Disciple) &&
-        supervisor.member.roles.includes(MemberRole.Supervisor) &&
+      (supervisor.member.roles.includes(MemberRole.Supervisor) &&
         supervisor.member.roles.includes(MemberRole.Treasurer) &&
+        !supervisor.member.roles.includes(MemberRole.Disciple) &&
         !supervisor.member.roles.includes(MemberRole.Copastor) &&
         !supervisor.member.roles.includes(MemberRole.Preacher) &&
         !supervisor.member.roles.includes(MemberRole.Pastor) &&
-        roles.includes(MemberRole.Disciple) &&
         roles.includes(MemberRole.Copastor) &&
+        !roles.includes(MemberRole.Disciple) &&
         !roles.includes(MemberRole.Treasurer) &&
         !roles.includes(MemberRole.Supervisor) &&
         !roles.includes(MemberRole.Pastor) &&
@@ -2260,13 +2321,14 @@ export class SupervisorService {
         const savedPastor = await this.copastorRepository.save(newCopastor);
 
         await this.supervisorRepository.remove(supervisor); // onDelete subordinate entities (null)
+
         return savedPastor;
       } catch (error) {
         this.handleDBExceptions(error);
       }
     } else {
       throw new BadRequestException(
-        `No se puede subir de nivel este Supervisor, el modo debe ser "Activo", los roles deben ser: ["discípulo", "supervisor"], revisar y actualizar el registro.`,
+        `No se puede subir de nivel este Supervisor, el modo debe ser "Activo", el rol debe ser: ["supervisor"], revisar y actualizar el registro.`,
       );
     }
   }
@@ -2289,10 +2351,6 @@ export class SupervisorService {
     try {
       const updatedSupervisor = await this.supervisorRepository.preload({
         id: supervisor.id,
-        // theirChurch: null,
-        // theirPastor: null,
-        // theirCopastor: null,
-        // theirZone: null,
         updatedAt: new Date(),
         updatedBy: user,
         recordStatus: RecordStatus.Inactive,
@@ -2396,7 +2454,7 @@ export class SupervisorService {
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
+      'Sucedió un error inesperado, hable con el administrador.',
     );
   }
 }

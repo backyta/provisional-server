@@ -5,6 +5,7 @@ import { OfferingReasonEliminationType } from '@/modules/offering/shared/enums';
 export class DeleteOfferingDto {
   @ApiProperty({
     example: OfferingReasonEliminationType.FamilyGroupSelectionError,
+    description: 'Type of reason for record deletion.',
   })
   @IsNotEmpty()
   @IsEnum(OfferingReasonEliminationType)
@@ -12,6 +13,7 @@ export class DeleteOfferingDto {
 
   @ApiProperty({
     example: '3.89',
+    description: 'Type or amount of exchange.',
   })
   @IsString()
   @IsOptional()
@@ -19,10 +21,9 @@ export class DeleteOfferingDto {
 
   @ApiProperty({
     example: 'pen_to_usd',
+    description: 'Currency for the exchange rate.',
   })
   @IsString()
   @IsOptional()
   exchangeCurrencyType?: string;
 }
-
-//TODO : poner description para la doc

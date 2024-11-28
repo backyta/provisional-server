@@ -8,12 +8,18 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, FindOptionsOrderValue, In, Repository } from 'typeorm';
 
+import { toZonedTime } from 'date-fns-tz';
 import { endOfMonth, startOfMonth } from 'date-fns';
 
-import { RecordStatus } from '@/common/enums';
+import { DashboardSearchType, RecordStatus } from '@/common/enums';
 import { SearchAndPaginationDto } from '@/common/dtos';
 
 import { MetricSearchType } from '@/modules/metrics/enums';
+
+import {
+  lastSundayOfferingsDataFormatter,
+  topOfferingsFamilyGroupsDataFormatter,
+} from '@/modules/metrics/helpers/dashboard';
 
 import {
   IncomeAndExpensesComparativeFormatter,
@@ -134,6 +140,8 @@ export class MetricsService {
       allFamilyGroups,
       allDistricts,
       isSingleMonth,
+      limit,
+      offset,
     } = searchTypeAndPaginationDto;
 
     if (!term) {
@@ -142,6 +150,150 @@ export class MetricsService {
 
     if (!searchType) {
       throw new BadRequestException(`El tipo de búsqueda es requerido.`);
+    }
+
+    //? DASHBOARD
+    //* Last Sunday Offerings
+    if (term && searchType === DashboardSearchType.LastSundaysOfferings) {
+      const [dateTerm, churchId] = term.split('&');
+
+      try {
+        const church = await this.churchRepository.findOne({
+          where: {
+            id: churchId,
+            recordStatus: RecordStatus.Active,
+          },
+        });
+
+        if (!church) {
+          throw new NotFoundException(
+            `No se encontró ninguna iglesia con este ID ${term}.`,
+          );
+        }
+
+        const timeZone = 'America/Lima';
+        const sundays = [];
+        const newDate = new Date(dateTerm);
+        const zonedDate = toZonedTime(newDate, timeZone);
+
+        zonedDate.setDate(
+          newDate.getDay() === 6
+            ? zonedDate.getDate()
+            : zonedDate.getDate() - (zonedDate.getDay() + 1),
+        ); // Domingo mas cercano
+
+        for (let i = 0; i < 14; i++) {
+          sundays.push(zonedDate.toISOString().split('T')[0]);
+          zonedDate.setDate(zonedDate.getDate() - 7);
+        }
+
+        const offeringIncome = await this.offeringIncomeRepository.find({
+          where: {
+            subType: OfferingIncomeSearchType.SundayService,
+            date: In(sundays),
+            church: church,
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'familyGroup',
+            'church',
+            'zone',
+            'pastor.member',
+            'copastor.member',
+            'supervisor.member',
+            'preacher.member',
+            'disciple.member',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        return lastSundayOfferingsDataFormatter({
+          offeringIncome: offeringIncome,
+        }) as any;
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
+      }
+    }
+
+    //* Top Family groups Offerings
+    if (term && searchType === DashboardSearchType.TopFamilyGroupsOfferings) {
+      const [year, churchId] = term.split('&');
+
+      try {
+        const currentYear = year;
+        const church = await this.churchRepository.findOne({
+          where: {
+            id: churchId,
+            recordStatus: RecordStatus.Active,
+          },
+        });
+
+        if (!church) {
+          throw new NotFoundException(
+            `No se encontró ninguna iglesia con este Id.`,
+          );
+        }
+
+        const offeringIncome = await this.offeringIncomeRepository.find({
+          where: {
+            subType: OfferingIncomeSearchType.FamilyGroup,
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'familyGroup',
+            'familyGroup.theirChurch',
+            'familyGroup.theirPreacher.member',
+            'familyGroup.disciples.member',
+            'zone',
+            'church',
+            'pastor.member',
+            'copastor.member',
+            'supervisor.member',
+            'preacher.member',
+            'disciple.member',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const filteredOfferingsByRecordStatus = offeringIncome.filter(
+          (offeringIncome) =>
+            offeringIncome.familyGroup?.recordStatus === RecordStatus.Active,
+        );
+
+        const filteredOfferingsByChurch =
+          filteredOfferingsByRecordStatus.filter(
+            (offeringIncome) =>
+              offeringIncome.familyGroup?.theirChurch?.id === church?.id,
+          );
+
+        const filteredOfferingIncomeByCurrentYear =
+          filteredOfferingsByChurch.filter((offeringIncome) => {
+            const year = new Date(offeringIncome.date).getFullYear();
+            return year === +currentYear;
+          });
+
+        return topOfferingsFamilyGroupsDataFormatter({
+          offeringIncome: filteredOfferingIncomeByCurrentYear,
+        }) as any;
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
+      }
     }
 
     //? MEMBER METRICS
@@ -3482,7 +3634,7 @@ export class MetricsService {
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
+      'Sucedió un error inesperado, hable con el administrador.',
     );
   }
 }

@@ -5,6 +5,7 @@ import { IsEnum, IsNotEmpty, IsString, MinLength } from 'class-validator';
 export class DeleteFileDto {
   @ApiProperty({
     example: 'my-folder/my-sub-folder/',
+    description: 'Path required for image deletion.',
   })
   @IsString()
   @IsNotEmpty()
@@ -14,6 +15,7 @@ export class DeleteFileDto {
   @ApiProperty({
     example:
       'https://res.cloudinary.com/example/image/upload/v1239394512/cld-sample-4.jpg',
+    description: 'Secure URL of the image hosted on Cloudinary',
   })
   @IsString()
   @IsNotEmpty()
@@ -22,6 +24,7 @@ export class DeleteFileDto {
 
   @ApiProperty({
     example: OfferingFileType.Expense,
+    description: 'Type of file to be used for the image path.',
   })
   @IsEnum(OfferingFileType)
   @IsNotEmpty()

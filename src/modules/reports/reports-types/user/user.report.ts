@@ -1,4 +1,10 @@
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
+
+import { GenderNames } from '@/common/enums';
+
+import { User } from '@/modules/user/entities';
+import { UserRoleNames } from '@/modules/auth/enums';
+
 import { headerSection, footerSection } from '@/modules/reports/sections';
 
 interface ReportOptions {
@@ -9,10 +15,10 @@ interface ReportOptions {
   searchType?: string;
   searchSubType?: string;
   orderSearch?: string;
-  data: any[];
+  data: User[];
 }
 
-export const getZonesReport = (
+export const getUsersReport = (
   options: ReportOptions,
 ): TDocumentDefinitions => {
   const {
@@ -37,94 +43,58 @@ export const getZonesReport = (
       orderSearch: orderSearch,
     }),
     footer: footerSection,
-    pageMargins: [20, 110, 20, 60],
+    pageMargins: [20, 120, 20, 60],
     content: [
       {
         layout: 'customLayout01', // optional
         table: {
           headerRows: 1,
-          widths: [
-            'auto',
-            'auto',
-            'auto',
-            50,
-            'auto',
-            'auto',
-            'auto',
-            'auto',
-            'auto',
-          ],
+          widths: ['*', '*', '*', '*', '*'],
 
           body: [
             [
               {
-                text: 'Nombre',
+                text: 'Nombres',
                 style: {
                   bold: true,
                 },
               },
               {
-                text: 'Ubicación',
+                text: 'Apellidos',
                 style: {
                   bold: true,
                 },
               },
               {
-                text: 'Disc.',
+                text: 'Genero',
                 style: {
                   bold: true,
                 },
               },
               {
-                text: 'G. Fam.',
+                text: 'E-mail',
                 style: {
                   bold: true,
                 },
               },
               {
-                text: 'Pred.',
-                style: {
-                  bold: true,
-                },
-              },
-              {
-                text: 'Iglesia',
-                style: {
-                  bold: true,
-                },
-              },
-              {
-                text: 'Pastor',
-                style: {
-                  bold: true,
-                },
-              },
-              {
-                text: 'Co-Pastor',
-                style: {
-                  bold: true,
-                },
-              },
-              {
-                text: 'Supervisor',
+                text: 'Roles',
                 style: {
                   bold: true,
                 },
               },
             ],
             ...data.map((item) => [
-              item?.zoneName,
-              `${item?.country}-${item?.department}-${item?.province}-${item?.district}`,
-              item?.disciples.length,
-              item?.familyGroups.length,
-              item?.preachers.length,
-              `${item?.theirChurch?.abbreviatedChurchName}`,
-              `${item?.theirPastor?.firstName} ${item?.theirPastor?.lastName}`,
-              `${item?.theirCopastor?.firstName} ${item?.theirCopastor?.lastName}`,
-              `${item?.theirSupervisor?.firstName} ${item?.theirSupervisor?.lastName}`,
+              item?.firstName,
+              item?.lastName,
+              GenderNames[item?.gender],
+              item?.email,
+              item?.roles.length > 1
+                ? item?.roles.map((role) => UserRoleNames[role]).join(' ~ ')
+                : UserRoleNames[item?.roles[0]],
             ]),
-            ['', '', '', '', '', '', '', '', ''],
-            ['', '', '', '', '', '', '', '', ''],
+            ['', '', '', '', ''],
+            ['', '', '', '', ''],
           ],
         },
       },
@@ -133,17 +103,7 @@ export const getZonesReport = (
         layout: 'noBorders',
         table: {
           headerRows: 1,
-          widths: [
-            'auto',
-            'auto',
-            'auto',
-            50,
-            'auto',
-            'auto',
-            'auto',
-            'auto',
-            'auto',
-          ],
+          widths: ['auto', 'auto', 'auto', 'auto', 'auto'],
           body: [
             [
               {
@@ -160,10 +120,6 @@ export const getZonesReport = (
                 colSpan: 2,
                 margin: [0, 10, 0, 0],
               },
-              {},
-              {},
-              {},
-              {},
               {},
               {},
               {},

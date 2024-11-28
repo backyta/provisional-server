@@ -73,7 +73,7 @@ export class ChurchService {
 
     if (mainChurch && !theirMainChurch) {
       throw new BadRequestException(
-        `Ya existe una iglesia principal, solo puedes crear iglesias anexos.`,
+        `Ya existe una iglesia central, solo puedes crear iglesias anexos.`,
       );
     }
 
@@ -92,13 +92,13 @@ export class ChurchService {
 
       if (mainChurch?.isAnexe) {
         throw new BadRequestException(
-          `No puedes asignar una Iglesia anexo como Iglesia principal.`,
+          `No puedes asignar una Iglesia anexo como Iglesia Central.`,
         );
       }
 
       if (mainChurch?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
-          `La propiedad "Estado de registro" en Iglesia Principal debe ser "Activo"`,
+          `La propiedad "Estado de registro" en Iglesia Central debe ser "Activo"`,
         );
       }
 
@@ -165,8 +165,18 @@ export class ChurchService {
           order: { createdAt: order as FindOptionsOrderValue },
         });
 
+        if (churches.length === 0) {
+          throw new NotFoundException(
+            `No existen registros disponibles para mostrar.`,
+          );
+        }
+
         return churches;
       } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
         this.handleDBExceptions(error);
       }
     }
@@ -657,13 +667,13 @@ export class ChurchService {
 
     if (church?.isAnexe && !isAnexe) {
       throw new BadRequestException(
-        `No se puede cambiar una iglesia anexada a una principal.`,
+        `No se puede cambiar una iglesia anexa a una central.`,
       );
     }
 
     if (!church?.isAnexe && theirMainChurch) {
       throw new BadRequestException(
-        `No se puede cambiar la iglesia principal a un anexo.`,
+        `No se puede cambiar la iglesia central a un anexo.`,
       );
     }
 
@@ -700,19 +710,19 @@ export class ChurchService {
 
       if (!newMainChurch) {
         throw new NotFoundException(
-          `No se encontró Iglesia principal con id ${theirMainChurch}`,
+          `No se encontró Iglesia Central con id ${theirMainChurch}`,
         );
       }
 
       if (newMainChurch?.isAnexe) {
         throw new NotFoundException(
-          `No se puede asignar una Iglesia anexo como Iglesia principal`,
+          `No se puede asignar una Iglesia Anexo como Iglesia Central`,
         );
       }
 
       if (newMainChurch?.recordStatus === RecordStatus.Inactive) {
         throw new BadRequestException(
-          `La propiedad "Estado de registro" en Iglesia principal debe ser "Activo"`,
+          `La propiedad "Estado de registro" en Iglesia Central debe ser "Activo"`,
         );
       }
 
@@ -776,16 +786,13 @@ export class ChurchService {
     }
 
     if (!church?.isAnexe) {
-      throw new NotFoundException(
-        `La iglesia principal no puede ser eliminada.`,
-      );
+      throw new NotFoundException(`La iglesia central no puede ser eliminada.`);
     }
 
     //* Update and set in Inactive on Church (anexe)
     try {
       const updatedChurch = await this.churchRepository.preload({
         id: church.id,
-        theirMainChurch: null,
         updatedAt: new Date(),
         updatedBy: user,
         recordStatus: RecordStatus.Inactive,
@@ -950,7 +957,7 @@ export class ChurchService {
 
     this.logger.error(error);
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
+      'Sucedió un error inesperado, hable con el administrador.',
     );
   }
 }

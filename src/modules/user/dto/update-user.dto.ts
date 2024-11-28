@@ -6,6 +6,7 @@ import { CreateUserDto } from '@/modules/user/dto';
 export class UpdateUserDto extends PartialType(CreateUserDto) {
   @ApiProperty({
     example: 'Abcd1234$',
+    description: 'Current password.',
   })
   @IsOptional()
   @MinLength(6)
@@ -18,6 +19,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 
   @ApiProperty({
     example: 'Abcd1234$',
+    description: 'Current password.',
   })
   @IsOptional()
   @MinLength(6)

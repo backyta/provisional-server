@@ -1,7 +1,7 @@
 export enum OfferingIncomeSearchSubType {
   OfferingByDate = 'offering_by_date',
-  OfferingByChurch = 'offering_by_church',
-  OfferingByChurchDate = 'offering_by_church_date',
+  // OfferingByChurch = 'offering_by_church',
+  // OfferingByChurchDate = 'offering_by_church_date',
 
   // Sunday Service, school sunday
   OfferingByShift = 'offering_by_shift',

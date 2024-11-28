@@ -10,7 +10,7 @@ interface Church {
   isAnexe: boolean;
   abbreviatedChurchName: string;
 }
-interface OfferingExpenseResult {
+export interface OfferingExpenseComparativeBySubTypeDataResult {
   subType: string;
   accumulatedOfferingPEN: number;
   accumulatedOfferingUSD: number;
@@ -21,9 +21,9 @@ interface OfferingExpenseResult {
 
 export const ComparativeOfferingExpensesBySubTypeFormatter = ({
   offeringExpenses,
-}: Options): OfferingExpenseResult[] => {
-  const dataResult: OfferingExpenseResult[] = offeringExpenses?.reduce(
-    (acc, offering) => {
+}: Options): OfferingExpenseComparativeBySubTypeDataResult[] => {
+  const dataResult: OfferingExpenseComparativeBySubTypeDataResult[] =
+    offeringExpenses?.reduce((acc, offering) => {
       const existing = acc.find(
         (item) =>
           item?.subType ===
@@ -58,9 +58,7 @@ export const ComparativeOfferingExpensesBySubTypeFormatter = ({
       }
 
       return acc;
-    },
-    [],
-  );
+    }, []);
 
   return dataResult;
 };

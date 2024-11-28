@@ -1,4 +1,5 @@
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
+
 import { headerSection, footerSection } from '@/modules/reports/sections';
 
 import { MetricSearchType } from '@/modules/metrics/enums';

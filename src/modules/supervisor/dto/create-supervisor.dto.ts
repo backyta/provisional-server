@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
   IsEmail,
@@ -16,6 +15,7 @@ import {
   RecordStatus,
   MaritalStatus,
 } from '@/common/enums';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateSupervisorDto {
   //* General and Personal info
@@ -163,12 +163,12 @@ export class CreateSupervisorDto {
 
   //* Roles and Status
   @ApiProperty({
-    example: [MemberRole.Disciple, MemberRole.Supervisor],
+    example: [MemberRole.Supervisor],
   })
   @IsEnum(MemberRole, {
     each: true,
     message:
-      'Los roles deben contener "Discípulo" y uno de los siguientes valores: Tesorero, Predicador, Supervisor, Co-Pastor, Pastor.',
+      'El valor debe ser un rol válido. Solo se permite el rol "Supervisor"',
   })
   @IsArray()
   @IsNotEmpty()

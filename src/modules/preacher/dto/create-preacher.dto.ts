@@ -163,12 +163,12 @@ export class CreatePreacherDto {
 
   //* Roles and Status
   @ApiProperty({
-    example: [MemberRole.Disciple, MemberRole.Preacher],
+    example: [MemberRole.Preacher],
   })
   @IsEnum(MemberRole, {
     each: true,
     message:
-      'Los roles deben contener "Discípulo" y uno de los siguientes valores: Tesorero, Predicador, Supervisor, Co-Pastor, Pastor.',
+      'El valor debe ser un rol válido. Solo se permite el rol "Predicador"',
   })
   @IsArray()
   @IsNotEmpty()

@@ -45,6 +45,7 @@ interface HeaderSectionOptions {
   orderSearch?: string;
   showLogo?: boolean;
   showDate?: boolean;
+  churchName?: string;
 }
 
 export const headerSection = (options: HeaderSectionOptions): Content => {
@@ -60,6 +61,7 @@ export const headerSection = (options: HeaderSectionOptions): Content => {
     yearSearch,
     startMonthSearch,
     endMonthSearch,
+    churchName,
   } = options;
 
   const headerLogo: Content = showLogo ? logo : null;
@@ -78,9 +80,9 @@ export const headerSection = (options: HeaderSectionOptions): Content => {
     : null;
 
   const headerTerms: Content =
-    searchTerm && searchSubType
+    searchTerm && searchSubType && orderSearch && churchName
       ? {
-          text: `${searchType} / ${searchSubType}\n${searchTerm}`,
+          text: `Tipo de búsqueda: ${searchType} ~ Sub-tipo de búsqueda: ${searchSubType}\n Tipo de orden: ${orderSearch} ~ Iglesia de búsqueda: ${churchName}\n Termino de búsqueda: ${searchTerm}`,
           alignment: 'center',
           margin: [20, 5, 0, 0],
           style: {
@@ -89,9 +91,9 @@ export const headerSection = (options: HeaderSectionOptions): Content => {
             fontSize: 12,
           },
         }
-      : !searchTerm && !searchSubType && orderSearch
+      : searchTerm && searchSubType && orderSearch && !churchName
         ? {
-            text: `Tipo de búsqueda: Búsqueda general / Tipo de orden: ${RecordOrderNames[orderSearch]}`,
+            text: `Tipo de búsqueda: ${searchType} ~ Sub-tipo de búsqueda: ${searchSubType}\n Tipo de orden: ${orderSearch} ~ Iglesia de búsqueda: Todas las iglesias \n Termino de búsqueda: ${searchTerm}`,
             alignment: 'center',
             margin: [20, 5, 0, 0],
             style: {
@@ -100,9 +102,9 @@ export const headerSection = (options: HeaderSectionOptions): Content => {
               fontSize: 12,
             },
           }
-        : startMonthSearch && endMonthSearch && yearSearch
+        : !searchTerm && !searchSubType && orderSearch && !churchName
           ? {
-              text: `Año de búsqueda: ${yearSearch} / Mes de búsqueda: ${monthNames[startMonthSearch]} - ${monthNames[endMonthSearch]}`,
+              text: `Tipo de búsqueda: Búsqueda general / Tipo de orden: ${RecordOrderNames[orderSearch]}\n Iglesia de búsqueda: Todas las iglesias`,
               alignment: 'center',
               margin: [20, 5, 0, 0],
               style: {
@@ -111,9 +113,9 @@ export const headerSection = (options: HeaderSectionOptions): Content => {
                 fontSize: 12,
               },
             }
-          : !startMonthSearch && !endMonthSearch && yearSearch
+          : !searchTerm && !searchSubType && orderSearch && churchName
             ? {
-                text: `Año de búsqueda: ${yearSearch}`,
+                text: `Tipo de búsqueda: Búsqueda general / Tipo de orden: ${RecordOrderNames[orderSearch]}\n Iglesia de búsqueda: ${churchName}`,
                 alignment: 'center',
                 margin: [20, 5, 0, 0],
                 style: {
@@ -122,7 +124,29 @@ export const headerSection = (options: HeaderSectionOptions): Content => {
                   fontSize: 12,
                 },
               }
-            : null;
+            : startMonthSearch && endMonthSearch && yearSearch
+              ? {
+                  text: `Año de búsqueda: ${yearSearch} / Mes de búsqueda: ${monthNames[startMonthSearch]} - ${monthNames[endMonthSearch]}`,
+                  alignment: 'center',
+                  margin: [20, 5, 0, 0],
+                  style: {
+                    color: '#3b9917',
+                    bold: true,
+                    fontSize: 12,
+                  },
+                }
+              : !startMonthSearch && !endMonthSearch && yearSearch
+                ? {
+                    text: `Año de búsqueda: ${yearSearch}`,
+                    alignment: 'center',
+                    margin: [20, 5, 0, 0],
+                    style: {
+                      color: '#3b9917',
+                      bold: true,
+                      fontSize: 12,
+                    },
+                  }
+                : null;
 
   const headerTitle: Content = title
     ? {

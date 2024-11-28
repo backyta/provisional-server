@@ -78,12 +78,12 @@ export class CloudinaryService {
           },
           relations: [
             'church',
-            'zone',
-            'familyGroup',
             'pastor',
             'copastor',
             'supervisor',
+            'zone',
             'preacher',
+            'familyGroup',
             'disciple',
           ],
         });
@@ -179,7 +179,7 @@ export class CloudinaryService {
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
+      'Sucedió un error inesperado, hable con el administrador.',
     );
   }
 }

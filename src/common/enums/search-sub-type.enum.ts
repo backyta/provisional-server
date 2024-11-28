@@ -72,8 +72,8 @@ export enum SearchSubType {
   // ? Offering Income
   //* Family House, Fasting Zonal, Fasting General, Vigil Zonal, vigilia General, Ground Church, Activities, Youngs
   OfferingByDate = 'offering_by_date',
-  OfferingByChurch = 'offering_by_church',
-  OfferingByChurchDate = 'offering_by_church_date',
+  // OfferingByChurch = 'offering_by_church',
+  // OfferingByChurchDate = 'offering_by_church_date',
 
   //* Sunday Service, youngs, school sunday
   OfferingByShift = 'offering_by_shift',
@@ -264,8 +264,8 @@ export const SearchSubTypeNames: Record<SearchSubType, string> = {
     'Por nombres y apellidos de su predicador',
 
   [SearchSubType.OfferingByDate]: 'Por fecha',
-  [SearchSubType.OfferingByChurch]: 'Por iglesia',
-  [SearchSubType.OfferingByChurchDate]: 'Por fecha e iglesia',
+  // [SearchSubType.OfferingByChurch]: 'Por iglesia',
+  // [SearchSubType.OfferingByChurchDate]: 'Por fecha e iglesia',
 
   // Sunday service, youngs, school sunday
   [SearchSubType.OfferingByShift]: 'Por turno',

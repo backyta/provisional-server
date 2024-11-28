@@ -73,23 +73,19 @@ export class PastorService {
   async create(createPastorDto: CreatePastorDto, user: User): Promise<Pastor> {
     const { roles, theirChurch } = createPastorDto;
 
-    if (
-      !roles.includes(MemberRole.Disciple) &&
-      !roles.includes(MemberRole.Pastor)
-    ) {
-      throw new BadRequestException(
-        `El rol "Discípulo" y "Pastor" deben ser incluidos.`,
-      );
+    if (!roles.includes(MemberRole.Pastor)) {
+      throw new BadRequestException(`El rol "Pastor" debe ser incluido.`);
     }
 
     if (
       roles.includes(MemberRole.Copastor) ||
       roles.includes(MemberRole.Supervisor) ||
       roles.includes(MemberRole.Preacher) ||
-      roles.includes(MemberRole.Treasurer)
+      roles.includes(MemberRole.Treasurer) ||
+      roles.includes(MemberRole.Disciple)
     ) {
       throw new BadRequestException(
-        `Para crear un Pastor, solo se requiere los roles: "Discípulo" y "Pastor".`,
+        `Para crear un Pastor, solo se requiere el rol: "Pastor".`,
       );
     }
 
@@ -156,7 +152,13 @@ export class PastorService {
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
-    const { limit, offset = 0, order = 'ASC', isSimpleQuery } = paginationDto;
+    const {
+      limit,
+      offset = 0,
+      order = 'ASC',
+      isSimpleQuery,
+      churchId,
+    } = paginationDto;
 
     if (isSimpleQuery) {
       try {
@@ -166,24 +168,48 @@ export class PastorService {
           relations: ['member'],
         });
 
+        if (pastors.length === 0) {
+          throw new NotFoundException(
+            `No existen registros disponibles para mostrar.`,
+          );
+        }
+
         return pastors;
       } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
         this.handleDBExceptions(error);
       }
     }
 
     try {
+      let church: Church;
+      if (churchId) {
+        church = await this.churchRepository.findOne({
+          where: { id: churchId, recordStatus: RecordStatus.Active },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (!church) {
+          throw new NotFoundException(
+            `Iglesia con id ${churchId} no fue encontrada.`,
+          );
+        }
+      }
+
       const pastors = await this.pastorRepository.find({
-        where: { recordStatus: RecordStatus.Active },
+        where: { recordStatus: RecordStatus.Active, theirChurch: church },
         take: limit,
         skip: offset,
         relations: [
           'updatedBy',
           'createdBy',
-          'theirChurch',
-          'zones',
-          'familyGroups',
           'member',
+          'theirChurch',
+          'familyGroups',
+          'zones',
           'copastors.member',
           'supervisors.member',
           'preachers.member',
@@ -219,6 +245,7 @@ export class PastorService {
       limit,
       offset = 0,
       order,
+      churchId,
     } = searchTypeAndPaginationDto;
 
     if (!term) {
@@ -229,6 +256,21 @@ export class PastorService {
       throw new BadRequestException(`El tipo de búsqueda es requerido.`);
     }
 
+    //* Search Church
+    let church: Church;
+    if (churchId) {
+      church = await this.churchRepository.findOne({
+        where: { id: churchId, recordStatus: RecordStatus.Active },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (!church) {
+        throw new NotFoundException(
+          `Iglesia con id ${churchId} no fue encontrada.`,
+        );
+      }
+    }
+
     //? Find by first name --> Many
     if (term && searchType === PastorSearchType.FirstName) {
       const firstNames = term.replace(/\+/g, ' ');
@@ -236,6 +278,7 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstName: ILike(`%${firstNames}%`),
             },
@@ -282,6 +325,7 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               lastName: ILike(`%${lastNames}%`),
             },
@@ -329,6 +373,7 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstName: ILike(`%${firstNames}%`),
               lastName: ILike(`%${lastNames}%`),
@@ -383,6 +428,7 @@ export class PastorService {
 
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               birthDate: Between(fromDate, toDate),
             },
@@ -430,6 +476,7 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -502,6 +549,7 @@ export class PastorService {
 
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               gender: genderTerm,
             },
@@ -561,6 +609,7 @@ export class PastorService {
 
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               maritalStatus: maritalStatusTerm,
             },
@@ -608,6 +657,7 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               originCountry: ILike(`%${term}%`),
             },
@@ -652,6 +702,7 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               department: ILike(`%${term}%`),
             },
@@ -696,6 +747,7 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               province: ILike(`%${term}%`),
             },
@@ -740,6 +792,7 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               district: ILike(`%${term}%`),
             },
@@ -784,6 +837,7 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               urbanSector: ILike(`%${term}%`),
             },
@@ -828,6 +882,7 @@ export class PastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               address: ILike(`%${term}%`),
             },
@@ -881,6 +936,7 @@ export class PastorService {
 
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             recordStatus: recordStatusTerm,
           },
           take: limit,
@@ -965,15 +1021,16 @@ export class PastorService {
 
     if (
       pastor.member.roles.includes(MemberRole.Pastor) &&
-      pastor.member.roles.includes(MemberRole.Disciple) &&
+      !pastor.member.roles.includes(MemberRole.Disciple) &&
       !pastor.member.roles.includes(MemberRole.Preacher) &&
       !pastor.member.roles.includes(MemberRole.Supervisor) &&
       !pastor.member.roles.includes(MemberRole.Copastor) &&
       !pastor.member.roles.includes(MemberRole.Treasurer) &&
-      (roles.includes(MemberRole.Supervisor) ||
-        roles.includes(MemberRole.Copastor) ||
+      (roles.includes(MemberRole.Copastor) ||
+        roles.includes(MemberRole.Supervisor) ||
         roles.includes(MemberRole.Preacher) ||
-        roles.includes(MemberRole.Treasurer))
+        roles.includes(MemberRole.Treasurer) ||
+        roles.includes(MemberRole.Disciple))
     ) {
       throw new BadRequestException(
         `No se puede asignar un rol inferior sin pasar por la jerarquía: [discípulo, predicador, supervisor, copastor, pastor]`,
@@ -982,18 +1039,18 @@ export class PastorService {
 
     //* Update info about Pastor
     if (
-      pastor.member.roles.includes(MemberRole.Disciple) &&
       pastor.member.roles.includes(MemberRole.Pastor) &&
       !pastor.member.roles.includes(MemberRole.Copastor) &&
       !pastor.member.roles.includes(MemberRole.Supervisor) &&
       !pastor.member.roles.includes(MemberRole.Preacher) &&
       !pastor.member.roles.includes(MemberRole.Treasurer) &&
-      roles.includes(MemberRole.Disciple) &&
+      !pastor.member.roles.includes(MemberRole.Disciple) &&
       roles.includes(MemberRole.Pastor) &&
       !roles.includes(MemberRole.Copastor) &&
       !roles.includes(MemberRole.Supervisor) &&
       !roles.includes(MemberRole.Preacher) &&
-      !roles.includes(MemberRole.Treasurer)
+      !roles.includes(MemberRole.Treasurer) &&
+      !roles.includes(MemberRole.Disciple)
     ) {
       if (
         pastor?.recordStatus === RecordStatus.Active &&
@@ -1233,14 +1290,13 @@ export class PastorService {
     const pastor = await this.pastorRepository.findOneBy({ id });
 
     if (!pastor) {
-      throw new NotFoundException(`Pastor con iwd: ${id} no fue encontrado.`);
+      throw new NotFoundException(`Pastor con id: ${id} no fue encontrado.`);
     }
 
     //* Update and set in Inactive on Pastor
     try {
       const updatedPastor = await this.pastorRepository.preload({
         id: pastor.id,
-        // theirChurch: null,
         updatedAt: new Date(),
         updatedBy: user,
         recordStatus: RecordStatus.Inactive,
@@ -1380,7 +1436,7 @@ export class PastorService {
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
+      'Sucedió un error inesperado, hable con el administrador.',
     );
   }
 }

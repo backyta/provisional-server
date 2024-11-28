@@ -1,9 +1,11 @@
+import { addDays, format } from 'date-fns';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
-import { GenderNames } from '@/common/enums';
-
-import { User } from '@/modules/user/entities';
-import { UserRoleNames } from '@/modules/auth/enums';
+import {
+  OfferingExpenseSearchTypeNames,
+  OfferingExpenseSearchSubTypeNames,
+} from '@/modules/offering/expense/enums';
+import { OfferingExpense } from '@/modules/offering/expense/entities';
 
 import { headerSection, footerSection } from '@/modules/reports/sections';
 
@@ -15,10 +17,11 @@ interface ReportOptions {
   searchType?: string;
   searchSubType?: string;
   orderSearch?: string;
-  data: User[];
+  churchName?: string;
+  data: OfferingExpense[];
 }
 
-export const getUsersReport = (
+export const getOfferingExpensesReport = (
   options: ReportOptions,
 ): TDocumentDefinitions => {
   const {
@@ -30,6 +33,7 @@ export const getUsersReport = (
     searchType,
     searchSubType,
     orderSearch,
+    churchName,
   } = options;
 
   return {
@@ -41,60 +45,73 @@ export const getUsersReport = (
       searchType: searchType,
       searchSubType: searchSubType,
       orderSearch: orderSearch,
+      churchName: churchName,
     }),
     footer: footerSection,
-    pageMargins: [20, 110, 20, 60],
+    pageMargins: [20, 120, 20, 60],
     content: [
       {
         layout: 'customLayout01', // optional
         table: {
           headerRows: 1,
-          widths: ['*', '*', '*', '*', '*'],
+          widths: [130, 120, 55, 55, 70, 80, '*'],
 
           body: [
             [
               {
-                text: 'Nombres',
+                text: 'Tipo',
                 style: {
                   bold: true,
                 },
               },
               {
-                text: 'Apellidos',
+                text: 'Sub-tipo',
                 style: {
                   bold: true,
                 },
               },
               {
-                text: 'Genero',
+                text: 'Monto',
                 style: {
                   bold: true,
                 },
               },
               {
-                text: 'E-mail',
+                text: 'Divisa',
                 style: {
                   bold: true,
                 },
               },
               {
-                text: 'Roles',
+                text: 'F. de Gasto',
+                style: {
+                  bold: true,
+                },
+              },
+              {
+                text: 'Iglesia',
+                style: {
+                  bold: true,
+                },
+              },
+              {
+                text: 'Comentarios',
                 style: {
                   bold: true,
                 },
               },
             ],
             ...data.map((item) => [
-              item?.firstName,
-              item?.lastName,
-              GenderNames[item?.gender],
-              item?.email,
-              item?.roles.length > 1
-                ? item?.roles.map((role) => UserRoleNames[role]).join(' ~ ')
-                : UserRoleNames[item?.roles[0]],
+              OfferingExpenseSearchTypeNames[item?.type],
+              OfferingExpenseSearchSubTypeNames[item?.subType] ?? '-',
+              item?.amount ?? '-',
+              item?.currency ?? '-',
+              format(new Date(addDays(item.date, 1)), 'dd/MM/yyyy'),
+              `${item?.church?.abbreviatedChurchName ?? '-'}`,
+              item?.comments ?? '-',
             ]),
-            ['', '', '', '', ''],
-            ['', '', '', '', ''],
+            ['', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', ''],
           ],
         },
       },
@@ -103,23 +120,25 @@ export const getUsersReport = (
         layout: 'noBorders',
         table: {
           headerRows: 1,
-          widths: ['auto', 'auto', 'auto', 'auto', 'auto'],
+          widths: [100, 'auto', 'auto', 'auto', 'auto', 'auto', '*'],
           body: [
             [
               {
                 text: `Total de ${description}:`,
-                colSpan: 1,
+                colSpan: 2,
                 fontSize: 13,
                 bold: true,
                 margin: [0, 10, 0, 0],
               },
+              {},
               {
                 text: `${data.length} ${description}.`,
                 bold: true,
                 fontSize: 13,
-                colSpan: 2,
-                margin: [0, 10, 0, 0],
+                colSpan: 1,
+                margin: [-50, 10, 0, 0],
               },
+              {},
               {},
               {},
               {},

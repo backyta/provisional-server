@@ -68,7 +68,12 @@ export class ZoneService {
     }
     const supervisor = await this.supervisorRepository.findOne({
       where: { id: theirSupervisor },
-      relations: ['theirChurch', 'theirCopastor', 'theirPastor', 'theirZone'],
+      relations: [
+        'theirChurch',
+        'theirCopastor.member',
+        'theirPastor.member',
+        'theirZone',
+      ],
     });
 
     if (!supervisor) {
@@ -170,19 +175,31 @@ export class ZoneService {
 
     if (isSimpleQuery || (isSimpleQuery && churchId)) {
       try {
-        const church = await this.churchRepository.findOne({
-          where: {
-            id: churchId,
-            recordStatus: RecordStatus.Active,
-          },
-          order: { createdAt: order as FindOptionsOrderValue },
-        });
+        let church: Church;
+        if (churchId) {
+          church = await this.churchRepository.findOne({
+            where: { id: churchId, recordStatus: RecordStatus.Active },
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+
+          if (!church) {
+            throw new NotFoundException(
+              `Iglesia con id ${churchId} no fue encontrada.`,
+            );
+          }
+        }
 
         const zones = await this.zoneRepository.find({
           where: { theirChurch: church, recordStatus: RecordStatus.Active },
           relations: ['familyGroups'],
           order: { createdAt: order as FindOptionsOrderValue },
         });
+
+        if (zones.length === 0) {
+          throw new NotFoundException(
+            `No existen registros disponibles para mostrar.`,
+          );
+        }
 
         return zones;
       } catch (error) {
@@ -195,8 +212,22 @@ export class ZoneService {
     }
 
     try {
+      let church: Church;
+      if (churchId) {
+        church = await this.churchRepository.findOne({
+          where: { id: churchId, recordStatus: RecordStatus.Active },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (!church) {
+          throw new NotFoundException(
+            `Iglesia con id ${churchId} no fue encontrada.`,
+          );
+        }
+      }
+
       const zones = await this.zoneRepository.find({
-        where: { recordStatus: RecordStatus.Active },
+        where: { theirChurch: church, recordStatus: RecordStatus.Active },
         take: limit,
         skip: offset,
         relations: [
@@ -210,7 +241,6 @@ export class ZoneService {
           'preachers.member',
           'disciples.member',
         ],
-        relationLoadStrategy: 'query',
         order: { createdAt: order as FindOptionsOrderValue },
       });
 
@@ -240,6 +270,7 @@ export class ZoneService {
       limit,
       offset = 0,
       order,
+      churchId,
     } = searchTypeAndPaginationDto;
 
     if (!term) {
@@ -250,11 +281,27 @@ export class ZoneService {
       throw new BadRequestException(`El tipo de búsqueda es requerido.`);
     }
 
+    //* Search Church
+    let church: Church;
+    if (churchId) {
+      church = await this.churchRepository.findOne({
+        where: { id: churchId, recordStatus: RecordStatus.Active },
+        order: { createdAt: order as FindOptionsOrderValue },
+      });
+
+      if (!church) {
+        throw new NotFoundException(
+          `Iglesia con id ${churchId} no fue encontrada.`,
+        );
+      }
+    }
+
     //? Find by zone name --> Many
     if (term && searchType === ZoneSearchType.ZoneName) {
       try {
         const zones = await this.zoneRepository.find({
           where: {
+            theirChurch: church,
             zoneName: ILike(`%${term}%`),
             recordStatus: RecordStatus.Active,
           },
@@ -271,7 +318,6 @@ export class ZoneService {
             'preachers.member',
             'disciples.member',
           ],
-          relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
         });
 
@@ -296,6 +342,7 @@ export class ZoneService {
       try {
         const zones = await this.zoneRepository.find({
           where: {
+            theirChurch: church,
             country: ILike(`%${term}%`),
             recordStatus: RecordStatus.Active,
           },
@@ -312,7 +359,6 @@ export class ZoneService {
             'preachers.member',
             'disciples.member',
           ],
-          relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
         });
 
@@ -337,6 +383,7 @@ export class ZoneService {
       try {
         const zones = await this.zoneRepository.find({
           where: {
+            theirChurch: church,
             department: ILike(`%${term}%`),
             recordStatus: RecordStatus.Active,
           },
@@ -353,7 +400,6 @@ export class ZoneService {
             'preachers.member',
             'disciples.member',
           ],
-          relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
         });
 
@@ -378,6 +424,7 @@ export class ZoneService {
       try {
         const zones = await this.zoneRepository.find({
           where: {
+            theirChurch: church,
             province: ILike(`%${term}%`),
             recordStatus: RecordStatus.Active,
           },
@@ -394,7 +441,6 @@ export class ZoneService {
             'preachers.member',
             'disciples.member',
           ],
-          relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
         });
 
@@ -419,6 +465,7 @@ export class ZoneService {
       try {
         const zones = await this.zoneRepository.find({
           where: {
+            theirChurch: church,
             district: ILike(`%${term}%`),
             recordStatus: RecordStatus.Active,
           },
@@ -435,7 +482,6 @@ export class ZoneService {
             'preachers.member',
             'disciples.member',
           ],
-          relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
         });
 
@@ -469,6 +515,7 @@ export class ZoneService {
 
         const zones = await this.zoneRepository.find({
           where: {
+            theirChurch: church,
             recordStatus: recordStatusTerm,
           },
           take: limit,
@@ -484,7 +531,6 @@ export class ZoneService {
             'preachers.member',
             'disciples.member',
           ],
-          relationLoadStrategy: 'query',
           order: { createdAt: order as FindOptionsOrderValue },
         });
 
@@ -534,12 +580,12 @@ export class ZoneService {
       where: { id: id },
       relations: [
         'theirChurch',
-        'theirPastor',
-        'theirCopastor',
-        'theirSupervisor',
-        'preachers',
+        'theirPastor.member',
+        'theirCopastor.member',
+        'theirSupervisor.member',
+        'preachers.member',
         'familyGroups',
-        'disciples',
+        'disciples.member',
       ],
     });
 
@@ -557,7 +603,7 @@ export class ZoneService {
     }
 
     //! Exchange of supervisor between zones
-    //? Update Zone if their Supervisor is different
+    //? Update Zone if their Supervisor is different and newSupervisor exists
     if (newTheirSupervisor && zone.theirSupervisor?.id !== newTheirSupervisor) {
       //* Validate new supervisor
       const newSupervisor = await this.supervisorRepository.findOne({
@@ -968,7 +1014,7 @@ export class ZoneService {
       }
     }
 
-    //? Update and save if is same supervisor
+    //? Update and save if is same supervisor and newSupervisor not exists
     if (
       !newTheirSupervisor &&
       updateZoneDto?.theirSupervisor === zone.theirSupervisor?.id
@@ -1023,7 +1069,7 @@ export class ZoneService {
       !newTheirSupervisor &&
       updateZoneDto?.theirSupervisor !== zone.theirSupervisor?.id
     ) {
-      //* Validation preacher
+      //* Validation Supervisor
       const newSupervisor = await this.supervisorRepository.findOne({
         where: { id: theirSupervisor },
         relations: ['theirChurch', 'theirPastor', 'theirCopastor', 'theirZone'],
@@ -1041,7 +1087,7 @@ export class ZoneService {
         );
       }
 
-      //* Validation relation exists in new Preacher
+      //* Validation relation exists in new Supervisor
       // Copastor
       if (!newSupervisor?.theirCopastor) {
         throw new NotFoundException(
@@ -1261,7 +1307,7 @@ export class ZoneService {
     this.logger.error(error);
 
     throw new InternalServerErrorException(
-      'Sucedió un error inesperado, hable con el administrador y que revise los registros de consola.',
+      'Sucedió un error inesperado, hable con el administrador.',
     );
   }
 }

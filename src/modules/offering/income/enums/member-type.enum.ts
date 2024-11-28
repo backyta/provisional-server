@@ -10,6 +10,6 @@ export const MemberTypeNames: Record<MemberType, string> = {
   [MemberType.Disciple]: 'Discípulo',
   [MemberType.Preacher]: 'Predicador',
   [MemberType.Supervisor]: 'Supervisor',
-  [MemberType.Copastor]: 'Copastor',
+  [MemberType.Copastor]: 'Co-Pastor',
   [MemberType.Pastor]: 'Pastor',
 };

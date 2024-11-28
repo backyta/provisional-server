@@ -2,16 +2,17 @@ import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
 import { headerSection, footerSection } from '@/modules/reports/sections';
 
+import { Church } from '@/modules/church/entities';
 import { MetricSearchType } from '@/modules/metrics/enums';
 
 import {
   YearlyIncomeExpenseComparativeDataResult,
   OfferingIncomeComparativeByTypeDataResult,
   GeneralOfferingIncomeComparativeDataResult,
-  GeneralOfferingExpensesComparativeDataResult,
   OfferingExpenseComparativeByTypeDataResult,
+  GeneralOfferingExpensesComparativeDataResult,
+  OfferingExpenseComparativeBySubTypeDataResult,
 } from '@/modules/metrics/helpers/offering-comparative';
-import { Church } from '@/modules/church/entities';
 import { OfferingIncomeCreationTypeNames } from '@/modules/offering/income/enums';
 
 const monthNames = {
@@ -37,9 +38,9 @@ interface ReportOptions {
   startMonth: string;
   endMonth: string;
   metricsTypesArray: string[];
-  yearlyIncomeExpenseComparisonPenDataResult: YearlyIncomeExpenseComparativeDataResult[];
-  yearlyIncomeExpenseComparisonUsdDataResult: YearlyIncomeExpenseComparativeDataResult[];
-  yearlyIncomeExpenseComparisonEurDataResult: YearlyIncomeExpenseComparativeDataResult[];
+  yearlyIncomeExpenseComparativePenDataResult: YearlyIncomeExpenseComparativeDataResult[];
+  yearlyIncomeExpenseComparativeUsdDataResult: YearlyIncomeExpenseComparativeDataResult[];
+  yearlyIncomeExpenseComparativeEurDataResult: YearlyIncomeExpenseComparativeDataResult[];
   generalOfferingIncomeComparativeDataResult: GeneralOfferingIncomeComparativeDataResult[];
   offeringIncomeComparativeByFamilyGroupDataResult: OfferingIncomeComparativeByTypeDataResult[];
   offeringIncomeComparativeBySundayServiceDataResult: OfferingIncomeComparativeByTypeDataResult[];
@@ -55,13 +56,19 @@ interface ReportOptions {
   offeringIncomeComparativeByChurchGroundDataResult: OfferingIncomeComparativeByTypeDataResult[];
   offeringIncomeComparativeByIncomeAdjustmentDataResult: OfferingIncomeComparativeByTypeDataResult[];
   generalOfferingExpensesComparativeDataResult: GeneralOfferingExpensesComparativeDataResult[];
-  offeringOperationalExpenseComparativeDataResult: OfferingExpenseComparativeByTypeDataResult[];
+  offeringOperationalExpensesComparativeDataResult: OfferingExpenseComparativeByTypeDataResult[];
   offeringExpensesComparativeByMaintenanceAndRepairDataResult: OfferingExpenseComparativeByTypeDataResult[];
   offeringExpensesComparativeByDecorationDataResult: OfferingExpenseComparativeByTypeDataResult[];
   offeringExpensesComparativeByEquipmentAndTechnologyDataResult: OfferingExpenseComparativeByTypeDataResult[];
   offeringExpensesComparativeBySuppliesDataResult: OfferingExpenseComparativeByTypeDataResult[];
   offeringExpensesComparativeByPlaningEventsDataResult: OfferingExpenseComparativeByTypeDataResult[];
   offeringExpensesComparativeByExpenseAdjustmentDataResult: OfferingExpenseComparativeByTypeDataResult[];
+  offeringOperationalExpensesBySubTypeComparativeDataResult: OfferingExpenseComparativeBySubTypeDataResult[];
+  offeringMaintenanceAndRepairExpensesBySubTypeComparativeDataResult: OfferingExpenseComparativeBySubTypeDataResult[];
+  offeringDecorationExpensesBySubTypeComparativeDataResult: OfferingExpenseComparativeBySubTypeDataResult[];
+  offeringSuppliesExpensesBySubTypeComparativeDataResult: OfferingExpenseComparativeBySubTypeDataResult[];
+  offeringPlaningEventsExpensesBySubTypeComparativeDataResult: OfferingExpenseComparativeBySubTypeDataResult[];
+  offeringEquipmentAndTechnologyExpensesBySubTypeComparativeDataResult: OfferingExpenseComparativeBySubTypeDataResult[];
 }
 
 export const getFinancialBalanceComparativeMetricsReport = (
@@ -75,9 +82,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
     startMonth,
     endMonth,
     metricsTypesArray,
-    yearlyIncomeExpenseComparisonPenDataResult,
-    yearlyIncomeExpenseComparisonUsdDataResult,
-    yearlyIncomeExpenseComparisonEurDataResult,
+    yearlyIncomeExpenseComparativePenDataResult,
+    yearlyIncomeExpenseComparativeUsdDataResult,
+    yearlyIncomeExpenseComparativeEurDataResult,
     generalOfferingIncomeComparativeDataResult,
     offeringIncomeComparativeByFamilyGroupDataResult,
     offeringIncomeComparativeBySundayServiceDataResult,
@@ -93,16 +100,20 @@ export const getFinancialBalanceComparativeMetricsReport = (
     offeringIncomeComparativeByChurchGroundDataResult,
     offeringIncomeComparativeByIncomeAdjustmentDataResult,
     generalOfferingExpensesComparativeDataResult,
-    offeringOperationalExpenseComparativeDataResult,
+    offeringOperationalExpensesComparativeDataResult,
     offeringExpensesComparativeByMaintenanceAndRepairDataResult,
     offeringExpensesComparativeByDecorationDataResult,
     offeringExpensesComparativeByEquipmentAndTechnologyDataResult,
     offeringExpensesComparativeBySuppliesDataResult,
     offeringExpensesComparativeByPlaningEventsDataResult,
     offeringExpensesComparativeByExpenseAdjustmentDataResult,
+    offeringOperationalExpensesBySubTypeComparativeDataResult,
+    offeringMaintenanceAndRepairExpensesBySubTypeComparativeDataResult,
+    offeringDecorationExpensesBySubTypeComparativeDataResult,
+    offeringEquipmentAndTechnologyExpensesBySubTypeComparativeDataResult,
+    offeringSuppliesExpensesBySubTypeComparativeDataResult,
+    offeringPlaningEventsExpensesBySubTypeComparativeDataResult,
   } = options;
-
-  console.log(offeringOperationalExpenseComparativeDataResult);
 
   return {
     pageOrientation: 'landscape',
@@ -151,11 +162,11 @@ export const getFinancialBalanceComparativeMetricsReport = (
                     {
                       text: `Moneda: Sol Peruano (PEN)`,
                       color: '#1d96d3',
-                      fontSize: 15,
+                      fontSize: 16,
                       bold: true,
                       italics: true,
                       alignment: 'center',
-                      margin: [0, 1, 0, 0],
+                      margin: [0, 0, 0, 5],
                     },
                   ],
                 ],
@@ -211,7 +222,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       },
                     },
                   ],
-                  ...yearlyIncomeExpenseComparisonPenDataResult
+                  ...yearlyIncomeExpenseComparativePenDataResult
                     .filter(
                       (item) =>
                         Object.values(monthNames).indexOf(item.month) <=
@@ -240,7 +251,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       },
                     },
                     {
-                      text: `${yearlyIncomeExpenseComparisonPenDataResult
+                      text: `${yearlyIncomeExpenseComparativePenDataResult
                         .filter(
                           (item) =>
                             Object.values(monthNames).indexOf(item.month) <=
@@ -260,7 +271,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       },
                     },
                     {
-                      text: `${yearlyIncomeExpenseComparisonPenDataResult
+                      text: `${yearlyIncomeExpenseComparativePenDataResult
                         .filter(
                           (item) =>
                             Object.values(monthNames).indexOf(item.month) <=
@@ -281,7 +292,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                     },
                     {
                       text: `${
-                        yearlyIncomeExpenseComparisonPenDataResult
+                        yearlyIncomeExpenseComparativePenDataResult
                           .filter(
                             (item) =>
                               Object.values(monthNames).indexOf(item.month) <=
@@ -293,7 +304,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             (acc, offering) => acc + offering?.totalIncome,
                             0,
                           ) -
-                        yearlyIncomeExpenseComparisonPenDataResult
+                        yearlyIncomeExpenseComparativePenDataResult
                           .filter(
                             (item) =>
                               Object.values(monthNames).indexOf(item.month) <=
@@ -348,11 +359,11 @@ export const getFinancialBalanceComparativeMetricsReport = (
                     {
                       text: `Moneda: Dolar Americano (USD)`,
                       color: '#1d96d3',
-                      fontSize: 15,
+                      fontSize: 16,
                       bold: true,
                       italics: true,
                       alignment: 'center',
-                      margin: [0, 1, 0, 0],
+                      margin: [0, 1, 0, 5],
                     },
                   ],
                 ],
@@ -407,7 +418,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       },
                     },
                   ],
-                  ...yearlyIncomeExpenseComparisonUsdDataResult
+                  ...yearlyIncomeExpenseComparativeUsdDataResult
                     .filter(
                       (item) =>
                         Object.values(monthNames).indexOf(item.month) <=
@@ -437,7 +448,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       },
                     },
                     {
-                      text: `${yearlyIncomeExpenseComparisonUsdDataResult
+                      text: `${yearlyIncomeExpenseComparativeUsdDataResult
                         .filter(
                           (item) =>
                             Object.values(monthNames).indexOf(item.month) <=
@@ -457,7 +468,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       },
                     },
                     {
-                      text: `${yearlyIncomeExpenseComparisonUsdDataResult
+                      text: `${yearlyIncomeExpenseComparativeUsdDataResult
                         .filter(
                           (item) =>
                             Object.values(monthNames).indexOf(item.month) <=
@@ -478,7 +489,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                     },
                     {
                       text: `${
-                        yearlyIncomeExpenseComparisonUsdDataResult
+                        yearlyIncomeExpenseComparativeUsdDataResult
                           .filter(
                             (item) =>
                               Object.values(monthNames).indexOf(item.month) <=
@@ -490,7 +501,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             (acc, offering) => acc + offering?.totalIncome,
                             0,
                           ) -
-                        yearlyIncomeExpenseComparisonUsdDataResult
+                        yearlyIncomeExpenseComparativeUsdDataResult
                           .filter(
                             (item) =>
                               Object.values(monthNames).indexOf(item.month) <=
@@ -545,11 +556,11 @@ export const getFinancialBalanceComparativeMetricsReport = (
                     {
                       text: `Moneda: Euro Europeo (EUR)`,
                       color: '#1d96d3',
-                      fontSize: 15,
+                      fontSize: 16,
                       bold: true,
                       italics: true,
                       alignment: 'center',
-                      margin: [0, 1, 0, 0],
+                      margin: [0, 1, 0, 5],
                     },
                   ],
                 ],
@@ -604,7 +615,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       },
                     },
                   ],
-                  ...yearlyIncomeExpenseComparisonEurDataResult
+                  ...yearlyIncomeExpenseComparativeEurDataResult
                     .filter(
                       (item) =>
                         Object.values(monthNames).indexOf(item.month) <=
@@ -634,7 +645,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       },
                     },
                     {
-                      text: `${yearlyIncomeExpenseComparisonEurDataResult
+                      text: `${yearlyIncomeExpenseComparativeEurDataResult
                         .filter(
                           (item) =>
                             Object.values(monthNames).indexOf(item.month) <=
@@ -654,7 +665,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       },
                     },
                     {
-                      text: `${yearlyIncomeExpenseComparisonEurDataResult
+                      text: `${yearlyIncomeExpenseComparativeEurDataResult
                         .filter(
                           (item) =>
                             Object.values(monthNames).indexOf(item.month) <=
@@ -675,7 +686,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                     },
                     {
                       text: `${
-                        yearlyIncomeExpenseComparisonEurDataResult
+                        yearlyIncomeExpenseComparativeEurDataResult
                           .filter(
                             (item) =>
                               Object.values(monthNames).indexOf(item.month) <=
@@ -687,7 +698,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             (acc, offering) => acc + offering?.totalIncome,
                             0,
                           ) -
-                        yearlyIncomeExpenseComparisonEurDataResult
+                        yearlyIncomeExpenseComparativeEurDataResult
                           .filter(
                             (item) =>
                               Object.values(monthNames).indexOf(item.month) <=
@@ -747,13 +758,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                 body: [
                   [
                     {
-                      text: `General - Rango de meses`,
+                      text: `(Tipo y Sub-tipo)`,
+                      color: '#1d96d3',
+                      fontSize: 15,
+                      bold: true,
+                      alignment: 'center',
+                      margin: [0, -3, 0, 0],
+                    },
+                  ],
+                ],
+              },
+            },
+            {
+              layout: 'noBorders',
+              table: {
+                headerRows: 1,
+                widths: ['*'],
+                body: [
+                  [
+                    {
+                      text: `Búsqueda General por Rango de Meses`,
                       color: '#1d96d3',
                       fontSize: 16,
                       italics: true,
                       bold: true,
                       alignment: 'center',
-                      margin: [0, -3, 0, 0],
+                      margin: [0, 0, 0, 5],
                     },
                   ],
                 ],
@@ -907,7 +937,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -916,10 +945,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `(Tipo y Sub-tipo)`,
                             color: '#1d96d3',
-                            fontSize: 16,
-                            italics: true,
+                            fontSize: 15,
                             bold: true,
                             alignment: 'center',
                             margin: [0, -3, 0, 0],
@@ -928,10 +956,29 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda detallada por mes`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -1, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
 
                   {
                     layout: 'noBorders',
-                    margin: [0, 5, 0, 0],
                     table: {
                       headerRows: 1,
                       widths: ['*'],
@@ -943,7 +990,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 4, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -1142,7 +1189,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -1151,13 +1197,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `(Tipo y Sub-tipo)`,
                             color: '#1d96d3',
-                            fontSize: 16,
-                            italics: true,
+                            fontSize: 15,
                             bold: true,
                             alignment: 'center',
                             margin: [0, -3, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda detallada por mes`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -1, 0, 0],
                           },
                         ],
                       ],
@@ -1177,7 +1242,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -1376,7 +1441,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -1385,13 +1449,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `(Tipo y Sub-tipo)`,
                             color: '#1d96d3',
-                            fontSize: 16,
-                            italics: true,
+                            fontSize: 15,
                             bold: true,
                             alignment: 'center',
                             margin: [0, -3, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda detallada por mes`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -1, 0, 0],
                           },
                         ],
                       ],
@@ -1411,7 +1494,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -1610,7 +1693,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -1619,13 +1701,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `(Tipo y Sub-tipo)`,
                             color: '#1d96d3',
-                            fontSize: 16,
-                            italics: true,
+                            fontSize: 15,
                             bold: true,
                             alignment: 'center',
                             margin: [0, -3, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda detallada por mes`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -1, 0, 0],
                           },
                         ],
                       ],
@@ -1645,7 +1746,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -1844,7 +1945,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -1853,13 +1953,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `(Tipo y Sub-tipo)`,
                             color: '#1d96d3',
-                            fontSize: 16,
-                            italics: true,
+                            fontSize: 15,
                             bold: true,
                             alignment: 'center',
                             margin: [0, -3, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda detallada por mes`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -1, 0, 0],
                           },
                         ],
                       ],
@@ -1879,7 +1998,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -2078,7 +2197,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -2087,13 +2205,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `(Tipo y Sub-tipo)`,
                             color: '#1d96d3',
-                            fontSize: 16,
-                            italics: true,
+                            fontSize: 15,
                             bold: true,
                             alignment: 'center',
                             margin: [0, -3, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda detallada por mes`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -1, 0, 0],
                           },
                         ],
                       ],
@@ -2113,7 +2250,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -2312,7 +2449,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -2321,13 +2457,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `(Tipo y Sub-tipo)`,
                             color: '#1d96d3',
-                            fontSize: 16,
-                            italics: true,
+                            fontSize: 15,
                             bold: true,
                             alignment: 'center',
                             margin: [0, -3, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda detallada por mes`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -1, 0, 0],
                           },
                         ],
                       ],
@@ -2347,7 +2502,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -2546,7 +2701,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -2555,13 +2709,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `(Tipo y Sub-tipo)`,
                             color: '#1d96d3',
-                            fontSize: 16,
-                            italics: true,
+                            fontSize: 15,
                             bold: true,
                             alignment: 'center',
                             margin: [0, -3, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda detallada por mes`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -1, 0, 0],
                           },
                         ],
                       ],
@@ -2581,7 +2754,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -2780,7 +2953,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -2789,13 +2961,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `(Tipo y Sub-tipo)`,
                             color: '#1d96d3',
-                            fontSize: 16,
-                            italics: true,
+                            fontSize: 15,
                             bold: true,
                             alignment: 'center',
                             margin: [0, -3, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda detallada por mes`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -1, 0, 0],
                           },
                         ],
                       ],
@@ -2815,7 +3006,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -3014,7 +3205,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -3023,13 +3213,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `(Tipo y Sub-tipo)`,
                             color: '#1d96d3',
-                            fontSize: 16,
-                            italics: true,
+                            fontSize: 15,
                             bold: true,
                             alignment: 'center',
                             margin: [0, -3, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda detallada por mes`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -1, 0, 0],
                           },
                         ],
                       ],
@@ -3049,7 +3258,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -3248,7 +3457,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -3257,13 +3465,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `(Tipo y Sub-tipo)`,
                             color: '#1d96d3',
-                            fontSize: 16,
-                            italics: true,
+                            fontSize: 15,
                             bold: true,
                             alignment: 'center',
                             margin: [0, -3, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda detallada por mes`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -1, 0, 0],
                           },
                         ],
                       ],
@@ -3283,7 +3510,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -3482,7 +3709,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -3491,13 +3717,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `(Tipo y Sub-tipo)`,
                             color: '#1d96d3',
-                            fontSize: 16,
-                            italics: true,
+                            fontSize: 15,
                             bold: true,
                             alignment: 'center',
                             margin: [0, -3, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda detallada por mes`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -1, 0, 0],
                           },
                         ],
                       ],
@@ -3517,7 +3762,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -3716,7 +3961,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -3725,13 +3969,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `(Tipo y Sub-tipo)`,
                             color: '#1d96d3',
-                            fontSize: 16,
-                            italics: true,
+                            fontSize: 15,
                             bold: true,
                             alignment: 'center',
                             margin: [0, -3, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda detallada por mes`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -1, 0, 0],
                           },
                         ],
                       ],
@@ -3751,7 +4014,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -3922,158 +4185,158 @@ export const getFinancialBalanceComparativeMetricsReport = (
                   },
                 ]
               : null,
+          ]
+        : null,
 
-            //? GeneralComparativeOfferingExpenses
-            metricsTypesArray.includes(
-              MetricSearchType.GeneralComparativeOfferingExpenses,
-            )
-              ? [
-                  // Table Title
-                  {
-                    layout: 'noBorders',
-                    table: {
-                      headerRows: 1,
-                      widths: ['*'],
-                      body: [
-                        [
-                          {
-                            text: `Comparativa Gastos de Ofrenda`,
-                            color: 'red',
-                            fontSize: 20,
-                            bold: true,
-                            alignment: 'center',
-                            margin: [0, -10, 0, 0],
-                          },
-                        ],
-                      ],
+      //? GeneralComparativeOfferingExpenses
+      metricsTypesArray.includes(
+        MetricSearchType.GeneralComparativeOfferingExpenses,
+      )
+        ? [
+            // Table Title
+            {
+              layout: 'noBorders',
+              table: {
+                headerRows: 1,
+                widths: ['*'],
+                body: [
+                  [
+                    {
+                      text: `Comparativa Gastos de Ofrenda`,
+                      color: 'red',
+                      fontSize: 20,
+                      bold: true,
+                      alignment: 'center',
+                      margin: [0, -10, 0, 0],
                     },
-                  },
-                  {
-                    layout: 'noBorders',
-                    table: {
-                      headerRows: 1,
-                      widths: ['*'],
-                      body: [
-                        [
-                          {
-                            text: `General - Rango de meses`,
-                            color: 'red',
-                            fontSize: 16,
-                            italics: true,
-                            bold: true,
-                            alignment: 'center',
-                            margin: [0, -3, 0, 0],
-                          },
-                        ],
-                      ],
+                  ],
+                ],
+              },
+            },
+            {
+              layout: 'noBorders',
+              table: {
+                headerRows: 1,
+                widths: ['*'],
+                body: [
+                  [
+                    {
+                      text: `Búsqueda General por Tipo y Rango de Meses`,
+                      color: 'red',
+                      fontSize: 16,
+                      italics: true,
+                      bold: true,
+                      alignment: 'center',
+                      margin: [0, 2, 0, 5],
                     },
-                  },
-                  // Table body (content)
-                  {
-                    pageBreak: 'after',
-                    layout: 'customLayout01', // optional
-                    table: {
-                      headerRows: 1,
-                      widths: [100, 100, '*', '*', '*', '*'],
-                      body: [
-                        [
-                          {
-                            text: 'Iglesia',
-                            style: {
-                              bold: true,
-                            },
-                          },
-                          {
-                            text: 'Rango',
-                            style: {
-                              bold: true,
-                            },
-                          },
-                          {
-                            text: `Tipo`,
-                            style: {
-                              bold: true,
-                            },
-                          },
-                          {
-                            text: `Total Acu. (PEN)`,
-                            style: {
-                              color: 'blue',
-                              bold: true,
-                            },
-                          },
-                          {
-                            text: `Total Acu. (USD)`,
-                            style: {
-                              color: 'green',
-                              bold: true,
-                            },
-                          },
-                          {
-                            text: `Total Acu. (EUR)`,
-                            style: {
-                              color: 'purple',
-                              bold: true,
-                            },
-                          },
-                        ],
-                        ...generalOfferingExpensesComparativeDataResult.map(
-                          (item) => [
-                            item?.church?.abbreviatedChurchName,
-                            `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
-                            item?.type,
-                            item?.accumulatedOfferingPEN,
-                            item?.accumulatedOfferingUSD,
-                            item?.accumulatedOfferingEUR,
-                          ],
-                        ),
-                        ['', '', '', '', '', ''],
-                        ['', '', '', '', '', ''],
-                        [
-                          '',
-                          '',
-                          {
-                            text: 'Totales',
-                            style: {
-                              bold: true,
-                              fontSize: 13,
-                              italics: true,
-                              color: '#475569',
-                            },
-                          },
-                          {
-                            text: `${generalOfferingExpensesComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
-                            style: {
-                              bold: true,
-                              fontSize: 13,
-                              italics: true,
-                              color: '#475569',
-                            },
-                          },
-                          {
-                            text: `${generalOfferingExpensesComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
-                            style: {
-                              bold: true,
-                              fontSize: 13,
-                              italics: true,
-                              color: '#475569',
-                            },
-                          },
-                          {
-                            text: `${generalOfferingExpensesComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
-                            style: {
-                              bold: true,
-                              fontSize: 13,
-                              italics: true,
-                              color: '#475569',
-                            },
-                          },
-                        ],
-                      ],
+                  ],
+                ],
+              },
+            },
+            // Table body (content)
+            {
+              pageBreak: 'after',
+              layout: 'customLayout01', // optional
+              table: {
+                headerRows: 1,
+                widths: [100, 100, '*', '*', '*', '*'],
+                body: [
+                  [
+                    {
+                      text: 'Iglesia',
+                      style: {
+                        bold: true,
+                      },
                     },
-                  },
-                ]
-              : null,
+                    {
+                      text: 'Rango',
+                      style: {
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: `Tipo`,
+                      style: {
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: `Total Acu. (PEN)`,
+                      style: {
+                        color: 'blue',
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: `Total Acu. (USD)`,
+                      style: {
+                        color: 'green',
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: `Total Acu. (EUR)`,
+                      style: {
+                        color: 'purple',
+                        bold: true,
+                      },
+                    },
+                  ],
+                  ...generalOfferingExpensesComparativeDataResult.map(
+                    (item) => [
+                      item?.church?.abbreviatedChurchName,
+                      `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
+                      item?.type,
+                      item?.accumulatedOfferingPEN,
+                      item?.accumulatedOfferingUSD,
+                      item?.accumulatedOfferingEUR,
+                    ],
+                  ),
+                  ['', '', '', '', '', ''],
+                  ['', '', '', '', '', ''],
+                  [
+                    '',
+                    '',
+                    {
+                      text: 'Totales',
+                      style: {
+                        bold: true,
+                        fontSize: 13,
+                        italics: true,
+                        color: '#475569',
+                      },
+                    },
+                    {
+                      text: `${generalOfferingExpensesComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      style: {
+                        bold: true,
+                        fontSize: 13,
+                        italics: true,
+                        color: '#475569',
+                      },
+                    },
+                    {
+                      text: `${generalOfferingExpensesComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      style: {
+                        bold: true,
+                        fontSize: 13,
+                        italics: true,
+                        color: '#475569',
+                      },
+                    },
+                    {
+                      text: `${generalOfferingExpensesComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      style: {
+                        bold: true,
+                        fontSize: 13,
+                        italics: true,
+                        color: '#475569',
+                      },
+                    },
+                  ],
+                ],
+              },
+            },
           ]
         : null,
 
@@ -4083,8 +4346,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
       )
         ? [
             //* Operational Expenses
-            offeringOperationalExpenseComparativeDataResult.length > 0 &&
-            offeringOperationalExpenseComparativeDataResult.filter(
+            offeringOperationalExpensesComparativeDataResult.length > 0 &&
+            offeringOperationalExpensesComparativeDataResult.filter(
               (item) =>
                 Object.values(monthNames).indexOf(item.month) <=
                 Object.values(monthNames).indexOf(monthNames[endMonth]),
@@ -4118,13 +4381,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `Búsqueda detallada por tipo y mes`,
                             color: 'red',
-                            fontSize: 16,
+                            fontSize: 15,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, -2, 0, 0],
                           },
                         ],
                       ],
@@ -4133,7 +4396,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
 
                   {
                     layout: 'noBorders',
-                    margin: [0, 5, 0, 0],
                     table: {
                       headerRows: 1,
                       widths: ['*'],
@@ -4145,7 +4407,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 4, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -4200,7 +4462,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             },
                           },
                         ],
-                        ...offeringOperationalExpenseComparativeDataResult
+                        ...offeringOperationalExpensesComparativeDataResult
                           .filter(
                             (item) =>
                               Object.values(monthNames).indexOf(item.month) <=
@@ -4231,7 +4493,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             },
                           },
                           {
-                            text: `${offeringOperationalExpenseComparativeDataResult
+                            text: `${offeringOperationalExpensesComparativeDataResult
                               .filter(
                                 (item) =>
                                   Object.values(monthNames).indexOf(
@@ -4254,7 +4516,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             },
                           },
                           {
-                            text: `${offeringOperationalExpenseComparativeDataResult
+                            text: `${offeringOperationalExpensesComparativeDataResult
                               .filter(
                                 (item) =>
                                   Object.values(monthNames).indexOf(
@@ -4277,7 +4539,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             },
                           },
                           {
-                            text: `${offeringOperationalExpenseComparativeDataResult
+                            text: `${offeringOperationalExpensesComparativeDataResult
                               .filter(
                                 (item) =>
                                   Object.values(monthNames).indexOf(
@@ -4334,7 +4596,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -4343,13 +4604,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `Búsqueda detallada por tipo y mes`,
                             color: 'red',
-                            fontSize: 16,
+                            fontSize: 15,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, -2, 0, 0],
                           },
                         ],
                       ],
@@ -4358,7 +4619,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
 
                   {
                     layout: 'noBorders',
-                    margin: [0, 5, 0, 0],
                     table: {
                       headerRows: 1,
                       widths: ['*'],
@@ -4370,7 +4630,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 4, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -4558,7 +4818,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -4567,13 +4826,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `Búsqueda detallada por tipo y mes`,
                             color: 'red',
-                            fontSize: 16,
+                            fontSize: 15,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, -2, 0, 0],
                           },
                         ],
                       ],
@@ -4582,7 +4841,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
 
                   {
                     layout: 'noBorders',
-                    margin: [0, 5, 0, 0],
                     table: {
                       headerRows: 1,
                       widths: ['*'],
@@ -4594,7 +4852,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 4, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -4783,7 +5041,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -4792,22 +5049,20 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `Búsqueda detallada por tipo y mes`,
                             color: 'red',
-                            fontSize: 16,
+                            fontSize: 15,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, -2, 0, 0],
                           },
                         ],
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
-                    margin: [0, 5, 0, 0],
                     table: {
                       headerRows: 1,
                       widths: ['*'],
@@ -4819,7 +5074,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 4, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -5007,7 +5262,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -5016,13 +5270,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `Búsqueda detallada por tipo y mes`,
                             color: 'red',
-                            fontSize: 16,
+                            fontSize: 15,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, -2, 0, 0],
                           },
                         ],
                       ],
@@ -5031,7 +5285,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
 
                   {
                     layout: 'noBorders',
-                    margin: [0, 5, 0, 0],
                     table: {
                       headerRows: 1,
                       widths: ['*'],
@@ -5043,7 +5296,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 4, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -5231,7 +5484,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -5240,13 +5492,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `Búsqueda detallada por tipo y mes`,
                             color: 'red',
-                            fontSize: 16,
+                            fontSize: 15,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, -2, 0, 0],
                           },
                         ],
                       ],
@@ -5255,19 +5507,18 @@ export const getFinancialBalanceComparativeMetricsReport = (
 
                   {
                     layout: 'noBorders',
-                    margin: [0, 5, 0, 0],
                     table: {
                       headerRows: 1,
                       widths: ['*'],
                       body: [
                         [
                           {
-                            text: `Gastos de Plantación de Eventos`,
+                            text: `Gastos de Planificación de Eventos`,
                             color: '#e77f08',
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 4, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -5456,7 +5707,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -5465,13 +5715,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Detallado - Por mes`,
+                            text: `Búsqueda detallada por tipo y mes`,
                             color: 'red',
-                            fontSize: 16,
+                            fontSize: 15,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, -2, 0, 0],
                           },
                         ],
                       ],
@@ -5480,7 +5730,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
 
                   {
                     layout: 'noBorders',
-                    margin: [0, 5, 0, 0],
                     table: {
                       headerRows: 1,
                       widths: ['*'],
@@ -5492,7 +5741,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 4, 0, 0],
+                            margin: [0, 5, 0, 2],
                           },
                         ],
                       ],
@@ -5639,6 +5888,1096 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
                               )} EUR`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                ]
+              : null,
+          ]
+        : null,
+
+      //? ComparativeOffering Expenses By SubType
+      metricsTypesArray.includes(
+        MetricSearchType.ComparativeOfferingExpensesBySubType,
+      )
+        ? [
+            //* Operational Expenses
+            offeringOperationalExpensesBySubTypeComparativeDataResult.length > 0
+              ? [
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Comparativa Gastos de Ofrenda`,
+                            color: 'red',
+                            fontSize: 20,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -10, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda general por sub-tipo y rango de meses`,
+                            color: 'red',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -2, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Gastos Operativos`,
+                            color: '#e77f08',
+                            fontSize: 18,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, 5, 0, 2],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  // Table body (content)
+                  {
+                    pageBreak: 'after',
+                    layout: 'customLayout01', // optional
+                    table: {
+                      headerRows: 1,
+                      widths: [100, 110, '*', '*', '*', '*'],
+                      body: [
+                        [
+                          {
+                            text: 'Iglesia',
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: 'Rango',
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Sub-Tipo`,
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (PEN)`,
+                            style: {
+                              color: 'blue',
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (USD)`,
+                            style: {
+                              color: 'green',
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (EUR)`,
+                            style: {
+                              color: 'purple',
+                              bold: true,
+                            },
+                          },
+                        ],
+                        ...offeringOperationalExpensesBySubTypeComparativeDataResult.map(
+                          (item) => [
+                            item?.church?.abbreviatedChurchName,
+                            `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
+                            item?.subType,
+                            `${item?.accumulatedOfferingPEN} PEN`,
+                            `${item?.accumulatedOfferingUSD} USD`,
+                            `${item?.accumulatedOfferingEUR} EUR`,
+                          ],
+                        ),
+                        ['', '', '', '', '', ''],
+                        ['', '', '', '', '', ''],
+                        [
+                          '',
+                          '',
+                          {
+                            text: 'Totales',
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringOperationalExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingPEN,
+                              0,
+                            )} PEN`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringOperationalExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingUSD,
+                              0,
+                            )} USD`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringOperationalExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingEUR,
+                              0,
+                            )} EUR`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                ]
+              : null,
+
+            //* Maintenance and Repair Expenses
+            offeringMaintenanceAndRepairExpensesBySubTypeComparativeDataResult.length >
+            0
+              ? [
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Comparativa Gastos de Ofrenda`,
+                            color: 'red',
+                            fontSize: 20,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -10, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda general por sub-tipo y rango de meses`,
+                            color: 'red',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -2, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Gastos de Mantenimiento y Reparación`,
+                            color: '#e77f08',
+                            fontSize: 18,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, 5, 0, 2],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  // Table body (content)
+                  {
+                    pageBreak: 'after',
+                    layout: 'customLayout01', // optional
+                    table: {
+                      headerRows: 1,
+                      widths: [100, 110, '*', '*', '*', '*'],
+                      body: [
+                        [
+                          {
+                            text: 'Iglesia',
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: 'Rango',
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Sub-Tipo`,
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (PEN)`,
+                            style: {
+                              color: 'blue',
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (USD)`,
+                            style: {
+                              color: 'green',
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (EUR)`,
+                            style: {
+                              color: 'purple',
+                              bold: true,
+                            },
+                          },
+                        ],
+                        ...offeringMaintenanceAndRepairExpensesBySubTypeComparativeDataResult.map(
+                          (item) => [
+                            item?.church?.abbreviatedChurchName,
+                            `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
+                            item?.subType,
+                            `${item?.accumulatedOfferingPEN} PEN`,
+                            `${item?.accumulatedOfferingUSD} USD`,
+                            `${item?.accumulatedOfferingEUR} EUR`,
+                          ],
+                        ),
+                        ['', '', '', '', '', ''],
+                        ['', '', '', '', '', ''],
+                        [
+                          '',
+                          '',
+                          {
+                            text: 'Totales',
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringMaintenanceAndRepairExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingPEN,
+                              0,
+                            )} PEN`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringMaintenanceAndRepairExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingUSD,
+                              0,
+                            )} USD`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringOperationalExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingEUR,
+                              0,
+                            )} EUR`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                ]
+              : null,
+
+            //* Decoration Expenses
+            offeringDecorationExpensesBySubTypeComparativeDataResult.length > 0
+              ? [
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Comparativa Gastos de Ofrenda`,
+                            color: 'red',
+                            fontSize: 20,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -10, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda general por sub-tipo y rango de meses`,
+                            color: 'red',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -2, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Gastos de Decoración`,
+                            color: '#e77f08',
+                            fontSize: 18,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, 5, 0, 2],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  // Table body (content)
+                  {
+                    pageBreak: 'after',
+                    layout: 'customLayout01', // optional
+                    table: {
+                      headerRows: 1,
+                      widths: [100, 110, '*', '*', '*', '*'],
+                      body: [
+                        [
+                          {
+                            text: 'Iglesia',
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: 'Rango',
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Sub-Tipo`,
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (PEN)`,
+                            style: {
+                              color: 'blue',
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (USD)`,
+                            style: {
+                              color: 'green',
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (EUR)`,
+                            style: {
+                              color: 'purple',
+                              bold: true,
+                            },
+                          },
+                        ],
+                        ...offeringDecorationExpensesBySubTypeComparativeDataResult.map(
+                          (item) => [
+                            item?.church?.abbreviatedChurchName,
+                            `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
+                            item?.subType,
+                            `${item?.accumulatedOfferingPEN} PEN`,
+                            `${item?.accumulatedOfferingUSD} USD`,
+                            `${item?.accumulatedOfferingEUR} EUR`,
+                          ],
+                        ),
+                        ['', '', '', '', '', ''],
+                        ['', '', '', '', '', ''],
+                        [
+                          '',
+                          '',
+                          {
+                            text: 'Totales',
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringDecorationExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingPEN,
+                              0,
+                            )} PEN`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringDecorationExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingUSD,
+                              0,
+                            )} USD`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringDecorationExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingEUR,
+                              0,
+                            )} EUR`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                ]
+              : null,
+
+            //* Equipment and Technology Expenses
+            offeringEquipmentAndTechnologyExpensesBySubTypeComparativeDataResult.length >
+            0
+              ? [
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Comparativa Gastos de Ofrenda`,
+                            color: 'red',
+                            fontSize: 20,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -10, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda general por sub-tipo y rango de meses`,
+                            color: 'red',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -2, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Gastos de Equipamiento y Tecnología`,
+                            color: '#e77f08',
+                            fontSize: 18,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, 5, 0, 2],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  // Table body (content)
+                  {
+                    pageBreak: 'after',
+                    layout: 'customLayout01', // optional
+                    table: {
+                      headerRows: 1,
+                      widths: [100, 110, '*', '*', '*', '*'],
+                      body: [
+                        [
+                          {
+                            text: 'Iglesia',
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: 'Rango',
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Sub-Tipo`,
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (PEN)`,
+                            style: {
+                              color: 'blue',
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (USD)`,
+                            style: {
+                              color: 'green',
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (EUR)`,
+                            style: {
+                              color: 'purple',
+                              bold: true,
+                            },
+                          },
+                        ],
+                        ...offeringEquipmentAndTechnologyExpensesBySubTypeComparativeDataResult.map(
+                          (item) => [
+                            item?.church?.abbreviatedChurchName,
+                            `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
+                            item?.subType,
+                            `${item?.accumulatedOfferingPEN} PEN`,
+                            `${item?.accumulatedOfferingUSD} USD`,
+                            `${item?.accumulatedOfferingEUR} EUR`,
+                          ],
+                        ),
+                        ['', '', '', '', '', ''],
+                        ['', '', '', '', '', ''],
+                        [
+                          '',
+                          '',
+                          {
+                            text: 'Totales',
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringEquipmentAndTechnologyExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingPEN,
+                              0,
+                            )} PEN`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringEquipmentAndTechnologyExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingUSD,
+                              0,
+                            )} USD`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringEquipmentAndTechnologyExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingEUR,
+                              0,
+                            )} EUR`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                ]
+              : null,
+
+            //* Supplies Expenses
+            offeringSuppliesExpensesBySubTypeComparativeDataResult.length > 0
+              ? [
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Comparativa Gastos de Ofrenda`,
+                            color: 'red',
+                            fontSize: 20,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -10, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda general por sub-tipo y rango de meses`,
+                            color: 'red',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -2, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Gastos de Suministros`,
+                            color: '#e77f08',
+                            fontSize: 18,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, 5, 0, 2],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  // Table body (content)
+                  {
+                    pageBreak: 'after',
+                    layout: 'customLayout01', // optional
+                    table: {
+                      headerRows: 1,
+                      widths: [100, 110, '*', '*', '*', '*'],
+                      body: [
+                        [
+                          {
+                            text: 'Iglesia',
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: 'Rango',
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Sub-Tipo`,
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (PEN)`,
+                            style: {
+                              color: 'blue',
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (USD)`,
+                            style: {
+                              color: 'green',
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (EUR)`,
+                            style: {
+                              color: 'purple',
+                              bold: true,
+                            },
+                          },
+                        ],
+                        ...offeringSuppliesExpensesBySubTypeComparativeDataResult.map(
+                          (item) => [
+                            item?.church?.abbreviatedChurchName,
+                            `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
+                            item?.subType,
+                            `${item?.accumulatedOfferingPEN} PEN`,
+                            `${item?.accumulatedOfferingUSD} USD`,
+                            `${item?.accumulatedOfferingEUR} EUR`,
+                          ],
+                        ),
+                        ['', '', '', '', '', ''],
+                        ['', '', '', '', '', ''],
+                        [
+                          '',
+                          '',
+                          {
+                            text: 'Totales',
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringSuppliesExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingPEN,
+                              0,
+                            )} PEN`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringSuppliesExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingUSD,
+                              0,
+                            )} USD`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringSuppliesExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingEUR,
+                              0,
+                            )} EUR`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                ]
+              : null,
+
+            //* Planing Events
+            offeringPlaningEventsExpensesBySubTypeComparativeDataResult.length >
+            0
+              ? [
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Comparativa Gastos de Ofrenda`,
+                            color: 'red',
+                            fontSize: 20,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -10, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Búsqueda general por sub-tipo y rango de meses`,
+                            color: 'red',
+                            fontSize: 15,
+                            italics: true,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -2, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `Gastos de Planificación de Eventos`,
+                            color: '#e77f08',
+                            fontSize: 18,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, 5, 0, 2],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  // Table body (content)
+                  {
+                    pageBreak: 'after',
+                    layout: 'customLayout01', // optional
+                    table: {
+                      headerRows: 1,
+                      widths: [100, 110, '*', '*', '*', '*'],
+                      body: [
+                        [
+                          {
+                            text: 'Iglesia',
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: 'Rango',
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Sub-Tipo`,
+                            style: {
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (PEN)`,
+                            style: {
+                              color: 'blue',
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (USD)`,
+                            style: {
+                              color: 'green',
+                              bold: true,
+                            },
+                          },
+                          {
+                            text: `Total Acu. (EUR)`,
+                            style: {
+                              color: 'purple',
+                              bold: true,
+                            },
+                          },
+                        ],
+                        ...offeringPlaningEventsExpensesBySubTypeComparativeDataResult.map(
+                          (item) => [
+                            item?.church?.abbreviatedChurchName,
+                            `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
+                            item?.subType,
+                            `${item?.accumulatedOfferingPEN} PEN`,
+                            `${item?.accumulatedOfferingUSD} USD`,
+                            `${item?.accumulatedOfferingEUR} EUR`,
+                          ],
+                        ),
+                        ['', '', '', '', '', ''],
+                        ['', '', '', '', '', ''],
+                        [
+                          '',
+                          '',
+                          {
+                            text: 'Totales',
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringPlaningEventsExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingPEN,
+                              0,
+                            )} PEN`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringPlaningEventsExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingUSD,
+                              0,
+                            )} USD`,
+                            style: {
+                              bold: true,
+                              fontSize: 13,
+                              italics: true,
+                              color: '#475569',
+                            },
+                          },
+                          {
+                            text: `${offeringPlaningEventsExpensesBySubTypeComparativeDataResult.reduce(
+                              (acc, offering) =>
+                                acc + offering?.accumulatedOfferingEUR,
+                              0,
+                            )} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,

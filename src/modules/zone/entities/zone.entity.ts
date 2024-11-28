@@ -1,7 +1,7 @@
 import {
+  Index,
   Column,
   Entity,
-  Index,
   OneToOne,
   ManyToOne,
   OneToMany,

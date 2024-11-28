@@ -27,6 +27,7 @@ interface ReportOptions {
   searchType?: string;
   searchSubType?: string;
   orderSearch?: string;
+  churchName?: string;
   data: DataOptions;
 }
 
@@ -42,6 +43,7 @@ export const getMembersReport = (
     searchType,
     searchSubType,
     orderSearch,
+    churchName,
   } = options;
 
   return {
@@ -53,20 +55,21 @@ export const getMembersReport = (
       searchType: searchType,
       searchSubType: searchSubType,
       orderSearch: orderSearch,
+      churchName: churchName,
     }),
     footer: footerSection,
-    pageMargins: [20, 110, 20, 60],
+    pageMargins: [20, 120, 20, 60],
     content: [
       {
         layout: 'customLayout01', // optional
         table: {
           headerRows: 1,
-          widths: [115, 75, 'auto', 'auto', 75, 'auto', 'auto', 'auto'],
+          widths: [100, 75, 30, 75, 80, 85, 100, '*'],
 
           body: [
             [
               {
-                text: 'Nombres y Apellidos',
+                text: 'Nom. y Apellidos',
                 style: {
                   bold: true,
                 },

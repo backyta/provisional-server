@@ -41,7 +41,7 @@ interface ReportOptions {
   offeringExpensesAdjustmentsDataResult: OfferingExpensesAdjustmentDataResult[];
 }
 
-export const getOfferingExpenseMetricsReport = (
+export const getOfferingExpensesMetricsReport = (
   options: ReportOptions,
 ): TDocumentDefinitions => {
   const {
