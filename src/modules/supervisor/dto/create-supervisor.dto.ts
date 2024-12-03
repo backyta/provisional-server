@@ -14,6 +14,8 @@ import {
   MemberRole,
   RecordStatus,
   MaritalStatus,
+  MemberInactivationReason,
+  MemberInactivationCategory,
 } from '@/common/enums';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -205,4 +207,21 @@ export class CreateSupervisorDto {
   @IsString()
   @IsOptional()
   theirPastor?: string;
+
+  //? Inactivation Data (optional)
+  @ApiProperty({
+    example: MemberInactivationCategory.PersonalChallenges,
+    description: 'Member inactivation category.',
+  })
+  @IsOptional()
+  @IsEnum(MemberInactivationCategory)
+  inactivationCategory?: string;
+
+  @ApiProperty({
+    example: MemberInactivationReason.HealthIssues,
+    description: 'Reason for member removal.',
+  })
+  @IsOptional()
+  @IsEnum(MemberInactivationReason)
+  inactivationReason?: string;
 }

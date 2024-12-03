@@ -7,3 +7,5 @@ export * from './search-types.enum';
 export * from './dashboard-search-type.enum';
 export * from './offering-file-type.enum';
 export * from './record-order.enum';
+export * from './member-inactivation-category.enum';
+export * from './member-inactivation-reason.enum';

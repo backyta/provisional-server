@@ -23,7 +23,11 @@ import {
   RecordStatus,
   MaritalStatusNames,
 } from '@/common/enums';
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import {
+  PaginationDto,
+  MemberInactivateDto,
+  SearchAndPaginationDto,
+} from '@/common/dtos';
 import { dateFormatterToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
 
 import { Zone } from '@/modules/zone/entities';
@@ -1244,7 +1248,14 @@ export class CopastorService {
     updateCopastorDto: UpdateCopastorDto,
     user: User,
   ): Promise<Copastor | Pastor> {
-    const { roles, recordStatus, theirPastor, theirChurch } = updateCopastorDto;
+    const {
+      roles,
+      recordStatus,
+      theirPastor,
+      theirChurch,
+      inactivationReason,
+      inactivationCategory,
+    } = updateCopastorDto;
 
     if (!roles) {
       throw new BadRequestException(
@@ -1395,6 +1406,12 @@ export class CopastorService {
             theirPastor: newPastor,
             updatedAt: new Date(),
             updatedBy: user,
+            inactivationCategory:
+              recordStatus === RecordStatus.Active
+                ? null
+                : inactivationCategory,
+            inactivationReason:
+              recordStatus === RecordStatus.Active ? null : inactivationReason,
             recordStatus: recordStatus,
           });
 
@@ -1539,6 +1556,12 @@ export class CopastorService {
             theirPastor: copastor.theirPastor,
             updatedAt: new Date(),
             updatedBy: user,
+            inactivationCategory:
+              recordStatus === RecordStatus.Active
+                ? null
+                : inactivationCategory,
+            inactivationReason:
+              recordStatus === RecordStatus.Active ? null : inactivationReason,
             recordStatus: recordStatus,
           });
 
@@ -1643,7 +1666,13 @@ export class CopastorService {
   }
 
   //! DELETE COPASTOR
-  async remove(id: string, user: User): Promise<void> {
+  async remove(
+    id: string,
+    memberInactivateDto: MemberInactivateDto,
+    user: User,
+  ): Promise<void> {
+    const { inactivationCategory, inactivationReason } = memberInactivateDto;
+
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido.`);
     }
@@ -1660,6 +1689,8 @@ export class CopastorService {
         id: copastor.id,
         updatedAt: new Date(),
         updatedBy: user,
+        inactivationCategory: inactivationCategory,
+        inactivationReason: inactivationReason,
         recordStatus: RecordStatus.Inactive,
       });
 

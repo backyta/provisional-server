@@ -33,7 +33,11 @@ import {
   RecordStatus,
   MaritalStatusNames,
 } from '@/common/enums';
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import {
+  MemberInactivateDto,
+  PaginationDto,
+  SearchAndPaginationDto,
+} from '@/common/dtos';
 import { dateFormatterToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
 
 import { Zone } from '@/modules/zone/entities';
@@ -1632,6 +1636,8 @@ export class SupervisorService {
       theirPastor,
       theirCopastor,
       isDirectRelationToPastor,
+      inactivationReason,
+      inactivationCategory,
     } = updateSupervisorDto;
 
     if (!roles) {
@@ -1851,6 +1857,12 @@ export class SupervisorService {
             isDirectRelationToPastor: isDirectRelationToPastor,
             updatedAt: new Date(),
             updatedBy: user,
+            inactivationCategory:
+              recordStatus === RecordStatus.Active
+                ? null
+                : inactivationCategory,
+            inactivationReason:
+              recordStatus === RecordStatus.Active ? null : inactivationReason,
             recordStatus: recordStatus,
           });
 
@@ -2028,6 +2040,12 @@ export class SupervisorService {
             isDirectRelationToPastor: isDirectRelationToPastor,
             updatedAt: new Date(),
             updatedBy: user,
+            inactivationCategory:
+              recordStatus === RecordStatus.Active
+                ? null
+                : inactivationCategory,
+            inactivationReason:
+              recordStatus === RecordStatus.Active ? null : inactivationReason,
             recordStatus: recordStatus,
           });
 
@@ -2157,6 +2175,12 @@ export class SupervisorService {
             isDirectRelationToPastor: isDirectRelationToPastor,
             updatedAt: new Date(),
             updatedBy: user,
+            inactivationCategory:
+              recordStatus === RecordStatus.Active
+                ? null
+                : inactivationCategory,
+            inactivationReason:
+              recordStatus === RecordStatus.Active ? null : inactivationReason,
             recordStatus: recordStatus,
           });
 
@@ -2205,6 +2229,12 @@ export class SupervisorService {
             isDirectRelationToPastor: isDirectRelationToPastor,
             updatedAt: new Date(),
             updatedBy: user,
+            inactivationCategory:
+              recordStatus === RecordStatus.Active
+                ? null
+                : inactivationCategory,
+            inactivationReason:
+              recordStatus === RecordStatus.Active ? null : inactivationReason,
             recordStatus: recordStatus,
           });
 
@@ -2334,7 +2364,13 @@ export class SupervisorService {
   }
 
   //! DELETE SUPERVISOR
-  async remove(id: string, user: User): Promise<void> {
+  async remove(
+    id: string,
+    memberInactivateDto: MemberInactivateDto,
+    user: User,
+  ): Promise<void> {
+    const { inactivationCategory, inactivationReason } = memberInactivateDto;
+
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido.`);
     }
@@ -2353,6 +2389,8 @@ export class SupervisorService {
         id: supervisor.id,
         updatedAt: new Date(),
         updatedBy: user,
+        inactivationCategory: inactivationCategory,
+        inactivationReason: inactivationReason,
         recordStatus: RecordStatus.Inactive,
       });
 

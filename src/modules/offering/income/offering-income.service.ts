@@ -59,8 +59,8 @@ import { OfferingIncome } from '@/modules/offering/income/entities';
 
 import {
   CurrencyType,
-  OfferingReasonEliminationType,
-  OfferingReasonEliminationTypeNames,
+  OfferingEliminationReasonType,
+  OfferingEliminationReasonTypeNames,
 } from '@/modules/offering/shared/enums';
 
 @Injectable()
@@ -3194,7 +3194,7 @@ export class OfferingIncomeService {
     //? Actualizar ofrenda de destino con el monto convertido
     try {
       if (
-        reasonEliminationType === OfferingReasonEliminationType.CurrencyExchange
+        reasonEliminationType === OfferingEliminationReasonType.CurrencyExchange
       ) {
         let offeringDestiny: OfferingIncome;
 
@@ -3418,7 +3418,7 @@ export class OfferingIncomeService {
           exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
         CurrencyType.PEN
       }`;
-      const removalInfoComments: string = `Fecha de eliminación: ${format(new Date(), 'dd/MM/yyyy')}\nMotivo de eliminación: ${OfferingReasonEliminationTypeNames[reasonEliminationType as OfferingReasonEliminationType]}\nUsuario: ${user.firstName} ${user.lastName}`;
+      const removalInfoComments: string = `Fecha de eliminación: ${format(new Date(), 'dd/MM/yyyy')}\nMotivo de eliminación: ${OfferingEliminationReasonTypeNames[reasonEliminationType as OfferingEliminationReasonType]}\nUsuario: ${user.firstName} ${user.lastName}`;
 
       const updatedComments =
         exchangeRate && exchangeCurrencyType && existingComments

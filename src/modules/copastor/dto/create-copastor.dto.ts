@@ -14,6 +14,8 @@ import {
   MemberRole,
   RecordStatus,
   MaritalStatus,
+  MemberInactivationReason,
+  MemberInactivationCategory,
 } from '@/common/enums';
 
 export class CreateCopastorDto {
@@ -198,4 +200,21 @@ export class CreateCopastorDto {
   @IsString()
   @IsOptional()
   theirChurch?: string;
+
+  //? Inactivation Data (optional)
+  @ApiProperty({
+    example: MemberInactivationCategory.PersonalChallenges,
+    description: 'Member inactivation category.',
+  })
+  @IsOptional()
+  @IsEnum(MemberInactivationCategory)
+  inactivationCategory?: string;
+
+  @ApiProperty({
+    example: MemberInactivationReason.HealthIssues,
+    description: 'Reason for member removal.',
+  })
+  @IsOptional()
+  @IsEnum(MemberInactivationReason)
+  inactivationReason?: string;
 }

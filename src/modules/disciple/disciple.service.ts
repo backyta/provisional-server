@@ -15,7 +15,11 @@ import {
   RecordStatus,
   MaritalStatusNames,
 } from '@/common/enums';
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import {
+  MemberInactivateDto,
+  PaginationDto,
+  SearchAndPaginationDto,
+} from '@/common/dtos';
 import { dateFormatterToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
 
 import {
@@ -2013,8 +2017,14 @@ export class DiscipleService {
     updateDiscipleDto: UpdateDiscipleDto,
     user: User,
   ): Promise<Disciple | Preacher> {
-    const { roles, recordStatus, theirSupervisor, theirFamilyGroup } =
-      updateDiscipleDto;
+    const {
+      roles,
+      recordStatus,
+      theirSupervisor,
+      theirFamilyGroup,
+      inactivationReason,
+      inactivationCategory,
+    } = updateDiscipleDto;
 
     if (!roles) {
       throw new BadRequestException(
@@ -2044,7 +2054,7 @@ export class DiscipleService {
       throw new NotFoundException(`Discípulo con id: ${id} no fue encontrado.`);
     }
 
-    if (!roles.some((role) => ['disciple', 'predicador'].includes(role))) {
+    if (!roles.some((role) => ['disciple', 'preacher'].includes(role))) {
       throw new BadRequestException(
         `Los roles deben incluir "Discípulo" o "Predicador".`,
       );
@@ -2278,6 +2288,12 @@ export class DiscipleService {
             theirFamilyGroup: newFamilyGroup,
             updatedAt: new Date(),
             updatedBy: user,
+            inactivationCategory:
+              recordStatus === RecordStatus.Active
+                ? null
+                : inactivationCategory,
+            inactivationReason:
+              recordStatus === RecordStatus.Active ? null : inactivationReason,
             recordStatus: recordStatus,
           });
 
@@ -2326,6 +2342,12 @@ export class DiscipleService {
             theirFamilyGroup: disciple.theirFamilyGroup,
             updatedAt: new Date(),
             updatedBy: user,
+            inactivationCategory:
+              recordStatus === RecordStatus.Active
+                ? null
+                : inactivationCategory,
+            inactivationReason:
+              recordStatus === RecordStatus.Active ? null : inactivationReason,
             recordStatus: recordStatus,
           });
 
@@ -2503,7 +2525,13 @@ export class DiscipleService {
   }
 
   //! DELETE DISCIPLE
-  async remove(id: string, user: User): Promise<void> {
+  async remove(
+    id: string,
+    memberInactivateDto: MemberInactivateDto,
+    user: User,
+  ): Promise<void> {
+    const { inactivationCategory, inactivationReason } = memberInactivateDto;
+
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido.`);
     }
@@ -2518,9 +2546,10 @@ export class DiscipleService {
     try {
       const updatedDisciple = await this.discipleRepository.preload({
         id: disciple.id,
-
         updatedAt: new Date(),
         updatedBy: user,
+        inactivationCategory: inactivationCategory,
+        inactivationReason: inactivationReason,
         recordStatus: RecordStatus.Inactive,
       });
 

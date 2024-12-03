@@ -18,8 +18,8 @@ import { User } from '@/modules/user/entities';
 import { Church } from '@/modules/church/entities';
 
 import {
-  OfferingReasonEliminationType,
-  OfferingReasonEliminationTypeNames,
+  OfferingEliminationReasonType,
+  OfferingEliminationReasonTypeNames,
 } from '@/modules/offering/shared/enums';
 import { DeleteOfferingDto } from '@/modules/offering/shared/dto';
 
@@ -455,7 +455,7 @@ export class OfferingExpenseService {
     }
 
     const existingComments = offeringExpense.comments || '';
-    const newComments: string = `Fecha de eliminación: ${format(new Date(), 'dd/MM/yyyy')}\nMotivo de eliminación: ${OfferingReasonEliminationTypeNames[reasonEliminationType as OfferingReasonEliminationType]}\nUsuario: ${user.firstName} ${user.lastName}  `;
+    const newComments: string = `Fecha de eliminación: ${format(new Date(), 'dd/MM/yyyy')}\nMotivo de eliminación: ${OfferingEliminationReasonTypeNames[reasonEliminationType as OfferingEliminationReasonType]}\nUsuario: ${user.firstName} ${user.lastName}  `;
     const updatedComments = existingComments
       ? `${existingComments}\n\n${newComments}`
       : `${newComments}`;

@@ -22,7 +22,11 @@ import {
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import {
+  PaginationDto,
+  MemberInactivateDto,
+  SearchAndPaginationDto,
+} from '@/common/dtos';
 
 import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
@@ -127,8 +131,9 @@ export class DiscipleController {
   })
   remove(
     @Param('id', ParseUUIDPipe) id: string,
+    @Query() memberInactivateDto: MemberInactivateDto,
     @GetUser() user: User,
   ): Promise<void> {
-    return this.discipleService.remove(id, user);
+    return this.discipleService.remove(id, memberInactivateDto, user);
   }
 }

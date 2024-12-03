@@ -22,7 +22,11 @@ import {
   RecordStatus,
   MaritalStatusNames,
 } from '@/common/enums';
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import {
+  PaginationDto,
+  MemberInactivateDto,
+  SearchAndPaginationDto,
+} from '@/common/dtos';
 import { dateFormatterToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
 
 import { Zone } from '@/modules/zone/entities';
@@ -992,7 +996,13 @@ export class PastorService {
     updatePastorDto: UpdatePastorDto,
     user: User,
   ): Promise<Pastor> {
-    const { roles, recordStatus, theirChurch } = updatePastorDto;
+    const {
+      roles,
+      recordStatus,
+      theirChurch,
+      inactivationCategory,
+      inactivationReason,
+    } = updatePastorDto;
 
     if (!roles) {
       throw new BadRequestException(
@@ -1124,6 +1134,12 @@ export class PastorService {
             theirChurch: newChurch,
             updatedAt: new Date(),
             updatedBy: user,
+            inactivationCategory:
+              recordStatus === RecordStatus.Active
+                ? null
+                : inactivationCategory,
+            inactivationReason:
+              recordStatus === RecordStatus.Active ? null : inactivationReason,
             recordStatus: recordStatus,
           });
 
@@ -1270,6 +1286,12 @@ export class PastorService {
             theirChurch: pastor.theirChurch,
             updatedAt: new Date(),
             updatedBy: user,
+            inactivationCategory:
+              recordStatus === RecordStatus.Active
+                ? null
+                : inactivationCategory,
+            inactivationReason:
+              recordStatus === RecordStatus.Active ? null : inactivationReason,
             recordStatus: recordStatus,
           });
 
@@ -1282,7 +1304,13 @@ export class PastorService {
   }
 
   //! DELETE PASTOR
-  async remove(id: string, user: User): Promise<void> {
+  async remove(
+    id: string,
+    memberInactivateDto: MemberInactivateDto,
+    user: User,
+  ): Promise<void> {
+    const { inactivationCategory, inactivationReason } = memberInactivateDto;
+
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido.`);
     }
@@ -1299,6 +1327,8 @@ export class PastorService {
         id: pastor.id,
         updatedAt: new Date(),
         updatedBy: user,
+        inactivationCategory: inactivationCategory,
+        inactivationReason: inactivationReason,
         recordStatus: RecordStatus.Inactive,
       });
 

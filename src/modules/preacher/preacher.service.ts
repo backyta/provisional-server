@@ -31,7 +31,11 @@ import {
   RecordStatus,
   MaritalStatusNames,
 } from '@/common/enums';
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import {
+  MemberInactivateDto,
+  PaginationDto,
+  SearchAndPaginationDto,
+} from '@/common/dtos';
 import { dateFormatterToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
 
 import { Zone } from '@/modules/zone/entities';
@@ -1836,6 +1840,8 @@ export class PreacherService {
       theirCopastor,
       theirPastor,
       isDirectRelationToPastor,
+      inactivationReason,
+      inactivationCategory,
     } = updatePreacherDto;
 
     if (!roles) {
@@ -2101,6 +2107,12 @@ export class PreacherService {
             theirFamilyGroup: preacher.theirFamilyGroup,
             updatedAt: new Date(),
             updatedBy: user,
+            inactivationCategory:
+              recordStatus === RecordStatus.Active
+                ? null
+                : inactivationCategory,
+            inactivationReason:
+              recordStatus === RecordStatus.Active ? null : inactivationReason,
             recordStatus: recordStatus,
           });
 
@@ -2340,6 +2352,12 @@ export class PreacherService {
             theirFamilyGroup: preacher.theirFamilyGroup,
             updatedAt: new Date(),
             updatedBy: user,
+            inactivationCategory:
+              recordStatus === RecordStatus.Active
+                ? null
+                : inactivationCategory,
+            inactivationReason:
+              recordStatus === RecordStatus.Active ? null : inactivationReason,
             recordStatus: recordStatus,
           });
 
@@ -2641,7 +2659,13 @@ export class PreacherService {
   }
 
   //! DELETE PREACHER
-  async remove(id: string, user: User): Promise<void> {
+  async remove(
+    id: string,
+    memberInactivateDto: MemberInactivateDto,
+    user: User,
+  ): Promise<void> {
+    const { inactivationCategory, inactivationReason } = memberInactivateDto;
+
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido.`);
     }
@@ -2660,6 +2684,8 @@ export class PreacherService {
         id: preacher.id,
         updatedAt: new Date(),
         updatedBy: user,
+        inactivationCategory: inactivationCategory,
+        inactivationReason: inactivationReason,
         recordStatus: RecordStatus.Inactive,
       });
 

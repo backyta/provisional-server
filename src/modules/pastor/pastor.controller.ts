@@ -22,7 +22,11 @@ import {
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import {
+  MemberInactivateDto,
+  PaginationDto,
+  SearchAndPaginationDto,
+} from '@/common/dtos';
 
 import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
@@ -124,7 +128,11 @@ export class PastorController {
   @ApiForbiddenResponse({
     description: 'Forbidden.',
   })
-  remove(@Param('id') id: string, @GetUser() user: User): Promise<void> {
-    return this.pastorService.remove(id, user);
+  remove(
+    @Param('id') id: string,
+    @Query() memberInactivateDto: MemberInactivateDto,
+    @GetUser() user: User,
+  ): Promise<void> {
+    return this.pastorService.remove(id, memberInactivateDto, user);
   }
 }

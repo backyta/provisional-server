@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { OfferingReasonEliminationType } from '@/modules/offering/shared/enums';
+import { OfferingEliminationReasonType } from '@/modules/offering/shared/enums';
 
 export class DeleteOfferingDto {
   @ApiProperty({
-    example: OfferingReasonEliminationType.FamilyGroupSelectionError,
+    example: OfferingEliminationReasonType.FamilyGroupSelectionError,
     description: 'Type of reason for record deletion.',
   })
   @IsNotEmpty()
-  @IsEnum(OfferingReasonEliminationType)
+  @IsEnum(OfferingEliminationReasonType)
   reasonEliminationType: string;
 
   @ApiProperty({

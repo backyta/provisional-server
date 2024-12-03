@@ -46,6 +46,12 @@ export class Pastor {
   @JoinColumn({ name: 'updated_by' })
   updatedBy: User;
 
+  @Column('text', { name: 'inactivation_category', nullable: true })
+  inactivationCategory: string;
+
+  @Column('text', { name: 'inactivation_reason', nullable: true })
+  inactivationReason: string;
+
   @Column('text', {
     name: 'record_status',
     default: RecordStatus.Active,

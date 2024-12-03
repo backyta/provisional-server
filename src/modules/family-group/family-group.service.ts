@@ -1477,12 +1477,12 @@ export class FamilyGroupService {
       }
     }
 
-    // TODO : colocar iglesia para pasar igual que los graficos
     //? Find family groups by most populated --> Many
     if (term && searchType === DashboardSearchType.MostPopulatedFamilyGroups) {
       try {
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -1526,6 +1526,7 @@ export class FamilyGroupService {
       try {
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             recordStatus: RecordStatus.Active,
           },
           take: limit,
