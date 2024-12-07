@@ -9,6 +9,10 @@ import {
   IsOptional,
   IsNotEmpty,
 } from 'class-validator';
+import {
+  ZoneInactivationReason,
+  ZoneInactivationCategory,
+} from '@/modules/zone/enums';
 
 export class CreateZoneDto {
   //* General info
@@ -73,4 +77,21 @@ export class CreateZoneDto {
   @IsNotEmpty()
   @IsUUID()
   theirSupervisor?: string;
+
+  //? Inactivation Data (optional)
+  @ApiProperty({
+    example: ZoneInactivationCategory.GroupFamilyRelatedReasons,
+    description: 'Member inactivation category.',
+  })
+  @IsOptional()
+  @IsEnum(ZoneInactivationCategory)
+  zoneInactivationCategory?: string;
+
+  @ApiProperty({
+    example: ZoneInactivationReason.FamilyGroupDissolution,
+    description: 'Reason for member removal.',
+  })
+  @IsOptional()
+  @IsEnum(ZoneInactivationReason)
+  zoneInactivationReason?: string;
 }

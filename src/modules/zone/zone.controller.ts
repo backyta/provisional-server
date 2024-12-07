@@ -29,9 +29,13 @@ import { Auth, GetUser } from '@/modules/auth/decorators';
 
 import { User } from '@/modules/user/entities';
 
+import {
+  UpdateZoneDto,
+  CreateZoneDto,
+  InactivateZoneDto,
+} from '@/modules/zone/dto';
 import { Zone } from '@/modules/zone/entities';
 import { ZoneService } from '@/modules/zone/zone.service';
-import { CreateZoneDto, UpdateZoneDto } from '@/modules/zone/dto';
 
 @ApiTags('Zones')
 @ApiBearerAuth()
@@ -115,7 +119,7 @@ export class ZoneController {
     return this.zoneService.update(id, updateZoneDto, user);
   }
 
-  //! DELETE
+  //! INACTIVATE
   @Delete(':id')
   @ApiOkResponse({
     description: 'Successful operation.',
@@ -124,7 +128,11 @@ export class ZoneController {
     description: 'Forbidden.',
   })
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
-  remove(@Param('id') id: string, @GetUser() user: User): Promise<void> {
-    return this.zoneService.remove(id, user);
+  remove(
+    @Param('id') id: string,
+    @Query() inactivateZoneDto: InactivateZoneDto,
+    @GetUser() user: User,
+  ): Promise<void> {
+    return this.zoneService.remove(id, inactivateZoneDto, user);
   }
 }

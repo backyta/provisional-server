@@ -24,7 +24,7 @@ import {
 
 import {
   PaginationDto,
-  MemberInactivateDto,
+  InactivateMemberDto,
   SearchAndPaginationDto,
 } from '@/common/dtos';
 
@@ -123,7 +123,7 @@ export class SupervisorController {
     return this.supervisorService.update(id, updateSupervisorDto, user);
   }
 
-  //! DELETE
+  //! INACTIVATE
   @Delete(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
@@ -134,9 +134,9 @@ export class SupervisorController {
   })
   remove(
     @Param('id', ParseUUIDPipe) id: string,
-    @Query() memberInactivateDto: MemberInactivateDto,
+    @Query() inactivateMemberDto: InactivateMemberDto,
     @GetUser() user: User,
   ): Promise<void> {
-    return this.supervisorService.remove(id, memberInactivateDto, user);
+    return this.supervisorService.remove(id, inactivateMemberDto, user);
   }
 }

@@ -29,7 +29,7 @@ import { Auth, GetUser } from '@/modules/auth/decorators';
 
 import { User } from '@/modules/user/entities';
 
-import { DeleteOfferingDto } from '@/modules/offering/shared/dto';
+import { InactivateOfferingDto } from '@/modules/offering/shared/dto';
 
 import { OfferingExpense } from '@/modules/offering/expense/entities';
 import { OfferingExpenseService } from '@/modules/offering/expense/offering-expense.service';
@@ -110,7 +110,7 @@ export class OfferingExpenseController {
     return this.offeringExpenseService.update(id, updateExpenseDto, user);
   }
 
-  //! DELETE
+  //! INACTIVATE
   @Delete(':id')
   @ApiOkResponse({
     description: 'Successful operation.',
@@ -121,12 +121,12 @@ export class OfferingExpenseController {
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   remove(
     @Param('id') id: string,
-    @Query() deleteOfferingIncomeDto: DeleteOfferingDto,
+    @Query() inactivateOfferingExpenseDto: InactivateOfferingDto,
     @GetUser() user: User,
   ): Promise<void> {
     return this.offeringExpenseService.remove(
       id,
-      deleteOfferingIncomeDto,
+      inactivateOfferingExpenseDto,
       user,
     );
   }

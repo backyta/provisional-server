@@ -29,9 +29,13 @@ import { Auth, GetUser } from '@/modules/auth/decorators';
 
 import { User } from '@/modules/user/entities';
 
+import {
+  CreateChurchDto,
+  UpdateChurchDto,
+  InactivateChurchDto,
+} from '@/modules/church/dto';
 import { Church } from '@/modules/church/entities';
 import { ChurchService } from '@/modules/church/church.service';
-import { CreateChurchDto, UpdateChurchDto } from '@/modules/church/dto';
 
 @ApiTags('Churches')
 @ApiBearerAuth()
@@ -128,7 +132,7 @@ export class ChurchController {
     return this.churchService.update(id, updateChurchDto, user);
   }
 
-  //! DELETE
+  //! INACTIVATE
   @Delete(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
@@ -137,7 +141,11 @@ export class ChurchController {
   @ApiForbiddenResponse({
     description: 'Forbidden.',
   })
-  remove(@Param('id') id: string, @GetUser() user: User): Promise<void> {
-    return this.churchService.remove(id, user);
+  remove(
+    @Param('id') id: string,
+    @Query() churchInactivationDto: InactivateChurchDto,
+    @GetUser() user: User,
+  ): Promise<void> {
+    return this.churchService.remove(id, churchInactivationDto, user);
   }
 }

@@ -1,4 +1,4 @@
 export * from './pagination.dto';
 export * from './search-and-pagination.dto';
 export * from './metrics-pagination.dto';
-export * from './member-inactivate.dto';
+export * from './inactivate-member.dto';

@@ -33,6 +33,7 @@ import { Auth, GetUser } from '@/modules/auth/decorators';
 import {
   CreateFamilyGroupDto,
   UpdateFamilyGroupDto,
+  InactivateFamilyGroupDto,
 } from '@/modules/family-group/dto';
 import { FamilyGroup } from '@/modules/family-group/entities';
 import { FamilyGroupService } from '@/modules/family-group/family-group.service';
@@ -118,7 +119,7 @@ export class FamilyGroupController {
     return this.familyGroupService.update(id, updateFamilyGroupDto, user);
   }
 
-  //! DELETE
+  //! INACTIVATE
   @Delete(':id')
   @ApiOkResponse({
     description: 'Successful operation.',
@@ -127,7 +128,11 @@ export class FamilyGroupController {
     description: 'Forbidden.',
   })
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
-  remove(@Param('id') id: string, @GetUser() user: User): Promise<void> {
-    return this.familyGroupService.remove(id, user);
+  remove(
+    @Param('id') id: string,
+    @Query() inactivateFamilyGroupDto: InactivateFamilyGroupDto,
+    @GetUser() user: User,
+  ): Promise<void> {
+    return this.familyGroupService.remove(id, inactivateFamilyGroupDto, user);
   }
 }

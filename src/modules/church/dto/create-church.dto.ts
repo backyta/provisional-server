@@ -11,6 +11,10 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import {
+  ChurchInactivationReason,
+  ChurchInactivationCategory,
+} from '@/modules/church/enums';
 
 export class CreateChurchDto {
   //* General info
@@ -150,4 +154,21 @@ export class CreateChurchDto {
   @IsString()
   @IsOptional()
   theirMainChurch?: string;
+
+  //? Inactivation Data (optional)
+  @ApiProperty({
+    example: ChurchInactivationCategory.Administrative,
+    description: 'Member inactivation category.',
+  })
+  @IsOptional()
+  @IsEnum(ChurchInactivationCategory)
+  churchInactivationCategory?: string;
+
+  @ApiProperty({
+    example: ChurchInactivationReason.FinancialInfeasibility,
+    description: 'Reason for member removal.',
+  })
+  @IsOptional()
+  @IsEnum(ChurchInactivationReason)
+  churchInactivationReason?: string;
 }

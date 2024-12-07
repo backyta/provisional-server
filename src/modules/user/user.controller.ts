@@ -27,9 +27,13 @@ import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
 
+import {
+  UpdateUserDto,
+  CreateUserDto,
+  InactivateUserDto,
+} from '@/modules/user/dto';
 import { User } from '@/modules/user/entities';
 import { UserService } from '@/modules/user/user.service';
-import { CreateUserDto, UpdateUserDto } from '@/modules/user/dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -110,7 +114,7 @@ export class UserController {
     return this.userService.update(id, updateUserDto, user);
   }
 
-  //! DELETE
+  //! INACTIVATE
   @Delete(':id')
   @Auth(UserRole.SuperUser)
   @ApiOkResponse({
@@ -121,8 +125,9 @@ export class UserController {
   })
   remove(
     @Param('id', ParseUUIDPipe) id: string,
+    @Query() inactivateUserDto: InactivateUserDto,
     @GetUser() user: User,
   ): Promise<void> {
-    return this.userService.delete(id, user);
+    return this.userService.delete(id, inactivateUserDto, user);
   }
 }

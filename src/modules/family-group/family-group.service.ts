@@ -14,6 +14,7 @@ import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 import {
   CreateFamilyGroupDto,
+  InactivateFamilyGroupDto,
   UpdateFamilyGroupDto,
 } from '@/modules/family-group/dto';
 import {
@@ -1596,8 +1597,13 @@ export class FamilyGroupService {
     updateFamilyGroupDto: UpdateFamilyGroupDto,
     user: User,
   ): Promise<FamilyGroup> {
-    const { recordStatus, theirPreacher, newTheirPreacher } =
-      updateFamilyGroupDto;
+    const {
+      recordStatus,
+      theirPreacher,
+      newTheirPreacher,
+      familyGroupInactivationCategory,
+      familyGroupInactivationReason,
+    } = updateFamilyGroupDto;
 
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido.`);
@@ -2066,6 +2072,14 @@ export class FamilyGroupService {
         theirPreacher: familyGroup.theirPreacher,
         updatedAt: new Date(),
         updatedBy: user,
+        inactivationCategory:
+          recordStatus === RecordStatus.Active
+            ? null
+            : familyGroupInactivationCategory,
+        inactivationReason:
+          recordStatus === RecordStatus.Active
+            ? null
+            : familyGroupInactivationReason,
         recordStatus: recordStatus,
       });
 
@@ -2212,6 +2226,14 @@ export class FamilyGroupService {
           theirPreacher: newPreacher,
           updatedAt: new Date(),
           updatedBy: user,
+          inactivationCategory:
+            recordStatus === RecordStatus.Active
+              ? null
+              : familyGroupInactivationCategory,
+          inactivationReason:
+            recordStatus === RecordStatus.Active
+              ? null
+              : familyGroupInactivationReason,
           recordStatus: recordStatus,
         });
 
@@ -2226,8 +2248,15 @@ export class FamilyGroupService {
     }
   }
 
-  //! DELETE FAMILY GROUP
-  async remove(id: string, user: User): Promise<void> {
+  //! INACTIVATE FAMILY GROUP
+  async remove(
+    id: string,
+    inactivateFamilyGroupDto: InactivateFamilyGroupDto,
+    user: User,
+  ): Promise<void> {
+    const { familyGroupInactivationCategory, familyGroupInactivationReason } =
+      inactivateFamilyGroupDto;
+
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido.`);
     }
@@ -2246,13 +2275,11 @@ export class FamilyGroupService {
     try {
       const updatedFamilyGroup = await this.familyGroupRepository.preload({
         id: familyGroup.id,
-        // theirChurch: null,
-        // theirPastor: null,
-        // theirCopastor: null,
-        // theirSupervisor: null,
-        // theirPreacher: null,
         updatedAt: new Date(),
         updatedBy: user,
+        //* Ver si inactiva el predicador para dejarlo solo
+        inactivationCategory: familyGroupInactivationCategory,
+        inactivationReason: familyGroupInactivationReason,
         recordStatus: RecordStatus.Inactive,
       });
 

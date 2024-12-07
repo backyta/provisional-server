@@ -93,7 +93,7 @@ export class CreateDiscipleDto {
   email?: string;
 
   @ApiProperty({
-    example: '999333555',
+    example: '+51 999333555',
   })
   @IsString()
   @IsOptional()
@@ -208,7 +208,7 @@ export class CreateDiscipleDto {
   })
   @IsOptional()
   @IsEnum(MemberInactivationCategory)
-  inactivationCategory?: string;
+  memberInactivationCategory?: string;
 
   @ApiProperty({
     example: MemberInactivationReason.HealthIssues,
@@ -216,5 +216,5 @@ export class CreateDiscipleDto {
   })
   @IsOptional()
   @IsEnum(MemberInactivationReason)
-  inactivationReason?: string;
+  memberInactivationReason?: string;
 }

@@ -48,7 +48,7 @@ export const dataPastors: SeedDataPastors = {
       urbanSector: 'Tahuantinsuyo',
       address: 'Jr. Tamputoco 100',
       referenceAddress: 'A 2 cuadras del parque cantuta',
-      roles: ['pastor', 'disciple'],
+      roles: ['pastor'],
     },
     {
       firstName: 'Daniel Jesus',
@@ -65,7 +65,7 @@ export const dataPastors: SeedDataPastors = {
       urbanSector: 'Ermitaño',
       address: 'Jr. Las flores 125',
       referenceAddress: 'Casa blanca al frente del colegio Maria Parado',
-      roles: ['pastor', 'disciple'],
+      roles: ['pastor'],
     },
     {
       firstName: 'Carlos Antonio',
@@ -82,7 +82,7 @@ export const dataPastors: SeedDataPastors = {
       urbanSector: 'Payet',
       address: 'Av. Tupac Amaru 500',
       referenceAddress: 'A 2 cuadras del mercado productores',
-      roles: ['pastor', 'disciple'],
+      roles: ['pastor'],
     },
   ],
 };

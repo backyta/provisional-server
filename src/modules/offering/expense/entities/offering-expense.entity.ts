@@ -40,8 +40,8 @@ export class OfferingExpense {
   @Column('text', { name: 'image_urls', array: true })
   imageUrls: string[];
 
-  @Column('text', { name: 'reason_elimination', nullable: true })
-  reasonElimination: string;
+  @Column('text', { name: 'inactivation_reason', nullable: true })
+  inactivationReason: string;
 
   //* Info register and update date
   @Column('timestamptz', { name: 'created_at', nullable: true })

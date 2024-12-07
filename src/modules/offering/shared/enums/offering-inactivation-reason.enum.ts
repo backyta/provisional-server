@@ -1,4 +1,4 @@
-export enum OfferingEliminationReasonType {
+export enum OfferingInactivationReason {
   CurrencyExchange = 'currency_exchange',
   TypeSelectionError = 'type_selection_error',
   SubTypeSelectionError = 'sub_type_selection_error',
@@ -14,8 +14,8 @@ export enum OfferingEliminationReasonType {
   ZoneSelectionError = 'zone_selection_error',
 }
 
-export const OfferingEliminationReasonTypeNames: Record<
-  OfferingEliminationReasonType,
+export const OfferingInactivationReasonNames: Record<
+  OfferingInactivationReason,
   string
 > = {
   currency_exchange: '💲💲 Cambio de divisa',

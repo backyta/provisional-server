@@ -11,7 +11,7 @@ import {
 
 import {
   CurrencyType,
-  OfferingEliminationReasonType,
+  OfferingInactivationReason,
 } from '@/modules/offering/shared/enums';
 
 import {
@@ -72,9 +72,9 @@ export class CreateOfferingExpenseDto {
   imageUrls?: string[];
 
   @ApiProperty({
-    example: OfferingEliminationReasonType.TypeSelectionError,
+    example: OfferingInactivationReason.TypeSelectionError,
   })
-  @IsEnum(OfferingEliminationReasonType)
+  @IsEnum(OfferingInactivationReason)
   @MinLength(1)
   @MaxLength(50)
   @IsOptional()

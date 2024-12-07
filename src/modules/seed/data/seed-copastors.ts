@@ -49,7 +49,7 @@ export const dataCopastors: SeedDataCopastors = {
       urbanSector: 'Payet',
       address: 'Av. Cariancha 231',
       referenceAddress: 'A 2 cuadras del colegio',
-      roles: ['copastor', 'disciple'],
+      roles: ['copastor'],
     },
     {
       firstName: 'Eduardo',
@@ -66,7 +66,7 @@ export const dataCopastors: SeedDataCopastors = {
       urbanSector: 'Ermitaño',
       address: 'Av. Los Pinos 512',
       referenceAddress: 'Frente a la plaza central',
-      roles: ['copastor', 'disciple'],
+      roles: ['copastor'],
     },
     {
       firstName: 'Carla',
@@ -83,7 +83,7 @@ export const dataCopastors: SeedDataCopastors = {
       urbanSector: 'Tahuantinsuyo',
       address: 'Jr. Los Alamos 321',
       referenceAddress: 'Cerca del mercado municipal',
-      roles: ['copastor', 'disciple'],
+      roles: ['copastor'],
     },
     {
       firstName: 'Julio',
@@ -100,7 +100,7 @@ export const dataCopastors: SeedDataCopastors = {
       urbanSector: 'Payet',
       address: 'Av. Los Jazmines 456',
       referenceAddress: 'Cerca del parque infantil',
-      roles: ['copastor', 'disciple'],
+      roles: ['copastor'],
     },
     {
       firstName: 'Ana',
@@ -117,7 +117,7 @@ export const dataCopastors: SeedDataCopastors = {
       urbanSector: 'Ermitaño',
       address: 'Jr. Los Rosales 789',
       referenceAddress: 'A una cuadra de la iglesia',
-      roles: ['copastor', 'disciple'],
+      roles: ['copastor'],
     },
     {
       firstName: 'Pedro',
@@ -134,7 +134,7 @@ export const dataCopastors: SeedDataCopastors = {
       urbanSector: 'Tahuantinsuyo',
       address: 'Av. Los Laureles 123',
       referenceAddress: 'Al lado del colegio San Miguel',
-      roles: ['copastor', 'disciple'],
+      roles: ['copastor'],
     },
   ],
 };

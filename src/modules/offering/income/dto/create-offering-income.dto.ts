@@ -2,16 +2,18 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
   IsArray,
+  IsEmail,
   IsString,
   MaxLength,
   MinLength,
   IsNotEmpty,
   IsOptional,
+  IsBoolean,
 } from 'class-validator';
 
 import {
   CurrencyType,
-  OfferingEliminationReasonType,
+  OfferingInactivationReason,
 } from '@/modules/offering/shared/enums';
 
 import {
@@ -21,7 +23,7 @@ import {
   OfferingIncomeCreationCategory,
   OfferingIncomeCreationShiftType,
 } from '@/modules/offering/income/enums';
-import { RecordStatus } from '@/common/enums';
+import { Gender, RecordStatus } from '@/common/enums';
 
 export class CreateOfferingIncomeDto {
   //* General data
@@ -42,6 +44,109 @@ export class CreateOfferingIncomeDto {
   })
   @IsOptional()
   category?: string;
+
+  //? For new Donator
+  @ApiProperty({
+    example: true,
+    description: 'Do you want create a new donor?',
+  })
+  @IsOptional()
+  @IsBoolean()
+  isNewDonor?: boolean;
+
+  @ApiProperty({
+    example: '0b46eb7e-7730-4cbb-8c61-3ccdfa6da391',
+  })
+  @IsString()
+  @IsOptional()
+  donorId?: string;
+
+  @ApiProperty({
+    example: 'John Martin',
+  })
+  @IsString()
+  @IsOptional()
+  @MinLength(1)
+  @MaxLength(50)
+  donorFirstName?: string;
+
+  @ApiProperty({
+    example: 'Rojas Castro',
+  })
+  @IsString()
+  @IsOptional()
+  @MinLength(1)
+  @MaxLength(50)
+  donorLastName?: string;
+
+  @ApiProperty({
+    example: Gender.Male,
+  })
+  @IsEnum(Gender, {
+    message:
+      'El género debe ser uno de los siguientes valores: Masculino o Femenino',
+  })
+  @IsOptional()
+  donorGender?: string;
+
+  @ApiProperty({
+    example: '1990-12-23',
+  })
+  @IsString()
+  @IsOptional()
+  donorBirthDate?: Date;
+
+  @ApiProperty({
+    example: '+51 999333555',
+  })
+  @IsString()
+  @IsOptional()
+  donorPhoneNumber?: string;
+
+  @ApiProperty({
+    example: 'example@example.com',
+  })
+  @IsEmail()
+  @IsOptional()
+  donorEmail?: string;
+
+  @ApiProperty({
+    example: 'Peru',
+  })
+  @IsString()
+  @IsOptional()
+  @MinLength(1)
+  @MaxLength(40)
+  donorOriginCountry: string;
+
+  @ApiProperty({
+    example: 'Italia',
+  })
+  @IsString()
+  @IsOptional()
+  @MinLength(1)
+  @MaxLength(40)
+  donorResidenceCountry: string;
+
+  @ApiProperty({
+    example: 'Roma',
+  })
+  @IsString()
+  @IsOptional()
+  @MinLength(1)
+  @MaxLength(40)
+  donorResidenceCity: string;
+
+  @ApiProperty({
+    example: 'A 2 cuadras al colegio',
+  })
+  @IsString()
+  @IsOptional()
+  @MinLength(1)
+  @MaxLength(40)
+  donorPostalCode: string;
+
+  //* ------------------------------------------------------------------ //
 
   @ApiProperty({
     example: OfferingIncomeCreationShiftType.Day,
@@ -88,9 +193,9 @@ export class CreateOfferingIncomeDto {
   imageUrls?: string[];
 
   @ApiProperty({
-    example: OfferingEliminationReasonType.TypeSelectionError,
+    example: OfferingInactivationReason.TypeSelectionError,
   })
-  @IsEnum(OfferingEliminationReasonType)
+  @IsEnum(OfferingInactivationReason)
   @MinLength(1)
   @MaxLength(50)
   @IsOptional()

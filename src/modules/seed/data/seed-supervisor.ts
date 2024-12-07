@@ -51,7 +51,7 @@ export const dataSupervisors: SeedDataSupervisors = {
       urbanSector: 'Tahuantinsuyo',
       address: 'Av. Los Nogales 890',
       referenceAddress: 'Frente al parque zonal',
-      roles: ['supervisor', 'disciple'],
+      roles: ['supervisor'],
       isDirectRelationToPastor: false,
     },
     {
@@ -69,7 +69,7 @@ export const dataSupervisors: SeedDataSupervisors = {
       urbanSector: 'Ermitaño',
       address: 'Jr. Las Acacias 567',
       referenceAddress: 'Cerca del mercado municipal',
-      roles: ['supervisor', 'disciple'],
+      roles: ['supervisor'],
       isDirectRelationToPastor: false,
     },
     {
@@ -87,7 +87,7 @@ export const dataSupervisors: SeedDataSupervisors = {
       urbanSector: 'Payet',
       address: 'Av. Las Hortensias 234',
       referenceAddress: 'Cerca del parque industrial',
-      roles: ['supervisor', 'disciple'],
+      roles: ['supervisor'],
       isDirectRelationToPastor: false,
     },
     {
@@ -105,7 +105,7 @@ export const dataSupervisors: SeedDataSupervisors = {
       urbanSector: 'Unificada',
       address: 'Jr. Los Laureles 890',
       referenceAddress: 'Al lado del centro educativo',
-      roles: ['supervisor', 'disciple'],
+      roles: ['supervisor'],
       isDirectRelationToPastor: false,
     },
     {
@@ -123,7 +123,7 @@ export const dataSupervisors: SeedDataSupervisors = {
       urbanSector: 'Industrial',
       address: 'Av. Los Cipreses 567',
       referenceAddress: 'Frente a la fábrica textil',
-      roles: ['supervisor', 'disciple'],
+      roles: ['supervisor'],
       isDirectRelationToPastor: false,
     },
     {
@@ -141,7 +141,7 @@ export const dataSupervisors: SeedDataSupervisors = {
       urbanSector: 'Ermitaño',
       address: 'Jr. Las Orquídeas 123',
       referenceAddress: 'Cerca del parque zonal',
-      roles: ['supervisor', 'disciple'],
+      roles: ['supervisor'],
       isDirectRelationToPastor: false,
     },
   ],

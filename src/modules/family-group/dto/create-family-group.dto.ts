@@ -1,14 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { RecordStatus } from '@/common/enums';
 import {
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
   IsUUID,
+  IsEnum,
+  IsString,
   MaxLength,
   MinLength,
+  IsNotEmpty,
+  IsOptional,
 } from 'class-validator';
+import {
+  FamilyGroupInactivationReason,
+  FamilyGroupInactivationCategory,
+} from '@/modules/family-group/enums';
 
 export class CreateFamilyGroupDto {
   //* General info
@@ -114,4 +118,21 @@ export class CreateFamilyGroupDto {
   @IsOptional()
   @IsUUID()
   theirZone?: string;
+
+  //? Inactivation Data (optional)
+  @ApiProperty({
+    example: FamilyGroupInactivationCategory.HostUnavailability,
+    description: 'Member inactivation category.',
+  })
+  @IsOptional()
+  @IsEnum(FamilyGroupInactivationCategory)
+  familyGroupInactivationCategory?: string;
+
+  @ApiProperty({
+    example: FamilyGroupInactivationReason.HostFamilyDecision,
+    description: 'Reason for member removal.',
+  })
+  @IsOptional()
+  @IsEnum(FamilyGroupInactivationReason)
+  familyGroupInactivationReason?: string;
 }

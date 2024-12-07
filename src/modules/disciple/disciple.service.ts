@@ -16,7 +16,7 @@ import {
   MaritalStatusNames,
 } from '@/common/enums';
 import {
-  MemberInactivateDto,
+  InactivateMemberDto,
   PaginationDto,
   SearchAndPaginationDto,
 } from '@/common/dtos';
@@ -2022,8 +2022,8 @@ export class DiscipleService {
       recordStatus,
       theirSupervisor,
       theirFamilyGroup,
-      inactivationReason,
-      inactivationCategory,
+      memberInactivationReason,
+      memberInactivationCategory,
     } = updateDiscipleDto;
 
     if (!roles) {
@@ -2291,9 +2291,11 @@ export class DiscipleService {
             inactivationCategory:
               recordStatus === RecordStatus.Active
                 ? null
-                : inactivationCategory,
+                : memberInactivationCategory,
             inactivationReason:
-              recordStatus === RecordStatus.Active ? null : inactivationReason,
+              recordStatus === RecordStatus.Active
+                ? null
+                : memberInactivationReason,
             recordStatus: recordStatus,
           });
 
@@ -2345,9 +2347,11 @@ export class DiscipleService {
             inactivationCategory:
               recordStatus === RecordStatus.Active
                 ? null
-                : inactivationCategory,
+                : memberInactivationCategory,
             inactivationReason:
-              recordStatus === RecordStatus.Active ? null : inactivationReason,
+              recordStatus === RecordStatus.Active
+                ? null
+                : memberInactivationReason,
             recordStatus: recordStatus,
           });
 
@@ -2524,13 +2528,14 @@ export class DiscipleService {
     }
   }
 
-  //! DELETE DISCIPLE
+  //! INACTIVATE DISCIPLE
   async remove(
     id: string,
-    memberInactivateDto: MemberInactivateDto,
+    inactivateMemberDto: InactivateMemberDto,
     user: User,
   ): Promise<void> {
-    const { inactivationCategory, inactivationReason } = memberInactivateDto;
+    const { memberInactivationCategory, memberInactivationReason } =
+      inactivateMemberDto;
 
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido.`);
@@ -2548,8 +2553,8 @@ export class DiscipleService {
         id: disciple.id,
         updatedAt: new Date(),
         updatedBy: user,
-        inactivationCategory: inactivationCategory,
-        inactivationReason: inactivationReason,
+        inactivationCategory: memberInactivationCategory,
+        inactivationReason: memberInactivationReason,
         recordStatus: RecordStatus.Inactive,
       });
 

@@ -23,7 +23,7 @@ import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
 
 import { User } from '@/modules/user/entities';
-import { DeleteOfferingDto } from '@/modules/offering/shared/dto';
+import { InactivateOfferingDto } from '@/modules/offering/shared/dto';
 
 import {
   CreateOfferingIncomeDto,
@@ -106,7 +106,7 @@ export class OfferingIncomeController {
     return this.offeringIncomeService.update(id, updateOfferingIncomeDto, user);
   }
 
-  //! DELETE
+  //! INACTIVATE
   @Delete(':id')
   @ApiOkResponse({
     description: 'Successful operation.',
@@ -117,9 +117,13 @@ export class OfferingIncomeController {
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   remove(
     @Param('id') id: string,
-    @Query() deleteOfferingIncomeDto: DeleteOfferingDto,
+    @Query() inactivateOfferingIncomeDto: InactivateOfferingDto,
     @GetUser() user: User,
   ): Promise<void> {
-    return this.offeringIncomeService.remove(id, deleteOfferingIncomeDto, user);
+    return this.offeringIncomeService.remove(
+      id,
+      inactivateOfferingIncomeDto,
+      user,
+    );
   }
 }

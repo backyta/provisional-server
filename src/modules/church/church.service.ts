@@ -14,7 +14,11 @@ import {
   churchDataFormatter,
   generateCodeChurch,
 } from '@/modules/church/helpers';
-import { CreateChurchDto, UpdateChurchDto } from '@/modules/church/dto';
+import {
+  InactivateChurchDto,
+  CreateChurchDto,
+  UpdateChurchDto,
+} from '@/modules/church/dto';
 import {
   ChurchSearchType,
   ChurchSearchTypeNames,
@@ -649,7 +653,13 @@ export class ChurchService {
     updateChurchDto: UpdateChurchDto,
     user: User,
   ): Promise<Church> {
-    const { recordStatus, theirMainChurch, isAnexe } = updateChurchDto;
+    const {
+      recordStatus,
+      theirMainChurch,
+      isAnexe,
+      churchInactivationCategory,
+      churchInactivationReason,
+    } = updateChurchDto;
 
     //* Validations
     if (!isUUID(id)) {
@@ -739,6 +749,14 @@ export class ChurchService {
           theirMainChurch: newMainChurch,
           updatedAt: new Date(),
           updatedBy: user,
+          inactivationCategory:
+            recordStatus === RecordStatus.Active
+              ? null
+              : churchInactivationCategory,
+          inactivationReason:
+            recordStatus === RecordStatus.Active
+              ? null
+              : churchInactivationReason,
           recordStatus: recordStatus,
         });
 
@@ -760,6 +778,14 @@ export class ChurchService {
         theirMainChurch: church.theirMainChurch,
         updatedAt: new Date(),
         updatedBy: user,
+        inactivationCategory:
+          recordStatus === RecordStatus.Active
+            ? null
+            : churchInactivationCategory,
+        inactivationReason:
+          recordStatus === RecordStatus.Active
+            ? null
+            : churchInactivationReason,
         recordStatus: recordStatus,
       });
 
@@ -769,8 +795,15 @@ export class ChurchService {
     }
   }
 
-  //! DELETE CHURCH
-  async remove(id: string, user: User) {
+  //! INACTIVATE CHURCH
+  async remove(
+    id: string,
+    inactivateChurchDto: InactivateChurchDto,
+    user: User,
+  ) {
+    const { churchInactivationCategory, churchInactivationReason } =
+      inactivateChurchDto;
+
     //* Validations
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido.`);
@@ -795,6 +828,8 @@ export class ChurchService {
         id: church.id,
         updatedAt: new Date(),
         updatedBy: user,
+        inactivationCategory: churchInactivationCategory,
+        inactivationReason: churchInactivationReason,
         recordStatus: RecordStatus.Inactive,
       });
 

@@ -48,7 +48,7 @@ export const dataPreachers: SeedDataPreachers = {
       urbanSector: 'Unificada',
       address: 'Av. Los Girasoles 678',
       referenceAddress: 'Cerca del centro comercial',
-      roles: ['preacher', 'disciple'],
+      roles: ['preacher'],
     },
     {
       firstName: 'Susana',
@@ -65,7 +65,7 @@ export const dataPreachers: SeedDataPreachers = {
       urbanSector: 'Ermitaño',
       address: 'Jr. Los Pinos 890',
       referenceAddress: 'Frente al parque zonal',
-      roles: ['preacher', 'disciple'],
+      roles: ['preacher'],
     },
     {
       firstName: 'Raul',
@@ -82,7 +82,7 @@ export const dataPreachers: SeedDataPreachers = {
       urbanSector: 'Tahuantinsuyo',
       address: 'Av. Los Cerezos 345',
       referenceAddress: 'Cerca del colegio San Jose',
-      roles: ['preacher', 'disciple'],
+      roles: ['preacher'],
     },
     {
       firstName: 'Jorge',
@@ -99,7 +99,7 @@ export const dataPreachers: SeedDataPreachers = {
       urbanSector: 'Payet',
       address: 'Jr. Los Olivos 567',
       referenceAddress: 'Al lado del centro de salud',
-      roles: ['preacher', 'disciple'],
+      roles: ['preacher'],
     },
     {
       firstName: 'Veronica',
@@ -116,7 +116,7 @@ export const dataPreachers: SeedDataPreachers = {
       urbanSector: 'Industrial',
       address: 'Av. Los Claveles 123',
       referenceAddress: 'Frente a la fábrica de muebles',
-      roles: ['preacher', 'disciple'],
+      roles: ['preacher'],
     },
     {
       firstName: 'Manuel',
@@ -133,7 +133,7 @@ export const dataPreachers: SeedDataPreachers = {
       urbanSector: 'Ermitaño',
       address: 'Jr. Las Orquídeas 890',
       referenceAddress: 'A una cuadra del mercado',
-      roles: ['preacher', 'disciple'],
+      roles: ['preacher'],
     },
     {
       firstName: 'Natalia',
@@ -150,7 +150,7 @@ export const dataPreachers: SeedDataPreachers = {
       urbanSector: 'Tahuantinsuyo',
       address: 'Av. Los Cedros 456',
       referenceAddress: 'Cerca del parque principal',
-      roles: ['preacher', 'disciple'],
+      roles: ['preacher'],
     },
     {
       firstName: 'Carlos',
@@ -167,7 +167,7 @@ export const dataPreachers: SeedDataPreachers = {
       urbanSector: 'Unificada',
       address: 'Jr. Las Azucenas 789',
       referenceAddress: 'Cerca del centro deportivo',
-      roles: ['preacher', 'disciple'],
+      roles: ['preacher'],
     },
     {
       firstName: 'Mariana',
@@ -184,7 +184,7 @@ export const dataPreachers: SeedDataPreachers = {
       urbanSector: 'Ermitaño',
       address: 'Av. Las Margaritas 234',
       referenceAddress: 'Frente al supermercado',
-      roles: ['preacher', 'disciple'],
+      roles: ['preacher'],
     },
     {
       firstName: 'Roberto',
@@ -201,7 +201,7 @@ export const dataPreachers: SeedDataPreachers = {
       urbanSector: 'Industrial',
       address: 'Jr. Los Lirios 678',
       referenceAddress: 'Cerca del hospital',
-      roles: ['preacher', 'disciple'],
+      roles: ['preacher'],
     },
   ],
 };

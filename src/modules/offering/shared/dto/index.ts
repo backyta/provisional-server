@@ -1,1 +1,1 @@
-export * from './delete-offering.dto';
+export * from './inactivate-offering.dto';

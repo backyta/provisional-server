@@ -14,7 +14,11 @@ import { ZoneSearchType, ZoneSearchTypeNames } from '@/modules/zone/enums';
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 import { zoneDataFormatter } from '@/modules/zone/helpers';
-import { CreateZoneDto, UpdateZoneDto } from '@/modules/zone/dto';
+import {
+  CreateZoneDto,
+  InactivateZoneDto,
+  UpdateZoneDto,
+} from '@/modules/zone/dto';
 
 import { User } from '@/modules/user/entities';
 import { Zone } from '@/modules/zone/entities';
@@ -569,7 +573,13 @@ export class ZoneService {
     updateZoneDto: UpdateZoneDto,
     user: User,
   ): Promise<Zone> {
-    const { recordStatus, theirSupervisor, newTheirSupervisor } = updateZoneDto;
+    const {
+      recordStatus,
+      theirSupervisor,
+      newTheirSupervisor,
+      zoneInactivationCategory,
+      zoneInactivationReason,
+    } = updateZoneDto;
 
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido.`);
@@ -1028,6 +1038,12 @@ export class ZoneService {
         theirSupervisor: zone.theirSupervisor,
         updatedAt: new Date(),
         updatedBy: user,
+        inactivationCategory:
+          recordStatus === RecordStatus.Active
+            ? null
+            : zoneInactivationCategory,
+        inactivationReason:
+          recordStatus === RecordStatus.Active ? null : zoneInactivationReason,
         recordStatus: recordStatus,
       });
 
@@ -1149,6 +1165,14 @@ export class ZoneService {
           theirSupervisor: newSupervisor,
           updatedAt: new Date(),
           updatedBy: user,
+          inactivationCategory:
+            recordStatus === RecordStatus.Active
+              ? null
+              : zoneInactivationCategory,
+          inactivationReason:
+            recordStatus === RecordStatus.Active
+              ? null
+              : zoneInactivationReason,
           recordStatus: recordStatus,
         });
 
@@ -1164,8 +1188,15 @@ export class ZoneService {
   }
 
   // TODO : revisar todos los comentario de delete si seran necesario almenos en membrsesia si.
-  //! DELETE ZONE
-  async remove(id: string, user: User): Promise<void> {
+  //! INACTIVATE ZONE
+  async remove(
+    id: string,
+    inactivateZoneDto: InactivateZoneDto,
+    user: User,
+  ): Promise<void> {
+    const { zoneInactivationCategory, zoneInactivationReason } =
+      inactivateZoneDto;
+
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido.`);
     }
@@ -1183,12 +1214,10 @@ export class ZoneService {
     try {
       const updatedZone = await this.zoneRepository.preload({
         id: zone.id,
-        // theirChurch: null,
-        // theirPastor: null,
-        // theirCopastor: null,
-        // theirSupervisor: null,
         updatedAt: new Date(),
         updatedBy: user,
+        inactivationCategory: zoneInactivationCategory,
+        inactivationReason: zoneInactivationReason,
         recordStatus: RecordStatus.Inactive,
       });
 

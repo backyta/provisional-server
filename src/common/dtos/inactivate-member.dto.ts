@@ -1,16 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty } from 'class-validator';
 
-import { MemberInactivationCategory, MemberInactivationReason } from '../enums';
+import {
+  MemberInactivationReason,
+  MemberInactivationCategory,
+} from '@/common/enums';
 
-export class MemberInactivateDto {
+export class InactivateMemberDto {
   @ApiProperty({
     example: MemberInactivationCategory.PersonalChallenges,
     description: 'Member inactivation category.',
   })
   @IsNotEmpty()
   @IsEnum(MemberInactivationCategory)
-  inactivationCategory: string;
+  memberInactivationCategory: string;
 
   @ApiProperty({
     example: MemberInactivationReason.HealthIssues,
@@ -18,5 +21,5 @@ export class MemberInactivateDto {
   })
   @IsNotEmpty()
   @IsEnum(MemberInactivationReason)
-  inactivationReason: string;
+  memberInactivationReason: string;
 }

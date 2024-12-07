@@ -94,7 +94,7 @@ export class CreatePastorDto {
   email?: string;
 
   @ApiProperty({
-    example: '999333555',
+    example: '+51 999333555',
   })
   @IsString()
   @IsOptional()
@@ -201,7 +201,7 @@ export class CreatePastorDto {
   })
   @IsOptional()
   @IsEnum(MemberInactivationCategory)
-  inactivationCategory?: string;
+  memberInactivationCategory?: string;
 
   @ApiProperty({
     example: MemberInactivationReason.HealthIssues,
@@ -209,5 +209,5 @@ export class CreatePastorDto {
   })
   @IsOptional()
   @IsEnum(MemberInactivationReason)
-  inactivationReason?: string;
+  memberInactivationReason?: string;
 }

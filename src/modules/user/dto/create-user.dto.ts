@@ -11,6 +11,10 @@ import {
   IsOptional,
 } from 'class-validator';
 
+import {
+  UserInactivationReason,
+  UserInactivationCategory,
+} from '@/modules/user/enums';
 import { UserRole } from '@/modules/auth/enums';
 import { Gender, RecordStatus } from '@/common/enums';
 
@@ -75,4 +79,21 @@ export class CreateUserDto {
   @IsArray()
   @IsNotEmpty()
   roles: string[];
+
+  //? Inactivation Data (optional)
+  @ApiProperty({
+    example: UserInactivationCategory.PerformanceOrConduct,
+    description: 'Member inactivation category.',
+  })
+  @IsOptional()
+  @IsEnum(UserInactivationCategory)
+  userInactivationCategory?: string;
+
+  @ApiProperty({
+    example: UserInactivationReason.PolicyViolation,
+    description: 'Reason for member removal.',
+  })
+  @IsOptional()
+  @IsEnum(UserInactivationReason)
+  userInactivationReason?: string;
 }

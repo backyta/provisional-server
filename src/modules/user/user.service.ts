@@ -18,7 +18,11 @@ import { GenderNames, RecordStatus } from '@/common/enums';
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 import { User } from '@/modules/user/entities';
-import { CreateUserDto, UpdateUserDto } from '@/modules/user/dto';
+import {
+  CreateUserDto,
+  InactivateUserDto,
+  UpdateUserDto,
+} from '@/modules/user/dto';
 import { UserSearchType, UserSearchTypeNames } from '@/modules/user/enums';
 
 @Injectable()
@@ -340,6 +344,8 @@ export class UserService {
       recordStatus,
       currentPassword,
       newPassword,
+      userInactivationCategory,
+      userInactivationReason,
     } = updateUserDto;
 
     if (!isUUID(id)) {
@@ -393,9 +399,17 @@ export class UserService {
           roles: roles,
           email: email,
           password: bcrypt.hashSync(newPassword, 10),
-          recordStatus: recordStatus,
           updatedAt: new Date(),
           updatedBy: user,
+          inactivationCategory:
+            recordStatus === RecordStatus.Active
+              ? null
+              : userInactivationCategory,
+          inactivationReason:
+            recordStatus === RecordStatus.Active
+              ? null
+              : userInactivationReason,
+          recordStatus: recordStatus,
         });
 
         return await this.userRepository.save(updateUser);
@@ -413,9 +427,17 @@ export class UserService {
           gender: gender,
           roles: roles,
           email: email,
-          recordStatus: recordStatus,
           updatedAt: new Date(),
           updatedBy: user,
+          inactivationCategory:
+            recordStatus === RecordStatus.Active
+              ? null
+              : userInactivationCategory,
+          inactivationReason:
+            recordStatus === RecordStatus.Active
+              ? null
+              : userInactivationReason,
+          recordStatus: recordStatus,
         });
 
         return await this.userRepository.save(updateUser);
@@ -425,8 +447,15 @@ export class UserService {
     }
   }
 
-  //! DELETE USER
-  async delete(id: string, user: User): Promise<void> {
+  //! INACTIVATE USER
+  async delete(
+    id: string,
+    inactivateUserDto: InactivateUserDto,
+    user: User,
+  ): Promise<void> {
+    const { userInactivationCategory, userInactivationReason } =
+      inactivateUserDto;
+
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido`);
     }
@@ -446,9 +475,11 @@ export class UserService {
     try {
       const deleteUser = await this.userRepository.preload({
         id: dataUser.id,
-        recordStatus: RecordStatus.Inactive,
         updatedAt: new Date(),
         updatedBy: user,
+        inactivationCategory: userInactivationCategory,
+        inactivationReason: userInactivationReason,
+        recordStatus: RecordStatus.Inactive,
       });
 
       await this.userRepository.save(deleteUser);

@@ -61,5 +61,13 @@ export const offeringIncomeDataFormatter = ({ offeringIncome }: Options) => {
       theirPreacher: offering?.familyGroup?.theirPreacher,
       disciples: offering?.familyGroup?.disciples,
     },
+    externalDonor: {
+      id: offering?.externalDonor?.id,
+      firstName: offering?.externalDonor?.firstName,
+      lastName: offering?.externalDonor?.lastName,
+      originCountry: offering?.externalDonor?.originCountry,
+      residenceCountry: offering?.externalDonor?.residenceCountry,
+      residenceCity: offering?.externalDonor?.residenceCity,
+    },
   }));
 };

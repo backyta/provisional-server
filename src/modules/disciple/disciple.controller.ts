@@ -24,7 +24,7 @@ import {
 
 import {
   PaginationDto,
-  MemberInactivateDto,
+  InactivateMemberDto,
   SearchAndPaginationDto,
 } from '@/common/dtos';
 
@@ -120,7 +120,7 @@ export class DiscipleController {
     return this.discipleService.update(id, updateDiscipleDto, user);
   }
 
-  //! DELETE
+  //! INACTIVATE
   @Delete(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
@@ -131,9 +131,9 @@ export class DiscipleController {
   })
   remove(
     @Param('id', ParseUUIDPipe) id: string,
-    @Query() memberInactivateDto: MemberInactivateDto,
+    @Query() inactivateMemberDto: InactivateMemberDto,
     @GetUser() user: User,
   ): Promise<void> {
-    return this.discipleService.remove(id, memberInactivateDto, user);
+    return this.discipleService.remove(id, inactivateMemberDto, user);
   }
 }

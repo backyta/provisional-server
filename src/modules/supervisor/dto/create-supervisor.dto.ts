@@ -94,7 +94,7 @@ export class CreateSupervisorDto {
   email?: string;
 
   @ApiProperty({
-    example: '999333555',
+    example: '+51 999333555',
   })
   @IsString()
   @IsOptional()
@@ -215,7 +215,7 @@ export class CreateSupervisorDto {
   })
   @IsOptional()
   @IsEnum(MemberInactivationCategory)
-  inactivationCategory?: string;
+  memberInactivationCategory?: string;
 
   @ApiProperty({
     example: MemberInactivationReason.HealthIssues,
@@ -223,5 +223,5 @@ export class CreateSupervisorDto {
   })
   @IsOptional()
   @IsEnum(MemberInactivationReason)
-  inactivationReason?: string;
+  memberInactivationReason?: string;
 }

@@ -23,7 +23,7 @@ import {
 } from '@nestjs/swagger';
 
 import {
-  MemberInactivateDto,
+  InactivateMemberDto,
   PaginationDto,
   SearchAndPaginationDto,
 } from '@/common/dtos';
@@ -119,7 +119,7 @@ export class PastorController {
     return this.pastorService.update(id, updatePastorDto, user);
   }
 
-  //! DELETE
+  //! INACTIVATE
   @Delete(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
@@ -130,9 +130,9 @@ export class PastorController {
   })
   remove(
     @Param('id') id: string,
-    @Query() memberInactivateDto: MemberInactivateDto,
+    @Query() inactivateMemberDto: InactivateMemberDto,
     @GetUser() user: User,
   ): Promise<void> {
-    return this.pastorService.remove(id, memberInactivateDto, user);
+    return this.pastorService.remove(id, inactivateMemberDto, user);
   }
 }

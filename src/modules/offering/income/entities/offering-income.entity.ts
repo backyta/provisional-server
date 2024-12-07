@@ -18,6 +18,7 @@ import { Copastor } from '@/modules/copastor/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
 import { FamilyGroup } from '@/modules/family-group/entities';
+import { ExternalDonor } from '@/modules/external-donor/entities';
 
 @Entity({ name: 'offering_income' })
 @Index(['type', 'subType'])
@@ -56,8 +57,8 @@ export class OfferingIncome {
   @Column('text', { name: 'shift', nullable: true })
   shift: string;
 
-  @Column('text', { name: 'reason_elimination', nullable: true })
-  reasonElimination: string;
+  @Column('text', { name: 'inactivation_reason', nullable: true })
+  inactivationReason: string;
 
   //* Info register and update date
   @Column('timestamptz', { name: 'created_at', nullable: true })
@@ -84,7 +85,7 @@ export class OfferingIncome {
   memberType: string;
 
   //* Relations (FK)
-  // Church
+  //? Church
   @ManyToOne(() => Church, {
     nullable: true,
     onDelete: 'SET NULL',
@@ -92,7 +93,7 @@ export class OfferingIncome {
   @JoinColumn({ name: 'church_id' })
   church: Church;
 
-  // Family House
+  //? Family House
   @ManyToOne(() => FamilyGroup, {
     nullable: true,
     onDelete: 'SET NULL',
@@ -100,7 +101,7 @@ export class OfferingIncome {
   @JoinColumn({ name: 'family_group_id' })
   familyGroup: FamilyGroup;
 
-  // Member
+  //? Member
   @ManyToOne(() => Pastor, {
     nullable: true,
     onDelete: 'SET NULL',
@@ -136,7 +137,15 @@ export class OfferingIncome {
   @JoinColumn({ name: 'disciple_id' })
   disciple: Disciple;
 
-  // Zone
+  //? Donor
+  @ManyToOne(() => ExternalDonor, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'external_donor_id' })
+  externalDonor: ExternalDonor;
+
+  //? Zone
   @ManyToOne(() => Zone, {
     nullable: true,
     onDelete: 'SET NULL',

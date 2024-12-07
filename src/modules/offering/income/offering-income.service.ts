@@ -22,14 +22,14 @@ import { RecordStatus } from '@/common/enums';
 import { dateFormatterToDDMMYYYY } from '@/common/helpers';
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
-import { DeleteOfferingDto } from '@/modules/offering/shared/dto';
+import { InactivateOfferingDto } from '@/modules/offering/shared/dto';
 
 import {
   MemberType,
   MemberTypeNames,
-  ExchangeCurrencyType,
+  ExchangeCurrencyTypes,
   OfferingIncomeSearchType,
-  ExchangeCurrencyTypeNames,
+  ExchangeCurrencyTypesNames,
   OfferingIncomeCreationType,
   OfferingIncomeSearchSubType,
   OfferingIncomeSearchTypeNames,
@@ -59,9 +59,10 @@ import { OfferingIncome } from '@/modules/offering/income/entities';
 
 import {
   CurrencyType,
-  OfferingEliminationReasonType,
-  OfferingEliminationReasonTypeNames,
+  OfferingInactivationReason,
+  OfferingInactivationReasonNames,
 } from '@/modules/offering/shared/enums';
+import { ExternalDonor } from '@/modules/external-donor/entities';
 
 @Injectable()
 export class OfferingIncomeService {
@@ -92,6 +93,9 @@ export class OfferingIncomeService {
     @InjectRepository(Disciple)
     private readonly discipleRepository: Repository<Disciple>,
 
+    @InjectRepository(ExternalDonor)
+    private readonly externalDonorRepository: Repository<ExternalDonor>,
+
     @InjectRepository(OfferingIncome)
     private readonly offeringIncomeRepository: Repository<OfferingIncome>,
   ) {}
@@ -110,6 +114,18 @@ export class OfferingIncomeService {
       subType,
       category,
       memberId,
+      donorId,
+      isNewDonor,
+      donorFirstName,
+      donorLastName,
+      donorGender,
+      donorBirthDate,
+      donorPhoneNumber,
+      donorEmail,
+      donorOriginCountry,
+      donorResidenceCountry,
+      donorResidenceCity,
+      donorPostalCode,
       churchId,
       currency,
       imageUrls,
@@ -331,6 +347,19 @@ export class OfferingIncomeService {
           );
         }
 
+        let externalDonor: ExternalDonor;
+        if (donorId) {
+          externalDonor = await this.externalDonorRepository.findOne({
+            where: { id: donorId },
+          });
+
+          if (!externalDonor) {
+            throw new NotFoundException(
+              `Donador externo con id: ${donorId}, no fue encontrado.`,
+            );
+          }
+        }
+
         //* Validate if exists record already
         let existsOffering: OfferingIncome[];
         if (category === OfferingIncomeCreationCategory.OfferingBox) {
@@ -347,14 +376,25 @@ export class OfferingIncomeService {
           });
         }
 
-        if (
-          category === OfferingIncomeCreationCategory.Activities ||
-          category === OfferingIncomeCreationCategory.ExternalDonation
-        ) {
+        if (category === OfferingIncomeCreationCategory.Activities) {
           existsOffering = await this.offeringIncomeRepository.find({
             where: {
               subType: subType,
               category: category,
+              church: church,
+              date: new Date(date),
+              currency: currency,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+        }
+
+        if (category === OfferingIncomeCreationCategory.ExternalDonation) {
+          existsOffering = await this.offeringIncomeRepository.find({
+            where: {
+              subType: subType,
+              category: category,
+              externalDonor: externalDonor,
               church: church,
               date: new Date(date),
               currency: currency,
@@ -513,21 +553,73 @@ export class OfferingIncomeService {
           );
         }
 
+        //? If is new donor, then create record
+        if (isNewDonor) {
+          try {
+            const newDonor = this.externalDonorRepository.create({
+              firstName: donorFirstName,
+              lastName: donorLastName,
+              birthDate:
+                donorBirthDate && !isNaN(new Date(donorBirthDate).getTime())
+                  ? donorBirthDate
+                  : null,
+              gender: donorGender,
+              email: donorEmail,
+              phoneNumber: donorPhoneNumber,
+              originCountry: donorOriginCountry,
+              residenceCountry: donorResidenceCountry,
+              residenceCity: donorResidenceCity,
+              postalCode: donorPostalCode,
+              createdAt: new Date(),
+              createdBy: user,
+              recordStatus: RecordStatus.Active,
+            });
+
+            await this.externalDonorRepository.save(newDonor);
+
+            const newOfferingIncome = this.offeringIncomeRepository.create({
+              ...createOfferingIncomeDto,
+              amount: +amount,
+              pastor: null,
+              copastor: null,
+              supervisor: null,
+              preacher: null,
+              disciple: null,
+              church: church ?? null,
+              zone: null,
+              familyGroup: null,
+              shift: null,
+              memberType: MemberType.ExternalDonor,
+              category: category,
+              externalDonor: newDonor,
+              imageUrls: imageUrls,
+              createdAt: new Date(),
+              createdBy: user,
+            });
+
+            return await this.offeringIncomeRepository.save(newOfferingIncome);
+          } catch (error) {
+            this.handleDBExceptions(error);
+          }
+        }
+
+        //? If not is new donor, search and assign donor
         try {
           const newOfferingIncome = this.offeringIncomeRepository.create({
             ...createOfferingIncomeDto,
             amount: +amount,
-            pastor: pastor,
-            copastor: copastor,
-            supervisor: supervisor,
-            preacher: preacher,
-            disciple: disciple,
-            church: church,
+            pastor: pastor ?? null,
+            copastor: copastor ?? null,
+            supervisor: supervisor ?? null,
+            preacher: preacher ?? null,
+            disciple: disciple ?? null,
+            church: church ?? null,
             zone: null,
             familyGroup: null,
-            memberType: !memberType || memberType === '' ? null : memberType,
-            category: category,
+            memberType: MemberType.ExternalDonor,
             shift: !shift || shift === '' ? null : shift,
+            category: category,
+            externalDonor: externalDonor ?? null,
             imageUrls: imageUrls,
             createdAt: new Date(),
             createdBy: user,
@@ -787,6 +879,7 @@ export class OfferingIncomeService {
           'disciple.member',
           'familyGroup',
           'zone',
+          'externalDonor',
         ],
         order: { createdAt: order as FindOptionsOrderValue },
       });
@@ -897,6 +990,7 @@ export class OfferingIncomeService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
             order: { createdAt: order as FindOptionsOrderValue },
           });
@@ -923,6 +1017,7 @@ export class OfferingIncomeService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
             order: { createdAt: order as FindOptionsOrderValue },
           });
@@ -948,213 +1043,6 @@ export class OfferingIncomeService {
         this.handleDBExceptions(error);
       }
     }
-
-    // //? Offerings others --> Many
-    // //* By church
-    // if (
-    //   term &&
-    //   (searchType === OfferingIncomeSearchType.SundayService ||
-    //     searchType === OfferingIncomeSearchType.SundaySchool ||
-    //     searchType === OfferingIncomeSearchType.GeneralFasting ||
-    //     searchType === OfferingIncomeSearchType.GeneralVigil ||
-    //     searchType === OfferingIncomeSearchType.YouthService ||
-    //     searchType === OfferingIncomeSearchType.UnitedService ||
-    //     searchType === OfferingIncomeSearchType.Activities ||
-    //     searchType === OfferingIncomeSearchType.IncomeAdjustment) &&
-    //   searchSubType === OfferingIncomeSearchSubType.OfferingByChurch
-    // ) {
-    //   try {
-    //     const church = await this.churchRepository.findOne({
-    //       where: {
-    //         id: term,
-    //       },
-    //     });
-
-    //     if (!church) {
-    //       throw new NotFoundException(
-    //         `No se encontró ninguna iglesia con este ID: ${term}.`,
-    //       );
-    //     }
-
-    //     let offeringIncome: OfferingIncome[];
-    //     if (searchType !== OfferingIncomeSearchType.IncomeAdjustment) {
-    //       offeringIncome = await this.offeringIncomeRepository.find({
-    //         where: {
-    //           subType: searchType,
-    //           church: church,
-    //           recordStatus: RecordStatus.Active,
-    //         },
-    //         take: limit,
-    //         skip: offset,
-    //         relations: [
-    //           'updatedBy',
-    //           'createdBy',
-    //           'familyGroup',
-    //           'church',
-    //           'zone',
-    //           'pastor.member',
-    //           'copastor.member',
-    //           'supervisor.member',
-    //           'preacher.member',
-    //           'disciple.member',
-    //         ],
-    //         order: { createdAt: order as FindOptionsOrderValue },
-    //       });
-    //     }
-
-    //     if (searchType === OfferingIncomeSearchType.IncomeAdjustment) {
-    //       offeringIncome = await this.offeringIncomeRepository.find({
-    //         where: {
-    //           type: searchType,
-    //           church: church,
-    //           recordStatus: RecordStatus.Active,
-    //         },
-    //         take: limit,
-    //         skip: offset,
-    //         relations: [
-    //           'updatedBy',
-    //           'createdBy',
-    //           'familyGroup',
-    //           'church',
-    //           'zone',
-    //           'pastor.member',
-    //           'copastor.member',
-    //           'supervisor.member',
-    //           'preacher.member',
-    //           'disciple.member',
-    //         ],
-    //         order: { createdAt: order as FindOptionsOrderValue },
-    //       });
-    //     }
-
-    //     if (offeringIncome.length === 0) {
-    //       throw new NotFoundException(
-    //         `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con esta iglesia: ${church?.abbreviatedChurchName}`,
-    //       );
-    //     }
-
-    //     return offeringIncomeDataFormatter({
-    //       offeringIncome: offeringIncome,
-    //     }) as any;
-    //   } catch (error) {
-    //     if (error instanceof NotFoundException) {
-    //       throw error;
-    //     }
-
-    //     this.handleDBExceptions(error);
-    //   }
-    // }
-
-    // //* By church and date
-    // if (
-    //   term &&
-    //   (searchType === OfferingIncomeSearchType.SundayService ||
-    //     searchType === OfferingIncomeSearchType.SundaySchool ||
-    //     searchType === OfferingIncomeSearchType.GeneralFasting ||
-    //     searchType === OfferingIncomeSearchType.GeneralVigil ||
-    //     searchType === OfferingIncomeSearchType.YouthService ||
-    //     searchType === OfferingIncomeSearchType.UnitedService ||
-    //     searchType === OfferingIncomeSearchType.Activities ||
-    //     searchType === OfferingIncomeSearchType.IncomeAdjustment) &&
-    //   searchSubType === OfferingIncomeSearchSubType.OfferingByChurchDate
-    // ) {
-    //   const [churchId, date] = term.split('&');
-
-    //   try {
-    //     const church = await this.churchRepository.findOne({
-    //       where: {
-    //         id: churchId,
-    //       },
-    //     });
-
-    //     if (!church) {
-    //       throw new NotFoundException(
-    //         `No se encontró ninguna iglesia con este Id.`,
-    //       );
-    //     }
-
-    //     const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
-
-    //     if (isNaN(fromTimestamp)) {
-    //       throw new NotFoundException('Formato de marca de tiempo invalido.');
-    //     }
-
-    //     const fromDate = new Date(fromTimestamp);
-    //     const toDate = toTimestamp ? new Date(toTimestamp) : fromDate;
-
-    //     let offeringIncome: OfferingIncome[];
-    //     if (searchType !== OfferingIncomeSearchType.IncomeAdjustment) {
-    //       offeringIncome = await this.offeringIncomeRepository.find({
-    //         where: {
-    //           subType: searchType,
-    //           church: church,
-    //           date: Between(fromDate, toDate),
-    //           recordStatus: RecordStatus.Active,
-    //         },
-    //         take: limit,
-    //         skip: offset,
-    //         relations: [
-    //           'updatedBy',
-    //           'createdBy',
-    //           'familyGroup',
-    //           'church',
-    //           'zone',
-    //           'pastor.member',
-    //           'copastor.member',
-    //           'supervisor.member',
-    //           'preacher.member',
-    //           'disciple.member',
-    //         ],
-    //         order: { createdAt: order as FindOptionsOrderValue },
-    //       });
-    //     }
-
-    //     if (searchType === OfferingIncomeSearchType.IncomeAdjustment) {
-    //       offeringIncome = await this.offeringIncomeRepository.find({
-    //         where: {
-    //           type: searchType,
-    //           church: church,
-    //           date: Between(fromDate, toDate),
-    //           recordStatus: RecordStatus.Active,
-    //         },
-    //         take: limit,
-    //         skip: offset,
-    //         relations: [
-    //           'updatedBy',
-    //           'createdBy',
-    //           'familyGroup',
-    //           'church',
-    //           'zone',
-    //           'pastor.member',
-    //           'copastor.member',
-    //           'supervisor.member',
-    //           'preacher.member',
-    //           'disciple.member',
-    //         ],
-    //         order: { createdAt: order as FindOptionsOrderValue },
-    //       });
-    //     }
-
-    //     if (offeringIncome.length === 0) {
-    //       const fromDate = dateFormatterToDDMMYYYY(fromTimestamp);
-    //       const toDate = dateFormatterToDDMMYYYY(toTimestamp);
-
-    //       throw new NotFoundException(
-    //         `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con esta iglesia: ${church?.abbreviatedChurchName} y con este rango de fechas: ${fromDate} - ${toDate}`,
-    //       );
-    //     }
-
-    //     return offeringIncomeDataFormatter({
-    //       offeringIncome: offeringIncome,
-    //     }) as any;
-    //   } catch (error) {
-    //     if (error instanceof NotFoundException) {
-    //       throw error;
-    //     }
-
-    //     this.handleDBExceptions(error);
-    //   }
-    // }
 
     //? Offerings Sunday Service and Sunday School --> Many
     //* By shift
@@ -1192,6 +1080,7 @@ export class OfferingIncomeService {
             'supervisor.member',
             'preacher.member',
             'disciple.member',
+            'externalDonor',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1264,6 +1153,7 @@ export class OfferingIncomeService {
             'supervisor.member',
             'preacher.member',
             'disciple.member',
+            'externalDonor',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1336,6 +1226,7 @@ export class OfferingIncomeService {
             'supervisor.member',
             'preacher.member',
             'disciple.member',
+            'externalDonor',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1412,6 +1303,7 @@ export class OfferingIncomeService {
             'supervisor.member',
             'preacher.member',
             'disciple.member',
+            'externalDonor',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1474,6 +1366,7 @@ export class OfferingIncomeService {
             'supervisor.member',
             'preacher.member',
             'disciple.member',
+            'externalDonor',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1545,6 +1438,7 @@ export class OfferingIncomeService {
             'supervisor.member',
             'preacher.member',
             'disciple.member',
+            'externalDonor',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1612,6 +1506,7 @@ export class OfferingIncomeService {
             'supervisor.member',
             'preacher.member',
             'disciple.member',
+            'externalDonor',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1676,6 +1571,7 @@ export class OfferingIncomeService {
             'supervisor.member',
             'preacher.member',
             'disciple.member',
+            'externalDonor',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1742,6 +1638,7 @@ export class OfferingIncomeService {
             'supervisor.member',
             'preacher.member',
             'disciple.member',
+            'externalDonor',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1801,6 +1698,7 @@ export class OfferingIncomeService {
             'supervisor.member',
             'preacher.member',
             'disciple.member',
+            'externalDonor',
           ],
         });
 
@@ -1870,6 +1768,7 @@ export class OfferingIncomeService {
             'supervisor.member',
             'preacher.member',
             'disciple.member',
+            'externalDonor',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -1938,6 +1837,7 @@ export class OfferingIncomeService {
             'supervisor.member',
             'preacher.member',
             'disciple.member',
+            'externalDonor',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -2004,6 +1904,7 @@ export class OfferingIncomeService {
             'supervisor.member',
             'preacher.member',
             'disciple.member',
+            'externalDonor',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -2071,6 +1972,7 @@ export class OfferingIncomeService {
             'supervisor.member',
             'preacher.member',
             'disciple.member',
+            'externalDonor',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -2098,7 +2000,9 @@ export class OfferingIncomeService {
     if (
       term &&
       (searchType === OfferingIncomeSearchType.Special ||
-        searchType === OfferingIncomeSearchType.ChurchGround) &&
+        searchType === OfferingIncomeSearchType.ChurchGround ||
+        searchType === OfferingIncomeSearchType.YouthService ||
+        searchType === OfferingIncomeSearchType.SundaySchool) &&
       searchSubType === OfferingIncomeSearchSubType.OfferingByContributorNames
     ) {
       const [memberType, names] = term.split('&');
@@ -2107,17 +2011,17 @@ export class OfferingIncomeService {
       try {
         let offeringIncome: OfferingIncome[];
 
-        if (memberType === MemberType.Pastor) {
+        if (memberType === MemberType.ExternalDonor) {
           offeringIncome = await this.offeringIncomeRepository.find({
             where: {
               church: church,
               subType: searchType,
               memberType: memberType,
-              pastor: {
-                member: {
-                  firstName: ILike(`%${firstNames}%`),
-                },
-              },
+              externalDonor: firstNames
+                ? {
+                    firstName: ILike(`%${firstNames}%`),
+                  }
+                : undefined,
               recordStatus: RecordStatus.Active,
             },
             take: limit,
@@ -2133,6 +2037,41 @@ export class OfferingIncomeService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
+
+        if (memberType === MemberType.Pastor) {
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              church: church,
+              subType: searchType,
+              memberType: memberType,
+              pastor: firstNames
+                ? {
+                    member: {
+                      firstName: ILike(`%${firstNames}%`),
+                    },
+                  }
+                : undefined,
+              recordStatus: RecordStatus.Active,
+            },
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+              'externalDonor',
             ],
             order: { createdAt: order as FindOptionsOrderValue },
           });
@@ -2144,11 +2083,13 @@ export class OfferingIncomeService {
               church: church,
               subType: searchType,
               memberType: memberType,
-              copastor: {
-                member: {
-                  firstName: ILike(`%${firstNames}%`),
-                },
-              },
+              copastor: firstNames
+                ? {
+                    member: {
+                      firstName: ILike(`%${firstNames}%`),
+                    },
+                  }
+                : undefined,
               recordStatus: RecordStatus.Active,
             },
             take: limit,
@@ -2164,6 +2105,7 @@ export class OfferingIncomeService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
             order: { createdAt: order as FindOptionsOrderValue },
           });
@@ -2175,11 +2117,13 @@ export class OfferingIncomeService {
               church: church,
               subType: searchType,
               memberType: memberType,
-              supervisor: {
-                member: {
-                  firstName: ILike(`%${firstNames}%`),
-                },
-              },
+              supervisor: firstNames
+                ? {
+                    member: {
+                      firstName: ILike(`%${firstNames}%`),
+                    },
+                  }
+                : undefined,
               recordStatus: RecordStatus.Active,
             },
             take: limit,
@@ -2195,6 +2139,7 @@ export class OfferingIncomeService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
             order: { createdAt: order as FindOptionsOrderValue },
           });
@@ -2206,11 +2151,13 @@ export class OfferingIncomeService {
               church: church,
               subType: searchType,
               memberType: memberType,
-              preacher: {
-                member: {
-                  firstName: ILike(`%${firstNames}%`),
-                },
-              },
+              preacher: firstNames
+                ? {
+                    member: {
+                      firstName: ILike(`%${firstNames}%`),
+                    },
+                  }
+                : undefined,
               recordStatus: RecordStatus.Active,
             },
             take: limit,
@@ -2226,6 +2173,7 @@ export class OfferingIncomeService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
             order: { createdAt: order as FindOptionsOrderValue },
           });
@@ -2237,11 +2185,13 @@ export class OfferingIncomeService {
               church: church,
               subType: searchType,
               memberType: memberType,
-              disciple: {
-                member: {
-                  firstName: ILike(`%${firstNames}%`),
-                },
-              },
+              disciple: firstNames
+                ? {
+                    member: {
+                      firstName: ILike(`%${firstNames}%`),
+                    },
+                  }
+                : undefined,
               recordStatus: RecordStatus.Active,
             },
             take: limit,
@@ -2257,6 +2207,7 @@ export class OfferingIncomeService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
             order: { createdAt: order as FindOptionsOrderValue },
           });
@@ -2286,7 +2237,9 @@ export class OfferingIncomeService {
     if (
       term &&
       (searchType === OfferingIncomeSearchType.Special ||
-        searchType === OfferingIncomeSearchType.ChurchGround) &&
+        searchType === OfferingIncomeSearchType.ChurchGround ||
+        searchType === OfferingIncomeSearchType.YouthService ||
+        searchType === OfferingIncomeSearchType.SundaySchool) &&
       searchSubType ===
         OfferingIncomeSearchSubType.OfferingByContributorLastNames
     ) {
@@ -2296,17 +2249,17 @@ export class OfferingIncomeService {
       try {
         let offeringIncome: OfferingIncome[];
 
-        if (memberType === MemberType.Pastor) {
+        if (memberType === MemberType.ExternalDonor) {
           offeringIncome = await this.offeringIncomeRepository.find({
             where: {
               church: church,
               subType: searchType,
               memberType: memberType,
-              pastor: {
-                member: {
-                  lastName: ILike(`%${lastNames}%`),
-                },
-              },
+              externalDonor: lastNames
+                ? {
+                    lastName: ILike(`%${lastNames}%`),
+                  }
+                : undefined,
               recordStatus: RecordStatus.Active,
             },
             take: limit,
@@ -2322,6 +2275,41 @@ export class OfferingIncomeService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
+
+        if (memberType === MemberType.Pastor) {
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              church: church,
+              subType: searchType,
+              memberType: memberType,
+              pastor: lastNames
+                ? {
+                    member: {
+                      lastName: ILike(`%${lastNames}%`),
+                    },
+                  }
+                : undefined,
+              recordStatus: RecordStatus.Active,
+            },
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+              'externalDonor',
             ],
             order: { createdAt: order as FindOptionsOrderValue },
           });
@@ -2333,11 +2321,13 @@ export class OfferingIncomeService {
               church: church,
               subType: searchType,
               memberType: memberType,
-              copastor: {
-                member: {
-                  lastName: ILike(`%${lastNames}%`),
-                },
-              },
+              copastor: lastNames
+                ? {
+                    member: {
+                      lastName: ILike(`%${lastNames}%`),
+                    },
+                  }
+                : undefined,
               recordStatus: RecordStatus.Active,
             },
             take: limit,
@@ -2353,6 +2343,7 @@ export class OfferingIncomeService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
             order: { createdAt: order as FindOptionsOrderValue },
           });
@@ -2364,11 +2355,13 @@ export class OfferingIncomeService {
               church: church,
               subType: searchType,
               memberType: memberType,
-              supervisor: {
-                member: {
-                  lastName: ILike(`%${lastNames}%`),
-                },
-              },
+              supervisor: lastNames
+                ? {
+                    member: {
+                      lastName: ILike(`%${lastNames}%`),
+                    },
+                  }
+                : undefined,
               recordStatus: RecordStatus.Active,
             },
             take: limit,
@@ -2384,6 +2377,7 @@ export class OfferingIncomeService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
             order: { createdAt: order as FindOptionsOrderValue },
           });
@@ -2395,11 +2389,13 @@ export class OfferingIncomeService {
               church: church,
               subType: searchType,
               memberType: memberType,
-              preacher: {
-                member: {
-                  lastName: ILike(`%${lastNames}%`),
-                },
-              },
+              preacher: lastNames
+                ? {
+                    member: {
+                      lastName: ILike(`%${lastNames}%`),
+                    },
+                  }
+                : undefined,
               recordStatus: RecordStatus.Active,
             },
             take: limit,
@@ -2415,6 +2411,7 @@ export class OfferingIncomeService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
             order: { createdAt: order as FindOptionsOrderValue },
           });
@@ -2426,11 +2423,13 @@ export class OfferingIncomeService {
               church: church,
               subType: searchType,
               memberType: memberType,
-              disciple: {
-                member: {
-                  lastName: ILike(`%${lastNames}%`),
-                },
-              },
+              disciple: lastNames
+                ? {
+                    member: {
+                      lastName: ILike(`%${lastNames}%`),
+                    },
+                  }
+                : undefined,
               recordStatus: RecordStatus.Active,
             },
             take: limit,
@@ -2446,6 +2445,7 @@ export class OfferingIncomeService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
             order: { createdAt: order as FindOptionsOrderValue },
           });
@@ -2475,7 +2475,9 @@ export class OfferingIncomeService {
     if (
       term &&
       (searchType === OfferingIncomeSearchType.Special ||
-        searchType === OfferingIncomeSearchType.ChurchGround) &&
+        searchType === OfferingIncomeSearchType.ChurchGround ||
+        searchType === OfferingIncomeSearchType.YouthService ||
+        searchType === OfferingIncomeSearchType.SundaySchool) &&
       searchSubType ===
         OfferingIncomeSearchSubType.OfferingByContributorFullName
     ) {
@@ -2487,18 +2489,19 @@ export class OfferingIncomeService {
       try {
         let offeringIncome: OfferingIncome[];
 
-        if (memberType === MemberType.Pastor) {
+        if (memberType === MemberType.ExternalDonor) {
           offeringIncome = await this.offeringIncomeRepository.find({
             where: {
               church: church,
               subType: searchType,
               memberType: memberType,
-              pastor: {
-                member: {
-                  firstName: ILike(`%${firstNames}%`),
-                  lastName: ILike(`%${lastNames}%`),
-                },
-              },
+              externalDonor:
+                firstNames && lastNames
+                  ? {
+                      firstName: ILike(`%${firstNames}%`),
+                      lastName: ILike(`%${lastNames}%`),
+                    }
+                  : undefined,
               recordStatus: RecordStatus.Active,
             },
             take: limit,
@@ -2514,6 +2517,43 @@ export class OfferingIncomeService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
+            ],
+            order: { createdAt: order as FindOptionsOrderValue },
+          });
+        }
+
+        if (memberType === MemberType.Pastor) {
+          offeringIncome = await this.offeringIncomeRepository.find({
+            where: {
+              church: church,
+              subType: searchType,
+              memberType: memberType,
+              pastor:
+                firstNames && lastNames
+                  ? {
+                      member: {
+                        firstName: ILike(`%${firstNames}%`),
+                        lastName: ILike(`%${lastNames}%`),
+                      },
+                    }
+                  : undefined,
+              recordStatus: RecordStatus.Active,
+            },
+            take: limit,
+            skip: offset,
+            relations: [
+              'updatedBy',
+              'createdBy',
+              'familyGroup',
+              'church',
+              'zone',
+              'pastor.member',
+              'copastor.member',
+              'supervisor.member',
+              'preacher.member',
+              'disciple.member',
+              'externalDonor',
             ],
             order: { createdAt: order as FindOptionsOrderValue },
           });
@@ -2525,12 +2565,15 @@ export class OfferingIncomeService {
               church: church,
               subType: searchType,
               memberType: memberType,
-              copastor: {
-                member: {
-                  firstName: ILike(`%${firstNames}%`),
-                  lastName: ILike(`%${lastNames}%`),
-                },
-              },
+              copastor:
+                firstNames && lastNames
+                  ? {
+                      member: {
+                        firstName: ILike(`%${firstNames}%`),
+                        lastName: ILike(`%${lastNames}%`),
+                      },
+                    }
+                  : undefined,
               recordStatus: RecordStatus.Active,
             },
             take: limit,
@@ -2546,6 +2589,7 @@ export class OfferingIncomeService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
             order: { createdAt: order as FindOptionsOrderValue },
           });
@@ -2557,12 +2601,15 @@ export class OfferingIncomeService {
               church: church,
               subType: searchType,
               memberType: memberType,
-              supervisor: {
-                member: {
-                  firstName: ILike(`%${firstNames}%`),
-                  lastName: ILike(`%${lastNames}%`),
-                },
-              },
+              supervisor:
+                firstNames && lastNames
+                  ? {
+                      member: {
+                        firstName: ILike(`%${firstNames}%`),
+                        lastName: ILike(`%${lastNames}%`),
+                      },
+                    }
+                  : undefined,
               recordStatus: RecordStatus.Active,
             },
             take: limit,
@@ -2578,6 +2625,7 @@ export class OfferingIncomeService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
             order: { createdAt: order as FindOptionsOrderValue },
           });
@@ -2589,12 +2637,15 @@ export class OfferingIncomeService {
               church: church,
               subType: searchType,
               memberType: memberType,
-              preacher: {
-                member: {
-                  firstName: ILike(`%${firstNames}%`),
-                  lastName: ILike(`%${lastNames}%`),
-                },
-              },
+              preacher:
+                firstNames && lastNames
+                  ? {
+                      member: {
+                        firstName: ILike(`%${firstNames}%`),
+                        lastName: ILike(`%${lastNames}%`),
+                      },
+                    }
+                  : undefined,
               recordStatus: RecordStatus.Active,
             },
             take: limit,
@@ -2610,6 +2661,7 @@ export class OfferingIncomeService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
             order: { createdAt: order as FindOptionsOrderValue },
           });
@@ -2621,12 +2673,15 @@ export class OfferingIncomeService {
               church: church,
               subType: searchType,
               memberType: memberType,
-              disciple: {
-                member: {
-                  firstName: ILike(`%${firstNames}%`),
-                  lastName: ILike(`%${lastNames}%`),
-                },
-              },
+              disciple:
+                firstNames && lastNames
+                  ? {
+                      member: {
+                        firstName: ILike(`%${firstNames}%`),
+                        lastName: ILike(`%${lastNames}%`),
+                      },
+                    }
+                  : undefined,
               recordStatus: RecordStatus.Active,
             },
             take: limit,
@@ -2642,6 +2697,7 @@ export class OfferingIncomeService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
             order: { createdAt: order as FindOptionsOrderValue },
           });
@@ -2698,6 +2754,7 @@ export class OfferingIncomeService {
             'supervisor.member',
             'preacher.member',
             'disciple.member',
+            'externalDonor',
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
@@ -3158,14 +3215,14 @@ export class OfferingIncomeService {
     }
   }
 
-  //! DELETE OFFERING INCOME
+  //! INACTIVATE OFFERING INCOME
   async remove(
     id: string,
-    deleteOfferingIncomeDto: DeleteOfferingDto,
+    inactivateOfferingIncomeDto: InactivateOfferingDto,
     user: User,
   ): Promise<void> {
-    const { reasonEliminationType, exchangeRate, exchangeCurrencyType } =
-      deleteOfferingIncomeDto;
+    const { offeringInactivationReason, exchangeRate, exchangeCurrencyTypes } =
+      inactivateOfferingIncomeDto;
 
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido.`);
@@ -3182,6 +3239,7 @@ export class OfferingIncomeService {
         'supervisor.member',
         'preacher.member',
         'disciple.member',
+        'externalDonor',
       ],
     });
 
@@ -3194,7 +3252,8 @@ export class OfferingIncomeService {
     //? Actualizar ofrenda de destino con el monto convertido
     try {
       if (
-        reasonEliminationType === OfferingEliminationReasonType.CurrencyExchange
+        offeringInactivationReason ===
+        OfferingInactivationReason.CurrencyExchange
       ) {
         let offeringDestiny: OfferingIncome;
 
@@ -3216,10 +3275,10 @@ export class OfferingIncomeService {
                   ? offeringIncome.shift
                   : IsNull(),
               currency:
-                exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-                exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN
+                exchangeCurrencyTypes === ExchangeCurrencyTypes.USDtoPEN ||
+                exchangeCurrencyTypes === ExchangeCurrencyTypes.EURtoPEN
                   ? CurrencyType.PEN
-                  : exchangeCurrencyType === ExchangeCurrencyType.PENtoEUR
+                  : exchangeCurrencyTypes === ExchangeCurrencyTypes.PENtoEUR
                     ? CurrencyType.EUR
                     : CurrencyType.USD,
               memberType: offeringIncome.memberType ?? IsNull(),
@@ -3245,10 +3304,10 @@ export class OfferingIncomeService {
               church: offeringIncome.church,
               familyGroup: offeringIncome.familyGroup,
               currency:
-                exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-                exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN
+                exchangeCurrencyTypes === ExchangeCurrencyTypes.USDtoPEN ||
+                exchangeCurrencyTypes === ExchangeCurrencyTypes.EURtoPEN
                   ? CurrencyType.PEN
-                  : exchangeCurrencyType === ExchangeCurrencyType.PENtoEUR
+                  : exchangeCurrencyTypes === ExchangeCurrencyTypes.PENtoEUR
                     ? CurrencyType.EUR
                     : CurrencyType.USD,
               recordStatus: RecordStatus.Active,
@@ -3270,10 +3329,10 @@ export class OfferingIncomeService {
               date: offeringIncome.date,
               zone: offeringIncome.zone,
               currency:
-                exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-                exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN
+                exchangeCurrencyTypes === ExchangeCurrencyTypes.USDtoPEN ||
+                exchangeCurrencyTypes === ExchangeCurrencyTypes.EURtoPEN
                   ? CurrencyType.PEN
-                  : exchangeCurrencyType === ExchangeCurrencyType.PENtoEUR
+                  : exchangeCurrencyTypes === ExchangeCurrencyTypes.PENtoEUR
                     ? CurrencyType.EUR
                     : CurrencyType.USD,
               recordStatus: RecordStatus.Active,
@@ -3300,10 +3359,10 @@ export class OfferingIncomeService {
               date: offeringIncome.date,
               church: offeringIncome.church,
               currency:
-                exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-                exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN
+                exchangeCurrencyTypes === ExchangeCurrencyTypes.USDtoPEN ||
+                exchangeCurrencyTypes === ExchangeCurrencyTypes.EURtoPEN
                   ? CurrencyType.PEN
-                  : exchangeCurrencyType === ExchangeCurrencyType.PENtoEUR
+                  : exchangeCurrencyTypes === ExchangeCurrencyTypes.PENtoEUR
                     ? CurrencyType.EUR
                     : CurrencyType.USD,
               recordStatus: RecordStatus.Active,
@@ -3324,10 +3383,10 @@ export class OfferingIncomeService {
               date: offeringIncome.date,
               church: offeringIncome.church,
               currency:
-                exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-                exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN
+                exchangeCurrencyTypes === ExchangeCurrencyTypes.USDtoPEN ||
+                exchangeCurrencyTypes === ExchangeCurrencyTypes.EURtoPEN
                   ? CurrencyType.PEN
-                  : exchangeCurrencyType === ExchangeCurrencyType.PENtoEUR
+                  : exchangeCurrencyTypes === ExchangeCurrencyTypes.PENtoEUR
                     ? CurrencyType.EUR
                     : CurrencyType.USD,
               memberType: offeringIncome.memberType ?? IsNull(),
@@ -3368,10 +3427,10 @@ export class OfferingIncomeService {
         //* Si no existe un registro a donde aumentar el cambio, se crea.
         if (!offeringDestiny) {
           const newComments = `💲 Monto convertido: ${(+offeringIncome.amount * +exchangeRate).toFixed(2)} ${
-            exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-            exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN
+            exchangeCurrencyTypes === ExchangeCurrencyTypes.USDtoPEN ||
+            exchangeCurrencyTypes === ExchangeCurrencyTypes.EURtoPEN
               ? CurrencyType.PEN
-              : exchangeCurrencyType === ExchangeCurrencyType.PENtoEUR
+              : exchangeCurrencyTypes === ExchangeCurrencyTypes.PENtoEUR
                 ? CurrencyType.EUR
                 : CurrencyType.USD
           } (${offeringIncome.amount} ${offeringIncome?.currency})\n💰Tipo de cambio (precio): ${exchangeRate}`;
@@ -3384,10 +3443,10 @@ export class OfferingIncomeService {
               (offeringIncome.amount * +exchangeRate).toFixed(2),
             ),
             currency:
-              exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-              exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN
+              exchangeCurrencyTypes === ExchangeCurrencyTypes.USDtoPEN ||
+              exchangeCurrencyTypes === ExchangeCurrencyTypes.EURtoPEN
                 ? CurrencyType.PEN
-                : exchangeCurrencyType === ExchangeCurrencyType.PENtoEUR
+                : exchangeCurrencyTypes === ExchangeCurrencyTypes.PENtoEUR
                   ? CurrencyType.EUR
                   : CurrencyType.USD,
             date: offeringIncome.date,
@@ -3413,19 +3472,19 @@ export class OfferingIncomeService {
 
       //* Update and set in Inactive and info comments on Offering Income
       const existingComments = offeringIncome.comments || '';
-      const exchangeRateComments = `Tipo de cambio(precio): ${exchangeRate}\nTipo de cambio(moneda): ${ExchangeCurrencyTypeNames[exchangeCurrencyType]}\nTotal monto cambiado: ${(offeringIncome.amount * +exchangeRate).toFixed(2)} ${
-        (exchangeCurrencyType === ExchangeCurrencyType.USDtoPEN ||
-          exchangeCurrencyType === ExchangeCurrencyType.EURtoPEN) &&
+      const exchangeRateComments = `Tipo de cambio(precio): ${exchangeRate}\nTipo de cambio(moneda): ${ExchangeCurrencyTypesNames[exchangeCurrencyTypes]}\nTotal monto cambiado: ${(offeringIncome.amount * +exchangeRate).toFixed(2)} ${
+        (exchangeCurrencyTypes === ExchangeCurrencyTypes.USDtoPEN ||
+          exchangeCurrencyTypes === ExchangeCurrencyTypes.EURtoPEN) &&
         CurrencyType.PEN
       }`;
-      const removalInfoComments: string = `Fecha de eliminación: ${format(new Date(), 'dd/MM/yyyy')}\nMotivo de eliminación: ${OfferingEliminationReasonTypeNames[reasonEliminationType as OfferingEliminationReasonType]}\nUsuario: ${user.firstName} ${user.lastName}`;
+      const removalInfoComments: string = `Fecha de inactivación: ${format(new Date(), 'dd/MM/yyyy')}\nMotivo de inactivación: ${OfferingInactivationReasonNames[offeringInactivationReason as OfferingInactivationReason]}\nUsuario responsable: ${user.firstName} ${user.lastName}`;
 
       const updatedComments =
-        exchangeRate && exchangeCurrencyType && existingComments
+        exchangeRate && exchangeCurrencyTypes && existingComments
           ? `${existingComments}\n\n${exchangeRateComments}\n\n${removalInfoComments}`
-          : exchangeRate && exchangeCurrencyType && !existingComments
+          : exchangeRate && exchangeCurrencyTypes && !existingComments
             ? `${exchangeRateComments}\n\n${removalInfoComments}`
-            : !exchangeRate && !exchangeCurrencyType && existingComments
+            : !exchangeRate && !exchangeCurrencyTypes && existingComments
               ? `${existingComments}\n\n${removalInfoComments}`
               : `${removalInfoComments}`;
 
@@ -3433,7 +3492,7 @@ export class OfferingIncomeService {
         {
           id: offeringIncome.id,
           comments: updatedComments,
-          reasonElimination: reasonEliminationType,
+          inactivationReason: offeringInactivationReason,
           updatedAt: new Date(),
           updatedBy: user,
           recordStatus: RecordStatus.Inactive,
@@ -3449,6 +3508,8 @@ export class OfferingIncomeService {
   //? PRIVATE METHODS
   // For future index errors or constrains with code.
   private handleDBExceptions(error: any): never {
+    console.log(error);
+
     if (error.code === '23505') {
       const detail = error.detail;
 

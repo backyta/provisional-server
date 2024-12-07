@@ -18,10 +18,10 @@ import { User } from '@/modules/user/entities';
 import { Church } from '@/modules/church/entities';
 
 import {
-  OfferingEliminationReasonType,
-  OfferingEliminationReasonTypeNames,
+  OfferingInactivationReason,
+  OfferingInactivationReasonNames,
 } from '@/modules/offering/shared/enums';
-import { DeleteOfferingDto } from '@/modules/offering/shared/dto';
+import { InactivateOfferingDto } from '@/modules/offering/shared/dto';
 
 import {
   UpdateOfferingExpenseDto,
@@ -431,13 +431,13 @@ export class OfferingExpenseService {
     }
   }
 
-  //! DELETE OFFERING EXPENSE
+  //! INACTIVATE OFFERING EXPENSE
   async remove(
     id: string,
-    deleteOfferingIncomeDto: DeleteOfferingDto,
+    inactivateOfferingExpenseDto: InactivateOfferingDto,
     user: User,
   ): Promise<void> {
-    const { reasonEliminationType } = deleteOfferingIncomeDto;
+    const { offeringInactivationReason } = inactivateOfferingExpenseDto;
 
     if (!isUUID(id)) {
       throw new BadRequestException(`UUID no valido.`);
@@ -455,7 +455,7 @@ export class OfferingExpenseService {
     }
 
     const existingComments = offeringExpense.comments || '';
-    const newComments: string = `Fecha de eliminación: ${format(new Date(), 'dd/MM/yyyy')}\nMotivo de eliminación: ${OfferingEliminationReasonTypeNames[reasonEliminationType as OfferingEliminationReasonType]}\nUsuario: ${user.firstName} ${user.lastName}  `;
+    const newComments: string = `Fecha de inactivación: ${format(new Date(), 'dd/MM/yyyy')}\nMotivo de inactivación: ${OfferingInactivationReasonNames[offeringInactivationReason as OfferingInactivationReason]}\nUsuario responsable: ${user.firstName} ${user.lastName}`;
     const updatedComments = existingComments
       ? `${existingComments}\n\n${newComments}`
       : `${newComments}`;
@@ -466,7 +466,7 @@ export class OfferingExpenseService {
         await this.offeringExpenseRepository.preload({
           id: offeringExpense.id,
           comments: updatedComments,
-          reasonElimination: reasonEliminationType,
+          inactivationReason: offeringInactivationReason,
           updatedAt: new Date(),
           updatedBy: user,
           recordStatus: RecordStatus.Inactive,

@@ -24,7 +24,7 @@ import {
 
 import {
   PaginationDto,
-  MemberInactivateDto,
+  InactivateMemberDto,
   SearchAndPaginationDto,
 } from '@/common/dtos';
 
@@ -120,7 +120,7 @@ export class CopastorController {
     return this.copastorService.update(id, updateCopastorDto, user);
   }
 
-  //! DELETE
+  //! INACTIVATE
   @Delete(':id')
   @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
@@ -131,9 +131,9 @@ export class CopastorController {
   })
   remove(
     @Param('id') id: string,
-    @Query() memberInactivateDto: MemberInactivateDto,
+    @Query() inactivateMemberDto: InactivateMemberDto,
     @GetUser() user: User,
   ): Promise<void> {
-    return this.copastorService.remove(id, memberInactivateDto, user);
+    return this.copastorService.remove(id, inactivateMemberDto, user);
   }
 }
