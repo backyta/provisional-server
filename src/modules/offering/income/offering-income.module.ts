@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { OfferingIncome } from '@/modules/offering/income/entities';
@@ -21,15 +21,15 @@ import { ExternalDonorModule } from '@/modules/external-donor/external-donor.mod
   providers: [OfferingIncomeService],
   imports: [
     TypeOrmModule.forFeature([OfferingIncome]),
+    forwardRef(() => DiscipleModule),
+    forwardRef(() => ZoneModule),
+    forwardRef(() => ChurchModule),
+    forwardRef(() => PastorModule),
+    forwardRef(() => PreacherModule),
+    forwardRef(() => CopastorModule),
+    forwardRef(() => SupervisorModule),
+    forwardRef(() => FamilyGroupModule),
     AuthModule,
-    ZoneModule,
-    ChurchModule,
-    PastorModule,
-    DiscipleModule,
-    PreacherModule,
-    CopastorModule,
-    SupervisorModule,
-    FamilyGroupModule,
     ExternalDonorModule,
   ],
   exports: [TypeOrmModule, OfferingIncomeService],

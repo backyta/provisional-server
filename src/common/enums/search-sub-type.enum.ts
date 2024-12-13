@@ -1,79 +1,83 @@
 export enum SearchSubType {
   //? Members
   //* Disciple
-  DiscipleByPastorNames = 'disciple_by_pastor_names',
+  DiscipleByPastorFirstNames = 'disciple_by_pastor_first_names',
   DiscipleByPastorLastNames = 'disciple_by_pastor_last_names',
-  DiscipleByPastorFullName = 'disciple_by_pastor_full_name',
-  DiscipleByCopastorNames = 'disciple_by_copastor_names',
+  DiscipleByPastorFullNames = 'disciple_by_pastor_full_names',
+  DiscipleByCopastorFirstNames = 'disciple_by_copastor_first_names',
   DiscipleByCopastorLastNames = 'disciple_by_copastor_last_names',
-  DiscipleByCopastorFullName = 'disciple_by_copastor_full_name',
-  DiscipleBySupervisorNames = 'disciple_by_supervisor_names',
+  DiscipleByCopastorFullNames = 'disciple_by_copastor_full_names',
+  DiscipleBySupervisorFirstNames = 'disciple_by_supervisor_first_names',
   DiscipleBySupervisorLastNames = 'disciple_by_supervisor_last_names',
-  DiscipleBySupervisorFullName = 'disciple_by_supervisor_full_name',
-  DiscipleByPreacherNames = 'disciple_by_preacher_names',
+  DiscipleBySupervisorFullNames = 'disciple_by_supervisor_full_names',
+  DiscipleByPreacherFirstNames = 'disciple_by_preacher_first_names',
   DiscipleByPreacherLastNames = 'disciple_by_preacher_last_names',
-  DiscipleByPreacherFullName = 'disciple_by_preacher_full_name',
-  ByDiscipleNames = 'by_disciple_names',
+  DiscipleByPreacherFullNames = 'disciple_by_preacher_full_names',
+  ByDiscipleFirstNames = 'by_disciple_first_names',
   ByDiscipleLastNames = 'by_disciple_last_names',
-  ByDiscipleFullName = 'by_disciple_full_name',
-
-  //* Pastor
-  // ByPastorNames = 'by_pastor_names',
-  // ByPastorLastNames = 'by_pastor_last_names',
-  // ByPastorFullName = 'by_pastor_full_name',
+  ByDiscipleFullNames = 'by_disciple_full_names',
 
   //* Copastor
-  CopastorByPastorNames = 'copastor_by_pastor_names',
+  CopastorByPastorFirstNames = 'copastor_by_pastor_first_names',
   CopastorByPastorLastNames = 'copastor_by_pastor_last_names',
-  CopastorByPastorFullName = 'copastor_by_pastor_full_name',
-  ByCopastorNames = 'by_copastor_names',
+  CopastorByPastorFullNames = 'copastor_by_pastor_full_names',
+  ByCopastorFirtsNames = 'by_copastor_first_names',
   ByCopastorLastNames = 'by_copastor_last_names',
-  ByCopastorFullName = 'by_copastor_full_name',
+  ByCopastorFullNames = 'by_copastor_full_names',
 
   //* Supervisor
-  SupervisorByPastorNames = 'supervisor_by_pastor_names',
+  SupervisorByPastorFirstNames = 'supervisor_by_pastor_names',
   SupervisorByPastorLastNames = 'supervisor_by_pastor_last_names',
-  SupervisorByPastorFullName = 'supervisor_by_pastor_full_name',
-  SupervisorByCopastorNames = 'supervisor_by_copastor_names',
+  SupervisorByPastorFullNames = 'supervisor_by_pastor_full_names',
+  SupervisorByCopastorFirstNames = 'supervisor_by_copastor_first_names',
   SupervisorByCopastorLastNames = 'supervisor_by_copastor_last_names',
-  SupervisorByCopastorFullName = 'supervisor_by_copastor_full_name',
-  BySupervisorNames = 'by_supervisor_names',
+  SupervisorByCopastorFullNames = 'supervisor_by_copastor_full_names',
+  BySupervisorFirstNames = 'by_supervisor_first_names',
   BySupervisorLastNames = 'by_supervisor_last_names',
-  BySupervisorFullName = 'by_supervisor_full_name',
+  BySupervisorFullNames = 'by_supervisor_full_names',
 
   //* Preacher
-  PreacherByPastorNames = 'preacher_by_pastor_names',
+  PreacherByPastorFirstNames = 'preacher_by_pastor_first_names',
   PreacherByPastorLastNames = 'preacher_by_pastor_last_names',
-  PreacherByPastorFullName = 'preacher_by_pastor_full_name',
-  PreacherByCopastorNames = 'preacher_by_copastor_names',
+  PreacherByPastorFullNames = 'preacher_by_pastor_full_names',
+  PreacherByCopastorFirstNames = 'preacher_by_copastor_first_names',
   PreacherByCopastorLastNames = 'preacher_by_copastor_last_names',
-  PreacherByCopastorFullName = 'preacher_by_copastor_full_name',
-  PreacherBySupervisorNames = 'preacher_by_supervisor_names',
+  PreacherByCopastorFullNames = 'preacher_by_copastor_full_names',
+  PreacherBySupervisorFirstNames = 'preacher_by_supervisor_first_names',
   PreacherBySupervisorLastNames = 'preacher_by_supervisor_last_names',
-  PreacherBySupervisorFullName = 'preacher_by_supervisor_full_name',
-  ByPreacherNames = 'by_preacher_names',
+  PreacherBySupervisorFullNames = 'preacher_by_supervisor_full_names',
+  ByPreacherFirstNames = 'by_preacher_first_names',
   ByPreacherLastNames = 'by_preacher_last_names',
-  ByPreacherFullName = 'by_preacher_full_name',
+  ByPreacherFullNames = 'by_preacher_full_names',
+
+  //* Zone
+  ZoneByPastorFirstNames = 'zone_by_pastor_first_names',
+  ZoneByPastorLastNames = 'zone_by_pastor_last_names',
+  ZoneByPastorFullNames = 'zone_by_pastor_full_names',
+  ZoneByCopastorFirstNames = 'zone_by_copastor_first_names',
+  ZoneByCopastorLastNames = 'zone_by_copastor_last_names',
+  ZoneByCopastorFullNames = 'zone_by_copastor_full_names',
+  ZoneBySupervisorFirstNames = 'zone_by_supervisor_first_names',
+  ZoneBySupervisorLastNames = 'zone_by_supervisor_last_names',
+  ZoneBySupervisorFullNames = 'zone_by_supervisor_full_names',
 
   //* Module Family Group
-  FamilyGroupByPastorNames = 'family_group_by_pastor_names',
+  FamilyGroupByPastorFirstNames = 'family_group_by_pastor_first_names',
   FamilyGroupByPastorLastNames = 'family_group_by_pastor_last_names',
-  FamilyGroupByPastorFullName = 'family_group_by_pastor_full_name',
-  FamilyGroupByCopastorNames = 'family_group_by_copastor_names',
+  FamilyGroupByPastorFullNames = 'family_group_by_pastor_full_names',
+  FamilyGroupByCopastorFirstNames = 'family_group_by_copastor_first_names',
   FamilyGroupByCopastorLastNames = 'family_group_by_copastor_last_names',
-  FamilyGroupByCopastorFullName = 'family_group_by_copastor_full_name',
-  FamilyGroupBySupervisorNames = 'family_group_by_supervisor_names',
+  FamilyGroupByCopastorFullNames = 'family_group_by_copastor_full_names',
+  FamilyGroupBySupervisorFirstNames = 'family_group_by_supervisor_first_names',
   FamilyGroupBySupervisorLastNames = 'family_group_by_supervisor_last_names',
-  FamilyGroupBySupervisorFullName = 'family_group_by_supervisor_full_name',
-  FamilyGroupByPreacherNames = 'family_group_by_preacher_names',
+  FamilyGroupBySupervisorFullNames = 'family_group_by_supervisor_full_names',
+  FamilyGroupByPreacherFirstNames = 'family_group_by_preacher_first_names',
   FamilyGroupByPreacherLastNames = 'family_group_by_preacher_last_names',
-  FamilyGroupByPreacherFullName = 'family_group_by_preacher_full_name',
+  FamilyGroupByPreacherFullNames = 'family_group_by_preacher_full_names',
 
   // ? Offering Income
   //* Family House, Fasting Zonal, Fasting General, Vigil Zonal, vigilia General, Ground Church, Activities, Youngs
   OfferingByDate = 'offering_by_date',
-  // OfferingByChurch = 'offering_by_church',
-  // OfferingByChurchDate = 'offering_by_church_date',
 
   //* Sunday Service, youngs, school sunday
   OfferingByShift = 'offering_by_shift',
@@ -86,19 +90,19 @@ export enum SearchSubType {
   //* Offering Family House
   OfferingByGroupCode = 'offering_by_group_code',
   OfferingByGroupCodeDate = 'offering_by_group_code_date',
-  OfferingByPreacherNames = 'offering_by_preacher_names',
+  OfferingByPreacherFirstNames = 'offering_by_preacher_first_names',
   OfferingByPreacherLastNames = 'offering_by_preacher_last_names',
-  OfferingByPreacherFullName = 'offering_by_preacher_full_name',
+  OfferingByPreacherFullNames = 'offering_by_preacher_full_names',
 
   //* Offering Ayuno y Vigilia Zonal
-  OfferingBySupervisorNames = 'offering_by_supervisor_names',
+  OfferingBySupervisorFirstNames = 'offering_by_supervisor_first_names',
   OfferingBySupervisorLastNames = 'offering_by_supervisor_last_names',
-  OfferingBySupervisorFullName = 'offering_by_supervisor_full_name',
+  OfferingBySupervisorFullNames = 'offering_by_supervisor_full_names',
 
   //* Offering Ground Church and Special
-  OfferingByContributorNames = 'offering_by_contributor_names',
+  OfferingByContributorFirstNames = 'offering_by_contributor_first_names',
   OfferingByContributorLastNames = 'offering_by_contributor_last_names',
-  OfferingByContributorFullName = 'offering_by_contributor_full_name',
+  OfferingByContributorFullNames = 'offering_by_contributor_full_names',
 
   // ? Offering Expenses
   //* Operative Expenses
@@ -175,97 +179,106 @@ export enum SearchSubType {
   EducationalMaterials = 'educational_materials',
   GiftsAndPrizesParticipants = 'gifts_and_prizes_participants',
   OtherRelatedExpenses = 'other_related_expenses',
-
-  //? Users
-  // UserByNames = 'user_by_names',
-  // UserByLastNames = 'user_by_last_names',
-  // UserByFullName = 'user_by_full_name',
-  // UserByRoles = 'user_by_roles',
 }
 
 export const SearchSubTypeNames: Record<SearchSubType, string> = {
-  [SearchSubType.DiscipleByPastorNames]: 'Por nombres de su pastor',
+  [SearchSubType.DiscipleByPastorFirstNames]: 'Por nombres de su pastor',
   [SearchSubType.DiscipleByPastorLastNames]: 'Por apellidos de su pastor',
-  [SearchSubType.DiscipleByPastorFullName]:
+  [SearchSubType.DiscipleByPastorFullNames]:
     'Por nombres y apellidos de su pastor',
-  [SearchSubType.DiscipleByCopastorNames]: 'Por nombres de su co-pastor',
+  [SearchSubType.DiscipleByCopastorFirstNames]: 'Por nombres de su co-pastor',
   [SearchSubType.DiscipleByCopastorLastNames]: 'Por apellidos de su co-pastor',
-  [SearchSubType.DiscipleByCopastorFullName]:
+  [SearchSubType.DiscipleByCopastorFullNames]:
     'Por nombres y apellidos de su co-pastor',
-  [SearchSubType.DiscipleBySupervisorNames]: 'Por nombres de su supervisor',
+  [SearchSubType.DiscipleBySupervisorFirstNames]:
+    'Por nombres de su supervisor',
   [SearchSubType.DiscipleBySupervisorLastNames]:
     'Por apellidos de su supervisor',
-  [SearchSubType.DiscipleBySupervisorFullName]:
+  [SearchSubType.DiscipleBySupervisorFullNames]:
     'Por nombres y apellidos de su supervisor',
-  [SearchSubType.DiscipleByPreacherNames]: 'Por nombres de su predicador',
+  [SearchSubType.DiscipleByPreacherFirstNames]: 'Por nombres de su predicador',
   [SearchSubType.DiscipleByPreacherLastNames]: 'Por apellidos de su predicador',
-  [SearchSubType.DiscipleByPreacherFullName]:
+  [SearchSubType.DiscipleByPreacherFullNames]:
     'Por nombres y apellidos de su predicador',
-  [SearchSubType.ByDiscipleNames]: 'Por sus nombres',
+  [SearchSubType.ByDiscipleFirstNames]: 'Por sus nombres',
   [SearchSubType.ByDiscipleLastNames]: 'Por sus apellidos',
-  [SearchSubType.ByDiscipleFullName]: 'Por sus nombres y apellidos',
+  [SearchSubType.ByDiscipleFullNames]: 'Por sus nombres y apellidos',
 
-  [SearchSubType.CopastorByPastorNames]: 'Por nombres de su pastor',
+  [SearchSubType.CopastorByPastorFirstNames]: 'Por nombres de su pastor',
   [SearchSubType.CopastorByPastorLastNames]: 'Por apellidos de su pastor',
-  [SearchSubType.CopastorByPastorFullName]:
+  [SearchSubType.CopastorByPastorFullNames]:
     'Por nombres y apellidos de su pastor',
-  [SearchSubType.ByCopastorNames]: 'Por sus nombres',
+  [SearchSubType.ByCopastorFirtsNames]: 'Por sus nombres',
   [SearchSubType.ByCopastorLastNames]: 'Por sus apellidos',
-  [SearchSubType.ByCopastorFullName]: 'Por sus nombres y apellidos',
+  [SearchSubType.ByCopastorFullNames]: 'Por sus nombres y apellidos',
 
-  [SearchSubType.SupervisorByPastorNames]: 'Por nombres de su pastor',
+  [SearchSubType.SupervisorByPastorFirstNames]: 'Por nombres de su pastor',
   [SearchSubType.SupervisorByPastorLastNames]: 'Por apellidos de su pastor',
-  [SearchSubType.SupervisorByPastorFullName]:
+  [SearchSubType.SupervisorByPastorFullNames]:
     'Por nombres y apellidos de su pastor',
-  [SearchSubType.SupervisorByCopastorNames]: 'Por nombres de su co-pastor',
+  [SearchSubType.SupervisorByCopastorFirstNames]: 'Por nombres de su co-pastor',
   [SearchSubType.SupervisorByCopastorLastNames]:
     'Por apellidos de su co-pastor',
-  [SearchSubType.SupervisorByCopastorFullName]:
+  [SearchSubType.SupervisorByCopastorFullNames]:
     'Por nombres y apellidos de su co-pastor',
-  [SearchSubType.BySupervisorNames]: 'Por sus nombres',
+  [SearchSubType.BySupervisorFirstNames]: 'Por sus nombres',
   [SearchSubType.BySupervisorLastNames]: 'Por sus apellidos',
-  [SearchSubType.BySupervisorFullName]: 'Por sus nombres y apellidos',
+  [SearchSubType.BySupervisorFullNames]: 'Por sus nombres y apellidos',
 
-  [SearchSubType.PreacherByPastorNames]: 'Por nombres de su pastor',
+  [SearchSubType.PreacherByPastorFirstNames]: 'Por nombres de su pastor',
   [SearchSubType.PreacherByPastorLastNames]: 'Por apellidos de su pastor',
-  [SearchSubType.PreacherByPastorFullName]:
+  [SearchSubType.PreacherByPastorFullNames]:
     'Por nombres y apellidos de su pastor',
-  [SearchSubType.PreacherByCopastorNames]: 'Por nombres de su co-pastor',
+  [SearchSubType.PreacherByCopastorFirstNames]: 'Por nombres de su co-pastor',
   [SearchSubType.PreacherByCopastorLastNames]: 'Por apellidos de su co-pastor',
-  [SearchSubType.PreacherByCopastorFullName]:
+  [SearchSubType.PreacherByCopastorFullNames]:
     'Por nombres y apellidos de su co-pastor',
-  [SearchSubType.PreacherBySupervisorNames]: 'Por nombres de su supervisor',
+  [SearchSubType.PreacherBySupervisorFirstNames]:
+    'Por nombres de su supervisor',
   [SearchSubType.PreacherBySupervisorLastNames]:
     'Por apellidos de su supervisor',
-  [SearchSubType.PreacherBySupervisorFullName]:
+  [SearchSubType.PreacherBySupervisorFullNames]:
     'Por nombres y apellidos de su supervisor',
-  [SearchSubType.ByPreacherNames]: 'Por sus nombres',
+  [SearchSubType.ByPreacherFirstNames]: 'Por sus nombres',
   [SearchSubType.ByPreacherLastNames]: 'Por sus apellidos',
-  [SearchSubType.ByPreacherFullName]: 'Por sus nombres y apellidos',
+  [SearchSubType.ByPreacherFullNames]: 'Por sus nombres y apellidos',
 
-  [SearchSubType.FamilyGroupByPastorNames]: 'Por nombres de su pastor',
+  [SearchSubType.ZoneByPastorFirstNames]: 'Por nombres de su pastor',
+  [SearchSubType.ZoneByPastorLastNames]: 'Por apellidos de su pastor',
+  [SearchSubType.ZoneByPastorFullNames]: 'Por nombres y apellidos de su pastor',
+  [SearchSubType.ZoneByCopastorFirstNames]: 'Por nombres de su co-pastor',
+  [SearchSubType.ZoneByCopastorLastNames]: 'Por apellidos de su co-pastor',
+  [SearchSubType.ZoneByCopastorFullNames]:
+    'Por nombres y apellidos de su co-pastor',
+  [SearchSubType.ZoneBySupervisorFirstNames]: 'Por nombres de su supervisor',
+  [SearchSubType.ZoneBySupervisorLastNames]: 'Por apellidos de su supervisor',
+  [SearchSubType.ZoneBySupervisorFullNames]:
+    'Por nombres y apellidos de su supervisor',
+
+  [SearchSubType.FamilyGroupByPastorFirstNames]: 'Por nombres de su pastor',
   [SearchSubType.FamilyGroupByPastorLastNames]: 'Por apellidos de su pastor',
-  [SearchSubType.FamilyGroupByPastorFullName]:
+  [SearchSubType.FamilyGroupByPastorFullNames]:
     'Por nombres y apellidos de su pastor',
-  [SearchSubType.FamilyGroupByCopastorNames]: 'Por nombres de su co-pastor',
+  [SearchSubType.FamilyGroupByCopastorFirstNames]:
+    'Por nombres de su co-pastor',
   [SearchSubType.FamilyGroupByCopastorLastNames]:
     'Por apellidos de su co-pastor',
-  [SearchSubType.FamilyGroupByCopastorFullName]:
+  [SearchSubType.FamilyGroupByCopastorFullNames]:
     'Por nombres y apellidos de su co-pastor',
-  [SearchSubType.FamilyGroupBySupervisorNames]: 'Por nombres de su supervisor',
+  [SearchSubType.FamilyGroupBySupervisorFirstNames]:
+    'Por nombres de su supervisor',
   [SearchSubType.FamilyGroupBySupervisorLastNames]:
     'Por apellidos de su supervisor',
-  [SearchSubType.FamilyGroupBySupervisorFullName]:
+  [SearchSubType.FamilyGroupBySupervisorFullNames]:
     'Por nombres y apellidos de su supervisor',
-  [SearchSubType.FamilyGroupByPreacherNames]: 'Por nombres de su predicador',
+  [SearchSubType.FamilyGroupByPreacherFirstNames]:
+    'Por nombres de su predicador',
   [SearchSubType.FamilyGroupByPreacherLastNames]:
     'Por apellidos de su predicador',
-  [SearchSubType.FamilyGroupByPreacherFullName]:
+  [SearchSubType.FamilyGroupByPreacherFullNames]:
     'Por nombres y apellidos de su predicador',
 
   [SearchSubType.OfferingByDate]: 'Por fecha',
-  // [SearchSubType.OfferingByChurch]: 'Por iglesia',
-  // [SearchSubType.OfferingByChurchDate]: 'Por fecha e iglesia',
 
   // Sunday service, youngs, school sunday
   [SearchSubType.OfferingByShift]: 'Por turno',
@@ -276,24 +289,25 @@ export const SearchSubTypeNames: Record<SearchSubType, string> = {
   [SearchSubType.OfferingByZoneDate]: 'Por zona y fecha',
 
   // Family House
-  [SearchSubType.OfferingByPreacherNames]: 'Por nombres de su predicador',
+  [SearchSubType.OfferingByPreacherFirstNames]: 'Por nombres de su predicador',
   [SearchSubType.OfferingByPreacherLastNames]: 'Por apellidos de su predicador',
-  [SearchSubType.OfferingByPreacherFullName]:
+  [SearchSubType.OfferingByPreacherFullNames]:
     'Por nombres y apellidos de su predicador',
   [SearchSubType.OfferingByGroupCode]: 'Por código de grupo fam.',
   [SearchSubType.OfferingByGroupCodeDate]: 'Por código de grupo fam. y fecha',
 
   // Offering Ayuno Zonal y Vigilia Zonal
-  [SearchSubType.OfferingBySupervisorNames]: 'Por nombres de su supervisor',
+  [SearchSubType.OfferingBySupervisorFirstNames]:
+    'Por nombres de su supervisor',
   [SearchSubType.OfferingBySupervisorLastNames]:
     'Por apellidos de su supervisor',
-  [SearchSubType.OfferingBySupervisorFullName]:
+  [SearchSubType.OfferingBySupervisorFullNames]:
     'Por nombres y apellidos de su supervisor',
 
   // Offering Ground Church and Special
-  [SearchSubType.OfferingByContributorNames]: 'Por nombres del aportante',
+  [SearchSubType.OfferingByContributorFirstNames]: 'Por nombres del aportante',
   [SearchSubType.OfferingByContributorLastNames]: 'Por apellidos del aportante',
-  [SearchSubType.OfferingByContributorFullName]:
+  [SearchSubType.OfferingByContributorFullNames]:
     'Por nombres y apellidos del aportante',
 
   // Operative Expenses

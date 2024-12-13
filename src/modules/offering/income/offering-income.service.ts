@@ -433,7 +433,7 @@ export class OfferingIncomeService {
           if (memberType === MemberType.Copastor) {
             copastor = await this.copastorRepository.findOne({
               where: { id: memberId },
-              relations: ['member', 'theirChurch'],
+              relations: ['member', 'theirPastor', 'theirChurch'],
             });
 
             existsOffering = await this.offeringIncomeRepository.find({
@@ -452,7 +452,13 @@ export class OfferingIncomeService {
           if (memberType === MemberType.Supervisor) {
             supervisor = await this.supervisorRepository.findOne({
               where: { id: memberId },
-              relations: ['member', 'theirChurch'],
+              relations: [
+                'member',
+                'theirPastor',
+                'theirCopastor',
+                'theirZone',
+                'theirChurch',
+              ],
             });
 
             existsOffering = await this.offeringIncomeRepository.find({
@@ -472,7 +478,14 @@ export class OfferingIncomeService {
           if (memberType === MemberType.Preacher) {
             preacher = await this.preacherRepository.findOne({
               where: { id: memberId },
-              relations: ['member', 'theirChurch'],
+              relations: [
+                'member',
+                'theirCopastor',
+                'theirPastor',
+                'theirZone',
+                'theirSupervisor',
+                'theirChurch',
+              ],
             });
 
             existsOffering = await this.offeringIncomeRepository.find({
@@ -492,7 +505,15 @@ export class OfferingIncomeService {
           if (memberType === MemberType.Disciple) {
             disciple = await this.discipleRepository.findOne({
               where: { id: memberId },
-              relations: ['member', 'theirChurch'],
+              relations: [
+                'member',
+                'theirPastor',
+                'theirCopastor',
+                'theirZone',
+                'theirSupervisor',
+                'theirPreacher',
+                'theirChurch',
+              ],
             });
 
             existsOffering = await this.offeringIncomeRepository.find({
@@ -557,8 +578,8 @@ export class OfferingIncomeService {
         if (isNewDonor) {
           try {
             const newDonor = this.externalDonorRepository.create({
-              firstName: donorFirstName,
-              lastName: donorLastName,
+              firstNames: donorFirstName,
+              lastNames: donorLastName,
               birthDate:
                 donorBirthDate && !isNaN(new Date(donorBirthDate).getTime())
                   ? donorBirthDate
@@ -616,7 +637,7 @@ export class OfferingIncomeService {
             church: church ?? null,
             zone: null,
             familyGroup: null,
-            memberType: MemberType.ExternalDonor,
+            memberType: memberType,
             shift: !shift || shift === '' ? null : shift,
             category: category,
             externalDonor: externalDonor ?? null,
@@ -1028,7 +1049,7 @@ export class OfferingIncomeService {
           const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este rango de fechas: ${fromDate} - ${toDate}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este rango de fechas: ${fromDate} - ${toDate} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1090,7 +1111,7 @@ export class OfferingIncomeService {
             OfferingIncomeCreationShiftTypeNames[term.toLowerCase()] ?? term;
 
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este turno: ${shiftInSpanish}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este turno: ${shiftInSpanish} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1167,7 +1188,7 @@ export class OfferingIncomeService {
             term;
 
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este rango de fechas: ${fromDate} - ${toDate} y con este turno: ${shiftInSpanish}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este rango de fechas: ${fromDate} - ${toDate}, con este turno: ${shiftInSpanish} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1233,7 +1254,7 @@ export class OfferingIncomeService {
 
         if (offeringIncome.length === 0) {
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con esta zona: ${term}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con esta zona: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1313,7 +1334,7 @@ export class OfferingIncomeService {
           const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este rango de fechas: ${fromDate} - ${toDate} y esta zona: ${zone}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este rango de fechas: ${fromDate} - ${toDate}, con esta zona: ${zone} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1373,7 +1394,7 @@ export class OfferingIncomeService {
 
         if (offeringIncome.length === 0) {
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con esta código de grupo familiar: ${term}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con esta código de grupo familiar: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1448,7 +1469,7 @@ export class OfferingIncomeService {
           const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este rango de fechas: ${fromDate} - ${toDate} y este código de grupo: ${code}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este rango de fechas: ${fromDate} - ${toDate}, este código de grupo: ${code} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1468,7 +1489,7 @@ export class OfferingIncomeService {
     if (
       term &&
       searchType === OfferingIncomeSearchType.FamilyGroup &&
-      searchSubType === OfferingIncomeSearchSubType.OfferingByPreacherNames
+      searchSubType === OfferingIncomeSearchSubType.OfferingByPreacherFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -1476,7 +1497,7 @@ export class OfferingIncomeService {
         const preachers = await this.preacherRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
           },
           relations: ['theirFamilyGroup'],
@@ -1513,7 +1534,7 @@ export class OfferingIncomeService {
 
         if (offeringIncome.length === 0) {
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con estos nombres de predicador: ${firstNames}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con estos nombres de predicador: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1541,7 +1562,7 @@ export class OfferingIncomeService {
         const preachers = await this.preacherRepository.find({
           where: {
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
           },
           relations: ['theirFamilyGroup'],
@@ -1578,7 +1599,7 @@ export class OfferingIncomeService {
 
         if (offeringIncome.length === 0) {
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con estos apellidos de predicador: ${lastNames}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con estos apellidos de predicador: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1598,7 +1619,7 @@ export class OfferingIncomeService {
     if (
       term &&
       searchType === OfferingIncomeSearchType.FamilyGroup &&
-      searchSubType === OfferingIncomeSearchSubType.OfferingByPreacherFullName
+      searchSubType === OfferingIncomeSearchSubType.OfferingByPreacherFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -1607,8 +1628,8 @@ export class OfferingIncomeService {
         const preachers = await this.preacherRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
           },
           relations: ['theirFamilyGroup'],
@@ -1645,7 +1666,7 @@ export class OfferingIncomeService {
 
         if (offeringIncome.length === 0) {
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con estos nombres y apellidos de predicador: ${firstNames} ${lastNames}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con estos nombres y apellidos de predicador: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1704,7 +1725,7 @@ export class OfferingIncomeService {
 
         if (offeringIncome.length === 0) {
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con esta zona: ${term}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con esta zona: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1778,7 +1799,7 @@ export class OfferingIncomeService {
           const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este rango de fechas: ${fromDate} - ${toDate} y esta zona: ${zone}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este rango de fechas: ${fromDate} - ${toDate}, con esta zona: ${zone} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1799,7 +1820,8 @@ export class OfferingIncomeService {
       term &&
       (searchType === OfferingIncomeSearchType.ZonalFasting ||
         searchType === OfferingIncomeSearchType.ZonalVigil) &&
-      searchSubType === OfferingIncomeSearchSubType.OfferingBySupervisorNames
+      searchSubType ===
+        OfferingIncomeSearchSubType.OfferingBySupervisorFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -1807,7 +1829,7 @@ export class OfferingIncomeService {
         const supervisors = await this.supervisorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
           },
           relations: ['theirZone'],
@@ -1844,7 +1866,7 @@ export class OfferingIncomeService {
 
         if (offeringIncome.length === 0) {
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con estos  nombres de supervisor: ${firstNames}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con estos  nombres de supervisor: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1874,7 +1896,7 @@ export class OfferingIncomeService {
         const supervisors = await this.supervisorRepository.find({
           where: {
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
           },
           relations: ['theirZone'],
@@ -1911,7 +1933,7 @@ export class OfferingIncomeService {
 
         if (offeringIncome.length === 0) {
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con estos apellidos de supervisor: ${lastNames}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con estos apellidos de supervisor: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1932,7 +1954,8 @@ export class OfferingIncomeService {
       term &&
       (searchType === OfferingIncomeSearchType.ZonalFasting ||
         searchType === OfferingIncomeSearchType.ZonalVigil) &&
-      searchSubType === OfferingIncomeSearchSubType.OfferingBySupervisorFullName
+      searchSubType ===
+        OfferingIncomeSearchSubType.OfferingBySupervisorFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -1941,8 +1964,8 @@ export class OfferingIncomeService {
         const supervisors = await this.supervisorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
           },
           relations: ['theirZone'],
@@ -1979,7 +2002,7 @@ export class OfferingIncomeService {
 
         if (offeringIncome.length === 0) {
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con estos nombres y apellidos de supervisor: ${firstNames} ${lastNames}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con estos nombres y apellidos de supervisor: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -2003,7 +2026,8 @@ export class OfferingIncomeService {
         searchType === OfferingIncomeSearchType.ChurchGround ||
         searchType === OfferingIncomeSearchType.YouthService ||
         searchType === OfferingIncomeSearchType.SundaySchool) &&
-      searchSubType === OfferingIncomeSearchSubType.OfferingByContributorNames
+      searchSubType ===
+        OfferingIncomeSearchSubType.OfferingByContributorFirstNames
     ) {
       const [memberType, names] = term.split('&');
       const firstNames = names.replace(/\+/g, ' ');
@@ -2019,7 +2043,7 @@ export class OfferingIncomeService {
               memberType: memberType,
               externalDonor: firstNames
                 ? {
-                    firstName: ILike(`%${firstNames}%`),
+                    firstNames: ILike(`%${firstNames}%`),
                   }
                 : undefined,
               recordStatus: RecordStatus.Active,
@@ -2052,7 +2076,7 @@ export class OfferingIncomeService {
               pastor: firstNames
                 ? {
                     member: {
-                      firstName: ILike(`%${firstNames}%`),
+                      firstNames: ILike(`%${firstNames}%`),
                     },
                   }
                 : undefined,
@@ -2086,7 +2110,7 @@ export class OfferingIncomeService {
               copastor: firstNames
                 ? {
                     member: {
-                      firstName: ILike(`%${firstNames}%`),
+                      firstNames: ILike(`%${firstNames}%`),
                     },
                   }
                 : undefined,
@@ -2120,7 +2144,7 @@ export class OfferingIncomeService {
               supervisor: firstNames
                 ? {
                     member: {
-                      firstName: ILike(`%${firstNames}%`),
+                      firstNames: ILike(`%${firstNames}%`),
                     },
                   }
                 : undefined,
@@ -2154,7 +2178,7 @@ export class OfferingIncomeService {
               preacher: firstNames
                 ? {
                     member: {
-                      firstName: ILike(`%${firstNames}%`),
+                      firstNames: ILike(`%${firstNames}%`),
                     },
                   }
                 : undefined,
@@ -2188,7 +2212,7 @@ export class OfferingIncomeService {
               disciple: firstNames
                 ? {
                     member: {
-                      firstName: ILike(`%${firstNames}%`),
+                      firstNames: ILike(`%${firstNames}%`),
                     },
                   }
                 : undefined,
@@ -2217,7 +2241,7 @@ export class OfferingIncomeService {
           const memberTypeInSpanish =
             MemberTypeNames[memberType.toLowerCase()] ?? memberType;
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este tipo de miembro: ${memberTypeInSpanish} y estos nombres: ${firstNames}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este tipo de miembro: ${memberTypeInSpanish}, con estos nombres: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -2257,7 +2281,7 @@ export class OfferingIncomeService {
               memberType: memberType,
               externalDonor: lastNames
                 ? {
-                    lastName: ILike(`%${lastNames}%`),
+                    lastNames: ILike(`%${lastNames}%`),
                   }
                 : undefined,
               recordStatus: RecordStatus.Active,
@@ -2290,7 +2314,7 @@ export class OfferingIncomeService {
               pastor: lastNames
                 ? {
                     member: {
-                      lastName: ILike(`%${lastNames}%`),
+                      lastNames: ILike(`%${lastNames}%`),
                     },
                   }
                 : undefined,
@@ -2324,7 +2348,7 @@ export class OfferingIncomeService {
               copastor: lastNames
                 ? {
                     member: {
-                      lastName: ILike(`%${lastNames}%`),
+                      lastNames: ILike(`%${lastNames}%`),
                     },
                   }
                 : undefined,
@@ -2358,7 +2382,7 @@ export class OfferingIncomeService {
               supervisor: lastNames
                 ? {
                     member: {
-                      lastName: ILike(`%${lastNames}%`),
+                      lastNames: ILike(`%${lastNames}%`),
                     },
                   }
                 : undefined,
@@ -2392,7 +2416,7 @@ export class OfferingIncomeService {
               preacher: lastNames
                 ? {
                     member: {
-                      lastName: ILike(`%${lastNames}%`),
+                      lastNames: ILike(`%${lastNames}%`),
                     },
                   }
                 : undefined,
@@ -2426,7 +2450,7 @@ export class OfferingIncomeService {
               disciple: lastNames
                 ? {
                     member: {
-                      lastName: ILike(`%${lastNames}%`),
+                      lastNames: ILike(`%${lastNames}%`),
                     },
                   }
                 : undefined,
@@ -2455,7 +2479,7 @@ export class OfferingIncomeService {
           const memberTypeInSpanish =
             MemberTypeNames[memberType.toLowerCase()] ?? memberType;
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este tipo de miembro: ${memberTypeInSpanish} y estos apellidos: ${lastNames}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este tipo de miembro: ${memberTypeInSpanish}, con estos apellidos: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -2479,7 +2503,7 @@ export class OfferingIncomeService {
         searchType === OfferingIncomeSearchType.YouthService ||
         searchType === OfferingIncomeSearchType.SundaySchool) &&
       searchSubType ===
-        OfferingIncomeSearchSubType.OfferingByContributorFullName
+        OfferingIncomeSearchSubType.OfferingByContributorFullNames
     ) {
       const [memberType, names] = term.split('&');
 
@@ -2498,8 +2522,8 @@ export class OfferingIncomeService {
               externalDonor:
                 firstNames && lastNames
                   ? {
-                      firstName: ILike(`%${firstNames}%`),
-                      lastName: ILike(`%${lastNames}%`),
+                      firstNames: ILike(`%${firstNames}%`),
+                      lastNames: ILike(`%${lastNames}%`),
                     }
                   : undefined,
               recordStatus: RecordStatus.Active,
@@ -2533,8 +2557,8 @@ export class OfferingIncomeService {
                 firstNames && lastNames
                   ? {
                       member: {
-                        firstName: ILike(`%${firstNames}%`),
-                        lastName: ILike(`%${lastNames}%`),
+                        firstNames: ILike(`%${firstNames}%`),
+                        lastNames: ILike(`%${lastNames}%`),
                       },
                     }
                   : undefined,
@@ -2569,8 +2593,8 @@ export class OfferingIncomeService {
                 firstNames && lastNames
                   ? {
                       member: {
-                        firstName: ILike(`%${firstNames}%`),
-                        lastName: ILike(`%${lastNames}%`),
+                        firstNames: ILike(`%${firstNames}%`),
+                        lastNames: ILike(`%${lastNames}%`),
                       },
                     }
                   : undefined,
@@ -2605,8 +2629,8 @@ export class OfferingIncomeService {
                 firstNames && lastNames
                   ? {
                       member: {
-                        firstName: ILike(`%${firstNames}%`),
-                        lastName: ILike(`%${lastNames}%`),
+                        firstNames: ILike(`%${firstNames}%`),
+                        lastNames: ILike(`%${lastNames}%`),
                       },
                     }
                   : undefined,
@@ -2641,8 +2665,8 @@ export class OfferingIncomeService {
                 firstNames && lastNames
                   ? {
                       member: {
-                        firstName: ILike(`%${firstNames}%`),
-                        lastName: ILike(`%${lastNames}%`),
+                        firstNames: ILike(`%${firstNames}%`),
+                        lastNames: ILike(`%${lastNames}%`),
                       },
                     }
                   : undefined,
@@ -2677,8 +2701,8 @@ export class OfferingIncomeService {
                 firstNames && lastNames
                   ? {
                       member: {
-                        firstName: ILike(`%${firstNames}%`),
-                        lastName: ILike(`%${lastNames}%`),
+                        firstNames: ILike(`%${firstNames}%`),
+                        lastNames: ILike(`%${lastNames}%`),
                       },
                     }
                   : undefined,
@@ -2708,7 +2732,7 @@ export class OfferingIncomeService {
             MemberTypeNames[memberType.toLowerCase()] ?? memberType;
 
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este tipo de miembro: ${memberTypeInSpanish} y estos nombres y apellidos: ${firstNames} ${lastNames}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este tipo de miembro: ${memberTypeInSpanish}, con estos nombres y apellidos: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -2763,7 +2787,7 @@ export class OfferingIncomeService {
           const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
 
           throw new NotFoundException(
-            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este estado de registro: ${value}`,
+            `No se encontraron ingresos de ofrendas (${OfferingIncomeSearchTypeNames[searchType]}) con este estado de registro: ${value} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -3477,7 +3501,7 @@ export class OfferingIncomeService {
           exchangeCurrencyTypes === ExchangeCurrencyTypes.EURtoPEN) &&
         CurrencyType.PEN
       }`;
-      const removalInfoComments: string = `Fecha de inactivación: ${format(new Date(), 'dd/MM/yyyy')}\nMotivo de inactivación: ${OfferingInactivationReasonNames[offeringInactivationReason as OfferingInactivationReason]}\nUsuario responsable: ${user.firstName} ${user.lastName}`;
+      const removalInfoComments: string = `Fecha de inactivación: ${format(new Date(), 'dd/MM/yyyy')}\nMotivo de inactivación: ${OfferingInactivationReasonNames[offeringInactivationReason as OfferingInactivationReason]}\nUsuario responsable: ${user.firstNames} ${user.lastNames}`;
 
       const updatedComments =
         exchangeRate && exchangeCurrencyTypes && existingComments
@@ -3508,8 +3532,6 @@ export class OfferingIncomeService {
   //? PRIVATE METHODS
   // For future index errors or constrains with code.
   private handleDBExceptions(error: any): never {
-    console.log(error);
-
     if (error.code === '23505') {
       const detail = error.detail;
 

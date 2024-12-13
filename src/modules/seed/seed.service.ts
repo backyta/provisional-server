@@ -195,7 +195,7 @@ export class SeedService {
 
     //* Create Copastor
     const pastor = await this.pastorRepository.findOne({
-      where: { member: { firstName: 'Michael Rodrigo' } },
+      where: { member: { firstNames: 'Michael Rodrigo' } },
     });
 
     copastors.forEach((copastor) => {
@@ -208,7 +208,7 @@ export class SeedService {
 
     //* Create Supervisor
     const copastor = await this.copastorRepository.findOne({
-      where: { member: { firstName: 'Luz Mariella' } },
+      where: { member: { firstNames: 'Luz Mariella' } },
     });
 
     supervisors.forEach((supervisor) => {
@@ -233,7 +233,7 @@ export class SeedService {
 
     //* Create Preachers
     const supervisor = await this.supervisorRepository.findOne({
-      where: { member: { lastName: 'Lopez Martinez' } },
+      where: { member: { lastNames: 'Lopez Martinez' } },
     });
 
     preachers.forEach((preacher) => {

@@ -21,6 +21,7 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
@@ -46,6 +47,7 @@ import { UserService } from '@/modules/user/user.service';
 @ApiBadRequestResponse({
   description: 'Bad request.',
 })
+@SkipThrottle()
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}

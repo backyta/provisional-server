@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -23,9 +25,9 @@ import { CopastorModule } from '@/modules/copastor/copastor.module';
 import { SupervisorModule } from '@/modules/supervisor/supervisor.module';
 import { CloudinaryModule } from '@/modules/cloudinary/cloudinary.module';
 import { FamilyGroupModule } from '@/modules/family-group/family-group.module';
+import { ExternalDonorModule } from '@/modules/external-donor/external-donor.module';
 import { OfferingIncomeModule } from '@/modules/offering/income/offering-income.module';
 import { OfferingExpenseModule } from '@/modules/offering/expense/offering-expense.module';
-import { ExternalDonorModule } from './modules/external-donor/external-donor.module';
 
 // TODO : Probar despliegues con migraciones
 @Module({
@@ -46,6 +48,12 @@ import { ExternalDonorModule } from './modules/external-donor/external-donor.mod
       autoLoadEntities: true,
       synchronize: process.env.STAGE === 'prod' ? false : true,
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 10,
+      },
+    ]),
     SeedModule,
     AuthModule,
     UserModule,
@@ -68,6 +76,12 @@ import { ExternalDonorModule } from './modules/external-donor/external-donor.mod
     OfferingExpenseModule,
     ExternalDonorModule,
   ],
-  providers: [SuperUserService],
+  providers: [
+    SuperUserService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

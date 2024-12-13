@@ -118,7 +118,7 @@ export const getMembersReport = (
               },
             ],
             ...data.map((item: MemberOptions) => [
-              `${item?.member?.firstName} ${item?.member?.lastName}`,
+              `${item?.member?.firstNames} ${item?.member?.lastNames}`,
 
               format(
                 new Date(addDays(item?.member?.birthDate, 1)),
@@ -131,8 +131,8 @@ export const getMembersReport = (
                 'dd/MM/yyyy',
               ),
               item.member.phoneNumber,
-              `${item?.member?.district} - ${item?.member?.urbanSector}`,
-              `${item?.member?.address} (${item?.member?.referenceAddress})`,
+              `${item?.member?.residenceDistrict} - ${item?.member?.residenceUrbanSector}`,
+              `${item?.member?.residenceAddress} (${item?.member?.referenceAddress})`,
             ]),
             ['', '', '', '', '', '', '', ''],
             ['', '', '', '', '', '', '', ''],

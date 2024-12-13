@@ -985,7 +985,7 @@ export class MetricsService {
               where: {
                 theirChurch: church,
                 member: {
-                  district: district,
+                  residenceDistrict: district,
                 },
                 recordStatus: RecordStatus.Active,
               },
@@ -996,7 +996,7 @@ export class MetricsService {
               where: {
                 theirChurch: church,
                 member: {
-                  district: district,
+                  residenceDistrict: district,
                 },
                 recordStatus: RecordStatus.Active,
               },
@@ -1007,7 +1007,7 @@ export class MetricsService {
               where: {
                 theirChurch: church,
                 member: {
-                  district: district,
+                  residenceDistrict: district,
                 },
                 recordStatus: RecordStatus.Active,
               },
@@ -1018,7 +1018,7 @@ export class MetricsService {
               where: {
                 theirChurch: church,
                 member: {
-                  district: district,
+                  residenceDistrict: district,
                 },
                 recordStatus: RecordStatus.Active,
               },
@@ -1029,7 +1029,7 @@ export class MetricsService {
               where: {
                 theirChurch: church,
                 member: {
-                  district: district,
+                  residenceDistrict: district,
                 },
                 recordStatus: RecordStatus.Active,
               },

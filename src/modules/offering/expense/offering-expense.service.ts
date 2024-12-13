@@ -207,8 +207,6 @@ export class OfferingExpenseService {
       throw new BadRequestException(`El tipo de búsqueda es requerido.`);
     }
 
-    console.log(term);
-
     //* Search Church
     let church: Church;
     if (churchId) {
@@ -236,21 +234,7 @@ export class OfferingExpenseService {
         searchType === OfferingExpenseSearchType.SuppliesExpenses ||
         searchType === OfferingExpenseSearchType.ExpensesAdjustment)
     ) {
-      // const [churchId, date] = term.split('&');
-
       try {
-        // const church = await this.churchRepository.findOne({
-        //   where: {
-        //     id: churchId,
-        //   },
-        // });
-
-        // if (!church) {
-        //   throw new NotFoundException(
-        //     `No se encontró ninguna iglesia con este ID: ${churchId}.`,
-        //   );
-        // }
-
         const [fromTimestamp, toTimestamp] = term.split('+').map(Number);
 
         if (isNaN(fromTimestamp)) {
@@ -297,7 +281,7 @@ export class OfferingExpenseService {
           const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
-            `No se encontraron salidas de ofrendas (${OfferingExpenseSearchTypeNames[searchType]}) con esta iglesia: ${church?.abbreviatedChurchName} y con este rango de fechas: ${fromDate} - ${toDate}`,
+            `No se encontraron salidas de ofrendas (${OfferingExpenseSearchTypeNames[searchType]}) con este rango de fechas: ${fromDate} - ${toDate} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -340,7 +324,7 @@ export class OfferingExpenseService {
           const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
 
           throw new NotFoundException(
-            `No se encontraron salidas de ofrendas (${OfferingExpenseSearchTypeNames[searchType]}) con este estado de registro: ${value}`,
+            `No se encontraron salidas de ofrendas (${OfferingExpenseSearchTypeNames[searchType]}) con este estado de registro: ${value} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -455,7 +439,7 @@ export class OfferingExpenseService {
     }
 
     const existingComments = offeringExpense.comments || '';
-    const newComments: string = `Fecha de inactivación: ${format(new Date(), 'dd/MM/yyyy')}\nMotivo de inactivación: ${OfferingInactivationReasonNames[offeringInactivationReason as OfferingInactivationReason]}\nUsuario responsable: ${user.firstName} ${user.lastName}`;
+    const newComments: string = `Fecha de inactivación: ${format(new Date(), 'dd/MM/yyyy')}\nMotivo de inactivación: ${OfferingInactivationReasonNames[offeringInactivationReason as OfferingInactivationReason]}\nUsuario responsable: ${user.firstNames} ${user.lastNames}`;
     const updatedComments = existingComments
       ? `${existingComments}\n\n${newComments}`
       : `${newComments}`;

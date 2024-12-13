@@ -17,6 +17,7 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import { PaginationDto } from '@/common/dtos';
 import { Auth } from '@/modules/auth/decorators';
@@ -39,6 +40,7 @@ import { ExternalDonorService } from '@/modules/external-donor/external-donor.se
 @ApiBadRequestResponse({
   description: 'Bad request.',
 })
+@SkipThrottle()
 @Controller('external-donor')
 export class ExternalDonorController {
   constructor(private readonly externalDonorService: ExternalDonorService) {}

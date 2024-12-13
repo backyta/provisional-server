@@ -7,10 +7,14 @@ import {
 } from '@nestjs/common';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsOrderValue, ILike, Repository } from 'typeorm';
+import { FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
 
 import { RecordStatus } from '@/common/enums';
-import { ZoneSearchType, ZoneSearchTypeNames } from '@/modules/zone/enums';
+import {
+  ZoneSearchSubType,
+  ZoneSearchType,
+  ZoneSearchTypeNames,
+} from '@/modules/zone/enums';
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
 import { zoneDataFormatter } from '@/modules/zone/helpers';
@@ -271,6 +275,7 @@ export class ZoneService {
   ): Promise<Zone[]> {
     const {
       'search-type': searchType,
+      'search-sub-type': searchSubType,
       limit,
       offset = 0,
       order,
@@ -297,6 +302,546 @@ export class ZoneService {
         throw new NotFoundException(
           `Iglesia con id ${churchId} no fue encontrada.`,
         );
+      }
+    }
+
+    //? Find by first name --> Many
+    //* Zones by supervisor names
+    if (
+      term &&
+      searchType === ZoneSearchType.FirstNames &&
+      searchSubType === ZoneSearchSubType.ZoneBySupervisorFirstNames
+    ) {
+      const firstNames = term.replace(/\+/g, ' ');
+
+      try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            member: {
+              firstNames: ILike(`%${firstNames}%`),
+            },
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
+
+        const zones = await this.zoneRepository.find({
+          where: {
+            theirChurch: church,
+            theirSupervisor: In(supervisorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
+            'familyGroups',
+            'preachers.member',
+            'disciples.member',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (zones.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron zonas con los nombres de su supervisor: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
+          );
+        }
+
+        return zoneDataFormatter({ zones }) as any;
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
+      }
+    }
+
+    //* Zone by co-pastor names
+    if (
+      term &&
+      searchType === ZoneSearchType.FirstNames &&
+      searchSubType === ZoneSearchSubType.ZoneByCopastorFirstNames
+    ) {
+      const firstNames = term.replace(/\+/g, ' ');
+
+      try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            member: {
+              firstNames: ILike(`%${firstNames}%`),
+            },
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const copastorsId = copastors.map((copastor) => copastor?.id);
+
+        const zones = await this.zoneRepository.find({
+          where: {
+            theirChurch: church,
+            theirCopastor: In(copastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
+            'familyGroups',
+            'preachers.member',
+            'disciples.member',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (zones.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron zonas con los nombres de su co-pastor: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
+          );
+        }
+
+        return zoneDataFormatter({ zones }) as any;
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
+      }
+    }
+
+    //* Zone by pastor names
+    if (
+      term &&
+      searchType === ZoneSearchType.FirstNames &&
+      searchSubType === ZoneSearchSubType.ZoneByPastorFirstNames
+    ) {
+      const firstNames = term.replace(/\+/g, ' ');
+
+      try {
+        const pastors = await this.pastorRepository.find({
+          where: {
+            member: {
+              firstNames: ILike(`%${firstNames}%`),
+            },
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const pastorsId = pastors.map((pastor) => pastor?.id);
+
+        const zones = await this.zoneRepository.find({
+          where: {
+            theirChurch: church,
+            theirPastor: In(pastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
+            'familyGroups',
+            'preachers.member',
+            'disciples.member',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (zones.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron zonas con los nombres de su pastor: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
+          );
+        }
+
+        return zoneDataFormatter({ zones }) as any;
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
+      }
+    }
+
+    //? Find by last name --> Many
+    //* Zone by supervisor last names
+    if (
+      term &&
+      searchType === ZoneSearchType.LastNames &&
+      searchSubType === ZoneSearchSubType.ZoneBySupervisorLastNames
+    ) {
+      const lastNames = term.replace(/\+/g, ' ');
+
+      try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            member: {
+              lastNames: ILike(`%${lastNames}%`),
+            },
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
+
+        const zones = await this.zoneRepository.find({
+          where: {
+            theirChurch: church,
+            theirSupervisor: In(supervisorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
+            'familyGroups',
+            'preachers.member',
+            'disciples.member',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (zones.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron zonas con los apellidos de su supervisor: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
+          );
+        }
+
+        return zoneDataFormatter({ zones }) as any;
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
+      }
+    }
+
+    //* Zones by co-pastor last names
+    if (
+      term &&
+      searchType === ZoneSearchType.LastNames &&
+      searchSubType === ZoneSearchSubType.ZoneByCopastorLastNames
+    ) {
+      const lastNames = term.replace(/\+/g, ' ');
+
+      try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            member: {
+              lastNames: ILike(`%${lastNames}%`),
+            },
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const copastorsId = copastors.map((copastor) => copastor?.id);
+
+        const zones = await this.zoneRepository.find({
+          where: {
+            theirChurch: church,
+            theirCopastor: In(copastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
+            'familyGroups',
+            'preachers.member',
+            'disciples.member',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (zones.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron zonas con los apellidos de su co-pastor: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
+          );
+        }
+
+        return zoneDataFormatter({ zones }) as any;
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
+      }
+    }
+
+    //* Zone by pastor last names
+    if (
+      term &&
+      searchType === ZoneSearchType.LastNames &&
+      searchSubType === ZoneSearchSubType.ZoneByPastorLastNames
+    ) {
+      const lastNames = term.replace(/\+/g, ' ');
+
+      try {
+        const pastors = await this.pastorRepository.find({
+          where: {
+            member: {
+              lastNames: ILike(`%${lastNames}%`),
+            },
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const pastorsId = pastors.map((pastor) => pastor?.id);
+
+        const zones = await this.zoneRepository.find({
+          where: {
+            theirChurch: church,
+            theirPastor: In(pastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
+            'familyGroups',
+            'preachers.member',
+            'disciples.member',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (zones.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron zonas con los apellidos de su pastor: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
+          );
+        }
+
+        return zoneDataFormatter({ zones }) as any;
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
+      }
+    }
+
+    //? Find by full name --> Many
+    //* Zones by supervisor full names
+    if (
+      term &&
+      searchType === ZoneSearchType.FullNames &&
+      searchSubType === ZoneSearchSubType.ZoneBySupervisorFullNames
+    ) {
+      const firstNames = term.split('-')[0].replace(/\+/g, ' ');
+      const lastNames = term.split('-')[1].replace(/\+/g, ' ');
+
+      try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            member: {
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
+            },
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const supervisorsId = supervisors.map((supervisor) => supervisor?.id);
+
+        const zones = await this.zoneRepository.find({
+          where: {
+            theirChurch: church,
+            theirSupervisor: In(supervisorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
+            'familyGroups',
+            'preachers.member',
+            'disciples.member',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (zones.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron zonas con los nombres y apellidos de su supervisor: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
+          );
+        }
+
+        return zoneDataFormatter({ zones }) as any;
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
+      }
+    }
+
+    //* Zones by co-pastor full names
+    if (
+      term &&
+      searchType === ZoneSearchType.FullNames &&
+      searchSubType === ZoneSearchSubType.ZoneByCopastorFullNames
+    ) {
+      const firstNames = term.split('-')[0].replace(/\+/g, ' ');
+      const lastNames = term.split('-')[1].replace(/\+/g, ' ');
+
+      try {
+        const copastors = await this.copastorRepository.find({
+          where: {
+            member: {
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
+            },
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const copastorsId = copastors.map((copastor) => copastor?.id);
+
+        const zones = await this.zoneRepository.find({
+          where: {
+            theirChurch: church,
+            theirCopastor: In(copastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
+            'familyGroups',
+            'preachers.member',
+            'disciples.member',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (zones.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron zonas con los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
+          );
+        }
+
+        return zoneDataFormatter({ zones }) as any;
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
+      }
+    }
+
+    //* Zones by pastor full names
+    if (
+      term &&
+      searchType === ZoneSearchType.FullNames &&
+      searchSubType === ZoneSearchSubType.ZoneByPastorFullNames
+    ) {
+      const firstNames = term.split('-')[0].replace(/\+/g, ' ');
+      const lastNames = term.split('-')[1].replace(/\+/g, ' ');
+
+      try {
+        const pastors = await this.pastorRepository.find({
+          where: {
+            member: {
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
+            },
+            recordStatus: RecordStatus.Active,
+          },
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        const pastorsId = pastors.map((pastor) => pastor?.id);
+
+        const zones = await this.zoneRepository.find({
+          where: {
+            theirChurch: church,
+            theirPastor: In(pastorsId),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
+            'familyGroups',
+            'preachers.member',
+            'disciples.member',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (zones.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron zonas con los nombres y apellidos de su pastor: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
+          );
+        }
+
+        return zoneDataFormatter({ zones }) as any;
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
       }
     }
 
@@ -327,7 +872,7 @@ export class ZoneService {
 
         if (zones.length === 0) {
           throw new NotFoundException(
-            `No se encontraron zonas con este nombre: ${term}`,
+            `No se encontraron zonas con este nombre: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -368,7 +913,7 @@ export class ZoneService {
 
         if (zones.length === 0) {
           throw new NotFoundException(
-            `No se encontraron zonas con este país: ${term}`,
+            `No se encontraron zonas con este país: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -409,7 +954,7 @@ export class ZoneService {
 
         if (zones.length === 0) {
           throw new NotFoundException(
-            `No se encontraron zonas con este departamento: ${term}`,
+            `No se encontraron zonas con este departamento: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -450,7 +995,7 @@ export class ZoneService {
 
         if (zones.length === 0) {
           throw new NotFoundException(
-            `No se encontraron zonas con esta provincia: ${term}`,
+            `No se encontraron zonas con esta provincia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -491,7 +1036,7 @@ export class ZoneService {
 
         if (zones.length === 0) {
           throw new NotFoundException(
-            `No se encontraron zonas con este distrito: ${term}`,
+            `No se encontraron zonas con este distrito: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -542,7 +1087,7 @@ export class ZoneService {
           const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
 
           throw new NotFoundException(
-            `No se encontraron zonas con este estado de registro: ${value}`,
+            `No se encontraron zonas con este estado de registro: ${value} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -563,6 +1108,18 @@ export class ZoneService {
     ) {
       throw new BadRequestException(
         `Tipos de búsqueda no validos, solo son validos: ${Object.values(ZoneSearchTypeNames).join(', ')}`,
+      );
+    }
+
+    if (
+      term &&
+      (ZoneSearchType.FirstNames ||
+        ZoneSearchType.LastNames ||
+        ZoneSearchType.FullNames) &&
+      !searchSubType
+    ) {
+      throw new BadRequestException(
+        `Para buscar por nombres o apellidos el sub-tipo es requerido.`,
       );
     }
   }

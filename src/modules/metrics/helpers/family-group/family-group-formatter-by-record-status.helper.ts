@@ -30,18 +30,18 @@ export const familyGroupFormatterByRecordStatus = ({
 
       if (!acc[zoneName]) {
         acc[zoneName] = {
-          copastor: familyGroup?.theirCopastor?.member?.firstName
+          copastor: familyGroup?.theirCopastor?.member?.firstNames
             ? `${getInitialFullNames({
-                firstNames: familyGroup?.theirCopastor?.member?.firstName ?? '',
+                firstNames: familyGroup?.theirCopastor?.member?.firstNames ?? '',
                 lastNames: '',
-              })} ${familyGroup?.theirCopastor?.member?.lastName}`
+              })} ${familyGroup?.theirCopastor?.member?.lastNames}`
             : 'Sin Co-Pastor',
-          supervisor: familyGroup?.theirSupervisor?.member?.firstName
+          supervisor: familyGroup?.theirSupervisor?.member?.firstNames
             ? `${getInitialFullNames({
                 firstNames:
-                  familyGroup?.theirSupervisor?.member?.firstName ?? '',
+                  familyGroup?.theirSupervisor?.member?.firstNames ?? '',
                 lastNames: '',
-              })} ${familyGroup?.theirSupervisor?.member?.lastName}`
+              })} ${familyGroup?.theirSupervisor?.member?.lastNames}`
             : 'Sin Supervisor',
           active: 0,
           inactive: 0,

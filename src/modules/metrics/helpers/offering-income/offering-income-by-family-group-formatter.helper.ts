@@ -14,8 +14,8 @@ interface Church {
 
 interface Preacher {
   id: string;
-  firstName: string;
-  lastName: string;
+  firstNames: string;
+  lastNames: string;
 }
 
 interface FamilyGroup {
@@ -77,12 +77,12 @@ export const offeringIncomeByFamilyGroupFormatter = ({
           },
           preacher: {
             id: offering?.familyGroup?.theirPreacher?.id,
-            firstName: getInitialFullNames({
+            firstNames: getInitialFullNames({
               firstNames:
-                offering?.familyGroup?.theirPreacher?.member?.firstName ?? '',
+                offering?.familyGroup?.theirPreacher?.member?.firstNames ?? '',
               lastNames: '',
             }),
-            lastName: offering?.familyGroup?.theirPreacher?.member?.lastName,
+            lastNames: offering?.familyGroup?.theirPreacher?.member?.lastNames,
           },
           church: {
             isAnexe: offering?.church?.isAnexe,

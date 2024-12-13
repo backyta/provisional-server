@@ -91,7 +91,8 @@ export class Supervisor {
 
   @OneToOne(() => Zone, {
     onDelete: 'SET NULL',
-  }) // NOTE: Revisar esto al eliminar zona se pone null el supervisor
+  })
+  // NOTE: Revisar esto al eliminar zona se pone null el supervisor
   @JoinColumn({ name: 'their_zone_id' })
   theirZone: Zone;
 }

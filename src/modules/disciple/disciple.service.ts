@@ -30,6 +30,8 @@ import {
 import { discipleDataFormatter } from '@/modules/disciple/helpers';
 import { CreateDiscipleDto, UpdateDiscipleDto } from '@/modules/disciple/dto';
 
+import { MemberType } from '@/modules/offering/income/enums';
+
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
 import { Church } from '@/modules/church/entities';
@@ -40,6 +42,7 @@ import { Disciple } from '@/modules/disciple/entities';
 import { Preacher } from '@/modules/preacher/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
 import { FamilyGroup } from '@/modules/family-group/entities';
+import { OfferingIncome } from '@/modules/offering/income/entities';
 
 @Injectable()
 export class DiscipleService {
@@ -72,6 +75,9 @@ export class DiscipleService {
 
     @InjectRepository(Member)
     private readonly memberRepository: Repository<Member>,
+
+    @InjectRepository(OfferingIncome)
+    private readonly offeringIncomeRepository: Repository<OfferingIncome>,
   ) {}
 
   //* CREATE DISCIPLE
@@ -233,8 +239,8 @@ export class DiscipleService {
     //* Create new instance member and assign to new copastor instance
     try {
       const newMember = this.memberRepository.create({
-        firstName: createDiscipleDto.firstName,
-        lastName: createDiscipleDto.lastName,
+        firstNames: createDiscipleDto.firstNames,
+        lastNames: createDiscipleDto.lastNames,
         gender: createDiscipleDto.gender,
         originCountry: createDiscipleDto.originCountry,
         birthDate: createDiscipleDto.birthDate,
@@ -243,12 +249,12 @@ export class DiscipleService {
         conversionDate: createDiscipleDto.conversionDate,
         email: createDiscipleDto.email,
         phoneNumber: createDiscipleDto.phoneNumber,
-        country: createDiscipleDto.country,
-        department: createDiscipleDto.department,
-        province: createDiscipleDto.province,
-        district: createDiscipleDto.district,
-        urbanSector: createDiscipleDto.urbanSector,
-        address: createDiscipleDto.address,
+        residenceCountry: createDiscipleDto.residenceCountry,
+        residenceDepartment: createDiscipleDto.residenceDepartment,
+        residenceProvince: createDiscipleDto.residenceProvince,
+        residenceDistrict: createDiscipleDto.residenceDistrict,
+        residenceUrbanSector: createDiscipleDto.residenceUrbanSector,
+        residenceAddress: createDiscipleDto.residenceAddress,
         referenceAddress: createDiscipleDto.referenceAddress,
         roles: createDiscipleDto.roles,
       });
@@ -399,8 +405,8 @@ export class DiscipleService {
     //* Disciple by disciple names
     if (
       term &&
-      searchType === DiscipleSearchType.FirstName &&
-      searchSubType === DiscipleSearchSubType.ByDiscipleNames
+      searchType === DiscipleSearchType.FirstNames &&
+      searchSubType === DiscipleSearchSubType.ByDiscipleFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -409,7 +415,7 @@ export class DiscipleService {
           where: {
             theirChurch: church,
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -432,7 +438,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos por los nombres: ${firstNames}`,
+            `No se encontraron discípulos con los nombres: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -449,8 +455,8 @@ export class DiscipleService {
     //* Disciples by preacher names
     if (
       term &&
-      searchType === DiscipleSearchType.FirstName &&
-      searchSubType === DiscipleSearchSubType.DiscipleByPreacherNames
+      searchType === DiscipleSearchType.FirstNames &&
+      searchSubType === DiscipleSearchSubType.DiscipleByPreacherFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -458,7 +464,7 @@ export class DiscipleService {
         const preachers = await this.preacherRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -492,7 +498,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos por los nombres de su predicador: ${firstNames}`,
+            `No se encontraron discípulos con los nombres de su predicador: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -509,8 +515,8 @@ export class DiscipleService {
     //* Disciples by supervisor names
     if (
       term &&
-      searchType === DiscipleSearchType.FirstName &&
-      searchSubType === DiscipleSearchSubType.DiscipleBySupervisorNames
+      searchType === DiscipleSearchType.FirstNames &&
+      searchSubType === DiscipleSearchSubType.DiscipleBySupervisorFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -518,7 +524,7 @@ export class DiscipleService {
         const supervisors = await this.supervisorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -552,7 +558,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos por los nombres de su supervisor: ${firstNames}`,
+            `No se encontraron discípulos con los nombres de su supervisor: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -569,8 +575,8 @@ export class DiscipleService {
     //* Disciples by co-pastor names
     if (
       term &&
-      searchType === DiscipleSearchType.FirstName &&
-      searchSubType === DiscipleSearchSubType.DiscipleByCopastorNames
+      searchType === DiscipleSearchType.FirstNames &&
+      searchSubType === DiscipleSearchSubType.DiscipleByCopastorFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -578,7 +584,7 @@ export class DiscipleService {
         const copastors = await this.copastorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -612,7 +618,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos por los nombres de su co-pastor: ${firstNames}`,
+            `No se encontraron discípulos con los nombres de su co-pastor: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -629,8 +635,8 @@ export class DiscipleService {
     //* Disciples by pastor names
     if (
       term &&
-      searchType === DiscipleSearchType.FirstName &&
-      searchSubType === DiscipleSearchSubType.DiscipleByPastorNames
+      searchType === DiscipleSearchType.FirstNames &&
+      searchSubType === DiscipleSearchSubType.DiscipleByPastorFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -638,7 +644,7 @@ export class DiscipleService {
         const pastors = await this.pastorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -672,7 +678,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos por los nombres de su pastor: ${firstNames}`,
+            `No se encontraron discípulos con los nombres de su pastor: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -690,7 +696,7 @@ export class DiscipleService {
     //* Disciples by last names
     if (
       term &&
-      searchType === DiscipleSearchType.LastName &&
+      searchType === DiscipleSearchType.LastNames &&
       searchSubType === DiscipleSearchSubType.ByDiscipleLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
@@ -700,7 +706,7 @@ export class DiscipleService {
           where: {
             theirChurch: church,
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -723,7 +729,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos por los apellidos: ${lastNames}`,
+            `No se encontraron discípulos con los apellidos: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -740,7 +746,7 @@ export class DiscipleService {
     //* Disciples by preacher last names
     if (
       term &&
-      searchType === DiscipleSearchType.LastName &&
+      searchType === DiscipleSearchType.LastNames &&
       searchSubType === DiscipleSearchSubType.DiscipleByPreacherLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
@@ -749,7 +755,7 @@ export class DiscipleService {
         const preachers = await this.preacherRepository.find({
           where: {
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -783,7 +789,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos por los apellidos de su predicador: ${lastNames}`,
+            `No se encontraron discípulos con los apellidos de su predicador: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -800,7 +806,7 @@ export class DiscipleService {
     //* Disciples by supervisor last names
     if (
       term &&
-      searchType === DiscipleSearchType.LastName &&
+      searchType === DiscipleSearchType.LastNames &&
       searchSubType === DiscipleSearchSubType.DiscipleBySupervisorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
@@ -809,7 +815,7 @@ export class DiscipleService {
         const supervisors = await this.supervisorRepository.find({
           where: {
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -843,7 +849,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos por los apellidos de su supervisor: ${lastNames}`,
+            `No se encontraron discípulos con los apellidos de su supervisor: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -860,7 +866,7 @@ export class DiscipleService {
     //* Disciples by co-pastor last names
     if (
       term &&
-      searchType === DiscipleSearchType.LastName &&
+      searchType === DiscipleSearchType.LastNames &&
       searchSubType === DiscipleSearchSubType.DiscipleByCopastorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
@@ -869,7 +875,7 @@ export class DiscipleService {
         const copastors = await this.copastorRepository.find({
           where: {
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -903,7 +909,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos por los apellidos de su co-pastor: ${lastNames}`,
+            `No se encontraron discípulos con los apellidos de su co-pastor: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -920,7 +926,7 @@ export class DiscipleService {
     //* Disciples by pastor last names
     if (
       term &&
-      searchType === DiscipleSearchType.LastName &&
+      searchType === DiscipleSearchType.LastNames &&
       searchSubType === DiscipleSearchSubType.DiscipleByPastorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
@@ -929,7 +935,7 @@ export class DiscipleService {
         const pastors = await this.pastorRepository.find({
           where: {
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -963,7 +969,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos por los apellidos de su pastor: ${lastNames}`,
+            `No se encontraron discípulos con los apellidos de su pastor: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -981,8 +987,8 @@ export class DiscipleService {
     //* Disciples by full names
     if (
       term &&
-      searchType === DiscipleSearchType.FullName &&
-      searchSubType === DiscipleSearchSubType.ByDiscipleFullName
+      searchType === DiscipleSearchType.FullNames &&
+      searchSubType === DiscipleSearchSubType.ByDiscipleFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -992,8 +998,8 @@ export class DiscipleService {
           where: {
             theirChurch: church,
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1016,7 +1022,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos por los nombres y apellidos: ${firstNames} ${lastNames}`,
+            `No se encontraron discípulos con los nombres y apellidos: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1033,8 +1039,8 @@ export class DiscipleService {
     //* Disciples by preacher full names
     if (
       term &&
-      searchType === DiscipleSearchType.FullName &&
-      searchSubType === DiscipleSearchSubType.DiscipleByPreacherFullName
+      searchType === DiscipleSearchType.FullNames &&
+      searchSubType === DiscipleSearchSubType.DiscipleByPreacherFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -1043,8 +1049,8 @@ export class DiscipleService {
         const preachers = await this.preacherRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1078,7 +1084,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos por los nombres y apellidos de su predicador: ${firstNames} ${lastNames}`,
+            `No se encontraron discípulos con los nombres y apellidos de su predicador: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1095,8 +1101,8 @@ export class DiscipleService {
     //* Disciples by supervisor full names
     if (
       term &&
-      searchType === DiscipleSearchType.FullName &&
-      searchSubType === DiscipleSearchSubType.DiscipleBySupervisorFullName
+      searchType === DiscipleSearchType.FullNames &&
+      searchSubType === DiscipleSearchSubType.DiscipleBySupervisorFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -1105,8 +1111,8 @@ export class DiscipleService {
         const supervisors = await this.supervisorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1140,7 +1146,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos por los nombres y apellidos de su supervisor: ${firstNames} ${lastNames}`,
+            `No se encontraron discípulos con los nombres y apellidos de su supervisor: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1157,8 +1163,8 @@ export class DiscipleService {
     //* Disciples by co-pastor full names
     if (
       term &&
-      searchType === DiscipleSearchType.FullName &&
-      searchSubType === DiscipleSearchSubType.DiscipleByCopastorFullName
+      searchType === DiscipleSearchType.FullNames &&
+      searchSubType === DiscipleSearchSubType.DiscipleByCopastorFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -1167,8 +1173,8 @@ export class DiscipleService {
         const copastors = await this.copastorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1202,7 +1208,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos por los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames}`,
+            `No se encontraron discípulos con los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1219,8 +1225,8 @@ export class DiscipleService {
     //* Disciples by pastor full names
     if (
       term &&
-      searchType === DiscipleSearchType.FullName &&
-      searchSubType === DiscipleSearchSubType.DiscipleByPastorFullName
+      searchType === DiscipleSearchType.FullNames &&
+      searchSubType === DiscipleSearchSubType.DiscipleByPastorFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -1229,8 +1235,8 @@ export class DiscipleService {
         const pastors = await this.pastorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1264,7 +1270,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos por los nombres y apellidos de su pastor: ${firstNames} ${lastNames}`,
+            `No se encontraron discípulos con los nombres y apellidos de su pastor: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1320,7 +1326,7 @@ export class DiscipleService {
           const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
-            `No se encontraron discípulos con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
+            `No se encontraron discípulos con este rango de fechas de nacimiento: ${fromDate} - ${toDate} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1383,7 +1389,7 @@ export class DiscipleService {
           const monthInSpanish = monthNames[term.toLowerCase()] ?? term;
 
           throw new NotFoundException(
-            `No se encontraron discípulos con este mes de nacimiento: ${monthInSpanish}`,
+            `No se encontraron discípulos con este mes de nacimiento: ${monthInSpanish} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1439,7 +1445,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos con este código de grupo familiar: ${term}`,
+            `No se encontraron discípulos con este código de grupo familiar: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1493,7 +1499,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos con este nombre de grupo familiar: ${term}`,
+            `No se encontraron discípulos con este nombre de grupo familiar: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1545,7 +1551,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos con este nombre de zona: ${term}`,
+            `No se encontraron discípulos con este nombre de zona: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1598,7 +1604,7 @@ export class DiscipleService {
           const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
 
           throw new NotFoundException(
-            `No se encontraron discípulos con este género: ${genderInSpanish}`,
+            `No se encontraron discípulos con este género: ${genderInSpanish} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1658,7 +1664,7 @@ export class DiscipleService {
             MaritalStatusNames[term.toLowerCase()] ?? term;
 
           throw new NotFoundException(
-            `No se encontraron discípulos con este estado civil: ${maritalStatusInSpanish}`,
+            `No se encontraron discípulos con este estado civil: ${maritalStatusInSpanish} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1702,7 +1708,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos con este país de origen: ${term}`,
+            `No se encontraron discípulos con este país de origen: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1716,14 +1722,14 @@ export class DiscipleService {
       }
     }
 
-    //? Find by department --> Many
-    if (term && searchType === DiscipleSearchType.Department) {
+    //? Find by residence country --> Many
+    if (term && searchType === DiscipleSearchType.ResidenceCountry) {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
             theirChurch: church,
             member: {
-              department: ILike(`%${term}%`),
+              residenceCountry: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1746,7 +1752,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos con este departamento: ${term}`,
+            `No se encontraron discípulos con este país de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1760,14 +1766,14 @@ export class DiscipleService {
       }
     }
 
-    //? Find by province --> Many
-    if (term && searchType === DiscipleSearchType.Province) {
+    //? Find by residence department --> Many
+    if (term && searchType === DiscipleSearchType.ResidenceDepartment) {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
             theirChurch: church,
             member: {
-              province: ILike(`%${term}%`),
+              residenceDepartment: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1790,7 +1796,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos con esta provincia: ${term}`,
+            `No se encontraron discípulos con este departamento de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1804,14 +1810,14 @@ export class DiscipleService {
       }
     }
 
-    //? Find by district --> Many
-    if (term && searchType === DiscipleSearchType.District) {
+    //? Find by residence province --> Many
+    if (term && searchType === DiscipleSearchType.ResidenceProvince) {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
             theirChurch: church,
             member: {
-              district: ILike(`%${term}%`),
+              residenceProvince: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1834,7 +1840,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos con este distrito: ${term}`,
+            `No se encontraron discípulos con esta provincia de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1848,14 +1854,14 @@ export class DiscipleService {
       }
     }
 
-    //? Find by urban sector --> Many
-    if (term && searchType === DiscipleSearchType.UrbanSector) {
+    //? Find by residence district --> Many
+    if (term && searchType === DiscipleSearchType.ResidenceDistrict) {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
             theirChurch: church,
             member: {
-              urbanSector: ILike(`%${term}%`),
+              residenceDistrict: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1878,7 +1884,7 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos con este sector urbano: ${term}`,
+            `No se encontraron discípulos con este distrito de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1892,14 +1898,14 @@ export class DiscipleService {
       }
     }
 
-    //? Find by address --> Many
-    if (term && searchType === DiscipleSearchType.Address) {
+    //? Find by residence urban sector --> Many
+    if (term && searchType === DiscipleSearchType.ResidenceUrbanSector) {
       try {
         const disciples = await this.discipleRepository.find({
           where: {
             theirChurch: church,
             member: {
-              address: ILike(`%${term}%`),
+              residenceUrbanSector: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1922,7 +1928,51 @@ export class DiscipleService {
 
         if (disciples.length === 0) {
           throw new NotFoundException(
-            `No se encontraron discípulos con esta dirección: ${term}`,
+            `No se encontraron discípulos con este sector urbano de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
+          );
+        }
+
+        return discipleDataFormatter({ disciples }) as any;
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
+      }
+    }
+
+    //? Find by residence address --> Many
+    if (term && searchType === DiscipleSearchType.ResidenceAddress) {
+      try {
+        const disciples = await this.discipleRepository.find({
+          where: {
+            theirChurch: church,
+            member: {
+              residenceAddress: ILike(`%${term}%`),
+            },
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'member',
+            'theirChurch',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
+            'theirZone',
+            'theirPreacher.member',
+            'theirFamilyGroup',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (disciples.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron discípulos con esta dirección de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1972,7 +2022,7 @@ export class DiscipleService {
           const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
 
           throw new NotFoundException(
-            `No se encontraron discípulos con este estado de registro: ${value}`,
+            `No se encontraron discípulos con este estado de registro: ${value} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -2000,9 +2050,9 @@ export class DiscipleService {
 
     if (
       term &&
-      (DiscipleSearchType.FirstName ||
-        DiscipleSearchType.LastName ||
-        DiscipleSearchType.FullName) &&
+      (DiscipleSearchType.FirstNames ||
+        DiscipleSearchType.LastNames ||
+        DiscipleSearchType.FullNames) &&
       !searchSubType
     ) {
       throw new BadRequestException(
@@ -2250,8 +2300,8 @@ export class DiscipleService {
         try {
           const updatedMember = await this.memberRepository.preload({
             id: disciple.member.id,
-            firstName: updateDiscipleDto.firstName,
-            lastName: updateDiscipleDto.lastName,
+            firstNames: updateDiscipleDto.firstNames,
+            lastNames: updateDiscipleDto.lastNames,
             gender: updateDiscipleDto.gender,
             originCountry: updateDiscipleDto.originCountry,
             birthDate: updateDiscipleDto.birthDate,
@@ -2260,12 +2310,12 @@ export class DiscipleService {
             conversionDate: updateDiscipleDto.conversionDate,
             email: updateDiscipleDto.email,
             phoneNumber: updateDiscipleDto.phoneNumber,
-            country: updateDiscipleDto.country,
-            department: updateDiscipleDto.department,
-            province: updateDiscipleDto.province,
-            district: updateDiscipleDto.district,
-            urbanSector: updateDiscipleDto.urbanSector,
-            address: updateDiscipleDto.address,
+            residenceCountry: updateDiscipleDto.residenceCountry,
+            residenceDepartment: updateDiscipleDto.residenceDepartment,
+            residenceProvince: updateDiscipleDto.residenceProvince,
+            residenceDistrict: updateDiscipleDto.residenceDistrict,
+            residenceUrbanSector: updateDiscipleDto.residenceUrbanSector,
+            residenceAddress: updateDiscipleDto.residenceAddress,
             referenceAddress: updateDiscipleDto.referenceAddress,
             roles: updateDiscipleDto.roles,
           });
@@ -2310,8 +2360,8 @@ export class DiscipleService {
         try {
           const updatedMember = await this.memberRepository.preload({
             id: disciple.member.id,
-            firstName: updateDiscipleDto.firstName,
-            lastName: updateDiscipleDto.lastName,
+            firstNames: updateDiscipleDto.firstNames,
+            lastNames: updateDiscipleDto.lastNames,
             gender: updateDiscipleDto.gender,
             originCountry: updateDiscipleDto.originCountry,
             birthDate: updateDiscipleDto.birthDate,
@@ -2320,12 +2370,12 @@ export class DiscipleService {
             conversionDate: updateDiscipleDto.conversionDate,
             email: updateDiscipleDto.email,
             phoneNumber: updateDiscipleDto.phoneNumber,
-            country: updateDiscipleDto.country,
-            department: updateDiscipleDto.department,
-            province: updateDiscipleDto.province,
-            district: updateDiscipleDto.district,
-            urbanSector: updateDiscipleDto.urbanSector,
-            address: updateDiscipleDto.address,
+            residenceCountry: updateDiscipleDto.residenceCountry,
+            residenceDepartment: updateDiscipleDto.residenceDepartment,
+            residenceProvince: updateDiscipleDto.residenceProvince,
+            residenceDistrict: updateDiscipleDto.residenceDistrict,
+            residenceUrbanSector: updateDiscipleDto.residenceUrbanSector,
+            residenceAddress: updateDiscipleDto.residenceAddress,
             referenceAddress: updateDiscipleDto.referenceAddress,
             roles: updateDiscipleDto.roles,
           });
@@ -2479,8 +2529,8 @@ export class DiscipleService {
       try {
         const updatedMember = await this.memberRepository.preload({
           id: disciple.member.id,
-          firstName: updateDiscipleDto.firstName,
-          lastName: updateDiscipleDto.lastName,
+          firstNames: updateDiscipleDto.firstNames,
+          lastNames: updateDiscipleDto.lastNames,
           gender: updateDiscipleDto.gender,
           originCountry: updateDiscipleDto.originCountry,
           birthDate: updateDiscipleDto.birthDate,
@@ -2489,12 +2539,12 @@ export class DiscipleService {
           conversionDate: updateDiscipleDto.conversionDate,
           email: updateDiscipleDto.email,
           phoneNumber: updateDiscipleDto.phoneNumber,
-          country: updateDiscipleDto.country,
-          department: updateDiscipleDto.department,
-          province: updateDiscipleDto.province,
-          district: updateDiscipleDto.district,
-          urbanSector: updateDiscipleDto.urbanSector,
-          address: updateDiscipleDto.address,
+          residenceCountry: updateDiscipleDto.residenceCountry,
+          residenceDepartment: updateDiscipleDto.residenceDepartment,
+          residenceProvince: updateDiscipleDto.residenceProvince,
+          residenceDistrict: updateDiscipleDto.residenceDistrict,
+          residenceUrbanSector: updateDiscipleDto.residenceUrbanSector,
+          residenceAddress: updateDiscipleDto.residenceAddress,
           referenceAddress: updateDiscipleDto.referenceAddress,
           roles: updateDiscipleDto.roles,
         });
@@ -2514,6 +2564,29 @@ export class DiscipleService {
         });
 
         const savedPreacher = await this.preacherRepository.save(newPreacher);
+
+        //! Find and replace with the new id and change member type
+        const offeringsByOldDisciple = await this.offeringIncomeRepository.find(
+          {
+            where: {
+              disciple: {
+                id: disciple.id,
+              },
+            },
+          },
+        );
+
+        await Promise.all(
+          offeringsByOldDisciple.map(async (offering) => {
+            await this.offeringIncomeRepository.update(offering?.id, {
+              disciple: null,
+              memberType: MemberType.Preacher,
+              preacher: savedPreacher,
+              updatedAt: new Date(),
+              updatedBy: user,
+            });
+          }),
+        );
 
         await this.discipleRepository.remove(disciple);
 

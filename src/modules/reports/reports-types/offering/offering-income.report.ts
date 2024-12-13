@@ -129,16 +129,18 @@ export const getOfferingIncomeReport = (
               `${MemberTypeNames[item?.memberType] ?? '-'}
               ${
                 item?.memberType === MemberType.Pastor
-                  ? `${item?.pastor?.firstName} ${item?.pastor?.lastName}`
+                  ? `${item?.pastor?.firstNames} ${item?.pastor?.lastNames}`
                   : item?.memberType === MemberType.Copastor
-                    ? `${item?.copastor?.firstName} ${item?.copastor?.lastName}`
+                    ? `${item?.copastor?.firstNames} ${item?.copastor?.lastNames}`
                     : item?.memberType === MemberType.Supervisor
-                      ? `${item?.supervisor?.firstName} ${item?.supervisor?.lastName}`
+                      ? `${item?.supervisor?.firstNames} ${item?.supervisor?.lastNames}`
                       : item?.memberType === MemberType.Preacher
-                        ? `${item?.preacher?.firstName} ${item?.preacher?.lastName}`
+                        ? `${item?.preacher?.firstNames} ${item?.preacher?.lastNames}`
                         : item?.memberType === MemberType.Disciple
-                          ? `${item?.disciple?.firstName} ${item?.disciple?.lastName}`
-                          : '-'
+                          ? `${item?.disciple?.firstNames} ${item?.disciple?.lastNames}`
+                          : item?.memberType === MemberType.ExternalDonor
+                            ? `${item?.externalDonor?.firstNames} ${item?.externalDonor?.lastNames}`
+                            : '-'
               }`,
             ]),
             ['', '', '', '', '', '', '', '', ''],

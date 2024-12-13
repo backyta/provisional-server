@@ -33,11 +33,11 @@ export const preacherFormatterByZoneAndGender = ({ zones }: Options) => {
     ).length;
 
     acc[zone.zoneName] = {
-      copastor: zone?.theirCopastor?.member?.firstName
-        ? `${getInitialFullNames({ firstNames: zone?.theirCopastor?.member?.firstName ?? '', lastNames: '' })} ${zone?.theirCopastor?.member?.lastName}`
+      copastor: zone?.theirCopastor?.member?.firstNames
+        ? `${getInitialFullNames({ firstNames: zone?.theirCopastor?.member?.firstNames ?? '', lastNames: '' })} ${zone?.theirCopastor?.member?.lastNames}`
         : 'Sin Supervisor',
-      supervisor: zone?.theirSupervisor?.member?.firstName
-        ? `${getInitialFullNames({ firstNames: zone?.theirSupervisor?.member?.firstName ?? '', lastNames: '' })} ${zone?.theirSupervisor?.member?.lastName}`
+      supervisor: zone?.theirSupervisor?.member?.firstNames
+        ? `${getInitialFullNames({ firstNames: zone?.theirSupervisor?.member?.firstNames ?? '', lastNames: '' })} ${zone?.theirSupervisor?.member?.lastNames}`
         : 'Sin Supervisor',
       men: menCount,
       women: womenCount,

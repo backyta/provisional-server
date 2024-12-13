@@ -85,8 +85,8 @@ export const getUsersReport = (
               },
             ],
             ...data.map((item) => [
-              item?.firstName,
-              item?.lastName,
+              item?.firstNames,
+              item?.lastNames,
               GenderNames[item?.gender],
               item?.email,
               item?.roles.length > 1

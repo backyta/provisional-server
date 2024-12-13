@@ -38,6 +38,8 @@ import {
 } from '@/common/dtos';
 import { dateFormatterToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
 
+import { MemberType } from '@/modules/offering/income/enums';
+
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
 import { Church } from '@/modules/church/entities';
@@ -47,6 +49,7 @@ import { Copastor } from '@/modules/copastor/entities';
 import { Disciple } from '@/modules/disciple/entities/';
 import { Supervisor } from '@/modules/supervisor/entities';
 import { FamilyGroup } from '@/modules/family-group/entities';
+import { OfferingIncome } from '@/modules/offering/income/entities';
 
 @Injectable()
 export class PreacherService {
@@ -79,6 +82,9 @@ export class PreacherService {
 
     @InjectRepository(Member)
     private readonly memberRepository: Repository<Member>,
+
+    @InjectRepository(OfferingIncome)
+    private readonly offeringIncomeRepository: Repository<OfferingIncome>,
   ) {}
 
   //* CREATE PREACHER
@@ -203,8 +209,8 @@ export class PreacherService {
     //* Create new instance member and assign to new preacher instance
     try {
       const newMember = this.memberRepository.create({
-        firstName: createPreacherDto.firstName,
-        lastName: createPreacherDto.lastName,
+        firstNames: createPreacherDto.firstNames,
+        lastNames: createPreacherDto.lastNames,
         gender: createPreacherDto.gender,
         originCountry: createPreacherDto.originCountry,
         birthDate: createPreacherDto.birthDate,
@@ -213,12 +219,12 @@ export class PreacherService {
         conversionDate: createPreacherDto.conversionDate,
         email: createPreacherDto.email,
         phoneNumber: createPreacherDto.phoneNumber,
-        country: createPreacherDto.country,
-        department: createPreacherDto.department,
-        province: createPreacherDto.province,
-        district: createPreacherDto.district,
-        urbanSector: createPreacherDto.urbanSector,
-        address: createPreacherDto.address,
+        residenceCountry: createPreacherDto.residenceCountry,
+        residenceDepartment: createPreacherDto.residenceDepartment,
+        residenceProvince: createPreacherDto.residenceProvince,
+        residenceDistrict: createPreacherDto.residenceDistrict,
+        residenceUrbanSector: createPreacherDto.residenceUrbanSector,
+        residenceAddress: createPreacherDto.residenceAddress,
         referenceAddress: createPreacherDto.referenceAddress,
         roles: createPreacherDto.roles,
       });
@@ -368,8 +374,8 @@ export class PreacherService {
     //* Preacher by preacher names
     if (
       term &&
-      searchType === PreacherSearchType.FirstName &&
-      searchSubType === PreacherSearchSubType.ByPreacherNames
+      searchType === PreacherSearchType.FirstNames &&
+      searchSubType === PreacherSearchSubType.ByPreacherFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -378,7 +384,7 @@ export class PreacherService {
           where: {
             theirChurch: church,
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -401,7 +407,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) con estos nombres: ${firstNames}`,
+            `No se encontraron predicadores(as) con estos nombres: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -418,8 +424,8 @@ export class PreacherService {
     //* Preachers by supervisor names
     if (
       term &&
-      searchType === PreacherSearchType.FirstName &&
-      searchSubType === PreacherSearchSubType.PreacherBySupervisorNames
+      searchType === PreacherSearchType.FirstNames &&
+      searchSubType === PreacherSearchSubType.PreacherBySupervisorFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -427,7 +433,7 @@ export class PreacherService {
         const supervisors = await this.supervisorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -461,7 +467,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) por los nombres de su supervisor: ${firstNames}`,
+            `No se encontraron predicadores(as) con los nombres de su supervisor: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -478,8 +484,8 @@ export class PreacherService {
     //* Preachers by co-pastor names
     if (
       term &&
-      searchType === PreacherSearchType.FirstName &&
-      searchSubType === PreacherSearchSubType.PreacherByCopastorNames
+      searchType === PreacherSearchType.FirstNames &&
+      searchSubType === PreacherSearchSubType.PreacherByCopastorFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -487,7 +493,7 @@ export class PreacherService {
         const copastors = await this.copastorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -521,7 +527,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) por los nombres de su co-pastor: ${firstNames}`,
+            `No se encontraron predicadores(as) con los nombres de su co-pastor: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -538,8 +544,8 @@ export class PreacherService {
     //* Preachers by pastor names
     if (
       term &&
-      searchType === PreacherSearchType.FirstName &&
-      searchSubType === PreacherSearchSubType.PreacherByPastorNames
+      searchType === PreacherSearchType.FirstNames &&
+      searchSubType === PreacherSearchSubType.PreacherByPastorFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -547,7 +553,7 @@ export class PreacherService {
         const pastors = await this.pastorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -581,7 +587,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) por los nombres de su pastor: ${firstNames}`,
+            `No se encontraron predicadores(as) con los nombres de su pastor: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -599,7 +605,7 @@ export class PreacherService {
     //* Preachers by last names
     if (
       term &&
-      searchType === PreacherSearchType.LastName &&
+      searchType === PreacherSearchType.LastNames &&
       searchSubType === PreacherSearchSubType.ByPreacherLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
@@ -609,7 +615,7 @@ export class PreacherService {
           where: {
             theirChurch: church,
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -632,7 +638,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) con estos apellidos: ${lastNames}`,
+            `No se encontraron predicadores(as) con estos apellidos: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -649,7 +655,7 @@ export class PreacherService {
     //* Preachers by supervisor last names
     if (
       term &&
-      searchType === PreacherSearchType.LastName &&
+      searchType === PreacherSearchType.LastNames &&
       searchSubType === PreacherSearchSubType.PreacherBySupervisorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
@@ -658,7 +664,7 @@ export class PreacherService {
         const supervisors = await this.supervisorRepository.find({
           where: {
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -692,7 +698,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) por los apellidos de su supervisor: ${lastNames}`,
+            `No se encontraron predicadores(as) con los apellidos de su supervisor: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -709,7 +715,7 @@ export class PreacherService {
     //* Preachers by co-pastor last names
     if (
       term &&
-      searchType === PreacherSearchType.LastName &&
+      searchType === PreacherSearchType.LastNames &&
       searchSubType === PreacherSearchSubType.PreacherByCopastorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
@@ -718,7 +724,7 @@ export class PreacherService {
         const copastors = await this.copastorRepository.find({
           where: {
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -752,7 +758,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) por los apellidos de su co-pastor: ${lastNames}`,
+            `No se encontraron predicadores(as) con los apellidos de su co-pastor: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -769,7 +775,7 @@ export class PreacherService {
     //* Preachers by pastor last names
     if (
       term &&
-      searchType === PreacherSearchType.LastName &&
+      searchType === PreacherSearchType.LastNames &&
       searchSubType === PreacherSearchSubType.PreacherByPastorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
@@ -778,7 +784,7 @@ export class PreacherService {
         const pastors = await this.pastorRepository.find({
           where: {
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -812,7 +818,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) por los apellidos de su pastor: ${lastNames}`,
+            `No se encontraron predicadores(as) con los apellidos de su pastor: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -830,8 +836,8 @@ export class PreacherService {
     //* Preachers by full names
     if (
       term &&
-      searchType === PreacherSearchType.FullName &&
-      searchSubType === PreacherSearchSubType.ByPreacherFullName
+      searchType === PreacherSearchType.FullNames &&
+      searchSubType === PreacherSearchSubType.ByPreacherFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -841,8 +847,8 @@ export class PreacherService {
           where: {
             theirChurch: church,
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -865,7 +871,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) con estos nombres y apellidos: ${firstNames} ${lastNames}`,
+            `No se encontraron predicadores(as) con estos nombres y apellidos: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -882,8 +888,8 @@ export class PreacherService {
     //* Preachers by supervisor full names
     if (
       term &&
-      searchType === PreacherSearchType.FullName &&
-      searchSubType === PreacherSearchSubType.PreacherBySupervisorFullName
+      searchType === PreacherSearchType.FullNames &&
+      searchSubType === PreacherSearchSubType.PreacherBySupervisorFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -892,8 +898,8 @@ export class PreacherService {
         const supervisors = await this.supervisorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -927,7 +933,7 @@ export class PreacherService {
 
         if (supervisors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) por los nombres y apellidos de su supervisor: ${firstNames} ${lastNames}`,
+            `No se encontraron predicadores(as) con los nombres y apellidos de su supervisor: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -944,8 +950,8 @@ export class PreacherService {
     //* Preachers by co-pastor full names
     if (
       term &&
-      searchType === PreacherSearchType.FullName &&
-      searchSubType === PreacherSearchSubType.PreacherByCopastorFullName
+      searchType === PreacherSearchType.FullNames &&
+      searchSubType === PreacherSearchSubType.PreacherByCopastorFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -954,8 +960,8 @@ export class PreacherService {
         const copastors = await this.copastorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -989,7 +995,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) por los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames}`,
+            `No se encontraron predicadores(as) con los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1006,8 +1012,8 @@ export class PreacherService {
     //* Preachers by pastor full names
     if (
       term &&
-      searchType === PreacherSearchType.FullName &&
-      searchSubType === PreacherSearchSubType.PreacherByPastorFullName
+      searchType === PreacherSearchType.FullNames &&
+      searchSubType === PreacherSearchSubType.PreacherByPastorFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -1016,8 +1022,8 @@ export class PreacherService {
         const pastors = await this.pastorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1051,7 +1057,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) por los nombres y apellidos de su pastor: ${firstNames} ${lastNames}`,
+            `No se encontraron predicadores(as) con los nombres y apellidos de su pastor: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1107,7 +1113,7 @@ export class PreacherService {
           const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
-            `No se encontraron predicadores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
+            `No se encontraron predicadores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1170,7 +1176,7 @@ export class PreacherService {
           const monthInSpanish = monthNames[term.toLowerCase()] ?? term;
 
           throw new NotFoundException(
-            `No se encontraron predicadores(as) con este mes de nacimiento: ${monthInSpanish}`,
+            `No se encontraron predicadores(as) con este mes de nacimiento: ${monthInSpanish} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1226,7 +1232,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) con este código de grupo familiar: ${term}`,
+            `No se encontraron predicadores(as) con este código de grupo familiar: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1280,7 +1286,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) con este nombre de grupo familiar: ${term}`,
+            `No se encontraron predicadores(as) con este nombre de grupo familiar: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1332,7 +1338,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) con este nombre de zona: ${term}`,
+            `No se encontraron predicadores(as) con este nombre de zona: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1412,7 +1418,7 @@ export class PreacherService {
           const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
 
           throw new NotFoundException(
-            `No se encontraron predicadores(as) con este género: ${genderInSpanish}`,
+            `No se encontraron predicadores(as) con este género: ${genderInSpanish} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1472,7 +1478,7 @@ export class PreacherService {
             MaritalStatusNames[term.toLowerCase()] ?? term;
 
           throw new NotFoundException(
-            `No se encontraron predicadores(as) con este estado civil: ${maritalStatusInSpanish}`,
+            `No se encontraron predicadores(as) con este estado civil: ${maritalStatusInSpanish} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1516,7 +1522,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) con este país de origen: ${term}`,
+            `No se encontraron predicadores(as) con este país de origen: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1530,14 +1536,14 @@ export class PreacherService {
       }
     }
 
-    //? Find by department --> Many
-    if (term && searchType === PreacherSearchType.Department) {
+    //? Find by residence country --> Many
+    if (term && searchType === PreacherSearchType.ResidenceCountry) {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
             theirChurch: church,
             member: {
-              department: ILike(`%${term}%`),
+              residenceCountry: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1560,7 +1566,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) con este departamento: ${term}`,
+            `No se encontraron predicadores(as) con este país de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1574,14 +1580,14 @@ export class PreacherService {
       }
     }
 
-    //? Find by province --> Many
-    if (term && searchType === PreacherSearchType.Province) {
+    //? Find by residence department --> Many
+    if (term && searchType === PreacherSearchType.ResidenceDepartment) {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
             theirChurch: church,
             member: {
-              province: ILike(`%${term}%`),
+              residenceDepartment: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1604,7 +1610,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) con esta provincia: ${term}`,
+            `No se encontraron predicadores(as) con este departamento de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1618,14 +1624,14 @@ export class PreacherService {
       }
     }
 
-    //? Find by district --> Many
-    if (term && searchType === PreacherSearchType.District) {
+    //? Find by residence province --> Many
+    if (term && searchType === PreacherSearchType.ResidenceProvince) {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
             theirChurch: church,
             member: {
-              district: ILike(`%${term}%`),
+              residenceProvince: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1648,7 +1654,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) con este distrito: ${term}`,
+            `No se encontraron predicadores(as) con esta provincia de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1662,14 +1668,14 @@ export class PreacherService {
       }
     }
 
-    //? Find by urban sector --> Many
-    if (term && searchType === PreacherSearchType.UrbanSector) {
+    //? Find by residence district --> Many
+    if (term && searchType === PreacherSearchType.ResidenceDistrict) {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
             theirChurch: church,
             member: {
-              urbanSector: ILike(`%${term}%`),
+              residenceDistrict: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1692,7 +1698,7 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) con este sector urbano: ${term}`,
+            `No se encontraron predicadores(as) con este distrito de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1706,14 +1712,14 @@ export class PreacherService {
       }
     }
 
-    //? Find by address --> Many
-    if (term && searchType === PreacherSearchType.Address) {
+    //? Find by residence urban sector --> Many
+    if (term && searchType === PreacherSearchType.ResidenceUrbanSector) {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
             theirChurch: church,
             member: {
-              address: ILike(`%${term}%`),
+              residenceUrbanSector: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1736,7 +1742,51 @@ export class PreacherService {
 
         if (preachers.length === 0) {
           throw new NotFoundException(
-            `No se encontraron predicadores(as) con esta dirección: ${term}`,
+            `No se encontraron predicadores(as) con este sector urbano de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
+          );
+        }
+
+        return preacherDataFormatter({ preachers }) as any;
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
+      }
+    }
+
+    //? Find by residence address --> Many
+    if (term && searchType === PreacherSearchType.ResidenceAddress) {
+      try {
+        const preachers = await this.preacherRepository.find({
+          where: {
+            theirChurch: church,
+            member: {
+              residenceAddress: ILike(`%${term}%`),
+            },
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'member',
+            'theirChurch',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
+            'theirZone',
+            'theirFamilyGroup',
+            'disciples.member',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (preachers.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron predicadores(as) con esta dirección de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1788,7 +1838,7 @@ export class PreacherService {
           const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
 
           throw new NotFoundException(
-            `No se encontraron predicadores(as) con este estado de registro: ${value}`,
+            `No se encontraron predicadores(as) con este estado de registro: ${value} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1816,9 +1866,9 @@ export class PreacherService {
 
     if (
       term &&
-      (PreacherSearchType.FirstName ||
-        PreacherSearchType.LastName ||
-        PreacherSearchType.FullName) &&
+      (PreacherSearchType.FirstNames ||
+        PreacherSearchType.LastNames ||
+        PreacherSearchType.FullNames) &&
       !searchSubType
     ) {
       throw new BadRequestException(
@@ -2069,8 +2119,8 @@ export class PreacherService {
         try {
           const updatedMember = await this.memberRepository.preload({
             id: preacher.member.id,
-            firstName: updatePreacherDto.firstName,
-            lastName: updatePreacherDto.lastName,
+            firstNames: updatePreacherDto.firstNames,
+            lastNames: updatePreacherDto.lastNames,
             gender: updatePreacherDto.gender,
             originCountry: updatePreacherDto.originCountry,
             birthDate: updatePreacherDto.birthDate,
@@ -2079,12 +2129,12 @@ export class PreacherService {
             conversionDate: updatePreacherDto.conversionDate,
             email: updatePreacherDto.email,
             phoneNumber: updatePreacherDto.phoneNumber,
-            country: updatePreacherDto.country,
-            department: updatePreacherDto.department,
-            province: updatePreacherDto.province,
-            district: updatePreacherDto.district,
-            urbanSector: updatePreacherDto.urbanSector,
-            address: updatePreacherDto.address,
+            residenceCountry: updatePreacherDto.residenceCountry,
+            residenceDepartment: updatePreacherDto.residenceDepartment,
+            residenceProvince: updatePreacherDto.residenceProvince,
+            residenceDistrict: updatePreacherDto.residenceDistrict,
+            residenceUrbanSector: updatePreacherDto.residenceUrbanSector,
+            residenceAddress: updatePreacherDto.residenceAddress,
             referenceAddress: updatePreacherDto.referenceAddress,
             roles: updatePreacherDto.roles,
           });
@@ -2316,8 +2366,8 @@ export class PreacherService {
         try {
           const updatedMember = await this.memberRepository.preload({
             id: preacher.member.id,
-            firstName: updatePreacherDto.firstName,
-            lastName: updatePreacherDto.lastName,
+            firstNames: updatePreacherDto.firstNames,
+            lastNames: updatePreacherDto.lastNames,
             gender: updatePreacherDto.gender,
             originCountry: updatePreacherDto.originCountry,
             birthDate: updatePreacherDto.birthDate,
@@ -2326,12 +2376,12 @@ export class PreacherService {
             conversionDate: updatePreacherDto.conversionDate,
             email: updatePreacherDto.email,
             phoneNumber: updatePreacherDto.phoneNumber,
-            country: updatePreacherDto.country,
-            department: updatePreacherDto.department,
-            province: updatePreacherDto.province,
-            district: updatePreacherDto.district,
-            urbanSector: updatePreacherDto.urbanSector,
-            address: updatePreacherDto.address,
+            residenceCountry: updatePreacherDto.residenceCountry,
+            residenceDepartment: updatePreacherDto.residenceDepartment,
+            residenceProvince: updatePreacherDto.residenceProvince,
+            residenceDistrict: updatePreacherDto.residenceDistrict,
+            residenceUrbanSector: updatePreacherDto.residenceUrbanSector,
+            residenceAddress: updatePreacherDto.residenceAddress,
             referenceAddress: updatePreacherDto.referenceAddress,
             roles: updatePreacherDto.roles,
           });
@@ -2521,8 +2571,8 @@ export class PreacherService {
         try {
           const updatedMember = await this.memberRepository.preload({
             id: preacher.member.id,
-            firstName: updatePreacherDto.firstName,
-            lastName: updatePreacherDto.lastName,
+            firstNames: updatePreacherDto.firstNames,
+            lastNames: updatePreacherDto.lastNames,
             gender: updatePreacherDto.gender,
             originCountry: updatePreacherDto.originCountry,
             birthDate: updatePreacherDto.birthDate,
@@ -2531,12 +2581,12 @@ export class PreacherService {
             conversionDate: updatePreacherDto.conversionDate,
             email: updatePreacherDto.email,
             phoneNumber: updatePreacherDto.phoneNumber,
-            country: updatePreacherDto.country,
-            department: updatePreacherDto.department,
-            province: updatePreacherDto.province,
-            district: updatePreacherDto.district,
-            urbanSector: updatePreacherDto.urbanSector,
-            address: updatePreacherDto.address,
+            residenceCountry: updatePreacherDto.residenceCountry,
+            residenceDepartment: updatePreacherDto.residenceDepartment,
+            residenceProvince: updatePreacherDto.residenceProvince,
+            residenceDistrict: updatePreacherDto.residenceDistrict,
+            residenceUrbanSector: updatePreacherDto.residenceUrbanSector,
+            residenceAddress: updatePreacherDto.residenceAddress,
             referenceAddress: updatePreacherDto.referenceAddress,
             roles: updatePreacherDto.roles,
           });
@@ -2556,6 +2606,28 @@ export class PreacherService {
 
           const savedSupervisor =
             await this.supervisorRepository.save(newSupervisor);
+
+          //! Find and replace with the new id and change member type
+          const offeringsByOldPreacher =
+            await this.offeringIncomeRepository.find({
+              where: {
+                preacher: {
+                  id: preacher.id,
+                },
+              },
+            });
+
+          await Promise.all(
+            offeringsByOldPreacher.map(async (offering) => {
+              await this.offeringIncomeRepository.update(offering?.id, {
+                preacher: null,
+                memberType: MemberType.Supervisor,
+                supervisor: savedSupervisor,
+                updatedAt: new Date(),
+                updatedBy: user,
+              });
+            }),
+          );
 
           await this.preacherRepository.remove(preacher); // onDelete subordinate entities (null)
 
@@ -2613,8 +2685,8 @@ export class PreacherService {
         try {
           const updatedMember = await this.memberRepository.preload({
             id: preacher.member.id,
-            firstName: updatePreacherDto.firstName,
-            lastName: updatePreacherDto.lastName,
+            firstNames: updatePreacherDto.firstNames,
+            lastNames: updatePreacherDto.lastNames,
             gender: updatePreacherDto.gender,
             originCountry: updatePreacherDto.originCountry,
             birthDate: updatePreacherDto.birthDate,
@@ -2623,12 +2695,12 @@ export class PreacherService {
             conversionDate: updatePreacherDto.conversionDate,
             email: updatePreacherDto.email,
             phoneNumber: updatePreacherDto.phoneNumber,
-            country: updatePreacherDto.country,
-            department: updatePreacherDto.department,
-            province: updatePreacherDto.province,
-            district: updatePreacherDto.district,
-            urbanSector: updatePreacherDto.urbanSector,
-            address: updatePreacherDto.address,
+            residenceCountry: updatePreacherDto.residenceCountry,
+            residenceDepartment: updatePreacherDto.residenceDepartment,
+            residenceProvince: updatePreacherDto.residenceProvince,
+            residenceDistrict: updatePreacherDto.residenceDistrict,
+            residenceUrbanSector: updatePreacherDto.residenceUrbanSector,
+            residenceAddress: updatePreacherDto.residenceAddress,
             referenceAddress: updatePreacherDto.referenceAddress,
             roles: updatePreacherDto.roles,
           });
@@ -2647,6 +2719,28 @@ export class PreacherService {
 
           const savedSupervisor =
             await this.supervisorRepository.save(newSupervisor);
+
+          //! Find and replace with the new id and change member type
+          const offeringsByOldPreacher =
+            await this.offeringIncomeRepository.find({
+              where: {
+                preacher: {
+                  id: preacher.id,
+                },
+              },
+            });
+
+          await Promise.all(
+            offeringsByOldPreacher.map(async (offering) => {
+              await this.offeringIncomeRepository.update(offering?.id, {
+                preacher: null,
+                memberType: MemberType.Supervisor,
+                supervisor: savedSupervisor,
+                updatedAt: new Date(),
+                updatedBy: user,
+              });
+            }),
+          );
 
           await this.preacherRepository.remove(preacher); // onDelete subordinate entities (null)
 

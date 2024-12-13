@@ -21,6 +21,7 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import {
   PaginationDto,
@@ -49,6 +50,7 @@ import { CreateCopastorDto, UpdateCopastorDto } from '@/modules/copastor/dto';
 @ApiBadRequestResponse({
   description: 'Bad request.',
 })
+@SkipThrottle()
 @Controller('copastors')
 export class CopastorController {
   constructor(private readonly copastorService: CopastorService) {}

@@ -22,8 +22,8 @@ interface Zone {
 
 interface Supervisor {
   id: string;
-  firstName: string;
-  lastName: string;
+  firstNames: string;
+  lastNames: string;
 }
 
 export interface OfferingIncomeByFastingAndVigilDataResult {
@@ -84,12 +84,12 @@ export const offeringIncomeByFastingAndVigilFormatter = ({
           },
           supervisor: {
             id: offering?.zone?.theirSupervisor?.id,
-            firstName: getInitialFullNames({
+            firstNames: getInitialFullNames({
               firstNames:
-                offering?.zone?.theirSupervisor?.member?.firstName ?? '',
+                offering?.zone?.theirSupervisor?.member?.firstNames ?? '',
               lastNames: '',
             }),
-            lastName: offering?.zone?.theirSupervisor?.member?.lastName,
+            lastNames: offering?.zone?.theirSupervisor?.member?.lastNames,
           },
           church: {
             isAnexe: offering?.church?.isAnexe,

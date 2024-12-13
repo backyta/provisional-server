@@ -28,7 +28,7 @@ export class CreateSupervisorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(40)
-  firstName: string;
+  firstNames: string;
 
   @ApiProperty({
     example: 'Quispe Loayza',
@@ -37,7 +37,7 @@ export class CreateSupervisorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(40)
-  lastName: string;
+  lastNames: string;
 
   @ApiProperty({
     example: Gender.Female,
@@ -107,7 +107,7 @@ export class CreateSupervisorDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  country?: string;
+  residenceCountry?: string;
 
   @ApiProperty({
     example: 'Lima',
@@ -116,7 +116,7 @@ export class CreateSupervisorDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  department?: string;
+  residenceDepartment?: string;
 
   @ApiProperty({
     example: 'Lima',
@@ -125,7 +125,7 @@ export class CreateSupervisorDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  province?: string;
+  residenceProvince?: string;
 
   @ApiProperty({
     example: 'Comas',
@@ -134,7 +134,7 @@ export class CreateSupervisorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(20)
-  district: string;
+  residenceDistrict: string;
 
   @ApiProperty({
     example: 'Las Lomas',
@@ -143,7 +143,7 @@ export class CreateSupervisorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(30)
-  urbanSector: string;
+  residenceUrbanSector: string;
 
   @ApiProperty({
     example: 'Jr. Central 123',
@@ -152,7 +152,7 @@ export class CreateSupervisorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(80)
-  address: string;
+  residenceAddress: string;
 
   @ApiProperty({
     example: 'A 1 cuadra del parque',
@@ -208,7 +208,7 @@ export class CreateSupervisorDto {
   @IsOptional()
   theirPastor?: string;
 
-  //? Inactivation Data (optional)
+  //! Properties record inactivation (optional)
   @ApiProperty({
     example: MemberInactivationCategory.PersonalChallenges,
     description: 'Member inactivation category.',

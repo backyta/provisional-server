@@ -21,6 +21,7 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import {
   PaginationDto,
@@ -49,6 +50,7 @@ import { CreateDiscipleDto, UpdateDiscipleDto } from '@/modules/disciple/dto';
 @ApiBadRequestResponse({
   description: 'Bad request.',
 })
+@SkipThrottle()
 @Controller('disciples')
 export class DiscipleController {
   constructor(private readonly discipleService: DiscipleService) {}

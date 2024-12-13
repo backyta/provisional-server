@@ -88,15 +88,15 @@ export const offeringIncomeByYouthServiceFormatter = ({
               ? offering.memberType
               : null,
           memberFullName: offering?.pastor
-            ? `${getInitialFullNames({ firstNames: offering?.pastor?.member?.firstName ?? '', lastNames: '' })} ${offering?.pastor?.member?.lastName}`
+            ? `${getInitialFullNames({ firstNames: offering?.pastor?.member?.firstNames ?? '', lastNames: '' })} ${offering?.pastor?.member?.lastNames}`
             : offering?.copastor
-              ? `${getInitialFullNames({ firstNames: offering?.copastor?.member?.firstName ?? '', lastNames: '' })} ${offering?.copastor?.member?.lastName}`
+              ? `${getInitialFullNames({ firstNames: offering?.copastor?.member?.firstNames ?? '', lastNames: '' })} ${offering?.copastor?.member?.lastNames}`
               : offering?.supervisor
-                ? `${getInitialFullNames({ firstNames: offering?.supervisor?.member?.firstName ?? '', lastNames: '' })} ${offering?.supervisor?.member?.lastName}`
+                ? `${getInitialFullNames({ firstNames: offering?.supervisor?.member?.firstNames ?? '', lastNames: '' })} ${offering?.supervisor?.member?.lastNames}`
                 : offering?.preacher
-                  ? `${getInitialFullNames({ firstNames: offering?.preacher?.member?.firstName ?? '', lastNames: '' })} ${offering?.preacher?.member?.lastName}`
+                  ? `${getInitialFullNames({ firstNames: offering?.preacher?.member?.firstNames ?? '', lastNames: '' })} ${offering?.preacher?.member?.lastNames}`
                   : offering?.disciple
-                    ? `${getInitialFullNames({ firstNames: offering?.disciple?.member?.firstName ?? '', lastNames: '' })} ${offering?.disciple?.member?.lastName}`
+                    ? `${getInitialFullNames({ firstNames: offering?.disciple?.member?.firstNames ?? '', lastNames: '' })} ${offering?.disciple?.member?.lastNames}`
                     : null,
           memberId: offering?.pastor
             ? offering?.pastor?.id

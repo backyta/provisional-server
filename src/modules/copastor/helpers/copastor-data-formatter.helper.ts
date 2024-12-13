@@ -16,14 +16,14 @@ export const copastorDataFormatter = ({ copastors }: Options) => {
     },
     theirPastor: {
       id: copastor?.theirPastor?.id,
-      firstName: copastor?.theirPastor?.member?.firstName,
-      lastName: copastor?.theirPastor?.member?.lastName,
+      firstNames: copastor?.theirPastor?.member?.firstNames,
+      lastNames: copastor?.theirPastor?.member?.lastNames,
       roles: copastor?.theirPastor?.member?.roles,
     },
     supervisors: copastor?.supervisors.map((supervisor) => ({
       id: supervisor?.id,
-      firstName: supervisor?.member?.firstName,
-      lastName: supervisor?.member?.lastName,
+      firstNames: supervisor?.member?.firstNames,
+      lastNames: supervisor?.member?.lastNames,
     })),
     zones: copastor?.zones.map((zone) => ({
       id: zone?.id,
@@ -32,8 +32,8 @@ export const copastorDataFormatter = ({ copastors }: Options) => {
     })),
     preachers: copastor?.preachers.map((preacher) => ({
       id: preacher?.id,
-      firstName: preacher?.member?.firstName,
-      lastName: preacher?.member?.lastName,
+      firstNames: preacher?.member?.firstNames,
+      lastNames: preacher?.member?.lastNames,
     })),
     familyGroups: copastor?.familyGroups.map((familyGroup) => ({
       id: familyGroup?.id,
@@ -45,8 +45,8 @@ export const copastorDataFormatter = ({ copastors }: Options) => {
     })),
     disciples: copastor.disciples.map((disciple) => ({
       id: disciple?.id,
-      firstName: disciple?.member?.firstName,
-      lastName: disciple?.member?.lastName,
+      firstNames: disciple?.member?.firstNames,
+      lastNames: disciple?.member?.lastNames,
     })),
   }));
 };

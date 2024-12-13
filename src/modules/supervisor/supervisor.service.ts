@@ -34,11 +34,13 @@ import {
   MaritalStatusNames,
 } from '@/common/enums';
 import {
-  InactivateMemberDto,
   PaginationDto,
+  InactivateMemberDto,
   SearchAndPaginationDto,
 } from '@/common/dtos';
 import { dateFormatterToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
+
+import { MemberType } from '@/modules/offering/income/enums';
 
 import { Zone } from '@/modules/zone/entities';
 import { User } from '@/modules/user/entities';
@@ -50,6 +52,7 @@ import { Disciple } from '@/modules/disciple/entities';
 import { Copastor } from '@/modules/copastor/entities';
 import { Supervisor } from '@/modules/supervisor/entities';
 import { FamilyGroup } from '@/modules/family-group/entities';
+import { OfferingIncome } from '@/modules/offering/income/entities';
 
 @Injectable()
 export class SupervisorService {
@@ -82,6 +85,9 @@ export class SupervisorService {
 
     @InjectRepository(Member)
     private readonly memberRepository: Repository<Member>,
+
+    @InjectRepository(OfferingIncome)
+    private readonly offeringIncomeRepository: Repository<OfferingIncome>,
   ) {}
 
   //* CREATE SUPERVISOR
@@ -171,8 +177,8 @@ export class SupervisorService {
       //* Create new instance member and assign to new supervisor instance
       try {
         const newMember = this.memberRepository.create({
-          firstName: createSupervisorDto.firstName,
-          lastName: createSupervisorDto.lastName,
+          firstNames: createSupervisorDto.firstNames,
+          lastNames: createSupervisorDto.lastNames,
           gender: createSupervisorDto.gender,
           originCountry: createSupervisorDto.originCountry,
           birthDate: createSupervisorDto.birthDate,
@@ -181,12 +187,12 @@ export class SupervisorService {
           conversionDate: createSupervisorDto.conversionDate,
           email: createSupervisorDto.email,
           phoneNumber: createSupervisorDto.phoneNumber,
-          country: createSupervisorDto.country,
-          department: createSupervisorDto.department,
-          province: createSupervisorDto.province,
-          district: createSupervisorDto.district,
-          urbanSector: createSupervisorDto.urbanSector,
-          address: createSupervisorDto.address,
+          residenceCountry: createSupervisorDto.residenceCountry,
+          residenceDepartment: createSupervisorDto.residenceDepartment,
+          residenceProvince: createSupervisorDto.residenceProvince,
+          residenceDistrict: createSupervisorDto.residenceDistrict,
+          residenceUrbanSector: createSupervisorDto.residenceUrbanSector,
+          residenceAddress: createSupervisorDto.residenceAddress,
           referenceAddress: createSupervisorDto.referenceAddress,
           roles: createSupervisorDto.roles,
         });
@@ -256,8 +262,8 @@ export class SupervisorService {
       // Create new instance
       try {
         const newMember = this.memberRepository.create({
-          firstName: createSupervisorDto.firstName,
-          lastName: createSupervisorDto.lastName,
+          firstNames: createSupervisorDto.firstNames,
+          lastNames: createSupervisorDto.lastNames,
           gender: createSupervisorDto.gender,
           originCountry: createSupervisorDto.originCountry,
           birthDate: createSupervisorDto.birthDate,
@@ -266,12 +272,12 @@ export class SupervisorService {
           conversionDate: createSupervisorDto.conversionDate,
           email: createSupervisorDto.email,
           phoneNumber: createSupervisorDto.phoneNumber,
-          country: createSupervisorDto.country,
-          department: createSupervisorDto.department,
-          province: createSupervisorDto.province,
-          district: createSupervisorDto.district,
-          urbanSector: createSupervisorDto.urbanSector,
-          address: createSupervisorDto.address,
+          residenceCountry: createSupervisorDto.residenceCountry,
+          residenceDepartment: createSupervisorDto.residenceDepartment,
+          residenceProvince: createSupervisorDto.residenceProvince,
+          residenceDistrict: createSupervisorDto.residenceDistrict,
+          residenceUrbanSector: createSupervisorDto.residenceUrbanSector,
+          residenceAddress: createSupervisorDto.residenceAddress,
           referenceAddress: createSupervisorDto.referenceAddress,
           roles: createSupervisorDto.roles,
         });
@@ -430,8 +436,8 @@ export class SupervisorService {
     //* Supervisors by supervisor names
     if (
       term &&
-      searchType === SupervisorSearchType.FirstName &&
-      searchSubType === SupervisorSearchSubType.BySupervisorNames
+      searchType === SupervisorSearchType.FirstNames &&
+      searchSubType === SupervisorSearchSubType.BySupervisorFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -440,7 +446,7 @@ export class SupervisorService {
           where: {
             theirChurch: church,
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -464,7 +470,7 @@ export class SupervisorService {
 
         if (supervisors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron supervisores(as) con estos nombres: ${firstNames}`,
+            `No se encontraron supervisores(as) con estos nombres: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -481,8 +487,8 @@ export class SupervisorService {
     //* Supervisors by co-pastor names
     if (
       term &&
-      searchType === SupervisorSearchType.FirstName &&
-      searchSubType === SupervisorSearchSubType.SupervisorByCopastorNames
+      searchType === SupervisorSearchType.FirstNames &&
+      searchSubType === SupervisorSearchSubType.SupervisorByCopastorFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -490,7 +496,7 @@ export class SupervisorService {
         const copastors = await this.copastorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -525,7 +531,7 @@ export class SupervisorService {
 
         if (supervisors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron supervisores(as) por los nombres de su co-pastor: ${firstNames}`,
+            `No se encontraron supervisores(as) con los nombres de su co-pastor: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -542,8 +548,8 @@ export class SupervisorService {
     //* Supervisors by pastor names
     if (
       term &&
-      searchType === SupervisorSearchType.FirstName &&
-      searchSubType === SupervisorSearchSubType.SupervisorByPastorNames
+      searchType === SupervisorSearchType.FirstNames &&
+      searchSubType === SupervisorSearchSubType.SupervisorByPastorFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -551,7 +557,7 @@ export class SupervisorService {
         const pastors = await this.pastorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -586,7 +592,7 @@ export class SupervisorService {
 
         if (supervisors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron supervisores(as) por los nombres de su pastor: ${firstNames}`,
+            `No se encontraron supervisores(as) con los nombres de su pastor: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -604,7 +610,7 @@ export class SupervisorService {
     //* Supervisors by last names
     if (
       term &&
-      searchType === SupervisorSearchType.LastName &&
+      searchType === SupervisorSearchType.LastNames &&
       searchSubType === SupervisorSearchSubType.BySupervisorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
@@ -614,7 +620,7 @@ export class SupervisorService {
           where: {
             theirChurch: church,
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -638,7 +644,7 @@ export class SupervisorService {
 
         if (supervisors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron supervisores(as) con estos apellidos: ${lastNames}`,
+            `No se encontraron supervisores(as) con estos apellidos: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -655,7 +661,7 @@ export class SupervisorService {
     //* Supervisors by co-pastor last names
     if (
       term &&
-      searchType === SupervisorSearchType.LastName &&
+      searchType === SupervisorSearchType.LastNames &&
       searchSubType === SupervisorSearchSubType.SupervisorByCopastorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
@@ -664,7 +670,7 @@ export class SupervisorService {
         const copastors = await this.copastorRepository.find({
           where: {
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -699,7 +705,7 @@ export class SupervisorService {
 
         if (supervisors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron supervisores(as) por los apellidos de su co-pastor: ${lastNames}`,
+            `No se encontraron supervisores(as) con los apellidos de su co-pastor: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -716,7 +722,7 @@ export class SupervisorService {
     //* Supervisors by pastor last names
     if (
       term &&
-      searchType === SupervisorSearchType.LastName &&
+      searchType === SupervisorSearchType.LastNames &&
       searchSubType === SupervisorSearchSubType.SupervisorByPastorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
@@ -725,7 +731,7 @@ export class SupervisorService {
         const pastors = await this.pastorRepository.find({
           where: {
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -760,7 +766,7 @@ export class SupervisorService {
 
         if (supervisors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron supervisores(as) por los apellidos de su pastor: ${lastNames}`,
+            `No se encontraron supervisores(as) con los apellidos de su pastor: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -778,8 +784,8 @@ export class SupervisorService {
     //* Supervisors by full names
     if (
       term &&
-      searchType === SupervisorSearchType.FullName &&
-      searchSubType === SupervisorSearchSubType.BySupervisorFullName
+      searchType === SupervisorSearchType.FullNames &&
+      searchSubType === SupervisorSearchSubType.BySupervisorFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -789,8 +795,8 @@ export class SupervisorService {
           where: {
             theirChurch: church,
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -814,7 +820,7 @@ export class SupervisorService {
 
         if (supervisors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron supervisores(as) con estos nombres y apellidos: ${firstNames} ${lastNames}`,
+            `No se encontraron supervisores(as) con estos nombres y apellidos: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -831,8 +837,8 @@ export class SupervisorService {
     //* Supervisors by co-pastor full names
     if (
       term &&
-      searchType === SupervisorSearchType.FullName &&
-      searchSubType === SupervisorSearchSubType.SupervisorByCopastorFullName
+      searchType === SupervisorSearchType.FullNames &&
+      searchSubType === SupervisorSearchSubType.SupervisorByCopastorFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -841,8 +847,8 @@ export class SupervisorService {
         const copastors = await this.copastorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -877,7 +883,7 @@ export class SupervisorService {
 
         if (supervisors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron supervisores(as) por los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames}`,
+            `No se encontraron supervisores(as) con los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -894,8 +900,8 @@ export class SupervisorService {
     //* Supervisors by pastor full names
     if (
       term &&
-      searchType === SupervisorSearchType.FullName &&
-      searchSubType === SupervisorSearchSubType.SupervisorByPastorFullName
+      searchType === SupervisorSearchType.FullNames &&
+      searchSubType === SupervisorSearchSubType.SupervisorByPastorFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -904,8 +910,8 @@ export class SupervisorService {
         const pastors = await this.pastorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -940,7 +946,7 @@ export class SupervisorService {
 
         if (supervisors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron supervisores(as) por los nombres y apellidos de su pastor: ${firstNames} ${lastNames}`,
+            `No se encontraron supervisores(as) con los nombres y apellidos de su pastor: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -997,7 +1003,7 @@ export class SupervisorService {
           const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
-            `No se encontraron supervisores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
+            `No se encontraron supervisores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1061,7 +1067,7 @@ export class SupervisorService {
           const monthInSpanish = monthNames[term.toLowerCase()] ?? term;
 
           throw new NotFoundException(
-            `No se encontraron supervisores(as) con este mes de nacimiento: ${monthInSpanish}`,
+            `No se encontraron supervisores(as) con este mes de nacimiento: ${monthInSpanish} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1116,7 +1122,7 @@ export class SupervisorService {
 
         if (supervisors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron supervisores(as) con este nombre de zona: ${term}`,
+            `No se encontraron supervisores(as) con este nombre de zona: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1170,7 +1176,7 @@ export class SupervisorService {
           const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
 
           throw new NotFoundException(
-            `No se encontraron supervisores(as) con este género: ${genderInSpanish}`,
+            `No se encontraron supervisores(as) con este género: ${genderInSpanish} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1231,7 +1237,7 @@ export class SupervisorService {
             MaritalStatusNames[term.toLowerCase()] ?? term;
 
           throw new NotFoundException(
-            `No se encontraron supervisores(as) con este estado civil: ${maritalStatusInSpanish}`,
+            `No se encontraron supervisores(as) con este estado civil: ${maritalStatusInSpanish} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1276,7 +1282,7 @@ export class SupervisorService {
 
         if (supervisors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron supervisores(as) con este país de origen: ${term}`,
+            `No se encontraron supervisores(as) con este país de origen: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1290,14 +1296,14 @@ export class SupervisorService {
       }
     }
 
-    //? Find by department --> Many
-    if (term && searchType === SupervisorSearchType.Department) {
+    //? Find by residence country --> Many
+    if (term && searchType === SupervisorSearchType.ResidenceCountry) {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
             theirChurch: church,
             member: {
-              department: ILike(`%${term}%`),
+              residenceCountry: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1321,7 +1327,7 @@ export class SupervisorService {
 
         if (supervisors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron supervisores(as) con este departamento: ${term}`,
+            `No se encontraron supervisores(as) con este país de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1335,14 +1341,14 @@ export class SupervisorService {
       }
     }
 
-    //? Find by province --> Many
-    if (term && searchType === SupervisorSearchType.Province) {
+    //? Find by residence department --> Many
+    if (term && searchType === SupervisorSearchType.ResidenceDepartment) {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
             theirChurch: church,
             member: {
-              province: ILike(`%${term}%`),
+              residenceDepartment: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1366,7 +1372,7 @@ export class SupervisorService {
 
         if (supervisors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron supervises(as) con esta provincia: ${term}`,
+            `No se encontraron supervisores(as) con este departamento de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1380,14 +1386,14 @@ export class SupervisorService {
       }
     }
 
-    //? Find by district --> Many
-    if (term && searchType === SupervisorSearchType.District) {
+    //? Find by residence province --> Many
+    if (term && searchType === SupervisorSearchType.ResidenceProvince) {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
             theirChurch: church,
             member: {
-              district: ILike(`%${term}%`),
+              residenceProvince: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1411,7 +1417,7 @@ export class SupervisorService {
 
         if (supervisors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron supervisores(as) con este distrito: ${term}`,
+            `No se encontraron supervises(as) con esta provincia de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1425,14 +1431,14 @@ export class SupervisorService {
       }
     }
 
-    //? Find by urban sector --> Many
-    if (term && searchType === SupervisorSearchType.UrbanSector) {
+    //? Find by residence district --> Many
+    if (term && searchType === SupervisorSearchType.ResidenceDistrict) {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
             theirChurch: church,
             member: {
-              urbanSector: ILike(`%${term}%`),
+              residenceDistrict: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1456,7 +1462,7 @@ export class SupervisorService {
 
         if (supervisors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron supervisores(as) con este sector urbano: ${term}`,
+            `No se encontraron supervisores(as) con este distrito de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1470,14 +1476,14 @@ export class SupervisorService {
       }
     }
 
-    //? Find by address --> Many
-    if (term && searchType === SupervisorSearchType.Address) {
+    //? Find by residence urban sector --> Many
+    if (term && searchType === SupervisorSearchType.ResidenceUrbanSector) {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
             theirChurch: church,
             member: {
-              address: ILike(`%${term}%`),
+              residenceUrbanSector: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1501,7 +1507,52 @@ export class SupervisorService {
 
         if (supervisors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron supervisores(as) con esta dirección: ${term}`,
+            `No se encontraron supervisores(as) con este sector urbano de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
+          );
+        }
+
+        return supervisorDataFormatter({ supervisors }) as any;
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
+      }
+    }
+
+    //? Find by residence address --> Many
+    if (term && searchType === SupervisorSearchType.ResidenceAddress) {
+      try {
+        const supervisors = await this.supervisorRepository.find({
+          where: {
+            theirChurch: church,
+            member: {
+              residenceAddress: ILike(`%${term}%`),
+            },
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'member',
+            'theirChurch',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'familyGroups',
+            'theirZone',
+            'preachers.member',
+            'disciples.member',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (supervisors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron supervisores(as) con esta dirección de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1554,7 +1605,7 @@ export class SupervisorService {
           const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
 
           throw new NotFoundException(
-            `No se encontraron supervisores(as) con este estado de registro: ${value}`,
+            `No se encontraron supervisores(as) con este estado de registro: ${value} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1613,9 +1664,9 @@ export class SupervisorService {
 
     if (
       term &&
-      (SupervisorSearchType.FirstName ||
-        SupervisorSearchType.LastName ||
-        SupervisorSearchType.FullName) &&
+      (SupervisorSearchType.FirstNames ||
+        SupervisorSearchType.LastNames ||
+        SupervisorSearchType.FullNames) &&
       !searchSubType
     ) {
       throw new BadRequestException(
@@ -1821,8 +1872,8 @@ export class SupervisorService {
         try {
           const updatedMember = await this.memberRepository.preload({
             id: supervisor.member.id,
-            firstName: updateSupervisorDto.firstName,
-            lastName: updateSupervisorDto.lastName,
+            firstNames: updateSupervisorDto.firstNames,
+            lastNames: updateSupervisorDto.lastNames,
             gender: updateSupervisorDto.gender,
             originCountry: updateSupervisorDto.originCountry,
             birthDate: updateSupervisorDto.birthDate,
@@ -1831,12 +1882,12 @@ export class SupervisorService {
             conversionDate: updateSupervisorDto.conversionDate,
             email: updateSupervisorDto.email,
             phoneNumber: updateSupervisorDto.phoneNumber,
-            country: updateSupervisorDto.country,
-            department: updateSupervisorDto.department,
-            province: updateSupervisorDto.province,
-            district: updateSupervisorDto.district,
-            urbanSector: updateSupervisorDto.urbanSector,
-            address: updateSupervisorDto.address,
+            residenceCountry: updateSupervisorDto.residenceCountry,
+            residenceDepartment: updateSupervisorDto.residenceDepartment,
+            residenceProvince: updateSupervisorDto.residenceProvince,
+            residenceDistrict: updateSupervisorDto.residenceDistrict,
+            residenceUrbanSector: updateSupervisorDto.residenceUrbanSector,
+            residenceAddress: updateSupervisorDto.residenceAddress,
             referenceAddress: updateSupervisorDto.referenceAddress,
             roles: updateSupervisorDto.roles,
           });
@@ -2006,8 +2057,8 @@ export class SupervisorService {
         try {
           const updatedMember = await this.memberRepository.preload({
             id: supervisor.member.id,
-            firstName: updateSupervisorDto.firstName,
-            lastName: updateSupervisorDto.lastName,
+            firstNames: updateSupervisorDto.firstNames,
+            lastNames: updateSupervisorDto.lastNames,
             gender: updateSupervisorDto.gender,
             originCountry: updateSupervisorDto.originCountry,
             birthDate: updateSupervisorDto.birthDate,
@@ -2016,12 +2067,12 @@ export class SupervisorService {
             conversionDate: updateSupervisorDto.conversionDate,
             email: updateSupervisorDto.email,
             phoneNumber: updateSupervisorDto.phoneNumber,
-            country: updateSupervisorDto.country,
-            department: updateSupervisorDto.department,
-            province: updateSupervisorDto.province,
-            district: updateSupervisorDto.district,
-            urbanSector: updateSupervisorDto.urbanSector,
-            address: updateSupervisorDto.address,
+            residenceCountry: updateSupervisorDto.residenceCountry,
+            residenceDepartment: updateSupervisorDto.residenceDepartment,
+            residenceProvince: updateSupervisorDto.residenceProvince,
+            residenceDistrict: updateSupervisorDto.residenceDistrict,
+            residenceUrbanSector: updateSupervisorDto.residenceUrbanSector,
+            residenceAddress: updateSupervisorDto.residenceAddress,
             referenceAddress: updateSupervisorDto.referenceAddress,
             roles: updateSupervisorDto.roles,
           });
@@ -2148,8 +2199,8 @@ export class SupervisorService {
         try {
           const updatedMember = await this.memberRepository.preload({
             id: supervisor.member.id,
-            firstName: updateSupervisorDto.firstName,
-            lastName: updateSupervisorDto.lastName,
+            firstNames: updateSupervisorDto.firstNames,
+            lastNames: updateSupervisorDto.lastNames,
             gender: updateSupervisorDto.gender,
             originCountry: updateSupervisorDto.originCountry,
             birthDate: updateSupervisorDto.birthDate,
@@ -2158,12 +2209,12 @@ export class SupervisorService {
             conversionDate: updateSupervisorDto.conversionDate,
             email: updateSupervisorDto.email,
             phoneNumber: updateSupervisorDto.phoneNumber,
-            country: updateSupervisorDto.country,
-            department: updateSupervisorDto.department,
-            province: updateSupervisorDto.province,
-            district: updateSupervisorDto.district,
-            urbanSector: updateSupervisorDto.urbanSector,
-            address: updateSupervisorDto.address,
+            residenceCountry: updateSupervisorDto.residenceCountry,
+            residenceDepartment: updateSupervisorDto.residenceDepartment,
+            residenceProvince: updateSupervisorDto.residenceProvince,
+            residenceDistrict: updateSupervisorDto.residenceDistrict,
+            residenceUrbanSector: updateSupervisorDto.residenceUrbanSector,
+            residenceAddress: updateSupervisorDto.residenceAddress,
             referenceAddress: updateSupervisorDto.referenceAddress,
             roles: updateSupervisorDto.roles,
           });
@@ -2204,8 +2255,8 @@ export class SupervisorService {
         try {
           const updatedMember = await this.memberRepository.preload({
             id: supervisor.member.id,
-            firstName: updateSupervisorDto.firstName,
-            lastName: updateSupervisorDto.lastName,
+            firstNames: updateSupervisorDto.firstNames,
+            lastNames: updateSupervisorDto.lastNames,
             gender: updateSupervisorDto.gender,
             originCountry: updateSupervisorDto.originCountry,
             birthDate: updateSupervisorDto.birthDate,
@@ -2214,12 +2265,12 @@ export class SupervisorService {
             conversionDate: updateSupervisorDto.conversionDate,
             email: updateSupervisorDto.email,
             phoneNumber: updateSupervisorDto.phoneNumber,
-            country: updateSupervisorDto.country,
-            department: updateSupervisorDto.department,
-            province: updateSupervisorDto.province,
-            district: updateSupervisorDto.district,
-            urbanSector: updateSupervisorDto.urbanSector,
-            address: updateSupervisorDto.address,
+            residenceCountry: updateSupervisorDto.residenceCountry,
+            residenceDepartment: updateSupervisorDto.residenceDepartment,
+            residenceProvince: updateSupervisorDto.residenceProvince,
+            residenceDistrict: updateSupervisorDto.residenceDistrict,
+            residenceUrbanSector: updateSupervisorDto.residenceUrbanSector,
+            residenceAddress: updateSupervisorDto.residenceAddress,
             referenceAddress: updateSupervisorDto.referenceAddress,
             roles: updateSupervisorDto.roles,
           });
@@ -2326,8 +2377,8 @@ export class SupervisorService {
       try {
         const updatedMember = await this.memberRepository.preload({
           id: supervisor.member.id,
-          firstName: updateSupervisorDto.firstName,
-          lastName: updateSupervisorDto.lastName,
+          firstNames: updateSupervisorDto.firstNames,
+          lastNames: updateSupervisorDto.lastNames,
           gender: updateSupervisorDto.gender,
           originCountry: updateSupervisorDto.originCountry,
           birthDate: updateSupervisorDto.birthDate,
@@ -2336,12 +2387,12 @@ export class SupervisorService {
           conversionDate: updateSupervisorDto.conversionDate,
           email: updateSupervisorDto.email,
           phoneNumber: updateSupervisorDto.phoneNumber,
-          country: updateSupervisorDto.country,
-          department: updateSupervisorDto.department,
-          province: updateSupervisorDto.province,
-          district: updateSupervisorDto.district,
-          urbanSector: updateSupervisorDto.urbanSector,
-          address: updateSupervisorDto.address,
+          residenceCountry: updateSupervisorDto.residenceCountry,
+          residenceDepartment: updateSupervisorDto.residenceDepartment,
+          residenceProvince: updateSupervisorDto.residenceProvince,
+          residenceDistrict: updateSupervisorDto.residenceDistrict,
+          residenceUrbanSector: updateSupervisorDto.residenceUrbanSector,
+          residenceAddress: updateSupervisorDto.residenceAddress,
           referenceAddress: updateSupervisorDto.referenceAddress,
           roles: updateSupervisorDto.roles,
         });
@@ -2356,11 +2407,33 @@ export class SupervisorService {
           createdBy: user,
         });
 
-        const savedPastor = await this.copastorRepository.save(newCopastor);
+        const savedCopastor = await this.copastorRepository.save(newCopastor);
+
+        //! Find and replace with the new id and change member type
+        const offeringsByOldSupervisor =
+          await this.offeringIncomeRepository.find({
+            where: {
+              supervisor: {
+                id: supervisor.id,
+              },
+            },
+          });
+
+        await Promise.all(
+          offeringsByOldSupervisor.map(async (offering) => {
+            await this.offeringIncomeRepository.update(offering?.id, {
+              supervisor: null,
+              memberType: MemberType.Copastor,
+              copastor: savedCopastor,
+              updatedAt: new Date(),
+              updatedBy: user,
+            });
+          }),
+        );
 
         await this.supervisorRepository.remove(supervisor); // onDelete subordinate entities (null)
 
-        return savedPastor;
+        return savedCopastor;
       } catch (error) {
         this.handleDBExceptions(error);
       }

@@ -4,9 +4,9 @@ export enum SearchType {
   FoundingDate = 'founding_date',
 
   //* Disciple, Pastor, Copastor, Supervisor, Preacher, Offering, User
-  FirstName = 'first_name',
-  LastName = 'last_name',
-  FullName = 'full_name',
+  FirstNames = 'first_names',
+  LastNames = 'last_names',
+  FullNames = 'full_names',
 
   //* Disciple, Pastor, Copastor, Supervisor, Preacher
   BirthDate = 'birth_date',
@@ -23,23 +23,25 @@ export enum SearchType {
   FamilyGroupCode = 'family_group_code',
   FamilyGroupName = 'family_group_name',
 
-  //* Disciple, Pastor, Copastor, Sup, Preacher, Family House
+  //* Disciple, Pastor, Copastor, Sup, Preacher, Family Group
+  Country = 'country',
   Address = 'address',
 
   //* Disciple, Pastor, Copastor, Supervisor, Preacher.
   OriginCountry = 'origin_country',
 
-  //* Disciple, Pastor, Copastor, Supervisor, Preacher, Family House
-  Country = 'country',
-  Department = 'department',
-  Province = 'province',
-  District = 'district',
-  UrbanSector = 'urban_sector',
+  //* Disciple, Pastor, Copastor, Supervisor, Preacher, Family Group
+  ResidenceCountry = 'residence_country',
+  ResidenceDepartment = 'residence_department',
+  ResidenceProvince = 'residence_province',
+  ResidenceDistrict = 'residence_district',
+  ResidenceUrbanSector = 'residence_urban_sector',
+  ResidenceAddress = 'residence_address',
 
   //* Disciple, Pastor, Copastor, Supervisor, Preacher, Fam. House, Offering, User
   RecordStatus = 'record_status',
 
-  //* Disciple, User
+  //* User
   Roles = 'roles',
 
   //* Offering Income
@@ -127,9 +129,9 @@ export const SearchTypeNames: Record<SearchType, string> = {
   [SearchType.ChurchName]: 'Nombre de Iglesia',
   [SearchType.FoundingDate]: 'Fecha de Fundación',
 
-  [SearchType.FirstName]: 'Nombres',
-  [SearchType.LastName]: 'Apellidos',
-  [SearchType.FullName]: 'Nombre Completo',
+  [SearchType.FirstNames]: 'Nombres',
+  [SearchType.LastNames]: 'Apellidos',
+  [SearchType.FullNames]: 'Nombres Completos',
 
   [SearchType.BirthDate]: 'Fecha de Nacimiento',
   [SearchType.BirthMonth]: 'Mes de Nacimiento',
@@ -143,15 +145,17 @@ export const SearchTypeNames: Record<SearchType, string> = {
   [SearchType.FamilyGroupCode]: 'Código de Grupo Familiar',
   [SearchType.FamilyGroupName]: 'Nombre de Grupo Familiar',
 
+  [SearchType.Country]: 'País',
   [SearchType.Address]: 'Dirección',
 
   [SearchType.OriginCountry]: 'País de Origen',
 
-  [SearchType.Country]: 'País',
-  [SearchType.Department]: 'Departamento',
-  [SearchType.Province]: 'Provincia',
-  [SearchType.District]: 'Distrito',
-  [SearchType.UrbanSector]: 'Sector Urbano',
+  [SearchType.ResidenceCountry]: 'País (residencia)',
+  [SearchType.ResidenceDepartment]: 'Departamento (residencia)',
+  [SearchType.ResidenceProvince]: 'Provincia (residencia)',
+  [SearchType.ResidenceDistrict]: 'Distrito (residencia)',
+  [SearchType.ResidenceUrbanSector]: 'Sector Urbano (residencia)',
+  [SearchType.ResidenceAddress]: 'Dirección (residencia)',
 
   [SearchType.RecordStatus]: 'Estado de Registro',
 

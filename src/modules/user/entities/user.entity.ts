@@ -11,19 +11,19 @@ import {
 } from 'typeorm';
 
 @Entity({ name: 'users' })
-@Index(['firstName', 'lastName'])
+@Index(['firstNames', 'lastNames'])
 export class User {
   //* General info
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Index()
-  @Column('text')
-  firstName: string;
+  @Column('text', { name: 'first_names' })
+  firstNames: string;
 
   @Index()
-  @Column('text')
-  lastName: string;
+  @Column('text', { name: 'last_names' })
+  lastNames: string;
 
   @Index()
   @Column('text')

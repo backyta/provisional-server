@@ -8,6 +8,7 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
 import { User } from '@/modules/user/entities';
 
@@ -32,10 +33,11 @@ export class AuthController {
 
   //* Login
   @Post('login')
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @HttpCode(200)
   @ApiOkResponse({
     description: 'Successful operation',
   })
-  @HttpCode(200)
   loginUser(@Body() loginUserDto: LoginUserDto) {
     return this.authService.login(loginUserDto);
   }
@@ -50,6 +52,7 @@ export class AuthController {
   @ApiForbiddenResponse({
     description: 'Forbidden.',
   })
+  @SkipThrottle()
   checkAuthStatus(@GetUser() user: User) {
     return this.authService.checkAuthStatus(user);
   }

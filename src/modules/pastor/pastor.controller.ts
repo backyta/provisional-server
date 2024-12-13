@@ -21,10 +21,11 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import {
-  InactivateMemberDto,
   PaginationDto,
+  InactivateMemberDto,
   SearchAndPaginationDto,
 } from '@/common/dtos';
 
@@ -48,6 +49,7 @@ import { CreatePastorDto, UpdatePastorDto } from '@/modules/pastor/dto';
 @ApiBadRequestResponse({
   description: 'Bad request.',
 })
+@SkipThrottle()
 @Controller('pastors')
 export class PastorController {
   constructor(private readonly pastorService: PastorService) {}

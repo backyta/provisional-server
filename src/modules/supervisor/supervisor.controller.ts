@@ -21,6 +21,7 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import {
   PaginationDto,
@@ -52,6 +53,7 @@ import { SupervisorService } from '@/modules/supervisor/supervisor.service';
 @ApiBadRequestResponse({
   description: 'Bad request.',
 })
+@SkipThrottle()
 @Controller('supervisors')
 export class SupervisorController {
   constructor(private readonly supervisorService: SupervisorService) {}

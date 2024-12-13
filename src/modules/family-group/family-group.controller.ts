@@ -22,6 +22,7 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
@@ -49,6 +50,7 @@ import { FamilyGroupService } from '@/modules/family-group/family-group.service'
 @ApiBadRequestResponse({
   description: 'Bad request.',
 })
+@SkipThrottle()
 @Controller('family-groups')
 export class FamilyGroupController {
   constructor(private readonly familyGroupService: FamilyGroupService) {}

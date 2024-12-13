@@ -13,7 +13,7 @@ export class LoginUserDto {
     example: 'Abcd1234$',
   })
   @IsString()
-  @MinLength(6)
+  @MinLength(1)
   @MaxLength(20)
   password: string;
 }

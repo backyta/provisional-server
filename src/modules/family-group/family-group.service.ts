@@ -375,8 +375,8 @@ export class FamilyGroupService {
     //* FamilyGroups by preacher names
     if (
       term &&
-      searchType === FamilyGroupSearchType.FirstName &&
-      searchSubType === FamilyGroupSearchSubType.FamilyGroupByPreacherNames
+      searchType === FamilyGroupSearchType.FirstNames &&
+      searchSubType === FamilyGroupSearchSubType.FamilyGroupByPreacherFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -384,7 +384,7 @@ export class FamilyGroupService {
         const preachers = await this.preacherRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -417,7 +417,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares por los nombres de su predicador: ${firstNames}`,
+            `No se encontraron grupos familiares con los nombres de su predicador: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -434,8 +434,9 @@ export class FamilyGroupService {
     //* Family groups by supervisor names
     if (
       term &&
-      searchType === FamilyGroupSearchType.FirstName &&
-      searchSubType === FamilyGroupSearchSubType.FamilyGroupBySupervisorNames
+      searchType === FamilyGroupSearchType.FirstNames &&
+      searchSubType ===
+        FamilyGroupSearchSubType.FamilyGroupBySupervisorFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -443,7 +444,7 @@ export class FamilyGroupService {
         const supervisors = await this.supervisorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -476,7 +477,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares por los nombres de su supervisor: ${firstNames}`,
+            `No se encontraron grupos familiares con los nombres de su supervisor: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -493,8 +494,8 @@ export class FamilyGroupService {
     //* Family groups by co-pastor names
     if (
       term &&
-      searchType === FamilyGroupSearchType.FirstName &&
-      searchSubType === FamilyGroupSearchSubType.FamilyGroupByCopastorNames
+      searchType === FamilyGroupSearchType.FirstNames &&
+      searchSubType === FamilyGroupSearchSubType.FamilyGroupByCopastorFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -502,7 +503,7 @@ export class FamilyGroupService {
         const copastors = await this.copastorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -535,7 +536,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares por los nombres de su co-pastor: ${firstNames}`,
+            `No se encontraron grupos familiares con los nombres de su co-pastor: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -552,8 +553,8 @@ export class FamilyGroupService {
     //* Family groups by pastor names
     if (
       term &&
-      searchType === FamilyGroupSearchType.FirstName &&
-      searchSubType === FamilyGroupSearchSubType.FamilyGroupByPastorNames
+      searchType === FamilyGroupSearchType.FirstNames &&
+      searchSubType === FamilyGroupSearchSubType.FamilyGroupByPastorFirstNames
     ) {
       const firstNames = term.replace(/\+/g, ' ');
 
@@ -561,7 +562,7 @@ export class FamilyGroupService {
         const pastors = await this.pastorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -594,7 +595,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares por los nombres de su pastor: ${firstNames}`,
+            `No se encontraron grupos familiares con los nombres de su pastor: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -612,7 +613,7 @@ export class FamilyGroupService {
     //* Family Groups by preacher last names
     if (
       term &&
-      searchType === FamilyGroupSearchType.LastName &&
+      searchType === FamilyGroupSearchType.LastNames &&
       searchSubType === FamilyGroupSearchSubType.FamilyGroupByPreacherLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
@@ -621,7 +622,7 @@ export class FamilyGroupService {
         const preachers = await this.preacherRepository.find({
           where: {
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -654,7 +655,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares por los apellidos de su predicador: ${lastNames}`,
+            `No se encontraron grupos familiares con los apellidos de su predicador: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -671,7 +672,7 @@ export class FamilyGroupService {
     //* Family groups by supervisor last names
     if (
       term &&
-      searchType === FamilyGroupSearchType.LastName &&
+      searchType === FamilyGroupSearchType.LastNames &&
       searchSubType ===
         FamilyGroupSearchSubType.FamilyGroupBySupervisorLastNames
     ) {
@@ -681,7 +682,7 @@ export class FamilyGroupService {
         const supervisors = await this.supervisorRepository.find({
           where: {
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -714,7 +715,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares por los apellidos de su supervisor: ${lastNames}`,
+            `No se encontraron grupos familiares con los apellidos de su supervisor: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -731,7 +732,7 @@ export class FamilyGroupService {
     //* Grupos familiares by co-pastor last names
     if (
       term &&
-      searchType === FamilyGroupSearchType.LastName &&
+      searchType === FamilyGroupSearchType.LastNames &&
       searchSubType === FamilyGroupSearchSubType.FamilyGroupByCopastorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
@@ -740,7 +741,7 @@ export class FamilyGroupService {
         const copastors = await this.copastorRepository.find({
           where: {
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -773,7 +774,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares por los apellidos de su co-pastor: ${lastNames}`,
+            `No se encontraron grupos familiares con los apellidos de su co-pastor: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -790,7 +791,7 @@ export class FamilyGroupService {
     //* Family groups by pastor last names
     if (
       term &&
-      searchType === FamilyGroupSearchType.LastName &&
+      searchType === FamilyGroupSearchType.LastNames &&
       searchSubType === FamilyGroupSearchSubType.FamilyGroupByPastorLastNames
     ) {
       const lastNames = term.replace(/\+/g, ' ');
@@ -799,7 +800,7 @@ export class FamilyGroupService {
         const pastors = await this.pastorRepository.find({
           where: {
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -832,7 +833,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares por los apellidos de su pastor: ${lastNames}`,
+            `No se encontraron grupos familiares con los apellidos de su pastor: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -850,8 +851,8 @@ export class FamilyGroupService {
     //* Family groups by preacher full names
     if (
       term &&
-      searchType === FamilyGroupSearchType.FullName &&
-      searchSubType === FamilyGroupSearchSubType.FamilyGroupByPreacherFullName
+      searchType === FamilyGroupSearchType.FullNames &&
+      searchSubType === FamilyGroupSearchSubType.FamilyGroupByPreacherFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -860,8 +861,8 @@ export class FamilyGroupService {
         const preachers = await this.preacherRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -894,7 +895,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares por los nombres y apellidos de su predicador: ${firstNames} ${lastNames}`,
+            `No se encontraron grupos familiares con los nombres y apellidos de su predicador: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -911,8 +912,9 @@ export class FamilyGroupService {
     //* Family groups by supervisor full names
     if (
       term &&
-      searchType === FamilyGroupSearchType.FullName &&
-      searchSubType === FamilyGroupSearchSubType.FamilyGroupBySupervisorFullName
+      searchType === FamilyGroupSearchType.FullNames &&
+      searchSubType ===
+        FamilyGroupSearchSubType.FamilyGroupBySupervisorFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -921,8 +923,8 @@ export class FamilyGroupService {
         const supervisors = await this.supervisorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -955,7 +957,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares por los nombres y apellidos de su supervisor: ${firstNames} ${lastNames}`,
+            `No se encontraron grupos familiares con los nombres y apellidos de su supervisor: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -972,8 +974,8 @@ export class FamilyGroupService {
     //* Family groups by co-pastor full names
     if (
       term &&
-      searchType === FamilyGroupSearchType.FullName &&
-      searchSubType === FamilyGroupSearchSubType.FamilyGroupByCopastorFullName
+      searchType === FamilyGroupSearchType.FullNames &&
+      searchSubType === FamilyGroupSearchSubType.FamilyGroupByCopastorFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -982,8 +984,8 @@ export class FamilyGroupService {
         const copastors = await this.copastorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1016,7 +1018,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares por los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames}`,
+            `No se encontraron grupos familiares con los nombres y apellidos de su co-pastor: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1033,8 +1035,8 @@ export class FamilyGroupService {
     //* Family groups by pastor full names
     if (
       term &&
-      searchType === FamilyGroupSearchType.FullName &&
-      searchSubType === FamilyGroupSearchSubType.FamilyGroupByPastorFullName
+      searchType === FamilyGroupSearchType.FullNames &&
+      searchSubType === FamilyGroupSearchSubType.FamilyGroupByPastorFullNames
     ) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
@@ -1043,8 +1045,8 @@ export class FamilyGroupService {
         const pastors = await this.pastorRepository.find({
           where: {
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -1077,7 +1079,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares por los nombres y apellidos de su pastor: ${firstNames} ${lastNames}`,
+            `No se encontraron grupos familiares con los nombres y apellidos de su pastor: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1118,7 +1120,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares con este código: ${term}`,
+            `No se encontraron grupos familiares con este código: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1159,7 +1161,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares con este nombre: ${term}`,
+            `No se encontraron grupos familiares con este nombre: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1210,7 +1212,48 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares con este nombre zona: ${term}`,
+            `No se encontraron grupos familiares con este nombre zona: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
+          );
+        }
+
+        return familyGroupDataFormatter({ familyGroups }) as any;
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
+      }
+    }
+
+    //? Find by country --> Many
+    if (term && searchType === FamilyGroupSearchType.Country) {
+      try {
+        const familyGroups = await this.familyGroupRepository.find({
+          where: {
+            theirChurch: church,
+            country: ILike(`%${term}%`),
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'theirPastor.member',
+            'theirCopastor.member',
+            'theirSupervisor.member',
+            'theirZone',
+            'theirPreacher.member',
+            'disciples.member',
+          ],
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (familyGroups.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron grupos familiares con este país: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1251,7 +1294,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares con este departamento: ${term}`,
+            `No se encontraron grupos familiares con este departamento: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1292,7 +1335,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares con esta provincia: ${term}`,
+            `No se encontraron grupos familiares con esta provincia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1333,7 +1376,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares con este distrito: ${term}`,
+            `No se encontraron grupos familiares con este distrito: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1374,7 +1417,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares con este sector urbano: ${term}`,
+            `No se encontraron grupos familiares con este sector urbano: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1415,7 +1458,7 @@ export class FamilyGroupService {
 
         if (familyGroups.length === 0) {
           throw new NotFoundException(
-            `No se encontraron grupos familiares con esta dirección: ${term}`,
+            `No se encontraron grupos familiares con esta dirección: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1464,7 +1507,7 @@ export class FamilyGroupService {
           const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
 
           throw new NotFoundException(
-            `No se encontraron grupos familiares con este estado de registro: ${value}`,
+            `No se encontraron grupos familiares con este estado de registro: ${value} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1580,9 +1623,9 @@ export class FamilyGroupService {
 
     if (
       term &&
-      (FamilyGroupSearchType.FirstName ||
-        FamilyGroupSearchType.LastName ||
-        FamilyGroupSearchType.FullName) &&
+      (FamilyGroupSearchType.FirstNames ||
+        FamilyGroupSearchType.LastNames ||
+        FamilyGroupSearchType.FullNames) &&
       !searchSubType
     ) {
       throw new BadRequestException(

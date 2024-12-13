@@ -26,13 +26,13 @@ export const familyGroupFormatterByServiceTime = ({
       if (!acc[familyGroup.serviceTime]) {
         acc[familyGroup.serviceTime] = {
           serviceTimesCount: 0,
-          supervisor: familyGroup?.theirSupervisor?.member?.firstName
+          supervisor: familyGroup?.theirSupervisor?.member?.firstNames
             ? `${getInitialFullNames({
                 firstNames:
-                  familyGroup?.theirSupervisor?.member?.firstName ?? '',
+                  familyGroup?.theirSupervisor?.member?.firstNames ?? '',
                 lastNames: '',
-              })} ${familyGroup?.theirSupervisor?.member?.lastName}`
-            : familyGroup?.theirSupervisor?.member?.firstName === undefined
+              })} ${familyGroup?.theirSupervisor?.member?.lastNames}`
+            : familyGroup?.theirSupervisor?.member?.firstNames === undefined
               ? ''
               : 'Sin Supervisor',
           church: {

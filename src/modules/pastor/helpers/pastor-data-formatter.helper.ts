@@ -14,13 +14,13 @@ export const pastorDataFormatter = ({ pastors }: Options) => {
     },
     copastors: pastor?.copastors.map((copastor) => ({
       id: copastor?.id,
-      firstName: copastor?.member?.firstName,
-      lastName: copastor?.member?.lastName,
+      firstNames: copastor?.member?.firstNames,
+      lastNames: copastor?.member?.lastNames,
     })),
     supervisors: pastor?.supervisors.map((supervisor) => ({
       id: supervisor?.id,
-      firstName: supervisor?.member?.firstName,
-      lastName: supervisor?.member?.lastName,
+      firstNames: supervisor?.member?.firstNames,
+      lastNames: supervisor?.member?.lastNames,
     })),
     zones: pastor?.zones.map((zone) => ({
       id: zone?.id,
@@ -29,8 +29,8 @@ export const pastorDataFormatter = ({ pastors }: Options) => {
     })),
     preachers: pastor?.preachers.map((preacher) => ({
       id: preacher?.id,
-      firstName: preacher?.member?.firstName,
-      lastName: preacher?.member?.lastName,
+      firstNames: preacher?.member?.firstNames,
+      lastNames: preacher?.member?.lastNames,
     })),
     familyGroups: pastor?.familyGroups.map((familyGroup) => ({
       id: familyGroup?.id,
@@ -42,8 +42,8 @@ export const pastorDataFormatter = ({ pastors }: Options) => {
     })),
     disciples: pastor.disciples.map((disciple) => ({
       id: disciple?.id,
-      firstName: disciple?.member?.firstName,
-      lastName: disciple?.member?.lastName,
+      firstNames: disciple?.member?.firstNames,
+      lastNames: disciple?.member?.lastNames,
     })),
   }));
 };

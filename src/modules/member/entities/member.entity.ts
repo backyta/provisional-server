@@ -9,19 +9,19 @@ import {
 
 //NOTE : crear indices o en las entitades especiales.
 @Entity({ name: 'members' })
-@Index(['firstName', 'lastName'])
+@Index(['firstNames', 'lastNames'])
 export class Member {
   //* General and personal info
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Index()
-  @Column('text', { name: 'first_name' })
-  firstName: string;
+  @Column('text', { name: 'first_names' })
+  firstNames: string;
 
   @Index()
-  @Column('text', { name: 'last_name' })
-  lastName: string;
+  @Column('text', { name: 'last_names' })
+  lastNames: string;
 
   @Column('text', { name: 'gender' })
   gender: string;
@@ -54,26 +54,26 @@ export class Member {
   @Column('text', { name: 'phone_number', nullable: true })
   phoneNumber: string;
 
-  @Column('text', { name: 'country', default: 'Peru' })
-  country: string;
+  @Column('text', { name: 'residence_country', default: 'Peru' })
+  residenceCountry: string;
 
-  @Column('text', { name: 'department', default: 'Lima' })
-  department: string;
+  @Column('text', { name: 'residence_department', default: 'Lima' })
+  residenceDepartment: string;
 
-  @Column('text', { name: 'province', default: 'Lima' })
-  province: string;
-
-  @Index()
-  @Column('text', { name: 'district' })
-  district: string;
+  @Column('text', { name: 'residence_province', default: 'Lima' })
+  residenceProvince: string;
 
   @Index()
-  @Column('text', { name: 'urban_sector' })
-  urbanSector: string;
+  @Column('text', { name: 'residence_district' })
+  residenceDistrict: string;
 
   @Index()
-  @Column('text', { name: 'address' })
-  address: string;
+  @Column('text', { name: 'residence_urban_sector' })
+  residenceUrbanSector: string;
+
+  @Index()
+  @Column('text', { name: 'residence_address' })
+  residenceAddress: string;
 
   @Column('text', { name: 'reference_address' })
   referenceAddress: string;

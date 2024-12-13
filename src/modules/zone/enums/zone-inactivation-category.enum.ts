@@ -7,12 +7,19 @@ export enum ZoneInactivationCategory {
   UnavoidableCircumstances = 'unavoidable_circumstances',
 }
 
-export const ZoneInactivationCategoryNames: Record<ZoneInactivationCategory, string> = {
-  [ZoneInactivationCategory.AdministrativeChanges]: 'Razones por cambios administrativos',
-  [ZoneInactivationCategory.LeadershipIssues]: 'Razones por problemas de liderazgo',
-  [ZoneInactivationCategory.LackOfActivityOrCommitment]: 'Razones por falta de actividad o compromiso',
-  [ZoneInactivationCategory.GroupFamilyRelatedReasons]: 'Razones relacionadas con grupos familiares',
+export const ZoneInactivationCategoryNames: Record<
+  ZoneInactivationCategory,
+  string
+> = {
+  [ZoneInactivationCategory.AdministrativeChanges]:
+    'Razones por cambios administrativos',
+  [ZoneInactivationCategory.LeadershipIssues]:
+    'Razones por problemas de liderazgo',
+  [ZoneInactivationCategory.LackOfActivityOrCommitment]:
+    'Razones por falta de actividad o compromiso',
+  [ZoneInactivationCategory.GroupFamilyRelatedReasons]:
+    'Razones relacionadas con grupos familiares',
   [ZoneInactivationCategory.ExternalFactors]: 'Razones por factores externos',
-  [ZoneInactivationCategory.UnavoidableCircumstances]: 'Razones inevitables o naturales',
+  [ZoneInactivationCategory.UnavoidableCircumstances]:
+    'Razones inevitables o naturales',
 };
-

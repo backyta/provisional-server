@@ -30,17 +30,17 @@ export const familyGroupFormatterByZone = ({ zones }: Options) => {
     ).length;
 
     acc[zone.zoneName] = {
-      copastor: zone?.theirCopastor?.member?.firstName
+      copastor: zone?.theirCopastor?.member?.firstNames
         ? `${getInitialFullNames({
-            firstNames: zone?.theirCopastor?.member?.firstName ?? '',
+            firstNames: zone?.theirCopastor?.member?.firstNames ?? '',
             lastNames: '',
-          })} ${zone?.theirCopastor?.member?.lastName}`
+          })} ${zone?.theirCopastor?.member?.lastNames}`
         : 'Sin Co-Pastor',
-      supervisor: zone?.theirSupervisor?.member?.firstName
+      supervisor: zone?.theirSupervisor?.member?.firstNames
         ? `${getInitialFullNames({
-            firstNames: zone?.theirSupervisor?.member?.firstName ?? '',
+            firstNames: zone?.theirSupervisor?.member?.firstNames ?? '',
             lastNames: '',
-          })} ${zone?.theirSupervisor?.member?.lastName}`
+          })} ${zone?.theirSupervisor?.member?.lastNames}`
         : 'Sin Supervisor',
       familyGroupsCount: filteredFamilyGroups,
       church: {

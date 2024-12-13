@@ -47,11 +47,11 @@ export const memberFormatterByDistrictAndGender = ({
     const menCount = item?.member?.gender === Gender.Male ? 1 : 0;
     const womenCount = item?.member?.gender === Gender.Female ? 1 : 0;
 
-    if (!acc[item?.member?.urbanSector]) {
-      acc[item?.member?.urbanSector] = {
+    if (!acc[item?.member?.residenceUrbanSector]) {
+      acc[item?.member?.residenceUrbanSector] = {
         men: 0,
         women: 0,
-        district: item.member.district,
+        district: item.member.residenceDistrict,
         church: {
           isAnexe: allMembers[0]?.theirChurch?.isAnexe,
           abbreviatedChurchName:
@@ -60,8 +60,8 @@ export const memberFormatterByDistrictAndGender = ({
       };
     }
 
-    acc[item?.member?.urbanSector].men += menCount;
-    acc[item?.member?.urbanSector].women += womenCount;
+    acc[item?.member?.residenceUrbanSector].men += menCount;
+    acc[item?.member?.residenceUrbanSector].women += womenCount;
 
     return acc;
   }, {});

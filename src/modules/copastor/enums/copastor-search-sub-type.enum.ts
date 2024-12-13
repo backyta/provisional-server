@@ -1,8 +1,8 @@
 export enum CopastorSearchSubType {
-  CopastorByPastorNames = 'copastor_by_pastor_names',
+  CopastorByPastorFirstNames = 'copastor_by_pastor_first_names',
   CopastorByPastorLastNames = 'copastor_by_pastor_last_names',
-  CopastorByPastorFullName = 'copastor_by_pastor_full_name',
-  ByCopastorNames = 'by_copastor_names',
+  CopastorByPastorFullNames = 'copastor_by_pastor_full_names',
+  ByCopastorFirstNames = 'by_copastor_first_names',
   ByCopastorLastNames = 'by_copastor_last_names',
-  ByCopastorFullName = 'by_copastor_full_name',
+  ByCopastorFullNames = 'by_copastor_full_names',
 }

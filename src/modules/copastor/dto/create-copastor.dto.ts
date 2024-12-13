@@ -27,7 +27,7 @@ export class CreateCopastorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(40)
-  firstName: string;
+  firstNames: string;
 
   @ApiProperty({
     example: 'Valdivia Fuerte',
@@ -36,7 +36,7 @@ export class CreateCopastorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(40)
-  lastName: string;
+  lastNames: string;
 
   @ApiProperty({
     example: Gender.Male,
@@ -106,7 +106,7 @@ export class CreateCopastorDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  country?: string;
+  residenceCountry?: string;
 
   @ApiProperty({
     example: 'Lima',
@@ -115,7 +115,7 @@ export class CreateCopastorDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  department?: string;
+  residenceDepartment?: string;
 
   @ApiProperty({
     example: 'Lima',
@@ -124,7 +124,7 @@ export class CreateCopastorDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(15)
-  province?: string;
+  residenceProvince?: string;
 
   @ApiProperty({
     example: 'Comas',
@@ -133,7 +133,7 @@ export class CreateCopastorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(20)
-  district: string;
+  residenceDistrict: string;
 
   @ApiProperty({
     example: 'La Merced',
@@ -142,7 +142,7 @@ export class CreateCopastorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(30)
-  urbanSector: string;
+  residenceUrbanSector: string;
 
   @ApiProperty({
     example: 'Jr Pascana 123',
@@ -151,7 +151,7 @@ export class CreateCopastorDto {
   @IsNotEmpty()
   @MinLength(1)
   @MaxLength(80)
-  address: string;
+  residenceAddress: string;
 
   @ApiProperty({
     example: 'A una cuadra del hospital central.',
@@ -201,7 +201,7 @@ export class CreateCopastorDto {
   @IsOptional()
   theirChurch?: string;
 
-  //? Inactivation Data (optional)
+  //! Properties record inactivation (optional)
   @ApiProperty({
     example: MemberInactivationCategory.PersonalChallenges,
     description: 'Member inactivation category.',

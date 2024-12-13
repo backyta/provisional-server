@@ -106,13 +106,13 @@ export class UserService {
     }
 
     //? Find by first name --> Many
-    if (term && searchType === UserSearchType.FirstName) {
+    if (term && searchType === UserSearchType.FirstNames) {
       const firstNames = term.replace(/\+/g, ' ');
 
       try {
         const users = await this.userRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
+            firstNames: ILike(`%${firstNames}%`),
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -138,13 +138,13 @@ export class UserService {
     }
 
     //? Find by last name --> Many
-    if (term && searchType === UserSearchType.LastName) {
+    if (term && searchType === UserSearchType.LastNames) {
       const lastNames = term.replace(/\+/g, ' ');
 
       try {
         const users = await this.userRepository.find({
           where: {
-            lastName: ILike(`%${lastNames}%`),
+            lastNames: ILike(`%${lastNames}%`),
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -170,15 +170,15 @@ export class UserService {
     }
 
     //? Find by full name --> Many
-    if (term && searchType === UserSearchType.FullName) {
+    if (term && searchType === UserSearchType.FullNames) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
       try {
         const users = await this.userRepository.find({
           where: {
-            firstName: ILike(`%${firstNames}%`),
-            lastName: ILike(`%${lastNames}%`),
+            firstNames: ILike(`%${firstNames}%`),
+            lastNames: ILike(`%${lastNames}%`),
             recordStatus: RecordStatus.Active,
           },
           take: limit,
@@ -336,8 +336,8 @@ export class UserService {
     user: User,
   ): Promise<User> {
     const {
-      firstName,
-      lastName,
+      firstNames,
+      lastNames,
       gender,
       email,
       roles,
@@ -356,8 +356,8 @@ export class UserService {
       where: { id },
       select: {
         id: true,
-        firstName: true,
-        lastName: true,
+        firstNames: true,
+        lastNames: true,
         roles: true,
         recordStatus: true,
         email: true,
@@ -393,8 +393,8 @@ export class UserService {
       try {
         const updateUser = await this.userRepository.preload({
           id: id,
-          firstName: firstName,
-          lastName: lastName,
+          firstNames: firstNames,
+          lastNames: lastNames,
           gender: gender,
           roles: roles,
           email: email,
@@ -422,8 +422,8 @@ export class UserService {
       try {
         const updateUser = await this.userRepository.preload({
           id: id,
-          firstName: firstName,
-          lastName: lastName,
+          firstNames: firstNames,
+          lastNames: lastNames,
           gender: gender,
           roles: roles,
           email: email,

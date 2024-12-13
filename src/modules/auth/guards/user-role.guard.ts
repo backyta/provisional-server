@@ -41,7 +41,7 @@ export class UserRoleGuard implements CanActivate {
     }
 
     throw new ForbiddenException(
-      `Operación rechazada, usuario ${user.firstName} ${user.lastName} necesita los roles de acceso: ${getRoleNamesInSpanish(validUserRoles)}`,
+      `Operación rechazada, usuario ${user.firstNames} ${user.lastNames} necesita los roles de acceso: ${getRoleNamesInSpanish(validUserRoles)}`,
     );
   }
 }

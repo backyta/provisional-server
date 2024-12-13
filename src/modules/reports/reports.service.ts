@@ -184,7 +184,7 @@ export class ReportsService {
       }
 
       const docDefinition = getStudyCertificateByIdReport({
-        studentName: `${student.firstName} ${student.lastName}`,
+        studentName: `${student.firstNames} ${student.lastNames}`,
         directorName: 'Marcos Alberto Reyes Quispe',
         studyStartDate: DateFormatter.getDDMMYYYY(new Date('2024-03-07')),
         studyEndDate: DateFormatter.getDDMMYYYY(new Date('2024-10-07')),
@@ -1643,7 +1643,7 @@ export class ReportsService {
       if (
         (searchType === SearchType.Special ||
           searchType === SearchType.ChurchGround) &&
-        searchSubType === SearchSubType.OfferingByContributorNames
+        searchSubType === SearchSubType.OfferingByContributorFirstNames
       ) {
         const [memberType, names] = term.split('&');
         const firstNames = names.replace(/\+/g, ' ');
@@ -1667,7 +1667,7 @@ export class ReportsService {
       if (
         (searchType === SearchType.Special ||
           searchType === SearchType.ChurchGround) &&
-        searchSubType === SearchSubType.OfferingByContributorFullName
+        searchSubType === SearchSubType.OfferingByContributorFullNames
       ) {
         const [memberType, names] = term.split('&');
         const firstNames = names.split('-')[0].replace(/\+/g, ' ');
@@ -1782,8 +1782,6 @@ export class ReportsService {
           `No se encontraron salidas de ofrenda con estos términos de búsqueda.`,
         );
       }
-
-      console.log(offeringExpenses);
 
       let newTerm: string;
       newTerm = term;

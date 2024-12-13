@@ -5,6 +5,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from '@/app.module';
 import { SuperUserService } from '@/utils';
 
+import { ThrottlerExceptionFilter } from '@/modules/auth/filters/throttler-exception.filter';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('Bootstrap');
@@ -38,6 +40,9 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
+
+  // Register global filter
+  app.useGlobalFilters(new ThrottlerExceptionFilter());
 
   await app.listen(process.env.PORT);
   logger.log(`App running in port ${process.env.PORT}`);

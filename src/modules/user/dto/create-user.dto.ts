@@ -43,14 +43,14 @@ export class CreateUserDto {
   })
   @IsString()
   @MinLength(1)
-  firstName: string;
+  firstNames: string;
 
   @ApiProperty({
     example: 'Villena Sanchez',
   })
   @IsString()
   @MinLength(1)
-  lastName: string;
+  lastNames: string;
 
   @ApiProperty({
     example: Gender.Female,
@@ -80,7 +80,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   roles: string[];
 
-  //? Inactivation Data (optional)
+  //! Properties record inactivation (optional)
   @ApiProperty({
     example: UserInactivationCategory.PerformanceOrConduct,
     description: 'Member inactivation category.',

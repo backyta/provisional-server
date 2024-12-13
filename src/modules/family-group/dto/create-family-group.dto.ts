@@ -119,7 +119,7 @@ export class CreateFamilyGroupDto {
   @IsUUID()
   theirZone?: string;
 
-  //? Inactivation Data (optional)
+  //! Properties record inactivation (optional)
   @ApiProperty({
     example: FamilyGroupInactivationCategory.HostUnavailability,
     description: 'Member inactivation category.',

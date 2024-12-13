@@ -13,6 +13,7 @@ import { UserRole } from '@/modules/auth/enums';
 import { Auth } from '@/modules/auth/decorators';
 
 import { SeedService } from '@/modules/seed/seed.service';
+import { SkipThrottle } from '@nestjs/throttler';
 
 @ApiTags('Seed')
 @ApiBearerAuth()
@@ -28,6 +29,7 @@ import { SeedService } from '@/modules/seed/seed.service';
 @ApiInternalServerErrorResponse({
   description: 'Internal server error, check logs.',
 })
+@SkipThrottle()
 @Controller('seed')
 export class SeedController {
   constructor(

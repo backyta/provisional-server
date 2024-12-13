@@ -337,7 +337,7 @@ export const getOfferingIncomeMetricsReport = (
                     `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
                     OfferingIncomeCreationCategoryNames[offering?.category],
                     offering?.familyGroup?.familyGroupCode,
-                    `${offering?.preacher?.firstName} ${offering?.preacher?.lastName}`,
+                    `${offering?.preacher?.firstNames} ${offering?.preacher?.lastNames}`,
                     offering.accumulatedOfferingPEN,
                     offering.accumulatedOfferingUSD,
                     offering.accumulatedOfferingEUR,
@@ -904,9 +904,9 @@ export const getOfferingIncomeMetricsReport = (
                       format(addDays(offering?.date, 1), 'dd/MM/yyyy'),
                       OfferingIncomeCreationSubTypeNames[offering?.type],
                       OfferingIncomeCreationCategoryNames[offering?.category],
-                      offering?.supervisor?.firstName &&
-                      offering?.supervisor?.lastName
-                        ? `${offering?.supervisor?.firstName} ${offering?.supervisor?.lastName}`
+                      offering?.supervisor?.firstNames &&
+                      offering?.supervisor?.lastNames
+                        ? `${offering?.supervisor?.firstNames} ${offering?.supervisor?.lastNames}`
                         : '-',
                       offering.zone.zoneName ? offering?.zone?.zoneName : '-',
                       `${offering.accumulatedOfferingPEN} PEN`,

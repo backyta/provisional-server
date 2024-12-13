@@ -21,13 +21,14 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
+import { User } from '@/modules/user/entities';
+
 import { UserRole } from '@/modules/auth/enums';
 import { Auth, GetUser } from '@/modules/auth/decorators';
-
-import { User } from '@/modules/user/entities';
 
 import {
   CreateChurchDto,
@@ -48,6 +49,7 @@ import { ChurchService } from '@/modules/church/church.service';
 @ApiBadRequestResponse({
   description: 'Bad request.',
 })
+@SkipThrottle()
 @Controller('churches')
 export class ChurchController {
   constructor(private readonly churchService: ChurchService) {}

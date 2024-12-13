@@ -9,6 +9,7 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import { SearchAndPaginationDto } from '@/common/dtos';
 
@@ -26,6 +27,7 @@ import { MetricsService } from '@/modules/metrics/metrics.service';
 @ApiBadRequestResponse({
   description: 'Bad request.',
 })
+@SkipThrottle()
 @Controller('metrics')
 export class MetricsController {
   constructor(private readonly metricsService: MetricsService) {}

@@ -2,14 +2,14 @@ import { RecordStatus } from '@/common/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
-  IsBoolean,
-  IsEmail,
   IsEnum,
-  IsNotEmpty,
-  IsOptional,
+  IsEmail,
   IsString,
   MaxLength,
   MinLength,
+  IsBoolean,
+  IsOptional,
+  IsNotEmpty,
 } from 'class-validator';
 import {
   ChurchInactivationReason,
@@ -155,7 +155,7 @@ export class CreateChurchDto {
   @IsOptional()
   theirMainChurch?: string;
 
-  //? Inactivation Data (optional)
+  //! Properties record inactivation (optional)
   @ApiProperty({
     example: ChurchInactivationCategory.Administrative,
     description: 'Member inactivation category.',

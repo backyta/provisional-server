@@ -15,8 +15,8 @@ interface DataResultOptions {
   };
   preacher: {
     id: string;
-    firstName: string;
-    lastName: string;
+    firstNames: string;
+    lastNames: string;
   };
   church: {
     isAnexe: boolean;
@@ -75,8 +75,8 @@ export const topOfferingsFamilyGroupsDataFormatter = ({
         },
         preacher: {
           id: offering?.familyGroup?.theirPreacher?.id,
-          firstName: offering?.familyGroup?.theirPreacher?.member?.firstName,
-          lastName: offering?.familyGroup?.theirPreacher?.member?.lastName,
+          firstNames: offering?.familyGroup?.theirPreacher?.member?.firstNames,
+          lastNames: offering?.familyGroup?.theirPreacher?.member?.lastNames,
         },
         church: {
           isAnexe: offering?.church?.isAnexe,

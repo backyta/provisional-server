@@ -16,26 +16,26 @@ export const zoneDataFormatter = ({ zones }: Options) => {
     },
     theirPastor: {
       id: zone?.theirPastor?.id,
-      firstName: zone?.theirPastor?.member?.firstName,
-      lastName: zone?.theirPastor?.member?.lastName,
+      firstNames: zone?.theirPastor?.member?.firstNames,
+      lastNames: zone?.theirPastor?.member?.lastNames,
       roles: zone?.theirPastor?.member?.roles,
     },
     theirCopastor: {
       id: zone?.theirCopastor?.id,
-      firstName: zone?.theirCopastor?.member?.firstName,
-      lastName: zone?.theirCopastor?.member?.lastName,
+      firstNames: zone?.theirCopastor?.member?.firstNames,
+      lastNames: zone?.theirCopastor?.member?.lastNames,
       roles: zone?.theirCopastor?.member?.roles,
     },
     theirSupervisor: {
       id: zone?.theirSupervisor?.id,
-      firstName: zone?.theirSupervisor?.member?.firstName,
-      lastName: zone?.theirSupervisor?.member?.lastName,
+      firstNames: zone?.theirSupervisor?.member?.firstNames,
+      lastNames: zone?.theirSupervisor?.member?.lastNames,
       roles: zone?.theirSupervisor?.member?.roles,
     },
     preachers: zone?.preachers.map((preacher) => ({
       id: preacher?.id,
-      firstName: preacher?.member?.firstName,
-      lastName: preacher?.member?.lastName,
+      firstNames: preacher?.member?.firstNames,
+      lastNames: preacher?.member?.lastNames,
     })),
     familyGroups: zone?.familyGroups.map((familyGroup) => ({
       id: familyGroup?.id,
@@ -47,8 +47,8 @@ export const zoneDataFormatter = ({ zones }: Options) => {
     })),
     disciples: zone?.disciples.map((disciple) => ({
       id: disciple?.id,
-      firstName: disciple?.member?.firstName,
-      lastName: disciple?.member?.lastName,
+      firstNames: disciple?.member?.firstNames,
+      lastNames: disciple?.member?.lastNames,
     })),
   }));
 };

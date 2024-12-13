@@ -16,20 +16,20 @@ export const preacherDataFormatter = ({ preachers }: Options) => {
     },
     theirPastor: {
       id: preacher?.theirPastor?.id,
-      firstName: preacher?.theirPastor?.member?.firstName,
-      lastName: preacher?.theirPastor?.member?.lastName,
+      firstNames: preacher?.theirPastor?.member?.firstNames,
+      lastNames: preacher?.theirPastor?.member?.lastNames,
       roles: preacher?.theirPastor?.member?.roles,
     },
     theirCopastor: {
       id: preacher?.theirCopastor?.id,
-      firstName: preacher?.theirCopastor?.member?.firstName,
-      lastName: preacher?.theirCopastor?.member?.lastName,
+      firstNames: preacher?.theirCopastor?.member?.firstNames,
+      lastNames: preacher?.theirCopastor?.member?.lastNames,
       roles: preacher?.theirCopastor?.member?.roles,
     },
     theirSupervisor: {
       id: preacher?.theirSupervisor?.id,
-      firstName: preacher?.theirSupervisor?.member?.firstName,
-      lastName: preacher?.theirSupervisor?.member?.lastName,
+      firstNames: preacher?.theirSupervisor?.member?.firstNames,
+      lastNames: preacher?.theirSupervisor?.member?.lastNames,
       roles: preacher?.theirSupervisor?.member?.roles,
     },
     theirZone: {
@@ -48,8 +48,8 @@ export const preacherDataFormatter = ({ preachers }: Options) => {
     },
     disciples: preacher?.disciples.map((disciple) => ({
       id: disciple?.id,
-      firstName: disciple?.member?.firstName,
-      lastName: disciple?.member?.lastName,
+      firstNames: disciple?.member?.firstNames,
+      lastNames: disciple?.member?.lastNames,
     })),
   }));
 };

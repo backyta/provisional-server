@@ -38,8 +38,8 @@ export class AuthService {
       const user = await this.userRepository.findOne({
         where: { email },
         select: {
-          firstName: true,
-          lastName: true,
+          firstNames: true,
+          lastNames: true,
           roles: true,
           recordStatus: true,
           email: true,
@@ -51,13 +51,13 @@ export class AuthService {
 
       if (!user) {
         throw new UnauthorizedException(
-          `Credenciales invalidas, revise el correo y la contraseña.`,
+          `Credenciales invalidas, verifique el correo y la contraseña.`,
         );
       }
 
       if (!bcrypt.compareSync(password, user.password)) {
         throw new UnauthorizedException(
-          `Credenciales invalidas, revise el correo y la contraseña.`,
+          `Credenciales invalidas, verifique el correo y la contraseña.`,
         );
       }
 

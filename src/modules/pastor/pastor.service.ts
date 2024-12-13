@@ -119,8 +119,8 @@ export class PastorService {
     //* Create new instance member and assign to new pastor instance
     try {
       const newMember = this.memberRepository.create({
-        firstName: createPastorDto.firstName,
-        lastName: createPastorDto.lastName,
+        firstNames: createPastorDto.firstNames,
+        lastNames: createPastorDto.lastNames,
         gender: createPastorDto.gender,
         originCountry: createPastorDto.originCountry,
         birthDate: createPastorDto.birthDate,
@@ -129,12 +129,12 @@ export class PastorService {
         conversionDate: createPastorDto.conversionDate,
         email: createPastorDto.email,
         phoneNumber: createPastorDto.phoneNumber,
-        country: createPastorDto.country,
-        department: createPastorDto.department,
-        province: createPastorDto.province,
-        district: createPastorDto.district,
-        urbanSector: createPastorDto.urbanSector,
-        address: createPastorDto.address,
+        residenceCountry: createPastorDto.residenceCountry,
+        residenceDepartment: createPastorDto.residenceDepartment,
+        residenceProvince: createPastorDto.residenceProvince,
+        residenceDistrict: createPastorDto.residenceDistrict,
+        residenceUrbanSector: createPastorDto.residenceUrbanSector,
+        residenceAddress: createPastorDto.residenceAddress,
         referenceAddress: createPastorDto.referenceAddress,
         roles: createPastorDto.roles,
       });
@@ -276,7 +276,7 @@ export class PastorService {
     }
 
     //? Find by first name --> Many
-    if (term && searchType === PastorSearchType.FirstName) {
+    if (term && searchType === PastorSearchType.FirstNames) {
       const firstNames = term.replace(/\+/g, ' ');
 
       try {
@@ -284,7 +284,7 @@ export class PastorService {
           where: {
             theirChurch: church,
             member: {
-              firstName: ILike(`%${firstNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -308,7 +308,7 @@ export class PastorService {
 
         if (pastors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron pastores(as) con estos nombres: ${firstNames}`,
+            `No se encontraron pastores(as) con estos nombres: ${firstNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -323,7 +323,7 @@ export class PastorService {
     }
 
     //? Find by last name --> Many
-    if (term && searchType === PastorSearchType.LastName) {
+    if (term && searchType === PastorSearchType.LastNames) {
       const lastNames = term.replace(/\+/g, ' ');
 
       try {
@@ -331,7 +331,7 @@ export class PastorService {
           where: {
             theirChurch: church,
             member: {
-              lastName: ILike(`%${lastNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -355,7 +355,7 @@ export class PastorService {
 
         if (pastors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron pastores(as) con estos apellidos: ${lastNames}`,
+            `No se encontraron pastores(as) con estos apellidos: ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -370,7 +370,7 @@ export class PastorService {
     }
 
     //? Find by full name --> Many
-    if (term && searchType === PastorSearchType.FullName) {
+    if (term && searchType === PastorSearchType.FullNames) {
       const firstNames = term.split('-')[0].replace(/\+/g, ' ');
       const lastNames = term.split('-')[1].replace(/\+/g, ' ');
 
@@ -379,8 +379,8 @@ export class PastorService {
           where: {
             theirChurch: church,
             member: {
-              firstName: ILike(`%${firstNames}%`),
-              lastName: ILike(`%${lastNames}%`),
+              firstNames: ILike(`%${firstNames}%`),
+              lastNames: ILike(`%${lastNames}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -404,7 +404,7 @@ export class PastorService {
 
         if (pastors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron pastores(as) con estos nombres y apellidos: ${firstNames} ${lastNames}`,
+            `No se encontraron pastores(as) con estos nombres y apellidos: ${firstNames} ${lastNames} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -461,7 +461,7 @@ export class PastorService {
           const toDate = dateFormatterToDDMMYYYY(toTimestamp);
 
           throw new NotFoundException(
-            `No se encontraron pastores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate}`,
+            `No se encontraron pastores(as) con este rango de fechas de nacimiento: ${fromDate} - ${toDate} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -525,7 +525,7 @@ export class PastorService {
           const monthInSpanish = monthNames[term.toLowerCase()] ?? term;
 
           throw new NotFoundException(
-            `No se encontraron pastores(as) con este mes de nacimiento: ${monthInSpanish}`,
+            `No se encontraron pastores(as) con este mes de nacimiento: ${monthInSpanish} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -581,7 +581,7 @@ export class PastorService {
           const genderInSpanish = GenderNames[term.toLowerCase()] ?? term;
 
           throw new NotFoundException(
-            `No se encontraron pastores(as) con este género: ${genderInSpanish}`,
+            `No se encontraron pastores(as) con este género: ${genderInSpanish} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -642,7 +642,7 @@ export class PastorService {
             MaritalStatusNames[term.toLowerCase()] ?? term;
 
           throw new NotFoundException(
-            `No se encontraron pastores(as) con este estado civil: ${maritalStatusInSpanish}`,
+            `No se encontraron pastores(as) con este estado civil: ${maritalStatusInSpanish} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -687,7 +687,7 @@ export class PastorService {
 
         if (pastors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron pastores(as) con este país de origen: ${term}`,
+            `No se encontraron pastores(as) con este país de origen: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -701,14 +701,14 @@ export class PastorService {
       }
     }
 
-    //? Find by department --> Many
-    if (term && searchType === PastorSearchType.Department) {
+    //? Find by residence country --> Many
+    if (term && searchType === PastorSearchType.ResidenceCountry) {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
             theirChurch: church,
             member: {
-              department: ILike(`%${term}%`),
+              residenceCountry: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -732,7 +732,7 @@ export class PastorService {
 
         if (pastors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron pastores(as) con este departamento: ${term}`,
+            `No se encontraron pastores(as) con este país de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -746,14 +746,14 @@ export class PastorService {
       }
     }
 
-    //? Find by province --> Many
-    if (term && searchType === PastorSearchType.Province) {
+    //? Find by residence department --> Many
+    if (term && searchType === PastorSearchType.ResidenceDepartment) {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
             theirChurch: church,
             member: {
-              province: ILike(`%${term}%`),
+              residenceDepartment: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -777,7 +777,7 @@ export class PastorService {
 
         if (pastors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron pastores(as) con esta provincia: ${term}`,
+            `No se encontraron pastores(as) con este departamento de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -791,14 +791,14 @@ export class PastorService {
       }
     }
 
-    //? Find by district --> Many
-    if (term && searchType === PastorSearchType.District) {
+    //? Find by residence province --> Many
+    if (term && searchType === PastorSearchType.ResidenceProvince) {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
             theirChurch: church,
             member: {
-              district: ILike(`%${term}%`),
+              residenceProvince: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -822,7 +822,7 @@ export class PastorService {
 
         if (pastors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron pastores(as) con este distrito: ${term}`,
+            `No se encontraron pastores(as) con esta provincia de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -836,14 +836,14 @@ export class PastorService {
       }
     }
 
-    //? Find by urban sector --> Many
-    if (term && searchType === PastorSearchType.UrbanSector) {
+    //? Find by residence district --> Many
+    if (term && searchType === PastorSearchType.ResidenceDistrict) {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
             theirChurch: church,
             member: {
-              urbanSector: ILike(`%${term}%`),
+              residenceDistrict: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -867,7 +867,7 @@ export class PastorService {
 
         if (pastors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron pastores(as) con este sector urbano: ${term}`,
+            `No se encontraron pastores(as) con este distrito de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -881,14 +881,14 @@ export class PastorService {
       }
     }
 
-    //? Find by address --> Many
-    if (term && searchType === PastorSearchType.Address) {
+    //? Find by residence urban sector --> Many
+    if (term && searchType === PastorSearchType.ResidenceUrbanSector) {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
             theirChurch: church,
             member: {
-              address: ILike(`%${term}%`),
+              residenceUrbanSector: ILike(`%${term}%`),
             },
             recordStatus: RecordStatus.Active,
           },
@@ -912,7 +912,52 @@ export class PastorService {
 
         if (pastors.length === 0) {
           throw new NotFoundException(
-            `No se encontraron pastores(as) con esta dirección: ${term}`,
+            `No se encontraron pastores(as) con este sector urbano de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
+          );
+        }
+
+        return pastorDataFormatter({ pastors }) as any;
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
+      }
+    }
+
+    //? Find by residence address --> Many
+    if (term && searchType === PastorSearchType.ResidenceAddress) {
+      try {
+        const pastors = await this.pastorRepository.find({
+          where: {
+            theirChurch: church,
+            member: {
+              residenceAddress: ILike(`%${term}%`),
+            },
+            recordStatus: RecordStatus.Active,
+          },
+          take: limit,
+          skip: offset,
+          relations: [
+            'updatedBy',
+            'createdBy',
+            'theirChurch',
+            'zones',
+            'familyGroups',
+            'member',
+            'copastors.member',
+            'supervisors.member',
+            'preachers.member',
+            'disciples.member',
+          ],
+          relationLoadStrategy: 'query',
+          order: { createdAt: order as FindOptionsOrderValue },
+        });
+
+        if (pastors.length === 0) {
+          throw new NotFoundException(
+            `No se encontraron pastores(as) con esta dirección de residencia: ${term} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -965,7 +1010,7 @@ export class PastorService {
           const value = term === RecordStatus.Inactive ? 'Inactivo' : 'Activo';
 
           throw new NotFoundException(
-            `No se encontraron pastores(as) con este estado de registro: ${value}`,
+            `No se encontraron pastores(as) con este estado de registro: ${value} y con esta iglesia: ${church ? church?.abbreviatedChurchName : 'Todas las iglesias'}`,
           );
         }
 
@@ -1101,8 +1146,8 @@ export class PastorService {
         try {
           const updatedMember = await this.memberRepository.preload({
             id: pastor.member.id,
-            firstName: updatePastorDto.firstName,
-            lastName: updatePastorDto.lastName,
+            firstNames: updatePastorDto.firstNames,
+            lastNames: updatePastorDto.lastNames,
             gender: updatePastorDto.gender,
             originCountry: updatePastorDto.originCountry,
             birthDate: updatePastorDto.birthDate,
@@ -1111,12 +1156,12 @@ export class PastorService {
             conversionDate: updatePastorDto.conversionDate,
             email: updatePastorDto.email,
             phoneNumber: updatePastorDto.phoneNumber,
-            country: updatePastorDto.country,
-            department: updatePastorDto.department,
-            province: updatePastorDto.province,
-            district: updatePastorDto.district,
-            urbanSector: updatePastorDto.urbanSector,
-            address: updatePastorDto.address,
+            residenceCountry: updatePastorDto.residenceCountry,
+            residenceDepartment: updatePastorDto.residenceDepartment,
+            residenceProvince: updatePastorDto.residenceProvince,
+            residenceDistrict: updatePastorDto.residenceDistrict,
+            residenceUrbanSector: updatePastorDto.residenceUrbanSector,
+            residenceAddress: updatePastorDto.residenceAddress,
             referenceAddress: updatePastorDto.referenceAddress,
             roles: updatePastorDto.roles,
           });
@@ -1260,8 +1305,8 @@ export class PastorService {
         try {
           const updatedMember = await this.memberRepository.preload({
             id: pastor.member.id,
-            firstName: updatePastorDto.firstName,
-            lastName: updatePastorDto.lastName,
+            firstNames: updatePastorDto.firstNames,
+            lastNames: updatePastorDto.lastNames,
             gender: updatePastorDto.gender,
             originCountry: updatePastorDto.originCountry,
             birthDate: updatePastorDto.birthDate,
@@ -1270,12 +1315,12 @@ export class PastorService {
             conversionDate: updatePastorDto.conversionDate,
             email: updatePastorDto.email,
             phoneNumber: updatePastorDto.phoneNumber,
-            country: updatePastorDto.country,
-            department: updatePastorDto.department,
-            province: updatePastorDto.province,
-            district: updatePastorDto.district,
-            urbanSector: updatePastorDto.urbanSector,
-            address: updatePastorDto.address,
+            residenceCountry: updatePastorDto.residenceCountry,
+            residenceDepartment: updatePastorDto.residenceDepartment,
+            residenceProvince: updatePastorDto.residenceProvince,
+            residenceDistrict: updatePastorDto.residenceDistrict,
+            residenceUrbanSector: updatePastorDto.residenceUrbanSector,
+            residenceAddress: updatePastorDto.residenceAddress,
             referenceAddress: updatePastorDto.referenceAddress,
             roles: updatePastorDto.roles,
           });

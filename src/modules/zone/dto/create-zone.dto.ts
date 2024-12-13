@@ -78,7 +78,7 @@ export class CreateZoneDto {
   @IsUUID()
   theirSupervisor?: string;
 
-  //? Inactivation Data (optional)
+  //! Properties record inactivation (optional)
   @ApiProperty({
     example: ZoneInactivationCategory.GroupFamilyRelatedReasons,
     description: 'Member inactivation category.',

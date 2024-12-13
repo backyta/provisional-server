@@ -11,20 +11,20 @@ import {
 import { RecordStatus } from '@/common/enums';
 import { User } from '@/modules/user/entities';
 
-@Entity({ name: 'external_donor' })
-@Index(['firstName', 'lastName'])
+@Entity({ name: 'external_donors' })
+@Index(['firstNames', 'lastNames'])
 export class ExternalDonor {
   //* General and personal info
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Index()
-  @Column('text', { name: 'first_name' })
-  firstName: string;
+  @Column('text', { name: 'first_names' })
+  firstNames: string;
 
   @Index()
-  @Column('text', { name: 'last_name' })
-  lastName: string;
+  @Column('text', { name: 'last_names' })
+  lastNames: string;
 
   @Column('int', { name: 'age', nullable: true })
   age: number;

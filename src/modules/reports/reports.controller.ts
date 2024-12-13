@@ -7,14 +7,36 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { SkipThrottle } from '@nestjs/throttler';
+
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiBadRequestResponse,
+  ApiUnauthorizedResponse,
+  ApiInternalServerErrorResponse,
+} from '@nestjs/swagger';
 
 import {
   PaginationDto,
   MetricsPaginationDto,
   SearchAndPaginationDto,
 } from '@/common/dtos';
+
 import { ReportsService } from '@/modules/reports/reports.service';
 
+@ApiTags('Reportes')
+@ApiBearerAuth()
+@ApiUnauthorizedResponse({
+  description: 'Unauthorized Bearer Auth.',
+})
+@ApiInternalServerErrorResponse({
+  description: 'Internal server error, check logs.',
+})
+@ApiBadRequestResponse({
+  description: 'Bad request.',
+})
+@SkipThrottle()
 @Controller('reports')
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}

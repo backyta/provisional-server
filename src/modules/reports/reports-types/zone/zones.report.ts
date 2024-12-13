@@ -108,9 +108,9 @@ export const getZonesReport = (
             ...data.map((item) => [
               item?.zoneName,
               `${item?.theirChurch?.abbreviatedChurchName}`,
-              `${item?.theirPastor?.firstName} ${item?.theirPastor?.lastName}`,
-              `${item?.theirCopastor?.firstName} ${item?.theirCopastor?.lastName}`,
-              `${item?.theirSupervisor?.firstName} ${item?.theirSupervisor?.lastName}`,
+              `${item?.theirPastor?.firstNames} ${item?.theirPastor?.lastNames}`,
+              `${item?.theirCopastor?.firstNames} ${item?.theirCopastor?.lastNames}`,
+              `${item?.theirSupervisor?.firstNames} ${item?.theirSupervisor?.lastNames}`,
               `${item?.country}-${item?.department}-${item?.province}-${item?.district}`,
               item?.disciples.length,
               item?.familyGroups.length,

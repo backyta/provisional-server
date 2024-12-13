@@ -21,10 +21,11 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import {
-  InactivateMemberDto,
   PaginationDto,
+  InactivateMemberDto,
   SearchAndPaginationDto,
 } from '@/common/dtos';
 
@@ -49,6 +50,7 @@ import { CreatePreacherDto, UpdatePreacherDto } from '@/modules/preacher/dto';
 @ApiBadRequestResponse({
   description: 'Bad request.',
 })
+@SkipThrottle()
 @Controller('preachers')
 export class PreacherController {
   constructor(private readonly preacherService: PreacherService) {}

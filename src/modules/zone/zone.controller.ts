@@ -21,6 +21,7 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
 
@@ -48,6 +49,7 @@ import { ZoneService } from '@/modules/zone/zone.service';
 @ApiBadRequestResponse({
   description: 'Bad request.',
 })
+@SkipThrottle()
 @Controller('zones')
 export class ZoneController {
   constructor(private readonly zoneService: ZoneService) {}
