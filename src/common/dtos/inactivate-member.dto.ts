@@ -1,10 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty } from 'class-validator';
 
-import {
-  MemberInactivationReason,
-  MemberInactivationCategory,
-} from '@/common/enums';
+import { MemberInactivationReason } from '@/common/enums/member-inactivation-reason.enum';
+import { MemberInactivationCategory } from '@/common/enums/member-inactivation-category.enum';
 
 export class InactivateMemberDto {
   @ApiProperty({

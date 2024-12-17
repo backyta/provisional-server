@@ -1,7 +1,7 @@
 import { IsOptional, IsString } from 'class-validator';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
-import { CreateFamilyGroupDto } from '@/modules/family-group/dto';
+import { CreateFamilyGroupDto } from '@/modules/family-group/dto/create-family-group.dto';
 
 export class UpdateFamilyGroupDto extends PartialType(CreateFamilyGroupDto) {
   @ApiProperty({

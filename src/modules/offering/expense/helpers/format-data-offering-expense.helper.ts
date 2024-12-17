@@ -1,4 +1,4 @@
-import { OfferingExpense } from '@/modules/offering/expense/entities';
+import { OfferingExpense } from '@/modules/offering/expense/entities/offering-expense.entity';
 
 interface Options {
   offeringExpenses: OfferingExpense[];

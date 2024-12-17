@@ -54,7 +54,7 @@ export class Member {
   @Column('text', { name: 'phone_number', nullable: true })
   phoneNumber: string;
 
-  @Column('text', { name: 'residence_country', default: 'Peru' })
+  @Column('text', { name: 'residence_country', default: 'Perú' })
   residenceCountry: string;
 
   @Column('text', { name: 'residence_department', default: 'Lima' })

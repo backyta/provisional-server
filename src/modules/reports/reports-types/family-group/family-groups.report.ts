@@ -1,7 +1,9 @@
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
-import { ChurchServiceTimeNames } from '@/modules/church/enums';
-import { headerSection, footerSection } from '@/modules/reports/sections';
+import { footerSection } from '@/modules/reports/sections/footer.section';
+import { headerSection } from '@/modules/reports/sections/header.section';
+
+import { ChurchServiceTimeNames } from '@/modules/church/enums/church-service-time.enum';
 
 interface ReportOptions {
   title?: string;

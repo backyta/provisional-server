@@ -1,5 +1,5 @@
-import { RecordStatus } from '@/common/enums';
-import { OfferingIncome } from '@/modules/offering/income/entities';
+import { RecordStatus } from '@/common/enums/record-status.enum';
+import { OfferingIncome } from '@/modules/offering/income/entities/offering-income.entity';
 
 interface Options {
   offeringIncome: OfferingIncome[];

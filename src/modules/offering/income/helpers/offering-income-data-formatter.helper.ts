@@ -1,4 +1,4 @@
-import { OfferingIncome } from '@/modules/offering/income/entities';
+import { OfferingIncome } from '@/modules/offering/income/entities/offering-income.entity';
 
 interface Options {
   offeringIncome: OfferingIncome[];

@@ -13,14 +13,15 @@ import * as streamifier from 'streamifier';
 import { v2 as cloudinary } from 'cloudinary';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { OfferingFileType } from '@/common/enums';
+import { OfferingFileType } from '@/common/enums/offering-file-type.enum';
 
-import { User } from '@/modules/user/entities';
-import { CloudinaryResponse } from '@/modules/cloudinary/types';
-import { CreateFileDto, DeleteFileDto } from '@/modules/files/dto';
+import { User } from '@/modules/user/entities/user.entity';
+import { CloudinaryResponse } from '@/modules/cloudinary/types/cloudinary-response.type';
+import { CreateFileDto } from '@/modules/files/dto/create-file.dto';
+import { DeleteFileDto } from '@/modules/files/dto/delete-file.dto';
 
-import { OfferingIncome } from '@/modules/offering/income/entities';
-import { OfferingExpense } from '@/modules/offering/expense/entities';
+import { OfferingIncome } from '@/modules/offering/income/entities/offering-income.entity';
+import { OfferingExpense } from '@/modules/offering/expense/entities/offering-expense.entity';
 
 @Injectable()
 export class CloudinaryService {

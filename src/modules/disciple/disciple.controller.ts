@@ -23,21 +23,21 @@ import {
 } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 
-import {
-  PaginationDto,
-  InactivateMemberDto,
-  SearchAndPaginationDto,
-} from '@/common/dtos';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { InactivateMemberDto } from '@/common/dtos/inactivate-member.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
 
-import { UserRole } from '@/modules/auth/enums';
-import { Auth, GetUser } from '@/modules/auth/decorators';
+import { UserRole } from '@/modules/auth/enums/user-role.enum';
+import { Auth } from '@/modules/auth/decorators/auth.decorator';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 
-import { User } from '@/modules/user/entities';
-import { Preacher } from '@/modules/preacher/entities';
+import { User } from '@/modules/user/entities/user.entity';
+import { Preacher } from '@/modules/preacher/entities/preacher.entity';
 
-import { Disciple } from '@/modules/disciple/entities';
+import { Disciple } from '@/modules/disciple/entities/disciple.entity';
 import { DiscipleService } from '@/modules/disciple/disciple.service';
-import { CreateDiscipleDto, UpdateDiscipleDto } from '@/modules/disciple/dto';
+import { CreateDiscipleDto } from '@/modules/disciple/dto/create-disciple.dto';
+import { UpdateDiscipleDto } from '@/modules/disciple/dto/update-disciple.dto';
 
 @ApiTags('Disciples')
 @ApiBearerAuth()

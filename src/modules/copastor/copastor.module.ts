@@ -1,7 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Copastor } from '@/modules/copastor/entities';
+import { Copastor } from '@/modules/copastor/entities/copastor.entity';
 
 import { CopastorService } from '@/modules/copastor/copastor.service';
 import { CopastorController } from '@/modules/copastor/copastor.controller';

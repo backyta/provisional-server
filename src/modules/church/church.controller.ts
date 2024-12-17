@@ -23,20 +23,20 @@ import {
 } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
 
-import { User } from '@/modules/user/entities';
+import { User } from '@/modules/user/entities/user.entity';
 
-import { UserRole } from '@/modules/auth/enums';
-import { Auth, GetUser } from '@/modules/auth/decorators';
+import { UserRole } from '@/modules/auth/enums/user-role.enum';
+import { Auth } from '@/modules/auth/decorators/auth.decorator';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 
-import {
-  CreateChurchDto,
-  UpdateChurchDto,
-  InactivateChurchDto,
-} from '@/modules/church/dto';
-import { Church } from '@/modules/church/entities';
 import { ChurchService } from '@/modules/church/church.service';
+import { Church } from '@/modules/church/entities/church.entity';
+import { CreateChurchDto } from '@/modules/church/dto/create-church.dto';
+import { UpdateChurchDto } from '@/modules/church/dto/update-church.dto';
+import { InactivateChurchDto } from '@/modules/church/dto/inactivate-church.dto';
 
 @ApiTags('Churches')
 @ApiBearerAuth()

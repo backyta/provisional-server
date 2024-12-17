@@ -23,23 +23,21 @@ import {
 } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 
-import {
-  PaginationDto,
-  InactivateMemberDto,
-  SearchAndPaginationDto,
-} from '@/common/dtos';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { InactivateMemberDto } from '@/common/dtos/inactivate-member.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
 
-import { UserRole } from '@/modules/auth/enums';
-import { Auth, GetUser } from '@/modules/auth/decorators';
+import { UserRole } from '@/modules/auth/enums/user-role.enum';
+import { Auth } from '@/modules/auth/decorators/auth.decorator';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 
-import { User } from '@/modules/user/entities';
-import { Copastor } from '@/modules/copastor/entities';
+import { User } from '@/modules/user/entities/user.entity';
+import { Copastor } from '@/modules/copastor/entities/copastor.entity';
 
-import {
-  CreateSupervisorDto,
-  UpdateSupervisorDto,
-} from '@/modules/supervisor/dto';
-import { Supervisor } from '@/modules/supervisor/entities';
+import { CreateSupervisorDto } from '@/modules/supervisor/dto/create-supervisor.dto';
+import { UpdateSupervisorDto } from '@/modules/supervisor/dto/update-supervisor.dto';
+
+import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
 import { SupervisorService } from '@/modules/supervisor/supervisor.service';
 
 @ApiTags('Supervisors')

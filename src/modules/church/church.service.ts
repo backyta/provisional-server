@@ -9,33 +9,34 @@ import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, FindOptionsOrderValue, ILike, Repository } from 'typeorm';
 
-import { Church } from '@/modules/church/entities';
-import {
-  churchDataFormatter,
-  generateCodeChurch,
-} from '@/modules/church/helpers';
-import {
-  InactivateChurchDto,
-  CreateChurchDto,
-  UpdateChurchDto,
-} from '@/modules/church/dto';
+import { Church } from '@/modules/church/entities/church.entity';
+
+import { generateCodeChurch } from '@/modules/church/helpers/generate-code-church';
+import { churchDataFormatter } from '@/modules/church/helpers/church-data-formatter.helper';
+
+import { CreateChurchDto } from '@/modules/church/dto/create-church.dto';
+import { UpdateChurchDto } from '@/modules/church/dto/update-church.dto';
+import { InactivateChurchDto } from '@/modules/church/dto/inactivate-church.dto';
+
 import {
   ChurchSearchType,
   ChurchSearchTypeNames,
-} from '@/modules/church/enums';
+} from '@/modules/church/enums/church-search-type.enum';
 
-import { RecordStatus } from '@/common/enums';
-import { dateFormatterToDDMMYYYY } from '@/common/helpers';
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import { RecordStatus } from '@/common/enums/record-status.enum';
+import { dateFormatterToDDMMYYYY } from '@/common/helpers/date-formatter-to-ddmmyyy.helper';
 
-import { User } from '@/modules/user/entities';
-import { Zone } from '@/modules/zone/entities';
-import { Pastor } from '@/modules/pastor/entities';
-import { Preacher } from '@/modules/preacher/entities';
-import { Copastor } from '@/modules/copastor/entities';
-import { Disciple } from '@/modules/disciple/entities';
-import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyGroup } from '@/modules/family-group/entities';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
+
+import { User } from '@/modules/user/entities/user.entity';
+import { Zone } from '@/modules/zone/entities/zone.entity';
+import { Pastor } from '@/modules/pastor/entities/pastor.entity';
+import { Preacher } from '@/modules/preacher/entities/preacher.entity';
+import { Copastor } from '@/modules/copastor/entities/copastor.entity';
+import { Disciple } from '@/modules/disciple/entities/disciple.entity';
+import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
+import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
 
 @Injectable()
 export class ChurchService {

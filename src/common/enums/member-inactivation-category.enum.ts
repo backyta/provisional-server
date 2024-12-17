@@ -1,5 +1,5 @@
 export enum MemberInactivationCategory {
-  PersonalOrFamilyChanges = 'personal_or_family_changes', 
+  PersonalOrFamilyChanges = 'personal_or_family_changes',
   ChurchRelatedIssues = 'church_related_issues',
   DisciplinaryActions = 'disciplinary_actions',
   PersonalChallenges = 'personal_challenges',
@@ -10,15 +10,23 @@ export enum MemberInactivationCategory {
   SpecialCircumstances = 'special_circumstances',
 }
 
-export const MemberInactivationCategoryNames: Record<MemberInactivationCategory, string> = {
-  [MemberInactivationCategory.PersonalOrFamilyChanges]: 'Cambios personales o familiares',
-  [MemberInactivationCategory.ChurchRelatedIssues]: 'Problemas relacionados con la iglesia',
+export const MemberInactivationCategoryNames: Record<
+  MemberInactivationCategory,
+  string
+> = {
+  [MemberInactivationCategory.PersonalOrFamilyChanges]:
+    'Cambios personales o familiares',
+  [MemberInactivationCategory.ChurchRelatedIssues]:
+    'Problemas relacionados con la iglesia',
   [MemberInactivationCategory.DisciplinaryActions]: 'Razones disciplinarias',
   [MemberInactivationCategory.PersonalChallenges]: 'Dificultades personales',
-  [MemberInactivationCategory.UnavoidableCircumstances]: 'Razones inevitables o naturales',
-  [MemberInactivationCategory.InactivityOrLackOfCommitment]: 'Falta de actividad o compromiso',
-  [MemberInactivationCategory.AdministrativeReasons]: ' Motivos administrativos',
+  [MemberInactivationCategory.UnavoidableCircumstances]:
+    'Razones inevitables o naturales',
+  [MemberInactivationCategory.InactivityOrLackOfCommitment]:
+    'Falta de actividad o compromiso',
+  [MemberInactivationCategory.AdministrativeReasons]:
+    ' Motivos administrativos',
   [MemberInactivationCategory.ExternalFactors]: 'Factores externos',
-  [MemberInactivationCategory.SpecialCircumstances]: 'Razones especiales o excepcionales',
+  [MemberInactivationCategory.SpecialCircumstances]:
+    'Razones especiales o excepcionales',
 };
-

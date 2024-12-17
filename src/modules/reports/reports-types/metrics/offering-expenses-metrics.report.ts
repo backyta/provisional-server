@@ -1,14 +1,13 @@
 import { addDays, format } from 'date-fns';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
-import { headerSection, footerSection } from '@/modules/reports/sections';
+import { headerSection } from '@/modules/reports/sections/header.section';
+import { footerSection } from '@/modules/reports/sections/footer.section';
 
-import { MetricSearchType } from '@/modules/metrics/enums';
+import { MetricSearchType } from '@/modules/metrics/enums/metrics-search-type.enum';
 
-import {
-  OfferingExpensesAdjustmentDataResult,
-  OfferingExpenseDataResult,
-} from '@/modules/metrics/helpers/offering-expense';
+import { OfferingExpenseDataResult } from '@/modules/metrics/helpers/offering-expense/offering-expense-chart-formatter.helper';
+import { OfferingExpensesAdjustmentDataResult } from '@/modules/metrics/helpers/offering-expense/offering-expenses-adjustment-formatter.helper';
 
 const monthNames = {
   january: 'Enero',

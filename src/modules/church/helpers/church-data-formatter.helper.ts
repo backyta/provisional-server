@@ -1,4 +1,4 @@
-import { Church } from '@/modules/church/entities';
+import { Church } from '@/modules/church/entities/church.entity';
 
 export interface Options {
   churches: Church[];

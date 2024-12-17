@@ -1,7 +1,7 @@
-import { Zone } from '@/modules/zone/entities';
+import { Zone } from '@/modules/zone/entities/zone.entity';
 
-import { Gender } from '@/common/enums';
-import { getInitialFullNames } from '@/common/helpers';
+import { Gender } from '@/common/enums/gender.enum';
+import { getInitialFullNames } from '@/common/helpers/get-initial-full-names.helper';
 
 interface Options {
   zones: Zone[];

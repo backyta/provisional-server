@@ -1,4 +1,4 @@
-import { Supervisor } from '@/modules/supervisor/entities';
+import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
 
 interface Options {
   supervisors: Supervisor[];

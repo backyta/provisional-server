@@ -12,33 +12,34 @@ import { Between, FindOptionsOrderValue, ILike, Repository } from 'typeorm';
 import {
   PastorSearchType,
   PastorSearchTypeNames,
-} from '@/modules/pastor/enums';
-import { pastorDataFormatter } from '@/modules/pastor/helpers';
-import { CreatePastorDto, UpdatePastorDto } from '@/modules/pastor/dto';
+} from '@/modules/pastor/enums/pastor-search-type.enum';
+import { pastorDataFormatter } from '@/modules/pastor/helpers/pastor-data-formatter.helper';
 
-import {
-  MemberRole,
-  GenderNames,
-  RecordStatus,
-  MaritalStatusNames,
-} from '@/common/enums';
-import {
-  PaginationDto,
-  InactivateMemberDto,
-  SearchAndPaginationDto,
-} from '@/common/dtos';
-import { dateFormatterToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
+import { CreatePastorDto } from '@/modules/pastor/dto/create-pastor.dto';
+import { UpdatePastorDto } from '@/modules/pastor/dto/update-pastor.dto';
 
-import { Zone } from '@/modules/zone/entities';
-import { User } from '@/modules/user/entities';
-import { Church } from '@/modules/church/entities';
-import { Member } from '@/modules/member/entities';
-import { Pastor } from '@/modules/pastor/entities';
-import { Disciple } from '@/modules/disciple/entities';
-import { Copastor } from '@/modules/copastor/entities';
-import { Preacher } from '@/modules/preacher/entities';
-import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyGroup } from '@/modules/family-group/entities';
+import { GenderNames } from '@/common/enums/gender.enum';
+import { MemberRole } from '@/common/enums/member-role.enum';
+import { RecordStatus } from '@/common/enums/record-status.enum';
+import { MaritalStatusNames } from '@/common/enums/marital-status.enum';
+
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { InactivateMemberDto } from '@/common/dtos/inactivate-member.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
+
+import { getBirthDateByMonth } from '@/common/helpers/get-birth-date-by-month.helper';
+import { dateFormatterToDDMMYYYY } from '@/common/helpers/date-formatter-to-ddmmyyy.helper';
+
+import { Zone } from '@/modules/zone/entities/zone.entity';
+import { User } from '@/modules/user/entities/user.entity';
+import { Church } from '@/modules/church/entities/church.entity';
+import { Member } from '@/modules/member/entities/member.entity';
+import { Pastor } from '@/modules/pastor/entities/pastor.entity';
+import { Disciple } from '@/modules/disciple/entities/disciple.entity';
+import { Copastor } from '@/modules/copastor/entities/copastor.entity';
+import { Preacher } from '@/modules/preacher/entities/preacher.entity';
+import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
+import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
 
 @Injectable()
 export class PastorService {

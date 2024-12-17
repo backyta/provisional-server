@@ -1,10 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty } from 'class-validator';
 
-import {
-  ChurchInactivationReason,
-  ChurchInactivationCategory,
-} from '@/modules/church/enums';
+import { ChurchInactivationReason } from '@/modules/church/enums/church-inactivation-reason.enum';
+import { ChurchInactivationCategory } from '@/modules/church/enums/church-inactivation-category.enum';
 
 export class InactivateChurchDto {
   @ApiProperty({

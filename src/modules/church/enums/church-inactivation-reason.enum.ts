@@ -1,33 +1,33 @@
 export enum ChurchInactivationReason {
-  // Razones administrativas
+  //* Administrative reasons
   MergerWithAnotherChurch = 'merger_with_another_church',
   Relocation = 'relocation',
   TemporaryClosure = 'temporary_closure',
   DataReorganization = 'data_reorganization',
 
-  // Razones naturales o inesperadas
+  //* Natural or unexpected reasons
   NaturalDisaster = 'natural_disaster',
   Pandemic = 'pandemic',
   InfrastructureLoss = 'infrastructure_loss',
 
-  // Razones relacionados con la comunidad
+  //* Reasons related to the community
   MembershipDecline = 'membership_decline',
   InternalConflicts = 'internal_conflicts',
   LeadershipVacancy = 'leadership_vacancy',
 
-  // Razones económicas
+  //* Economic reasons
   FinancialInfeasibility = 'financial_infeasibility',
   LossOfSupport = 'loss_of_support',
 
-  // Razones legales o normativos
+  //* Razones legales o normativos
   LegalDisputes = 'legal_disputes',
   RegulatoryNonCompliance = 'regulatory_non_compliance',
 
-  // Razones estratégicas
+  //* Legal or regulatory reasons
   MinistryRefocus = 'ministry_refocus',
   ConsolidationWithNearbyChurches = 'consolidation_with_nearby_churches',
 
-  // Razones por factores externos
+  //* Reasons due to external factors
   CommunityRelocation = 'community_relocation',
   GovernmentMandatedClosure = 'government_mandated_closure',
 }
@@ -72,117 +72,5 @@ export const ChurchInactivationReasonNames: Record<
   [ChurchInactivationReason.CommunityRelocation]:
     'Reubicación de la comunidad a otra región.',
   [ChurchInactivationReason.GovernmentMandatedClosure]:
-    'Clausura gubernamental por decisiones municipales o estatales',
-};
-
-// ? Individuals
-
-export enum AdministrativeReasons {
-  MergerWithAnotherChurch = 'merger_with_another_church',
-  Relocation = 'relocation',
-  TemporaryClosure = 'temporary_closure',
-  DataReorganization = 'data_reorganization',
-}
-
-export const AdministrativeReasonsNames: Record<AdministrativeReasons, string> =
-  {
-    [AdministrativeReasons.MergerWithAnotherChurch]: 'Fusión con otra iglesia',
-    [AdministrativeReasons.Relocation]: 'Cambio de ubicación',
-    [AdministrativeReasons.TemporaryClosure]:
-      ' Cierre temporal por remodelación',
-    [AdministrativeReasons.DataReorganization]: 'Reorganización de registros',
-  };
-
-export enum NaturalCircumstancesReasons {
-  NaturalDisaster = 'natural_disaster',
-  Pandemic = 'pandemic',
-  InfrastructureLoss = 'infrastructure_loss',
-}
-
-export const NaturalCircumstancesReasonsNames: Record<
-  NaturalCircumstancesReasons,
-  string
-> = {
-  [NaturalCircumstancesReasons.NaturalDisaster]: 'Desastres naturales.',
-  [NaturalCircumstancesReasons.Pandemic]: 'Pandemias o emergencias sanitarias.',
-  [NaturalCircumstancesReasons.InfrastructureLoss]:
-    'Pérdida de infraestructura.',
-};
-
-export enum CommunityRelatedIssuesReasons {
-  MembershipDecline = 'membership_decline',
-  InternalConflicts = 'internal_conflicts',
-  LeadershipVacancy = 'leadership_vacancy',
-}
-
-export const CommunityRelatedIssuesReasonsNames: Record<
-  CommunityRelatedIssuesReasons,
-  string
-> = {
-  [CommunityRelatedIssuesReasons.MembershipDecline]:
-    'Disminución significativa de miembros',
-  [CommunityRelatedIssuesReasons.InternalConflicts]:
-    'Conflictos internos graves entre líderes o miembros',
-  [CommunityRelatedIssuesReasons.LeadershipVacancy]:
-    'Falta de liderazgo, ausencia de pastores o líderes',
-};
-
-export enum FinancialChallengesReasons {
-  FinancialInfeasibility = 'financial_infeasibility',
-  LossOfSupport = 'loss_of_support',
-}
-
-export const FinancialChallengesReasonsNames: Record<
-  FinancialChallengesReasons,
-  string
-> = {
-  [FinancialChallengesReasons.FinancialInfeasibility]:
-    'Problemas financieros, imposibilidad de mantener gastos operativos',
-  [FinancialChallengesReasons.LossOfSupport]:
-    'Falta de apoyo externo para sustento de la iglesia',
-};
-
-export enum LegalOrRegulatoryIssuesReasons {
-  LegalDisputes = 'legal_disputes',
-  RegulatoryNonCompliance = 'regulatory_non_compliance',
-}
-
-export const LegalOrRegulatoryIssuesReasonsNames: Record<
-  LegalOrRegulatoryIssuesReasons,
-  string
-> = {
-  [LegalOrRegulatoryIssuesReasons.LegalDisputes]:
-    'Problemas legales, enfrentamiento de demandas.',
-  [LegalOrRegulatoryIssuesReasons.RegulatoryNonCompliance]:
-    'Incumplimiento de normativas legales, permisos, registros.',
-};
-
-export enum StrategicDecisionsReasons {
-  MinistryRefocus = 'ministry_refocus',
-  ConsolidationWithNearbyChurches = 'consolidation_with_nearby_churches',
-}
-
-export const StrategicDecisionsReasonsNames: Record<
-  StrategicDecisionsReasons,
-  string
-> = {
-  [StrategicDecisionsReasons.MinistryRefocus]:
-    'Cambio de enfoque ministerial. / Redirección de recursos.',
-  [StrategicDecisionsReasons.ConsolidationWithNearbyChurches]:
-    'Concentración en iglesias cercanas.',
-};
-
-export enum ExternalFactorsReasons {
-  CommunityRelocation = 'community_relocation',
-  GovernmentMandatedClosure = 'government_mandated_closure',
-}
-
-export const ExternalFactorsReasonsNames: Record<
-  ExternalFactorsReasons,
-  string
-> = {
-  [ExternalFactorsReasons.CommunityRelocation]:
-    'Reubicación de la comunidad a otra región.',
-  [ExternalFactorsReasons.GovernmentMandatedClosure]:
     'Clausura gubernamental por decisiones municipales o estatales',
 };

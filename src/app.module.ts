@@ -5,7 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { SuperUserService } from '@/utils';
+import { SuperUserService } from '@/utils/create-super-user';
 
 import { CommonModule } from '@/common/common.module';
 import { SeedModule } from '@/modules/seed/seed.module';
@@ -72,9 +72,9 @@ import { OfferingExpenseModule } from '@/modules/offering/expense/offering-expen
     CloudinaryModule,
     SupervisorModule,
     FamilyGroupModule,
+    ExternalDonorModule,
     OfferingIncomeModule,
     OfferingExpenseModule,
-    ExternalDonorModule,
   ],
   providers: [
     SuperUserService,

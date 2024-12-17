@@ -1,32 +1,35 @@
 import {
-  Controller,
   Get,
-  Post,
   Body,
   Patch,
   Param,
-  Delete,
   Query,
+  Controller,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiBearerAuth,
   ApiOkResponse,
   ApiNotFoundResponse,
+  ApiForbiddenResponse,
   ApiBadRequestResponse,
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 
-import { PaginationDto } from '@/common/dtos';
-import { Auth } from '@/modules/auth/decorators';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
 
-import {
-  CreateExternalDonorDto,
-  UpdateExternalDonorDto,
-} from '@/modules/external-donor/dto';
-import { ExternalDonor } from '@/modules/external-donor/entities';
+import { Auth } from '@/modules/auth/decorators/auth.decorator';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
+
+import { User } from '@/modules/user/entities/user.entity';
+import { UserRole } from '@/modules/auth/enums/user-role.enum';
+
+import { UpdateExternalDonorDto } from '@/modules/external-donor/dto/update-external-donor.dto';
+
+import { ExternalDonor } from '@/modules/external-donor/entities/external-donor.entity';
 import { ExternalDonorService } from '@/modules/external-donor/external-donor.service';
 
 @ApiTags('Donadores-Externos')
@@ -45,11 +48,6 @@ import { ExternalDonorService } from '@/modules/external-donor/external-donor.se
 export class ExternalDonorController {
   constructor(private readonly externalDonorService: ExternalDonorService) {}
 
-  @Post()
-  create(@Body() createExternalDonatorDto: CreateExternalDonorDto) {
-    return this.externalDonorService.create(createExternalDonatorDto);
-  }
-
   //* FIND ALL
   @Get()
   @Auth()
@@ -63,21 +61,20 @@ export class ExternalDonorController {
     return this.externalDonorService.findAll(paginationDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.externalDonorService.findOne(+id);
-  }
-
+  //* UPDATE
   @Patch(':id')
+  @Auth(UserRole.SuperUser, UserRole.AdminUser)
+  @ApiOkResponse({
+    description: 'Successful operation',
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden.',
+  })
   update(
-    @Param('id') id: string,
-    @Body() updateExternalDonatorDto: UpdateExternalDonorDto,
-  ) {
-    return this.externalDonorService.update(+id, updateExternalDonatorDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.externalDonorService.remove(+id);
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateExternalDonorDto: UpdateExternalDonorDto,
+    @GetUser() user: User,
+  ): Promise<ExternalDonor> {
+    return this.externalDonorService.update(id, updateExternalDonorDto, user);
   }
 }

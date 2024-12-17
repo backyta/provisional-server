@@ -59,12 +59,6 @@ export enum SearchType {
   Special = 'special',
   IncomeAdjustment = 'income_adjustment',
 
-  //* Metrics
-  LastSundaysOfferings = 'last_sundays_offerings',
-  TopFamilyGroupsOfferings = 'top_family_groups_offerings',
-  MostPopulatedFamilyGroups = 'most_populated_family_groups',
-  LessPopulatedFamilyGroups = 'less_populated_family_groups',
-
   //* Offering Expenses
   OperationalExpenses = 'operational_expenses',
   MaintenanceAndRepairExpenses = 'maintenance_and_repair_expenses',
@@ -72,7 +66,14 @@ export enum SearchType {
   EquipmentAndTechnologyExpenses = 'equipment_and_technology_expenses',
   SuppliesExpenses = 'supplies_expenses',
   PlaningEventsExpenses = 'planing_events_expenses',
+  OtherExpenses = 'other_expenses',
   ExpensesAdjustment = 'expenses_adjustment',
+
+  //* Metrics Dashboard
+  LastSundaysOfferings = 'last_sundays_offerings',
+  TopFamilyGroupsOfferings = 'top_family_groups_offerings',
+  MostPopulatedFamilyGroups = 'most_populated_family_groups',
+  LessPopulatedFamilyGroups = 'less_populated_family_groups',
 
   //* Metrics
   MembersByProportion = 'members_by_proportion',
@@ -126,6 +127,7 @@ export enum SearchType {
 }
 
 export const SearchTypeNames: Record<SearchType, string> = {
+  //* Membership
   [SearchType.ChurchName]: 'Nombre de Iglesia',
   [SearchType.FoundingDate]: 'Fecha de Fundación',
 
@@ -161,6 +163,7 @@ export const SearchTypeNames: Record<SearchType, string> = {
 
   [SearchType.Roles]: 'Roles',
 
+  //* Offering Income
   [SearchType.SundayService]: 'Culto Dominical',
   [SearchType.FamilyGroup]: 'Grupo Familiar',
   [SearchType.GeneralFasting]: 'Ayuno General',
@@ -175,11 +178,7 @@ export const SearchTypeNames: Record<SearchType, string> = {
   [SearchType.Special]: 'Especial',
   [SearchType.IncomeAdjustment]: 'Ajuste por Ingresos',
 
-  [SearchType.LastSundaysOfferings]: 'Ultimas Ofrendas Dominicales',
-  [SearchType.TopFamilyGroupsOfferings]: 'Top Ofrendas Grupos Familiares',
-  [SearchType.MostPopulatedFamilyGroups]: 'Grupos Familiares mas poblados',
-  [SearchType.LessPopulatedFamilyGroups]: 'Grupos Familiares menos poblados',
-
+  //* Expenses
   [SearchType.OperationalExpenses]: 'Gastos Operativos',
   [SearchType.MaintenanceAndRepairExpenses]:
     'Gastos de Mantenimiento y Reparación',
@@ -187,7 +186,14 @@ export const SearchTypeNames: Record<SearchType, string> = {
   [SearchType.EquipmentAndTechnologyExpenses]: 'Gastos de Equipos y Tecnología',
   [SearchType.SuppliesExpenses]: 'Gastos de Suministros',
   [SearchType.PlaningEventsExpenses]: 'Gastos de Actividades y Eventos',
+  [SearchType.OtherExpenses]: 'Otros Gastos',
   [SearchType.ExpensesAdjustment]: 'Ajuste de Gastos',
+
+  //* Metrics Dashboard
+  [SearchType.LastSundaysOfferings]: 'Ultimas Ofrendas Dominicales',
+  [SearchType.TopFamilyGroupsOfferings]: 'Top Ofrendas Grupos Familiares',
+  [SearchType.MostPopulatedFamilyGroups]: 'Grupos Familiares mas poblados',
+  [SearchType.LessPopulatedFamilyGroups]: 'Grupos Familiares menos poblados',
 
   //* Metrics
   [SearchType.MembersByProportion]: 'Análisis de proporción de miembros',

@@ -1,7 +1,7 @@
-import { getInitialFullNames } from '@/common/helpers';
+import { getInitialFullNames } from '@/common/helpers/get-initial-full-names.helper';
 
-import { CurrencyType } from '@/modules/offering/shared/enums';
-import { OfferingIncome } from '@/modules/offering/income/entities';
+import { CurrencyType } from '@/modules/offering/shared/enums/currency-type.enum';
+import { OfferingIncome } from '@/modules/offering/income/entities/offering-income.entity';
 
 interface Options {
   offeringIncome: OfferingIncome[];

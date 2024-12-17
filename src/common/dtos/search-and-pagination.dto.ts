@@ -10,7 +10,8 @@ import {
   IsOptional,
 } from 'class-validator';
 
-import { SearchType, SearchSubType } from '@/common/enums';
+import { SearchType } from '@/common/enums/search-types.enum';
+import { SearchSubType } from '@/common/enums/search-sub-type.enum';
 
 export class SearchAndPaginationDto {
   @ApiProperty({

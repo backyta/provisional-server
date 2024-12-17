@@ -18,51 +18,61 @@ import {
 import { format } from 'date-fns';
 import { isUUID } from 'class-validator';
 
-import { RecordStatus } from '@/common/enums';
-import { dateFormatterToDDMMYYYY } from '@/common/helpers';
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import { ExternalDonor } from '@/modules/external-donor/entities/external-donor.entity';
 
-import { InactivateOfferingDto } from '@/modules/offering/shared/dto';
+import {
+  OfferingInactivationReason,
+  OfferingInactivationReasonNames,
+} from '@/modules/offering/shared/enums/offering-inactivation-reason.enum';
+import { CurrencyType } from '@/modules/offering/shared/enums/currency-type.enum';
 
 import {
   MemberType,
   MemberTypeNames,
+} from '@/modules/offering/income/enums/member-type.enum';
+import {
   ExchangeCurrencyTypes,
-  OfferingIncomeSearchType,
   ExchangeCurrencyTypesNames,
-  OfferingIncomeCreationType,
-  OfferingIncomeSearchSubType,
+} from '@/modules/offering/income/enums/exchange-currency-type.enum';
+import {
+  OfferingIncomeSearchType,
   OfferingIncomeSearchTypeNames,
+} from '@/modules/offering/income/enums/offering-income-search-type.enum';
+import {
   OfferingIncomeCreationSubType,
-  OfferingIncomeCreationCategory,
   OfferingIncomeCreationSubTypeNames,
+} from '@/modules/offering/income/enums/offering-income-creation-sub-type.enum';
+import {
+  OfferingIncomeCreationCategory,
   OfferingIncomeCreationCategoryNames,
-  OfferingIncomeCreationShiftTypeNames,
-} from '@/modules/offering/income/enums';
-import {
-  CreateOfferingIncomeDto,
-  UpdateOfferingIncomeDto,
-} from '@/modules/offering/income/dto';
+} from '@/modules/offering/income/enums/offering-income-creation-category.enum';
+import { OfferingIncomeCreationType } from '@/modules/offering/income/enums/offering-income-creation-type.enum';
+import { OfferingIncomeSearchSubType } from '@/modules/offering/income/enums/offering-income-search-sub-type.enum';
+import { OfferingIncomeCreationShiftTypeNames } from '@/modules/offering/income/enums/offering-income-creation-shift-type.enum';
 
-import { offeringIncomeDataFormatter } from '@/modules/offering/income/helpers';
+import { RecordStatus } from '@/common/enums/record-status.enum';
+import { dateFormatterToDDMMYYYY } from '@/common/helpers/date-formatter-to-ddmmyyy.helper';
 
-import { Zone } from '@/modules/zone/entities';
-import { User } from '@/modules/user/entities';
-import { Church } from '@/modules/church/entities';
-import { Pastor } from '@/modules/pastor/entities';
-import { Copastor } from '@/modules/copastor/entities';
-import { Preacher } from '@/modules/preacher/entities';
-import { Disciple } from '@/modules/disciple/entities';
-import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyGroup } from '@/modules/family-group/entities';
-import { OfferingIncome } from '@/modules/offering/income/entities';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
 
-import {
-  CurrencyType,
-  OfferingInactivationReason,
-  OfferingInactivationReasonNames,
-} from '@/modules/offering/shared/enums';
-import { ExternalDonor } from '@/modules/external-donor/entities';
+import { InactivateOfferingDto } from '@/modules/offering/shared/dto/inactivate-offering.dto';
+
+import { CreateOfferingIncomeDto } from '@/modules/offering/income/dto/create-offering-income.dto';
+import { UpdateOfferingIncomeDto } from '@/modules/offering/income/dto/update-offering-income.dto';
+
+import { offeringIncomeDataFormatter } from '@/modules/offering/income/helpers/offering-income-data-formatter.helper';
+
+import { Zone } from '@/modules/zone/entities/zone.entity';
+import { User } from '@/modules/user/entities/user.entity';
+import { Church } from '@/modules/church/entities/church.entity';
+import { Pastor } from '@/modules/pastor/entities/pastor.entity';
+import { Copastor } from '@/modules/copastor/entities/copastor.entity';
+import { Preacher } from '@/modules/preacher/entities/preacher.entity';
+import { Disciple } from '@/modules/disciple/entities/disciple.entity';
+import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
+import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
+import { OfferingIncome } from '@/modules/offering/income/entities/offering-income.entity';
 
 @Injectable()
 export class OfferingIncomeService {
@@ -114,18 +124,18 @@ export class OfferingIncomeService {
       subType,
       category,
       memberId,
-      donorId,
-      isNewDonor,
-      donorFirstName,
-      donorLastName,
-      donorGender,
-      donorBirthDate,
-      donorPhoneNumber,
-      donorEmail,
-      donorOriginCountry,
-      donorResidenceCountry,
-      donorResidenceCity,
-      donorPostalCode,
+      externalDonorId,
+      isNewExternalDonor,
+      externalDonorFirstNames: externalDonorFirstName,
+      externalDonorLastNames: externalDonorLastName,
+      externalDonorGender,
+      externalDonorBirthDate,
+      externalDonorPhoneNumber,
+      externalDonorEmail,
+      externalDonorOriginCountry,
+      externalDonorResidenceCountry,
+      externalDonorResidenceCity,
+      externalDonorPostalCode,
       churchId,
       currency,
       imageUrls,
@@ -348,14 +358,14 @@ export class OfferingIncomeService {
         }
 
         let externalDonor: ExternalDonor;
-        if (donorId) {
+        if (externalDonorId) {
           externalDonor = await this.externalDonorRepository.findOne({
-            where: { id: donorId },
+            where: { id: externalDonorId },
           });
 
           if (!externalDonor) {
             throw new NotFoundException(
-              `Donador externo con id: ${donorId}, no fue encontrado.`,
+              `Donador externo con id: ${externalDonorId}, no fue encontrado.`,
             );
           }
         }
@@ -376,7 +386,11 @@ export class OfferingIncomeService {
           });
         }
 
-        if (category === OfferingIncomeCreationCategory.Activities) {
+        if (
+          category ===
+            OfferingIncomeCreationCategory.ActivitiesProChurchGround ||
+          category === OfferingIncomeCreationCategory.FundraisingProMinistry
+        ) {
           existsOffering = await this.offeringIncomeRepository.find({
             where: {
               subType: subType,
@@ -531,7 +545,7 @@ export class OfferingIncomeService {
           }
         }
 
-        if (existsOffering.length > 0) {
+        if (existsOffering?.length > 0) {
           const offeringDate = dateFormatterToDDMMYYYY(
             new Date(date).getTime(),
           );
@@ -542,7 +556,8 @@ export class OfferingIncomeService {
             );
           }
           if (
-            category === OfferingIncomeCreationCategory.Activities ||
+            category ===
+              OfferingIncomeCreationCategory.ActivitiesProChurchGround ||
             category === OfferingIncomeCreationCategory.ExternalDonation
           ) {
             throw new NotFoundException(
@@ -575,22 +590,23 @@ export class OfferingIncomeService {
         }
 
         //? If is new donor, then create record
-        if (isNewDonor) {
+        if (isNewExternalDonor) {
           try {
             const newDonor = this.externalDonorRepository.create({
-              firstNames: donorFirstName,
-              lastNames: donorLastName,
+              firstNames: externalDonorFirstName,
+              lastNames: externalDonorLastName,
               birthDate:
-                donorBirthDate && !isNaN(new Date(donorBirthDate).getTime())
-                  ? donorBirthDate
+                externalDonorBirthDate &&
+                !isNaN(new Date(externalDonorBirthDate).getTime())
+                  ? externalDonorBirthDate
                   : null,
-              gender: donorGender,
-              email: donorEmail,
-              phoneNumber: donorPhoneNumber,
-              originCountry: donorOriginCountry,
-              residenceCountry: donorResidenceCountry,
-              residenceCity: donorResidenceCity,
-              postalCode: donorPostalCode,
+              gender: externalDonorGender,
+              email: externalDonorEmail,
+              phoneNumber: externalDonorPhoneNumber,
+              originCountry: externalDonorOriginCountry,
+              residenceCountry: externalDonorResidenceCountry,
+              residenceCity: externalDonorResidenceCity,
+              postalCode: externalDonorPostalCode,
               createdAt: new Date(),
               createdBy: user,
               recordStatus: RecordStatus.Active,
@@ -637,7 +653,7 @@ export class OfferingIncomeService {
             church: church ?? null,
             zone: null,
             familyGroup: null,
-            memberType: memberType,
+            memberType: !memberType || memberType === '' ? null : memberType,
             shift: !shift || shift === '' ? null : shift,
             category: category,
             externalDonor: externalDonor ?? null,

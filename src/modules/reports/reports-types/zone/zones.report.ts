@@ -1,5 +1,7 @@
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
-import { headerSection, footerSection } from '@/modules/reports/sections';
+
+import { headerSection } from '@/modules/reports/sections/header.section';
+import { footerSection } from '@/modules/reports/sections/footer.section';
 
 interface ReportOptions {
   title?: string;

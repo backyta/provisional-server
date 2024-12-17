@@ -1,8 +1,8 @@
 import { addDays } from 'date-fns';
 
-import { CurrencyType } from '@/modules/offering/shared/enums';
-import { OfferingExpense } from '@/modules/offering/expense/entities';
-import { OfferingExpenseSearchTypeNames } from '@/modules/offering/expense/enums';
+import { CurrencyType } from '@/modules/offering/shared/enums/currency-type.enum';
+import { OfferingExpense } from '@/modules/offering/expense/entities/offering-expense.entity';
+import { OfferingExpenseSearchTypeNames } from '@/modules/offering/expense/enums/offering-expense-search-type.enum';
 
 interface Options {
   offeringExpenses: OfferingExpense[];

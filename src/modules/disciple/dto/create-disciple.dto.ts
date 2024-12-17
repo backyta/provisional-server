@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
   IsEmail,
@@ -9,14 +8,14 @@ import {
   IsNotEmpty,
   IsOptional,
 } from 'class-validator';
-import {
-  Gender,
-  MemberRole,
-  RecordStatus,
-  MaritalStatus,
-  MemberInactivationReason,
-  MemberInactivationCategory,
-} from '@/common/enums';
+import { ApiProperty } from '@nestjs/swagger';
+
+import { Gender } from '@/common/enums/gender.enum';
+import { MemberRole } from '@/common/enums/member-role.enum';
+import { RecordStatus } from '@/common/enums/record-status.enum';
+import { MaritalStatus } from '@/common/enums/marital-status.enum';
+import { MemberInactivationReason } from '@/common/enums/member-inactivation-reason.enum';
+import { MemberInactivationCategory } from '@/common/enums/member-inactivation-category.enum';
 
 export class CreateDiscipleDto {
   //* General and Personal info
@@ -100,7 +99,7 @@ export class CreateDiscipleDto {
   phoneNumber?: string;
 
   @ApiProperty({
-    example: 'Peru',
+    example: 'Perú',
   })
   @IsString()
   @IsOptional()

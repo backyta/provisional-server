@@ -1,11 +1,12 @@
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
-import { GenderNames } from '@/common/enums';
+import { GenderNames } from '@/common/enums/gender.enum';
 
-import { User } from '@/modules/user/entities';
-import { UserRoleNames } from '@/modules/auth/enums';
+import { User } from '@/modules/user/entities/user.entity';
+import { UserRoleNames } from '@/modules/auth/enums/user-role.enum';
 
-import { headerSection, footerSection } from '@/modules/reports/sections';
+import { headerSection } from '@/modules/reports/sections/header.section';
+import { footerSection } from '@/modules/reports/sections/footer.section';
 
 interface ReportOptions {
   title?: string;

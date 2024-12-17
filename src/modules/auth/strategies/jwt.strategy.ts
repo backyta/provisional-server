@@ -6,10 +6,10 @@ import { Repository } from 'typeorm';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import { JwtPayload } from '@/modules/auth/interfaces';
+import { RecordStatus } from '@/common/enums/record-status.enum';
 
-import { User } from '@/modules/user/entities';
-import { RecordStatus } from '@/common/enums';
+import { User } from '@/modules/user/entities/user.entity';
+import { JwtPayload } from '@/modules/auth/interfaces/jwt-payload.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {

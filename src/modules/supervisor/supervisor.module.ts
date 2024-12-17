@@ -3,7 +3,8 @@ import { Module, forwardRef } from '@nestjs/common';
 
 import { AuthModule } from '@/modules/auth/auth.module';
 
-import { Supervisor } from '@/modules/supervisor/entities';
+import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
+
 import { SupervisorService } from '@/modules/supervisor/supervisor.service';
 import { SupervisorController } from '@/modules/supervisor/supervisor.controller';
 

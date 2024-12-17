@@ -7,10 +7,10 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { RecordStatus } from '@/common/enums';
+import { RecordStatus } from '@/common/enums/record-status.enum';
 
-import { User } from '@/modules/user/entities';
-import { Church } from '@/modules/church/entities';
+import { User } from '@/modules/user/entities/user.entity';
+import { Church } from '@/modules/church/entities/church.entity';
 
 @Entity({ name: 'offering_expenses' })
 @Index(['type', 'subType'])

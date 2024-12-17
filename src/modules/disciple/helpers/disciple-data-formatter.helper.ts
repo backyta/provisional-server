@@ -1,4 +1,4 @@
-import { Disciple } from '@/modules/disciple/entities';
+import { Disciple } from '@/modules/disciple/entities/disciple.entity';
 
 interface Options {
   disciples: Disciple[];

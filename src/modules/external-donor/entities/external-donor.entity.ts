@@ -8,8 +8,11 @@ import {
   BeforeUpdate,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { RecordStatus } from '@/common/enums';
-import { User } from '@/modules/user/entities';
+import { IsDate } from 'class-validator';
+
+import { RecordStatus } from '@/common/enums/record-status.enum';
+
+import { User } from '@/modules/user/entities/user.entity';
 
 @Entity({ name: 'external_donors' })
 @Index(['firstNames', 'lastNames'])
@@ -29,12 +32,13 @@ export class ExternalDonor {
   @Column('int', { name: 'age', nullable: true })
   age: number;
 
-  @Index()
+  // @Index()
   @Column('date', {
     name: 'birth_date',
     default: null,
     nullable: true,
   })
+  @IsDate()
   birthDate: Date;
 
   @Column('text', { name: 'gender' })

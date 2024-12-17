@@ -3,8 +3,8 @@ import { Module, forwardRef } from '@nestjs/common';
 
 import { AuthModule } from '@/modules/auth/auth.module';
 
-import { Church } from '@/modules/church/entities';
 import { ChurchService } from '@/modules/church/church.service';
+import { Church } from '@/modules/church/entities/church.entity';
 import { ChurchController } from '@/modules/church/church.controller';
 
 import { ZoneModule } from '@/modules/zone/zone.module';

@@ -11,86 +11,74 @@ import { Between, FindOptionsOrderValue, In, Repository } from 'typeorm';
 import { toZonedTime } from 'date-fns-tz';
 import { endOfMonth, startOfMonth } from 'date-fns';
 
-import { DashboardSearchType, RecordStatus } from '@/common/enums';
-import { SearchAndPaginationDto } from '@/common/dtos';
+import { RecordStatus } from '@/common/enums/record-status.enum';
+import { DashboardSearchType } from '@/common/enums/dashboard-search-type.enum';
 
-import { MetricSearchType } from '@/modules/metrics/enums';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
 
-import {
-  lastSundayOfferingsDataFormatter,
-  topOfferingsFamilyGroupsDataFormatter,
-} from '@/modules/metrics/helpers/dashboard';
+import { MetricSearchType } from '@/modules/metrics/enums/metrics-search-type.enum';
 
-import {
-  IncomeAndExpensesComparativeFormatter,
-  comparativeOfferingIncomeByTypeFormatter,
-  generalComparativeOfferingIncomeFormatter,
-  comparativeOfferingExpensesByTypeFormatter,
-  generalComparativeOfferingExpensesFormatter,
-  ComparativeOfferingExpensesBySubTypeFormatter,
-  offeringExpensesAndOfferingIncomeProportionFormatter,
-} from '@/modules/metrics/helpers/offering-comparative';
+import { OfferingIncomeSearchType } from '@/modules/offering/income/enums/offering-income-search-type.enum';
+import { OfferingExpenseSearchType } from '@/modules/offering/expense/enums/offering-expense-search-type.enum';
+import { OfferingIncomeCreationType } from '@/modules/offering/income/enums/offering-income-creation-type.enum';
 
-import {
-  offeringExpenseChartFormatter,
-  offeringExpenseProportionFormatter,
-  offeringExpensesAdjustmentFormatter,
-} from '@/modules/metrics/helpers/offering-expense';
+import { lastSundayOfferingsDataFormatter } from '@/modules/metrics/helpers/dashboard/last-sunday-offerings-data-formatter.helper';
+import { topOfferingsFamilyGroupsDataFormatter } from '@/modules/metrics/helpers/dashboard/top-offerings-family-groups-data-formatter.helper';
 
-import {
-  offeringIncomeProportionFormatter,
-  offeringIncomeByActivitiesFormatter,
-  offeringIncomeByFamilyGroupFormatter,
-  offeringIncomeByYouthServiceFormatter,
-  offeringIncomeBySundaySchoolFormatter,
-  offeringIncomeByChurchGroundFormatter,
-  offeringIncomeBySundayServiceFormatter,
-  offeringIncomeByUnitedServiceFormatter,
-  offeringIncomeByFastingAndVigilFormatter,
-  offeringIncomeBySpecialOfferingFormatter,
-  offeringIncomeByIncomeAdjustmentFormatter,
-} from '@/modules/metrics/helpers/offering-income';
+import { IncomeAndExpensesComparativeFormatter } from '@//modules/metrics/helpers/offering-comparative/income-and-expenses-comparative-formatter.helper';
+import { comparativeOfferingIncomeByTypeFormatter } from '@//modules/metrics/helpers/offering-comparative/comparative-offering-income-by-type-formatter.helper';
+import { generalComparativeOfferingIncomeFormatter } from '@//modules/metrics/helpers/offering-comparative/general-comparative-offering-income-formatter.helper';
+import { comparativeOfferingExpensesByTypeFormatter } from '@//modules/metrics/helpers/offering-comparative/comparative-offering-expenses-by-type-formatter.helper';
+import { generalComparativeOfferingExpensesFormatter } from '@//modules/metrics/helpers/offering-comparative/general-comparative-offering-expenses-formatter.helper';
+import { ComparativeOfferingExpensesBySubTypeFormatter } from '@//modules/metrics/helpers/offering-comparative/comparative-offering-expenses-by-sub-type-formatter.helper';
+import { offeringExpensesAndOfferingIncomeProportionFormatter } from '@//modules/metrics/helpers/offering-comparative/offering-expenses-and-offering-income-comparative-proportion-formatter.helper';
 
-import {
-  memberProportionFormatter,
-  memberFormatterByCategory,
-  memberFluctuationFormatter,
-  memberFormatterByBirthMonth,
-  memberFormatterByRecordStatus,
-  memberFormatterByMaritalStatus,
-  memberFormatterByZoneAndGender,
-  memberFormatterByRoleAndGender,
-  preacherFormatterByZoneAndGender,
-  memberFormatterByCategoryAndGender,
-  memberFormatterByDistrictAndGender,
-} from '@/modules/metrics/helpers/member';
+import { offeringIncomeProportionFormatter } from '@/modules/metrics/helpers/offering-income/offering-income-proportion-formatter.helper';
+import { offeringIncomeByActivitiesFormatter } from '@/modules/metrics/helpers/offering-income/offering-income-by-activities-formatter.helper';
+import { offeringIncomeByFamilyGroupFormatter } from '@/modules/metrics/helpers/offering-income/offering-income-by-family-group-formatter.helper';
+import { offeringIncomeByChurchGroundFormatter } from '@/modules/metrics/helpers/offering-income/offering-income-by-church-ground-formatter.helper';
+import { offeringIncomeBySundaySchoolFormatter } from '@/modules/metrics/helpers/offering-income/offering-income-by-sunday-school-formatter.helper';
+import { offeringIncomeByYouthServiceFormatter } from '@/modules/metrics/helpers/offering-income/offering-income-by-youth-service-formatter.helper';
+import { offeringIncomeBySundayServiceFormatter } from '@/modules/metrics/helpers/offering-income/offering-income-by-sunday-service-formatter.helper';
+import { offeringIncomeByUnitedServiceFormatter } from '@/modules/metrics/helpers/offering-income/offering-income-by-united-service-formatter.helper';
+import { offeringIncomeBySpecialOfferingFormatter } from '@/modules/metrics/helpers/offering-income/offering-income-by-special-offering-formatter.helper';
+import { offeringIncomeByFastingAndVigilFormatter } from '@/modules/metrics/helpers/offering-income/offering-income-by-fasting-and-vigil-formatter.helper';
+import { offeringIncomeByIncomeAdjustmentFormatter } from '@/modules/metrics/helpers/offering-income/offering-income-by-income-adjustment-formatter.helper';
 
-import {
-  familyGroupFormatterByZone,
-  familyGroupFormatterByCode,
-  familyGroupFormatterByDistrict,
-  familyGroupProportionFormatter,
-  familyGroupFluctuationFormatter,
-  familyGroupFormatterByServiceTime,
-  familyGroupFormatterByRecordStatus,
-} from '@/modules/metrics/helpers/family-group';
+import { offeringExpenseChartFormatter } from '@/modules/metrics/helpers/offering-expense/offering-expense-chart-formatter.helper';
+import { offeringExpenseProportionFormatter } from '@/modules/metrics/helpers/offering-expense/offering-expense-proportion-formatter.helper';
+import { offeringExpensesAdjustmentFormatter } from '@/modules/metrics/helpers/offering-expense/offering-expenses-adjustment-formatter.helper';
 
-import {
-  OfferingIncomeSearchType,
-  OfferingIncomeCreationType,
-} from '@/modules/offering/income/enums';
-import { OfferingExpenseSearchType } from '@/modules/offering/expense/enums';
+import { familyGroupFormatterByCode } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-code.helper';
+import { familyGroupFormatterByZone } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-zone.helper';
+import { familyGroupProportionFormatter } from '@/modules/metrics/helpers/family-group/family-group-proportion-formatter.helper';
+import { familyGroupFormatterByDistrict } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-district.helper';
+import { familyGroupFluctuationFormatter } from '@/modules/metrics/helpers/family-group/family-group-fluctuation-formatter.helper';
+import { familyGroupFormatterByServiceTime } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-service-time.helper';
+import { familyGroupFormatterByRecordStatus } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-record-status.helper';
 
-import { Zone } from '@/modules/zone/entities';
-import { Church } from '@/modules/church/entities';
-import { Pastor } from '@/modules/pastor/entities';
-import { Copastor } from '@/modules/copastor/entities';
-import { Preacher } from '@/modules/preacher/entities';
-import { Disciple } from '@/modules/disciple/entities';
-import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyGroup } from '@/modules/family-group/entities';
-import { OfferingIncome } from '@/modules/offering/income/entities';
-import { OfferingExpense } from '@/modules/offering/expense/entities';
+import { memberProportionFormatter } from '@/modules/metrics/helpers/member/member-proportion-formatter.helper';
+import { memberFormatterByCategory } from '@/modules/metrics/helpers/member/member-formatter-by-category.helper';
+import { memberFluctuationFormatter } from '@/modules/metrics/helpers/member/member-fluctuation-formatter.helper';
+import { memberFormatterByBirthMonth } from '@/modules/metrics/helpers/member/member-formatter-by-birth-month.helper';
+import { memberFormatterByRecordStatus } from '@/modules/metrics/helpers/member/member-formatter-by-record-status.helper';
+import { memberFormatterByMaritalStatus } from '@/modules/metrics/helpers/member/member-formatter-by-marital-status.helper';
+import { memberFormatterByRoleAndGender } from '@/modules/metrics/helpers/member/member-formatter-by-role-and-gender.helper';
+import { memberFormatterByZoneAndGender } from '@/modules/metrics/helpers/member/member-formatter-by-zone-and-gender.helper';
+import { preacherFormatterByZoneAndGender } from '@/modules/metrics/helpers/member/preacher-formatter-by-zone-and-gender.helper';
+import { memberFormatterByDistrictAndGender } from '@/modules/metrics/helpers/member/member-formatter-by-district-and-gender.helper';
+import { memberFormatterByCategoryAndGender } from '@/modules/metrics/helpers/member/member-formatter-by-category-and-gender.helper';
+
+import { Zone } from '@/modules/zone/entities/zone.entity';
+import { Church } from '@/modules/church/entities/church.entity';
+import { Pastor } from '@/modules/pastor/entities/pastor.entity';
+import { Copastor } from '@/modules/copastor/entities/copastor.entity';
+import { Preacher } from '@/modules/preacher/entities/preacher.entity';
+import { Disciple } from '@/modules/disciple/entities/disciple.entity';
+import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
+import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
+import { OfferingIncome } from '@/modules/offering/income/entities/offering-income.entity';
+import { OfferingExpense } from '@/modules/offering/expense/entities/offering-expense.entity';
 
 @Injectable()
 export class MetricsService {

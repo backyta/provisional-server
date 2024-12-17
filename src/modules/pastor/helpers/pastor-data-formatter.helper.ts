@@ -1,4 +1,4 @@
-import { Pastor } from '@/modules/pastor/entities';
+import { Pastor } from '@/modules/pastor/entities/pastor.entity';
 
 interface Options {
   pastors: Pastor[];

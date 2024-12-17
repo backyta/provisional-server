@@ -5,12 +5,12 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
+import { Reflector } from '@nestjs/core';
 
-import { User } from '@/modules/user/entities';
-import { META_ROLES } from '@/modules/auth/decorators';
-import { getRoleNamesInSpanish } from '@/modules/auth/helpers';
+import { User } from '@/modules/user/entities/user.entity';
+import { META_ROLES } from '@/modules/auth/decorators/role-protected.decorator';
+import { getRoleNamesInSpanish } from '@/modules/auth/helpers/get-role-names-in-spanish.helper';
 
 @Injectable()
 export class UserRoleGuard implements CanActivate {
@@ -41,7 +41,7 @@ export class UserRoleGuard implements CanActivate {
     }
 
     throw new ForbiddenException(
-      `Operación rechazada, usuario ${user.firstNames} ${user.lastNames} necesita los roles de acceso: ${getRoleNamesInSpanish(validUserRoles)}`,
+      `Acceso denegado: el usuario ${user.firstNames} ${user.lastNames} no posee los roles necesarios para realizar esta operación. Los roles requeridos son: ${getRoleNamesInSpanish(validUserRoles)}.`,
     );
   }
 }

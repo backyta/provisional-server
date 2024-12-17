@@ -1,5 +1,4 @@
 import { BadRequestException, Controller, Get } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import {
   ApiTags,
   ApiOkResponse,
@@ -8,12 +7,13 @@ import {
   ApiUnauthorizedResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
+import { SkipThrottle } from '@nestjs/throttler';
 
-import { UserRole } from '@/modules/auth/enums';
-import { Auth } from '@/modules/auth/decorators';
+import { UserRole } from '@/modules/auth/enums/user-role.enum';
+import { Auth } from '@/modules/auth/decorators/auth.decorator';
 
 import { SeedService } from '@/modules/seed/seed.service';
-import { SkipThrottle } from '@nestjs/throttler';
 
 @ApiTags('Seed')
 @ApiBearerAuth()

@@ -17,28 +17,26 @@ import { CopastorService } from '@/modules/copastor/copastor.service';
 import { SupervisorService } from '@/modules/supervisor/supervisor.service';
 import { FamilyGroupService } from '@/modules/family-group/family-group.service';
 
-import { Zone } from '@/modules/zone/entities';
-import { User } from '@/modules/user/entities';
-import { Pastor } from '@/modules/pastor/entities';
-import { Member } from '@/modules/member/entities';
-import { Church } from '@/modules/church/entities';
-import { Copastor } from '@/modules/copastor/entities';
-import { Preacher } from '@/modules/preacher/entities';
-import { Disciple } from '@/modules/disciple/entities';
-import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyGroup } from '@/modules/family-group/entities';
+import { Zone } from '@/modules/zone/entities/zone.entity';
+import { User } from '@/modules/user/entities/user.entity';
+import { Pastor } from '@/modules/pastor/entities/pastor.entity';
+import { Member } from '@/modules/member/entities/member.entity';
+import { Church } from '@/modules/church/entities/church.entity';
+import { Copastor } from '@/modules/copastor/entities/copastor.entity';
+import { Preacher } from '@/modules/preacher/entities/preacher.entity';
+import { Disciple } from '@/modules/disciple/entities/disciple.entity';
+import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
+import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
 
-import {
-  dataUsers,
-  dataZones,
-  dataPastors,
-  dataChurches,
-  dataCopastors,
-  dataDisciples,
-  dataPreachers,
-  dataSupervisors,
-  dataFamilyGroups,
-} from '@/modules/seed/data';
+import { dataUsers } from '@/modules/seed/data/seed-users';
+import { dataZones } from '@/modules/seed/data/seed-zone';
+import { dataPastors } from '@/modules/seed/data/seed-pastors';
+import { dataChurches } from '@/modules/seed/data/seed-churches';
+import { dataDisciples } from '@/modules/seed/data/seed-disciples';
+import { dataCopastors } from '@/modules/seed/data/seed-copastors';
+import { dataPreachers } from '@/modules/seed/data/seed-preachers';
+import { dataSupervisors } from '@/modules/seed/data/seed-supervisor';
+import { dataFamilyGroups } from '@/modules/seed/data/seed-family-group';
 
 // TODO : agregar offerings mediante el id creado de la iglesia y pastores,zones etc
 @Injectable()

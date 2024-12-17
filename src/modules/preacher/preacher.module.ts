@@ -3,7 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AuthModule } from '@/modules/auth/auth.module';
 
-import { Preacher } from '@/modules/preacher/entities';
+import { Preacher } from '@/modules/preacher/entities/preacher.entity';
+
 import { PreacherService } from '@/modules/preacher/preacher.service';
 import { PreacherController } from '@/modules/preacher/preacher.controller';
 

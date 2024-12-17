@@ -1,5 +1,3 @@
-import { RecordStatus } from '@/common/enums';
-import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
   IsUUID,
@@ -9,10 +7,12 @@ import {
   IsOptional,
   IsNotEmpty,
 } from 'class-validator';
-import {
-  ZoneInactivationReason,
-  ZoneInactivationCategory,
-} from '@/modules/zone/enums';
+import { ApiProperty } from '@nestjs/swagger';
+
+import { RecordStatus } from '@/common/enums/record-status.enum';
+
+import { ZoneInactivationReason } from '@/modules/zone/enums/zone-inactivation-reason.enum';
+import { ZoneInactivationCategory } from '@/modules/zone/enums/zone-inactivation-category.enum';
 
 export class CreateZoneDto {
   //* General info
@@ -27,7 +27,7 @@ export class CreateZoneDto {
   zoneName?: string;
 
   @ApiProperty({
-    example: 'Peru',
+    example: 'Perú',
   })
   @IsString()
   @IsNotEmpty()

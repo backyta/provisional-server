@@ -1,7 +1,7 @@
 import type { Content } from 'pdfmake/interfaces';
 
-import { RecordOrderNames } from '@/common/enums';
-import { DateFormatter } from '@/modules/reports/helpers';
+import { RecordOrderNames } from '@/common/enums/record-order.enum';
+import { DateFormatter } from '@/modules/reports/helpers/date-formatter';
 
 const monthNames = {
   january: 'Enero',

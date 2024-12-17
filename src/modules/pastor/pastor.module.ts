@@ -1,7 +1,7 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module, forwardRef } from '@nestjs/common';
 
-import { Pastor } from '@/modules/pastor/entities';
+import { Pastor } from '@/modules/pastor/entities/pastor.entity';
 import { PastorService } from '@/modules/pastor/pastor.service';
 import { PastorController } from '@/modules/pastor/pastor.controller';
 

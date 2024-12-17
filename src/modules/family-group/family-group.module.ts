@@ -1,7 +1,8 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module, forwardRef } from '@nestjs/common';
 
-import { FamilyGroup } from '@/modules/family-group/entities';
+import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
+
 import { FamilyGroupService } from '@/modules/family-group/family-group.service';
 import { FamilyGroupController } from '@/modules/family-group/family-group.controller';
 

@@ -5,16 +5,17 @@ import {
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsOrderValue, Repository } from 'typeorm';
 
-import { PaginationDto } from '@/common/dtos';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
 
-import {
-  CreateExternalDonorDto,
-  UpdateExternalDonorDto,
-} from '@/modules/external-donor/dto';
-import { ExternalDonor } from '@/modules/external-donor/entities';
+import { User } from '@/modules/user/entities/user.entity';
+
+import { UpdateExternalDonorDto } from '@/modules/external-donor/dto/update-external-donor.dto';
+
+import { ExternalDonor } from '@/modules/external-donor/entities/external-donor.entity';
 
 @Injectable()
 export class ExternalDonorService {
@@ -24,10 +25,6 @@ export class ExternalDonorService {
     @InjectRepository(ExternalDonor)
     private readonly externalDonorRepository: Repository<ExternalDonor>,
   ) {}
-
-  create(createExternalDonorDto: CreateExternalDonorDto) {
-    return 'This action adds a new externalDonator';
-  }
 
   //* FIND ALL (PAGINATED)
   async findAll(paginationDto: PaginationDto): Promise<any[]> {
@@ -54,16 +51,67 @@ export class ExternalDonorService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} externalDonator`;
-  }
+  //* UPDATE EXTERNAL DONOR
+  async update(
+    id: string,
+    updateExternalDonorDto: UpdateExternalDonorDto,
+    user: User,
+  ): Promise<ExternalDonor> {
+    const {
+      externalDonorEmail,
+      externalDonorGender,
+      externalDonorLastNames,
+      externalDonorBirthDate,
+      externalDonorFirstNames,
+      externalDonorPostalCode,
+      externalDonorPhoneNumber,
+      externalDonorOriginCountry,
+      externalDonorResidenceCity,
+      externalDonorResidenceCountry,
+    } = updateExternalDonorDto;
 
-  update(id: number, updateExternalDonorDto: UpdateExternalDonorDto) {
-    return `This action updates a #${id} externalDonator`;
-  }
+    if (!isUUID(id)) {
+      throw new BadRequestException(`UUID no valido.`);
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} externalDonator`;
+    const externalDonor = await this.externalDonorRepository.findOne({
+      where: { id: id },
+    });
+
+    if (!externalDonor) {
+      throw new NotFoundException(
+        `Donador Externo con id: ${id} no fue encontrado.`,
+      );
+    }
+
+    try {
+      const updatedExternalDonor = await this.externalDonorRepository.preload({
+        id: externalDonor.id,
+        firstNames: externalDonorFirstNames,
+        lastNames: externalDonorLastNames,
+        gender: externalDonorGender,
+        birthDate: externalDonorBirthDate ?? null,
+        originCountry:
+          externalDonorOriginCountry !== '' ? externalDonorOriginCountry : null,
+        email: externalDonorEmail !== '' ? externalDonorEmail : null,
+        phoneNumber:
+          externalDonorPhoneNumber !== '' ? externalDonorPhoneNumber : null,
+        residenceCountry:
+          externalDonorResidenceCountry !== ''
+            ? externalDonorResidenceCountry
+            : null,
+        residenceCity:
+          externalDonorResidenceCity !== '' ? externalDonorResidenceCity : null,
+        postalCode:
+          externalDonorPostalCode !== '' ? externalDonorPostalCode : null,
+        updatedBy: user,
+        updatedAt: new Date(),
+      });
+
+      return await this.externalDonorRepository.save(updatedExternalDonor);
+    } catch (error) {
+      this.handleDBExceptions(error);
+    }
   }
 
   //? PRIVATE METHODS

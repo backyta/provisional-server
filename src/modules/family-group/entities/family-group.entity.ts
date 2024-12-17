@@ -9,16 +9,16 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { RecordStatus } from '@/common/enums';
+import { RecordStatus } from '@/common/enums/record-status.enum';
 
-import { Zone } from '@/modules/zone/entities';
-import { User } from '@/modules/user/entities';
-import { Church } from '@/modules/church/entities';
-import { Pastor } from '@/modules/pastor/entities';
-import { Copastor } from '@/modules/copastor/entities';
-import { Preacher } from '@/modules/preacher/entities';
-import { Disciple } from '@/modules/disciple/entities';
-import { Supervisor } from '@/modules/supervisor/entities';
+import { Zone } from '@/modules/zone/entities/zone.entity';
+import { User } from '@/modules/user/entities/user.entity';
+import { Church } from '@/modules/church/entities/church.entity';
+import { Pastor } from '@/modules/pastor/entities/pastor.entity';
+import { Copastor } from '@/modules/copastor/entities/copastor.entity';
+import { Preacher } from '@/modules/preacher/entities/preacher.entity';
+import { Disciple } from '@/modules/disciple/entities/disciple.entity';
+import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
 
 @Entity({ name: 'family_groups' })
 export class FamilyGroup {
@@ -41,7 +41,7 @@ export class FamilyGroup {
   serviceTime: string;
 
   //* Contact Info
-  @Column('text', { name: 'country', default: 'Peru' })
+  @Column('text', { name: 'country', default: 'Perú' })
   country: string;
 
   @Column('text', { name: 'department', default: 'Lima' })

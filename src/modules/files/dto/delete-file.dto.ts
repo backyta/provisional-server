@@ -1,6 +1,7 @@
-import { OfferingFileType } from '@/common/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsString, MinLength } from 'class-validator';
+
+import { OfferingFileType } from '@/common/enums/offering-file-type.enum';
 
 export class DeleteFileDto {
   @ApiProperty({

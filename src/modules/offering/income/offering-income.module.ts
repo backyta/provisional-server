@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { OfferingIncome } from '@/modules/offering/income/entities';
+import { OfferingIncome } from '@/modules/offering/income/entities/offering-income.entity';
 import { OfferingIncomeService } from '@/modules/offering/income/offering-income.service';
 import { OfferingIncomeController } from '@/modules/offering/income/offering-income.controller';
 

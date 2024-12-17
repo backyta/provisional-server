@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
   Logger,
+  Injectable,
+  BadRequestException,
   UnauthorizedException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -13,11 +13,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import * as bcrypt from 'bcrypt';
 
-import { LoginUserDto } from '@/modules/auth/dto';
-import { JwtPayload } from '@/modules/auth/interfaces';
+import { RecordStatus } from '@/common/enums/record-status.enum';
 
-import { User } from '@/modules/user/entities';
-import { RecordStatus } from '@/common/enums';
+import { User } from '@/modules/user/entities/user.entity';
+import { LoginUserDto } from '@/modules/auth/dto/login-user.dto';
+import { JwtPayload } from '@/modules/auth/interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {

@@ -1,4 +1,4 @@
-import { Copastor } from '@/modules/copastor/entities';
+import { Copastor } from '@/modules/copastor/entities/copastor.entity';
 
 interface Options {
   copastors: Copastor[];

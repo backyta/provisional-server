@@ -73,6 +73,15 @@ export enum OfferingExpenseSearchSubType {
   PrivateMobilityRental = 'private_mobility_rental',
   GiftsAndPrizesParticipants = 'gifts_and_prizes_participants',
   OtherRelatedExpenses = 'other_related_expenses',
+
+  //* Other Expenses
+  FraternalSupport = 'fraternal_Support',
+  EmergencyRepairs = 'emergency_repairs',
+  HospitalityExpenses = 'hospitality_expenses',
+  MissionDonations = 'mission_donations',
+  TrainingAndEducation = 'training_and_education',
+  LegalAndAdministrative = 'legal_and_administrative',
+  SpecialsProjects = 'special_projects',
 }
 
 export const OfferingExpenseSearchSubTypeNames: Record<
@@ -187,4 +196,19 @@ export const OfferingExpenseSearchSubTypeNames: Record<
     'Premios y regalos',
   [OfferingExpenseSearchSubType.OtherRelatedExpenses]:
     'Otros gastos relacionados',
+
+  // Other Expenses
+  [OfferingExpenseSearchSubType.FraternalSupport]:
+    'Apoyo a hermanos de la iglesia',
+  [OfferingExpenseSearchSubType.EmergencyRepairs]:
+    'Rep. urgentes de instalaciones y equipos',
+  [OfferingExpenseSearchSubType.HospitalityExpenses]:
+    'Alojamiento y alimentación de invitados',
+  [OfferingExpenseSearchSubType.MissionDonations]:
+    'Apoyo económico a misiones y misioneros',
+  [OfferingExpenseSearchSubType.TrainingAndEducation]:
+    'Capacitación para líderes y pastores',
+  [OfferingExpenseSearchSubType.LegalAndAdministrative]:
+    'Gastos legales o administrativos',
+  [OfferingExpenseSearchSubType.SpecialsProjects]: 'Proyectos especiales',
 };

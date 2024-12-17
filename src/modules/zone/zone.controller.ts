@@ -23,19 +23,20 @@ import {
 } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
 
-import { UserRole } from '@/modules/auth/enums';
-import { Auth, GetUser } from '@/modules/auth/decorators';
+import { UserRole } from '@/modules/auth/enums/user-role.enum';
+import { Auth } from '@/modules/auth/decorators/auth.decorator';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 
-import { User } from '@/modules/user/entities';
+import { User } from '@/modules/user/entities/user.entity';
 
-import {
-  UpdateZoneDto,
-  CreateZoneDto,
-  InactivateZoneDto,
-} from '@/modules/zone/dto';
-import { Zone } from '@/modules/zone/entities';
+import { CreateZoneDto } from '@/modules/zone/dto/create-zone.dto';
+import { UpdateZoneDto } from '@/modules/zone/dto/update-zone.dto';
+import { InactivateZoneDto } from '@/modules/zone/dto/inactivate-zone.dto';
+
+import { Zone } from '@/modules/zone/entities/zone.entity';
 import { ZoneService } from '@/modules/zone/zone.service';
 
 @ApiTags('Zones')

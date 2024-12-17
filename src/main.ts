@@ -3,7 +3,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from '@/app.module';
-import { SuperUserService } from '@/utils';
+import { SuperUserService } from '@/utils/create-super-user';
 
 import { ThrottlerExceptionFilter } from '@/modules/auth/filters/throttler-exception.filter';
 

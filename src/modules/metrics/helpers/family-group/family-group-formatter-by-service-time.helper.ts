@@ -1,5 +1,5 @@
-import { getInitialFullNames } from '@/common/helpers';
-import { FamilyGroup } from '@/modules/family-group/entities';
+import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
+import { getInitialFullNames } from '@/common/helpers/get-initial-full-names.helper';
 
 interface Options {
   familyGroups: FamilyGroup[];

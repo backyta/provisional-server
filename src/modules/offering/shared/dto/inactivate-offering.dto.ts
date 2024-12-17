@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { OfferingInactivationReason } from '@/modules/offering/shared/enums';
+
+import { OfferingInactivationReason } from '@/modules/offering/shared/enums/offering-inactivation-reason.enum';
 
 export class InactivateOfferingDto {
   @ApiProperty({

@@ -1,7 +1,7 @@
 import type { StyleDictionary, TDocumentDefinitions } from 'pdfmake/interfaces';
 
-import { DateFormatter } from '@/modules/reports/helpers';
-import { headerSection } from '@/modules/reports/sections';
+import { DateFormatter } from '@/modules/reports/helpers/date-formatter';
+import { headerSection } from '@/modules/reports/sections/header.section';
 
 interface ReportValues {
   directorName?: string;

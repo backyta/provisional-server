@@ -3,7 +3,7 @@ import { Module, forwardRef } from '@nestjs/common';
 
 import { AuthModule } from '@/modules/auth/auth.module';
 
-import { Disciple } from '@/modules/disciple/entities';
+import { Disciple } from '@/modules/disciple/entities/disciple.entity';
 import { DiscipleService } from '@/modules/disciple/disciple.service';
 import { DiscipleController } from '@/modules/disciple/disciple.controller';
 

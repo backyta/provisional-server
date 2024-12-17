@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
   IsString,
@@ -7,12 +6,12 @@ import {
   IsNotEmpty,
   IsOptional,
 } from 'class-validator';
-import {
-  OfferingIncomeCreationType,
-  OfferingIncomeCreationSubType,
-} from '@/modules/offering/income/enums';
+import { ApiProperty } from '@nestjs/swagger';
 
-import { OfferingFileType } from '@/common/enums';
+import { OfferingIncomeCreationType } from '@/modules/offering/income/enums/offering-income-creation-type.enum';
+import { OfferingIncomeCreationSubType } from '@/modules/offering/income/enums/offering-income-creation-sub-type.enum';
+
+import { OfferingFileType } from '@/common/enums/offering-file-type.enum';
 
 export class CreateFileDto {
   @ApiProperty({

@@ -1,29 +1,27 @@
-import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
   IsArray,
   IsEmail,
   IsString,
+  IsBoolean,
   MaxLength,
   MinLength,
   IsNotEmpty,
   IsOptional,
-  IsBoolean,
 } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
-import {
-  CurrencyType,
-  OfferingInactivationReason,
-} from '@/modules/offering/shared/enums';
+import { CurrencyType } from '@/modules/offering/shared/enums/currency-type.enum';
+import { OfferingInactivationReason } from '@/modules/offering/shared/enums/offering-inactivation-reason.enum';
 
-import {
-  MemberType,
-  OfferingIncomeCreationType,
-  OfferingIncomeCreationSubType,
-  OfferingIncomeCreationCategory,
-  OfferingIncomeCreationShiftType,
-} from '@/modules/offering/income/enums';
-import { Gender, RecordStatus } from '@/common/enums';
+import { Gender } from '@/common/enums/gender.enum';
+import { RecordStatus } from '@/common/enums/record-status.enum';
+import { MemberType } from '@/modules/offering/income/enums/member-type.enum';
+
+import { OfferingIncomeCreationType } from '@/modules/offering/income/enums/offering-income-creation-type.enum';
+import { OfferingIncomeCreationSubType } from '@/modules/offering/income/enums/offering-income-creation-sub-type.enum';
+import { OfferingIncomeCreationCategory } from '@/modules/offering/income/enums/offering-income-creation-category.enum';
+import { OfferingIncomeCreationShiftType } from '@/modules/offering/income/enums/offering-income-creation-shift-type.enum';
 
 export class CreateOfferingIncomeDto {
   //* General data
@@ -52,14 +50,14 @@ export class CreateOfferingIncomeDto {
   })
   @IsOptional()
   @IsBoolean()
-  isNewDonor?: boolean;
+  isNewExternalDonor?: boolean;
 
   @ApiProperty({
     example: '0b46eb7e-7730-4cbb-8c61-3ccdfa6da391',
   })
   @IsString()
   @IsOptional()
-  donorId?: string;
+  externalDonorId?: string;
 
   @ApiProperty({
     example: 'John Martin',
@@ -68,7 +66,7 @@ export class CreateOfferingIncomeDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(50)
-  donorFirstName?: string;
+  externalDonorFirstNames?: string;
 
   @ApiProperty({
     example: 'Rojas Castro',
@@ -77,7 +75,7 @@ export class CreateOfferingIncomeDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(50)
-  donorLastName?: string;
+  externalDonorLastNames?: string;
 
   @ApiProperty({
     example: Gender.Male,
@@ -87,37 +85,37 @@ export class CreateOfferingIncomeDto {
       'El género debe ser uno de los siguientes valores: Masculino o Femenino',
   })
   @IsOptional()
-  donorGender?: string;
+  externalDonorGender?: string;
 
   @ApiProperty({
     example: '1990-12-23',
   })
   @IsString()
   @IsOptional()
-  donorBirthDate?: Date;
+  externalDonorBirthDate?: Date;
 
   @ApiProperty({
     example: '+51 999333555',
   })
   @IsString()
   @IsOptional()
-  donorPhoneNumber?: string;
+  externalDonorPhoneNumber?: string;
 
   @ApiProperty({
     example: 'example@example.com',
   })
   @IsEmail()
   @IsOptional()
-  donorEmail?: string;
+  externalDonorEmail?: string;
 
   @ApiProperty({
-    example: 'Peru',
+    example: 'Perú',
   })
   @IsString()
   @IsOptional()
   @MinLength(1)
   @MaxLength(40)
-  donorOriginCountry: string;
+  externalDonorOriginCountry?: string;
 
   @ApiProperty({
     example: 'Italia',
@@ -126,7 +124,7 @@ export class CreateOfferingIncomeDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(40)
-  donorResidenceCountry: string;
+  externalDonorResidenceCountry?: string;
 
   @ApiProperty({
     example: 'Roma',
@@ -135,7 +133,7 @@ export class CreateOfferingIncomeDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(40)
-  donorResidenceCity: string;
+  externalDonorResidenceCity?: string;
 
   @ApiProperty({
     example: 'A 2 cuadras al colegio',
@@ -144,7 +142,7 @@ export class CreateOfferingIncomeDto {
   @IsOptional()
   @MinLength(1)
   @MaxLength(40)
-  donorPostalCode: string;
+  externalDonorPostalCode?: string;
 
   //* ------------------------------------------------------------------ //
 

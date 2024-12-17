@@ -5,6 +5,7 @@ export enum OfferingExpenseSearchType {
   EquipmentAndTechnologyExpenses = 'equipment_and_technology_expenses',
   SuppliesExpenses = 'supplies_expenses',
   PlaningEventsExpenses = 'planing_events_expenses',
+  OtherExpenses = 'other_expenses',
   ExpensesAdjustment = 'expenses_adjustment',
   RecordStatus = 'record_status',
 }
@@ -22,6 +23,7 @@ export const OfferingExpenseSearchTypeNames: Record<
   [OfferingExpenseSearchType.SuppliesExpenses]: 'Gastos de Suministros',
   [OfferingExpenseSearchType.PlaningEventsExpenses]:
     'Gastos de Planificación de Eventos',
+  [OfferingExpenseSearchType.OtherExpenses]: 'Otros Gastos',
   [OfferingExpenseSearchType.ExpensesAdjustment]: 'Ajuste por Salida',
   [OfferingExpenseSearchType.RecordStatus]: 'Estado de Registro',
 };

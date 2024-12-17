@@ -8,17 +8,17 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { RecordStatus } from '@/common/enums';
+import { RecordStatus } from '@/common/enums/record-status.enum';
 
-import { User } from '@/modules/user/entities';
-import { Zone } from '@/modules/zone/entities';
-import { Church } from '@/modules/church/entities';
-import { Pastor } from '@/modules/pastor/entities';
-import { Member } from '@/modules/member/entities';
-import { Copastor } from '@/modules/copastor/entities';
-import { Disciple } from '@/modules/disciple/entities';
-import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyGroup } from '@/modules/family-group/entities';
+import { User } from '@/modules/user/entities/user.entity';
+import { Zone } from '@/modules/zone/entities/zone.entity';
+import { Church } from '@/modules/church/entities/church.entity';
+import { Pastor } from '@/modules/pastor/entities/pastor.entity';
+import { Member } from '@/modules/member/entities/member.entity';
+import { Copastor } from '@/modules/copastor/entities/copastor.entity';
+import { Disciple } from '@/modules/disciple/entities/disciple.entity';
+import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
+import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
 
 @Entity({ name: 'preachers' })
 export class Preacher {

@@ -1,10 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty } from 'class-validator';
 
-import {
-  ZoneInactivationReason,
-  ZoneInactivationCategory,
-} from '@/modules/zone/enums';
+import { ZoneInactivationReason } from '@/modules/zone/enums/zone-inactivation-reason.enum';
+import { ZoneInactivationCategory } from '@/modules/zone/enums/zone-inactivation-category.enum';
 
 export class InactivateZoneDto {
   @ApiProperty({

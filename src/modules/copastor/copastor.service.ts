@@ -11,38 +11,40 @@ import { Between, FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
 
 import {
   CopastorSearchType,
-  CopastorSearchSubType,
   CopastorSearchTypeNames,
-} from '@/modules/copastor/enums';
-import { copastorDataFormatter } from '@/modules/copastor/helpers';
-import { CreateCopastorDto, UpdateCopastorDto } from '@/modules/copastor/dto';
+} from '@/modules/copastor/enums/copastor-search-type.enum';
+import { CopastorSearchSubType } from '@/modules/copastor/enums/copastor-search-sub-type.enum';
 
-import {
-  MemberRole,
-  GenderNames,
-  RecordStatus,
-  MaritalStatusNames,
-} from '@/common/enums';
-import {
-  PaginationDto,
-  InactivateMemberDto,
-  SearchAndPaginationDto,
-} from '@/common/dtos';
-import { dateFormatterToDDMMYYYY, getBirthDateByMonth } from '@/common/helpers';
+import { CreateCopastorDto } from '@/modules/copastor/dto/create-copastor.dto';
+import { UpdateCopastorDto } from '@/modules/copastor/dto/update-copastor.dto';
 
-import { MemberType } from '@/modules/offering/income/enums';
+import { copastorDataFormatter } from '@/modules/copastor/helpers/copastor-data-formatter.helper';
 
-import { Zone } from '@/modules/zone/entities';
-import { User } from '@/modules/user/entities';
-import { Pastor } from '@/modules/pastor/entities';
-import { Church } from '@/modules/church/entities';
-import { Member } from '@/modules/member/entities';
-import { Copastor } from '@/modules/copastor/entities';
-import { Disciple } from '@/modules/disciple/entities';
-import { Preacher } from '@/modules/preacher/entities';
-import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyGroup } from '@/modules/family-group/entities';
-import { OfferingIncome } from '@/modules/offering/income/entities';
+import { GenderNames } from '@/common/enums/gender.enum';
+import { MemberRole } from '@/common/enums/member-role.enum';
+import { RecordStatus } from '@/common/enums/record-status.enum';
+import { MaritalStatusNames } from '@/common/enums/marital-status.enum';
+
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { InactivateMemberDto } from '@/common/dtos/inactivate-member.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
+
+import { getBirthDateByMonth } from '@/common/helpers/get-birth-date-by-month.helper';
+import { dateFormatterToDDMMYYYY } from '@/common/helpers/date-formatter-to-ddmmyyy.helper';
+
+import { MemberType } from '@/modules/offering/income/enums/member-type.enum';
+
+import { Zone } from '@/modules/zone/entities/zone.entity';
+import { User } from '@/modules/user/entities/user.entity';
+import { Pastor } from '@/modules/pastor/entities/pastor.entity';
+import { Church } from '@/modules/church/entities/church.entity';
+import { Member } from '@/modules/member/entities/member.entity';
+import { Copastor } from '@/modules/copastor/entities/copastor.entity';
+import { Disciple } from '@/modules/disciple/entities/disciple.entity';
+import { Preacher } from '@/modules/preacher/entities/preacher.entity';
+import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
+import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
+import { OfferingIncome } from '@/modules/offering/income/entities/offering-income.entity';
 
 @Injectable()
 export class CopastorService {

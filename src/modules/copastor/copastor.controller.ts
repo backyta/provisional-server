@@ -23,21 +23,21 @@ import {
 } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 
-import {
-  PaginationDto,
-  InactivateMemberDto,
-  SearchAndPaginationDto,
-} from '@/common/dtos';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { InactivateMemberDto } from '@/common/dtos/inactivate-member.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
 
-import { UserRole } from '@/modules/auth/enums';
-import { Auth, GetUser } from '@/modules/auth/decorators';
+import { UserRole } from '@/modules/auth/enums/user-role.enum';
+import { Auth } from '@/modules/auth/decorators/auth.decorator';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 
-import { User } from '@/modules/user/entities';
-import { Pastor } from '@/modules/pastor/entities';
+import { User } from '@/modules/user/entities/user.entity';
+import { Pastor } from '@/modules/pastor/entities/pastor.entity';
 
-import { Copastor } from '@/modules/copastor/entities';
+import { Copastor } from '@/modules/copastor/entities/copastor.entity';
 import { CopastorService } from '@/modules/copastor/copastor.service';
-import { CreateCopastorDto, UpdateCopastorDto } from '@/modules/copastor/dto';
+import { CreateCopastorDto } from '@/modules/copastor/dto/create-copastor.dto';
+import { UpdateCopastorDto } from '@/modules/copastor/dto/update-copastor.dto';
 
 @ApiTags('Copastors')
 @ApiBearerAuth()

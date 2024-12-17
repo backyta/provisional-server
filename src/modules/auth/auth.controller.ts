@@ -10,12 +10,13 @@ import {
 } from '@nestjs/swagger';
 import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
-import { User } from '@/modules/user/entities';
+import { User } from '@/modules/user/entities/user.entity';
 
-import { Auth, GetUser } from '@/modules/auth/decorators';
+import { Auth } from '@/modules/auth/decorators/auth.decorator';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 
-import { LoginUserDto } from '@/modules/auth/dto';
 import { AuthService } from '@/modules/auth/auth.service';
+import { LoginUserDto } from '@/modules/auth/dto/login-user.dto';
 
 @ApiTags('Auth')
 @ApiUnauthorizedResponse({

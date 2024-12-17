@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
   IsArray,
@@ -8,17 +7,15 @@ import {
   IsNotEmpty,
   IsOptional,
 } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
-import {
-  CurrencyType,
-  OfferingInactivationReason,
-} from '@/modules/offering/shared/enums';
+import { RecordStatus } from '@/common/enums/record-status.enum';
 
-import {
-  OfferingExpenseSearchType,
-  OfferingExpenseSearchSubType,
-} from '@/modules/offering/expense/enums';
-import { RecordStatus } from '@/common/enums';
+import { CurrencyType } from '@/modules/offering/shared/enums/currency-type.enum';
+import { OfferingInactivationReason } from '@/modules/offering/shared/enums/offering-inactivation-reason.enum';
+
+import { OfferingExpenseSearchType } from '@/modules/offering/expense/enums/offering-expense-search-type.enum';
+import { OfferingExpenseSearchSubType } from '@/modules/offering/expense/enums/offering-expense-search-sub-type.enum';
 
 export class CreateOfferingExpenseDto {
   @ApiProperty({

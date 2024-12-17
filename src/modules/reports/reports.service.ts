@@ -5,61 +5,61 @@ import {
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 import { format } from 'date-fns';
 
+import { UserRoleNames } from '@/modules/auth/enums/user-role.enum';
+
 import {
-  SearchType,
-  GenderNames,
   RecordOrder,
-  SearchSubType,
-  SearchTypeNames,
-  RecordStatusNames,
-  SearchSubTypeNames,
-  MaritalStatusNames,
   RecordOrderNames,
-} from '@/common/enums';
+} from '@/common/enums/record-order.enum';
 import {
-  PaginationDto,
-  MetricsPaginationDto,
-  SearchAndPaginationDto,
-} from '@/common/dtos';
+  SearchSubType,
+  SearchSubTypeNames,
+} from '@/common/enums/search-sub-type.enum';
+import { GenderNames } from '@/common/enums/gender.enum';
+import { RecordStatusNames } from '@/common/enums/record-status.enum';
+import { MaritalStatusNames } from '@/common/enums/marital-status.enum';
+import { SearchType, SearchTypeNames } from '@/common/enums/search-types.enum';
 
-import { UserRoleNames } from '@/modules/auth/enums';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { MetricsPaginationDto } from '@/common/dtos/metrics-pagination.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
 
-import {
-  MemberTypeNames,
-  OfferingIncomeCreationType,
-  OfferingIncomeCreationSubType,
-  OfferingIncomeCreationShiftTypeNames,
-} from '@/modules/offering/income/enums';
+import { MemberTypeNames } from '@/modules/offering/income/enums/member-type.enum';
+import { OfferingIncomeCreationType } from '@/modules/offering/income/enums/offering-income-creation-type.enum';
+import { OfferingIncomeCreationSubType } from '@/modules/offering/income/enums/offering-income-creation-sub-type.enum';
+import { OfferingIncomeCreationShiftTypeNames } from '@/modules/offering/income/enums/offering-income-creation-shift-type.enum';
 
-import { CurrencyType } from '@/modules/offering/shared/enums';
-import { OfferingExpenseSearchType } from '@/modules/offering/expense/enums';
+import { CurrencyType } from '@/modules/offering/shared/enums/currency-type.enum';
 
-import { DateFormatter } from '@/modules/reports/helpers';
+import { ZoneService } from '@/modules/zone/zone.service';
+
+import { MetricsService } from '@/modules/metrics/metrics.service';
+import { MetricSearchType } from '@/modules/metrics/enums/metrics-search-type.enum';
+
+import { OfferingExpenseSearchType } from '@/modules/offering/expense/enums/offering-expense-search-type.enum';
+
 import { PrinterService } from '@/modules/printer/printer.service';
+import { DateFormatter } from '@/modules/reports/helpers/date-formatter';
 
-import {
-  getOfferingIncomeReport,
-  getOfferingExpensesReport,
-} from '@/modules/reports/reports-types/offering';
-import { getUsersReport } from '@/modules/reports/reports-types/user';
-import { getZonesReport } from '@/modules/reports/reports-types/zone';
-import { getChurchesReport } from '@/modules/reports/reports-types/church';
-import { getMembersReport } from '@/modules/reports/reports-types/membership';
-import { getFamilyGroupsReport } from '@/modules/reports/reports-types/family-group';
-import { getStudyCertificateByIdReport } from '@/modules/reports/reports-types/others';
+import { getUsersReport } from '@/modules/reports/reports-types/user/user.report';
+import { getZonesReport } from '@/modules/reports/reports-types/zone/zones.report';
+import { getChurchesReport } from '@/modules/reports/reports-types/church/churches.report';
+import { getMembersReport } from '@/modules/reports/reports-types/membership/members.report';
+import { getFamilyGroupsReport } from '@/modules/reports/reports-types/family-group/family-groups.report';
+import { getOfferingIncomeReport } from '@/modules/reports/reports-types/offering/offering-income.report';
+import { getOfferingExpensesReport } from '@/modules/reports/reports-types/offering/offering-expenses.report';
+import { getStudyCertificateByIdReport } from '@/modules/reports/reports-types/others/study-certificate-by-id.report';
 
-import {
-  getMemberMetricsReport,
-  getFamilyGroupMetricsReport,
-  getOfferingIncomeMetricsReport,
-  getOfferingExpensesMetricsReport,
-  getFinancialBalanceComparativeMetricsReport,
-} from '@/modules/reports/reports-types/metrics';
+import { getMemberMetricsReport } from '@/modules/reports/reports-types/metrics/member-metrics.report';
+import { getFamilyGroupMetricsReport } from '@/modules/reports/reports-types/metrics/family-group-metrics.report';
+import { getOfferingIncomeMetricsReport } from '@/modules/reports/reports-types/metrics/offering-income-metrics.report';
+import { getOfferingExpensesMetricsReport } from '@/modules/reports/reports-types/metrics/offering-expenses-metrics.report';
+import { getFinancialBalanceComparativeMetricsReport } from '@/modules/reports/reports-types/metrics/financial-balance-comparative-metrics.report';
 
 import { UserService } from '@/modules/user/user.service';
 import { PastorService } from '@/modules/pastor/pastor.service';
@@ -72,70 +72,57 @@ import { FamilyGroupService } from '@/modules/family-group/family-group.service'
 import { OfferingIncomeService } from '@/modules/offering/income/offering-income.service';
 import { OfferingExpenseService } from '@/modules/offering/expense/offering-expense.service';
 
-import { Zone } from '@/modules/zone/entities';
-import { User } from '@/modules/user/entities';
-import { Member } from '@/modules/member/entities';
-import { Pastor } from '@/modules/pastor/entities';
-import { Church } from '@/modules/church/entities';
-import { Copastor } from '@/modules/copastor/entities';
-import { Preacher } from '@/modules/preacher/entities';
-import { Disciple } from '@/modules/disciple/entities';
-import { ZoneService } from '@/modules/zone/zone.service';
-import { MetricSearchType } from '@/modules/metrics/enums';
-import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyGroup } from '@/modules/family-group/entities';
-import { MetricsService } from '@/modules/metrics/metrics.service';
-import { OfferingIncome } from '@/modules/offering/income/entities';
-import { OfferingExpense } from '@/modules/offering/expense/entities';
+import { Zone } from '@/modules/zone/entities/zone.entity';
+import { User } from '@/modules/user/entities/user.entity';
+import { Member } from '@/modules/member/entities/member.entity';
+import { Pastor } from '@/modules/pastor/entities/pastor.entity';
+import { Church } from '@/modules/church/entities/church.entity';
+import { Copastor } from '@/modules/copastor/entities/copastor.entity';
+import { Preacher } from '@/modules/preacher/entities/preacher.entity';
+import { Disciple } from '@/modules/disciple/entities/disciple.entity';
+import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
+import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
+import { OfferingIncome } from '@/modules/offering/income/entities/offering-income.entity';
+import { OfferingExpense } from '@/modules/offering/expense/entities/offering-expense.entity';
 
-import {
-  MonthlyMemberDataResult,
-  MembersByZoneDataResult,
-  PreachersByZoneDataResult,
-  MembersByCategoryDataResult,
-  MembersByRecordStatusDataResult,
-  MemberByRoleAndGenderDataResult,
-  MembersByMaritalStatusDataResult,
-  MonthlyMemberFluctuationDataResult,
-  MembersByCategoryAndGenderDataResult,
-  MembersByDistrictAndGenderDataResult,
-} from '@/modules/metrics/helpers/member';
+import { MonthlyMemberDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-birth-month.helper';
+import { MembersByCategoryDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-category.helper';
+import { MembersByZoneDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-zone-and-gender.helper';
+import { PreachersByZoneDataResult } from '@/modules/metrics/helpers/member/preacher-formatter-by-zone-and-gender.helper';
+import { MonthlyMemberFluctuationDataResult } from '@/modules/metrics/helpers/member/member-fluctuation-formatter.helper';
+import { MembersByRecordStatusDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-record-status.helper';
+import { MembersByMaritalStatusDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-marital-status.helper';
+import { MemberByRoleAndGenderDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-role-and-gender.helper';
+import { MembersByDistrictAndGenderDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-district-and-gender.helper';
+import { MembersByCategoryAndGenderDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-category-and-gender.helper';
 
-import {
-  FamilyGroupsByCodeDataResult,
-  FamilyGroupsByZoneDataResult,
-  FamilyGroupsByDistrictDataResult,
-  FamilyGroupsByServiceTimeDataResult,
-  FamilyGroupsByRecordStatusDataResult,
-  MonthlyFamilyGroupsFluctuationDataResult,
-} from '@/modules/metrics/helpers/family-group';
+import { FamilyGroupsByCodeDataResult } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-code.helper';
+import { FamilyGroupsByZoneDataResult } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-zone.helper';
+import { FamilyGroupsByDistrictDataResult } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-district.helper';
+import { FamilyGroupsByServiceTimeDataResult } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-service-time.helper';
+import { MonthlyFamilyGroupsFluctuationDataResult } from '@/modules/metrics/helpers/family-group/family-group-fluctuation-formatter.helper';
+import { FamilyGroupsByRecordStatusDataResult } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-record-status.helper';
 
-import {
-  OfferingIncomeByActivitiesDataResult,
-  OfferingIncomeByFamilyGroupDataResult,
-  OfferingIncomeByChurchGroundDataResult,
-  OfferingIncomeBySundaySchoolDataResult,
-  OfferingIncomeByYouthServiceDataResult,
-  OfferingIncomeBySundayServiceDataResult,
-  OfferingIncomeByUnitedServiceDataResult,
-  OfferingIncomeByFastingAndVigilDataResult,
-  OfferingIncomeByIncomeAdjustmentDataResult,
-  OfferingIncomeBySpecialOfferingDataResult,
-} from '@/modules/metrics/helpers/offering-income';
+import { OfferingIncomeByActivitiesDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-activities-formatter.helper';
+import { OfferingIncomeByFamilyGroupDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-family-group-formatter.helper';
+import { OfferingIncomeByChurchGroundDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-church-ground-formatter.helper';
+import { OfferingIncomeBySundaySchoolDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-sunday-school-formatter.helper';
+import { OfferingIncomeByYouthServiceDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-youth-service-formatter.helper';
+import { OfferingIncomeBySundayServiceDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-sunday-service-formatter.helper';
+import { OfferingIncomeByUnitedServiceDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-united-service-formatter.helper';
+import { OfferingIncomeBySpecialOfferingDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-special-offering-formatter.helper';
+import { OfferingIncomeByFastingAndVigilDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-fasting-and-vigil-formatter.helper';
+import { OfferingIncomeByIncomeAdjustmentDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-income-adjustment-formatter.helper';
 
-import {
-  OfferingExpenseDataResult,
-  OfferingExpensesAdjustmentDataResult,
-} from '@/modules/metrics/helpers/offering-expense';
+import { OfferingExpenseDataResult } from '@/modules/metrics/helpers/offering-expense/offering-expense-chart-formatter.helper';
+import { OfferingExpensesAdjustmentDataResult } from '@/modules/metrics/helpers/offering-expense/offering-expenses-adjustment-formatter.helper';
 
-import {
-  YearlyIncomeExpenseComparativeDataResult,
-  OfferingIncomeComparativeByTypeDataResult,
-  GeneralOfferingIncomeComparativeDataResult,
-  OfferingExpenseComparativeByTypeDataResult,
-  GeneralOfferingExpensesComparativeDataResult,
-  OfferingExpenseComparativeBySubTypeDataResult,
-} from '@/modules/metrics/helpers/offering-comparative';
+import { YearlyIncomeExpenseComparativeDataResult } from '@/modules/metrics/helpers/offering-comparative/income-and-expenses-comparative-formatter.helper';
+import { OfferingIncomeComparativeByTypeDataResult } from '@/modules/metrics/helpers/offering-comparative/comparative-offering-income-by-type-formatter.helper';
+import { GeneralOfferingIncomeComparativeDataResult } from '@/modules/metrics/helpers/offering-comparative/general-comparative-offering-income-formatter.helper';
+import { OfferingExpenseComparativeByTypeDataResult } from '@/modules/metrics/helpers/offering-comparative/comparative-offering-expenses-by-type-formatter.helper';
+import { GeneralOfferingExpensesComparativeDataResult } from '@/modules/metrics/helpers/offering-comparative/general-comparative-offering-expenses-formatter.helper';
+import { OfferingExpenseComparativeBySubTypeDataResult } from '@/modules/metrics/helpers/offering-comparative/comparative-offering-expenses-by-sub-type-formatter.helper';
 
 @Injectable()
 export class ReportsService {
@@ -1492,71 +1479,6 @@ export class ReportsService {
 
         newTerm = `${formattedFromDate} - ${formattedToDate}`;
       }
-
-      // //* By Church
-      // if (
-      //   (searchType === SearchType.SundayService ||
-      //     searchType === SearchType.SundaySchool ||
-      //     searchType === SearchType.GeneralFasting ||
-      //     searchType === SearchType.GeneralVigil ||
-      //     searchType === SearchType.YouthService ||
-      //     searchType === SearchType.UnitedService ||
-      //     searchType === SearchType.Activities ||
-      //     searchType === SearchType.IncomeAdjustment) &&
-      //   searchSubType === SearchSubType.OfferingByChurch
-      // ) {
-      //   const church = await this.churchRepository.findOne({
-      //     where: {
-      //       id: term,
-      //     },
-      //   });
-
-      //   if (!church) {
-      //     throw new NotFoundException(
-      //       `No se encontró ninguna iglesia con este ID: ${term}.`,
-      //     );
-      //   }
-
-      //   newTerm = `${church.abbreviatedChurchName}`;
-      // }
-
-      // //* By Church And Date
-      // if (
-      //   (searchType === SearchType.SundayService ||
-      //     searchType === SearchType.SundaySchool ||
-      //     searchType === SearchType.GeneralFasting ||
-      //     searchType === SearchType.GeneralVigil ||
-      //     searchType === SearchType.YouthService ||
-      //     searchType === SearchType.UnitedService ||
-      //     searchType === SearchType.Activities ||
-      //     searchType === SearchType.IncomeAdjustment) &&
-      //   searchSubType === SearchSubType.OfferingByChurchDate
-      // ) {
-      //   const [churchId, date] = term.split('&');
-
-      //   const church = await this.churchRepository.findOne({
-      //     where: {
-      //       id: churchId,
-      //     },
-      //   });
-
-      //   if (!church) {
-      //     throw new NotFoundException(
-      //       `No se encontró ninguna iglesia con este ID: ${churchId}.`,
-      //     );
-      //   }
-
-      //   const [fromTimestamp, toTimestamp] = date.split('+').map(Number);
-
-      //   if (isNaN(fromTimestamp)) {
-      //     throw new NotFoundException('Formato de marca de tiempo invalido.');
-      //   }
-
-      //   const formattedFromDate = format(fromTimestamp, 'dd/MM/yyyy');
-      //   const formattedToDate = format(toTimestamp, 'dd/MM/yyyy');
-
-      //   newTerm = `${church.abbreviatedChurchName} ~ ${formattedFromDate} - ${formattedToDate}`;
-      // }
 
       //* By Shift
       if (

@@ -1,10 +1,11 @@
-import { MemberRole, RecordStatus } from '@/common/enums';
+import { MemberRole } from '@/common/enums/member-role.enum';
+import { RecordStatus } from '@/common/enums/record-status.enum';
 
-import { Pastor } from '@/modules/pastor/entities';
-import { Copastor } from '@/modules/copastor/entities';
-import { Disciple } from '@/modules/disciple/entities';
-import { Preacher } from '@/modules/preacher/entities';
-import { Supervisor } from '@/modules/supervisor/entities';
+import { Pastor } from '@/modules/pastor/entities/pastor.entity';
+import { Copastor } from '@/modules/copastor/entities/copastor.entity';
+import { Disciple } from '@/modules/disciple/entities/disciple.entity';
+import { Preacher } from '@/modules/preacher/entities/preacher.entity';
+import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
 
 interface Options {
   pastors: Pastor[];

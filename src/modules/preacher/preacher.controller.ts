@@ -23,21 +23,21 @@ import {
 } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 
-import {
-  PaginationDto,
-  InactivateMemberDto,
-  SearchAndPaginationDto,
-} from '@/common/dtos';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { InactivateMemberDto } from '@/common/dtos/inactivate-member.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
 
-import { UserRole } from '@/modules/auth/enums';
-import { Auth, GetUser } from '@/modules/auth/decorators';
+import { UserRole } from '@/modules/auth/enums/user-role.enum';
+import { Auth } from '@/modules/auth/decorators/auth.decorator';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 
-import { User } from '@/modules/user/entities';
-import { Supervisor } from '@/modules/supervisor/entities';
+import { User } from '@/modules/user/entities/user.entity';
+import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
 
-import { Preacher } from '@/modules/preacher/entities';
+import { Preacher } from '@/modules/preacher/entities/preacher.entity';
 import { PreacherService } from '@/modules/preacher/preacher.service';
-import { CreatePreacherDto, UpdatePreacherDto } from '@/modules/preacher/dto';
+import { CreatePreacherDto } from '@/modules/preacher/dto/create-preacher.dto';
+import { UpdatePreacherDto } from '@/modules/preacher/dto/update-preacher.dto';
 
 @ApiTags('Preachers')
 @ApiBearerAuth()

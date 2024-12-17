@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
   IsArray,
@@ -10,14 +9,14 @@ import {
   MinLength,
   IsOptional,
 } from 'class-validator';
-import {
-  Gender,
-  MemberRole,
-  RecordStatus,
-  MaritalStatus,
-  MemberInactivationReason,
-  MemberInactivationCategory,
-} from '@/common/enums';
+import { ApiProperty } from '@nestjs/swagger';
+
+import { Gender } from '@/common/enums/gender.enum';
+import { MemberRole } from '@/common/enums/member-role.enum';
+import { RecordStatus } from '@/common/enums/record-status.enum';
+import { MaritalStatus } from '@/common/enums/marital-status.enum';
+import { MemberInactivationReason } from '@/common/enums/member-inactivation-reason.enum';
+import { MemberInactivationCategory } from '@/common/enums/member-inactivation-category.enum';
 
 export class CreatePreacherDto {
   //* General and Personal info
@@ -101,7 +100,7 @@ export class CreatePreacherDto {
   phoneNumber?: string;
 
   @ApiProperty({
-    example: 'Peru',
+    example: 'Perú',
   })
   @IsString()
   @IsOptional()

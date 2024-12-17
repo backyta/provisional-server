@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 
-import { User } from '@/modules/user/entities';
+import { User } from '@/modules/user/entities/user.entity';
 
 @Injectable()
 export class SuperUserService {

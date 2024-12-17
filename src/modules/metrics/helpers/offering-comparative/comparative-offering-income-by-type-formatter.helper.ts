@@ -1,12 +1,11 @@
 import { addDays } from 'date-fns';
 
-import { CurrencyType } from '@/modules/offering/shared/enums';
+import { CurrencyType } from '@/modules/offering/shared/enums/currency-type.enum';
 
-import {
-  OfferingIncomeCreationTypeNames,
-  OfferingIncomeCreationSubTypeNames,
-} from '@/modules/offering/income/enums';
-import { OfferingIncome } from '@/modules/offering/income/entities';
+import { OfferingIncomeCreationTypeNames } from '@/modules/offering/income/enums/offering-income-creation-type.enum';
+import { OfferingIncomeCreationSubTypeNames } from '@/modules/offering/income/enums/offering-income-creation-sub-type.enum';
+
+import { OfferingIncome } from '@/modules/offering/income/entities/offering-income.entity';
 
 interface Options {
   offeringIncome: OfferingIncome[];

@@ -1,5 +1,3 @@
-import { RecordStatus } from '@/common/enums';
-import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
   IsEnum,
@@ -11,10 +9,12 @@ import {
   IsOptional,
   IsNotEmpty,
 } from 'class-validator';
-import {
-  ChurchInactivationReason,
-  ChurchInactivationCategory,
-} from '@/modules/church/enums';
+import { ApiProperty } from '@nestjs/swagger';
+
+import { RecordStatus } from '@/common/enums/record-status.enum';
+
+import { ChurchInactivationReason } from '@/modules/church/enums/church-inactivation-reason.enum';
+import { ChurchInactivationCategory } from '@/modules/church/enums/church-inactivation-category.enum';
 
 export class CreateChurchDto {
   //* General info
@@ -73,7 +73,7 @@ export class CreateChurchDto {
   phoneNumber?: string;
 
   @ApiProperty({
-    example: 'Peru',
+    example: 'Perú',
   })
   @IsString()
   @IsOptional()

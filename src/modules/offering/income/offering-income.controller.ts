@@ -17,19 +17,20 @@ import {
   ApiForbiddenResponse,
 } from '@nestjs/swagger';
 
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
 
-import { UserRole } from '@/modules/auth/enums';
-import { Auth, GetUser } from '@/modules/auth/decorators';
+import { UserRole } from '@/modules/auth/enums/user-role.enum';
+import { Auth } from '@/modules/auth/decorators/auth.decorator';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 
-import { User } from '@/modules/user/entities';
-import { InactivateOfferingDto } from '@/modules/offering/shared/dto';
+import { User } from '@/modules/user/entities/user.entity';
+import { InactivateOfferingDto } from '@/modules/offering/shared/dto/inactivate-offering.dto';
 
-import {
-  CreateOfferingIncomeDto,
-  UpdateOfferingIncomeDto,
-} from '@/modules/offering/income/dto';
-import { OfferingIncome } from '@/modules/offering/income/entities';
+import { CreateOfferingIncomeDto } from '@/modules/offering/income/dto/create-offering-income.dto';
+import { UpdateOfferingIncomeDto } from '@/modules/offering/income/dto/update-offering-income.dto';
+
+import { OfferingIncome } from '@/modules/offering/income/entities/offering-income.entity';
 import { OfferingIncomeService } from '@/modules/offering/income/offering-income.service';
 
 @Controller('offering-income')
@@ -38,7 +39,7 @@ export class OfferingIncomeController {
 
   //* CREATE
   @Post()
-  @Auth(UserRole.SuperUser, UserRole.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser, UserRole.TreasurerUser)
   @ApiCreatedResponse({
     description: 'Disciple has been successfully created.',
   })
@@ -91,7 +92,7 @@ export class OfferingIncomeController {
 
   //* UPDATE
   @Patch(':id')
-  @Auth(UserRole.SuperUser, UserRole.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser, UserRole.TreasurerUser)
   @ApiOkResponse({
     description: 'Successful operation',
   })
@@ -114,7 +115,7 @@ export class OfferingIncomeController {
   @ApiForbiddenResponse({
     description: 'Forbidden.',
   })
-  @Auth(UserRole.SuperUser, UserRole.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser, UserRole.TreasurerUser)
   remove(
     @Param('id') id: string,
     @Query() inactivateOfferingIncomeDto: InactivateOfferingDto,

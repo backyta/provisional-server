@@ -1,18 +1,17 @@
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
-import { headerSection, footerSection } from '@/modules/reports/sections';
+import { footerSection } from '@/modules/reports/sections/footer.section';
+import { headerSection } from '@/modules/reports/sections/header.section';
 
-import { MetricSearchType } from '@/modules/metrics/enums';
+import { MetricSearchType } from '@/modules/metrics/enums/metrics-search-type.enum';
 
-import {
-  FamilyGroupsByZoneDataResult,
-  FamilyGroupsByCodeDataResult,
-  FamilyGroupsByDistrictDataResult,
-  FamilyGroupsByServiceTimeDataResult,
-  FamilyGroupsByRecordStatusDataResult,
-  MonthlyFamilyGroupsFluctuationDataResult,
-} from '@/modules/metrics/helpers/family-group';
-import { FamilyGroupServiceTimeNames } from '@/modules/family-group/enums';
+import { FamilyGroupServiceTimeNames } from '@/modules/family-group/enums/family-group-service-time.enum';
+import { FamilyGroupsByCodeDataResult } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-code.helper';
+import { FamilyGroupsByZoneDataResult } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-zone.helper';
+import { FamilyGroupsByDistrictDataResult } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-district.helper';
+import { FamilyGroupsByServiceTimeDataResult } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-service-time.helper';
+import { MonthlyFamilyGroupsFluctuationDataResult } from '@/modules/metrics/helpers/family-group/family-group-fluctuation-formatter.helper';
+import { FamilyGroupsByRecordStatusDataResult } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-record-status.helper';
 
 interface ReportOptions {
   title?: string;

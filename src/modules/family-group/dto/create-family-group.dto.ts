@@ -1,5 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { RecordStatus } from '@/common/enums';
 import {
   IsUUID,
   IsEnum,
@@ -9,10 +7,12 @@ import {
   IsNotEmpty,
   IsOptional,
 } from 'class-validator';
-import {
-  FamilyGroupInactivationReason,
-  FamilyGroupInactivationCategory,
-} from '@/modules/family-group/enums';
+import { ApiProperty } from '@nestjs/swagger';
+
+import { RecordStatus } from '@/common/enums/record-status.enum';
+
+import { FamilyGroupInactivationReason } from '@/modules/family-group/enums/family-group-inactivation-reason.enum';
+import { FamilyGroupInactivationCategory } from '@/modules/family-group/enums/family-group-inactivation-category.enum';
 
 export class CreateFamilyGroupDto {
   //* General info
@@ -34,7 +34,7 @@ export class CreateFamilyGroupDto {
 
   //* Contact Info
   @ApiProperty({
-    example: 'Peru',
+    example: 'Perú',
   })
   @IsString()
   @IsNotEmpty()

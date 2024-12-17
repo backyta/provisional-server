@@ -1,15 +1,17 @@
 import { addDays, format } from 'date-fns';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
+import { footerSection } from '@/modules/reports/sections/footer.section';
+import { headerSection } from '@/modules/reports/sections/header.section';
+
 import {
   MemberType,
   MemberTypeNames,
-  OfferingIncomeCreationTypeNames,
-  OfferingIncomeCreationSubTypeNames,
-  OfferingIncomeCreationCategoryNames,
-  OfferingIncomeCreationShiftTypeNames,
-} from '@/modules/offering/income/enums';
-import { headerSection, footerSection } from '@/modules/reports/sections';
+} from '@/modules/offering/income/enums/member-type.enum';
+import { OfferingIncomeCreationTypeNames } from '@/modules/offering/income/enums/offering-income-creation-type.enum';
+import { OfferingIncomeCreationCategoryNames } from '@/modules/offering/income/enums/offering-income-creation-category.enum';
+import { OfferingIncomeCreationSubTypeNames } from '@/modules/offering/income/enums/offering-income-creation-sub-type.enum';
+import { OfferingIncomeCreationShiftTypeNames } from '@/modules/offering/income/enums/offering-income-creation-shift-type.enum';
 
 interface ReportOptions {
   title?: string;

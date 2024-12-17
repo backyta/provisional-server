@@ -10,29 +10,30 @@ import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, FindOptionsOrderValue, Repository } from 'typeorm';
 
-import { RecordStatus } from '@/common/enums';
-import { dateFormatterToDDMMYYYY } from '@/common/helpers';
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import { RecordStatus } from '@/common/enums/record-status.enum';
+import { dateFormatterToDDMMYYYY } from '@/common/helpers/date-formatter-to-ddmmyyy.helper';
 
-import { User } from '@/modules/user/entities';
-import { Church } from '@/modules/church/entities';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
+
+import { User } from '@/modules/user/entities/user.entity';
+import { Church } from '@/modules/church/entities/church.entity';
 
 import {
   OfferingInactivationReason,
   OfferingInactivationReasonNames,
-} from '@/modules/offering/shared/enums';
-import { InactivateOfferingDto } from '@/modules/offering/shared/dto';
+} from '@/modules/offering/shared/enums/offering-inactivation-reason.enum';
+import { InactivateOfferingDto } from '@/modules/offering/shared/dto/inactivate-offering.dto';
 
-import {
-  UpdateOfferingExpenseDto,
-  CreateOfferingExpenseDto,
-} from '@/modules/offering/expense/dto';
+import { CreateOfferingExpenseDto } from '@/modules/offering/expense/dto/create-offering-expense.dto';
+import { UpdateOfferingExpenseDto } from '@/modules/offering/expense/dto/update-offering-expense.dto';
+
 import {
   OfferingExpenseSearchType,
   OfferingExpenseSearchTypeNames,
-} from '@/modules/offering/expense/enums';
-import { OfferingExpense } from '@/modules/offering/expense/entities';
-import { formatDataOfferingExpense } from '@/modules/offering/expense/helpers';
+} from '@/modules/offering/expense/enums/offering-expense-search-type.enum';
+import { OfferingExpense } from '@/modules/offering/expense/entities/offering-expense.entity';
+import { formatDataOfferingExpense } from '@/modules/offering/expense/helpers/format-data-offering-expense.helper';
 
 @Injectable()
 export class OfferingExpenseService {
@@ -60,7 +61,8 @@ export class OfferingExpenseService {
       type === OfferingExpenseSearchType.OperationalExpenses ||
       type === OfferingExpenseSearchType.MaintenanceAndRepairExpenses ||
       type === OfferingExpenseSearchType.PlaningEventsExpenses ||
-      type === OfferingExpenseSearchType.EquipmentAndTechnologyExpenses
+      type === OfferingExpenseSearchType.EquipmentAndTechnologyExpenses ||
+      type === OfferingExpenseSearchType.OtherExpenses
     ) {
       if (!churchId) {
         throw new NotFoundException(`La iglesia es requerida.`);
@@ -232,6 +234,7 @@ export class OfferingExpenseService {
         searchType === OfferingExpenseSearchType.MaintenanceAndRepairExpenses ||
         searchType === OfferingExpenseSearchType.OperationalExpenses ||
         searchType === OfferingExpenseSearchType.SuppliesExpenses ||
+        searchType === OfferingExpenseSearchType.OtherExpenses ||
         searchType === OfferingExpenseSearchType.ExpensesAdjustment)
     ) {
       try {

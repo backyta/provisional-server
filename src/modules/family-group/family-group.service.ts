@@ -9,30 +9,33 @@ import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
 
-import { DashboardSearchType, RecordStatus } from '@/common/enums';
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import { RecordStatus } from '@/common/enums/record-status.enum';
+import { DashboardSearchType } from '@/common/enums/dashboard-search-type.enum';
 
-import {
-  CreateFamilyGroupDto,
-  InactivateFamilyGroupDto,
-  UpdateFamilyGroupDto,
-} from '@/modules/family-group/dto';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
+
+import { CreateFamilyGroupDto } from '@/modules/family-group/dto/create-family-group.dto';
+import { UpdateFamilyGroupDto } from '@/modules/family-group/dto/update-family-group.dto';
+import { InactivateFamilyGroupDto } from '@/modules/family-group/dto/inactivate-family-group.dto';
+
 import {
   FamilyGroupSearchType,
-  FamilyGroupSearchSubType,
   FamilyGroupSearchTypeNames,
-} from '@/modules/family-group/enums';
-import { FamilyGroup } from '@/modules/family-group/entities';
-import { familyGroupDataFormatter } from '@/modules/family-group/helpers';
+} from '@/modules/family-group/enums/family-group-search-type.enum';
+import { FamilyGroupSearchSubType } from '@/modules/family-group/enums/family-group-search-sub-type.enum';
 
-import { Zone } from '@/modules/zone/entities';
-import { User } from '@/modules/user/entities';
-import { Pastor } from '@/modules/pastor/entities';
-import { Church } from '@/modules/church/entities';
-import { Preacher } from '@/modules/preacher/entities';
-import { Copastor } from '@/modules/copastor/entities';
-import { Disciple } from '@/modules/disciple/entities';
-import { Supervisor } from '@/modules/supervisor/entities';
+import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
+import { familyGroupDataFormatter } from '@/modules/family-group/helpers/family-group-data-formatter.helper';
+
+import { Zone } from '@/modules/zone/entities/zone.entity';
+import { User } from '@/modules/user/entities/user.entity';
+import { Pastor } from '@/modules/pastor/entities/pastor.entity';
+import { Church } from '@/modules/church/entities/church.entity';
+import { Preacher } from '@/modules/preacher/entities/preacher.entity';
+import { Copastor } from '@/modules/copastor/entities/copastor.entity';
+import { Disciple } from '@/modules/disciple/entities/disciple.entity';
+import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
 
 @Injectable()
 export class FamilyGroupService {

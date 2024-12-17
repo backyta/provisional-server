@@ -1,4 +1,4 @@
-import { Zone } from '@/modules/zone/entities';
+import { Zone } from '@/modules/zone/entities/zone.entity';
 
 interface Options {
   zones: Zone[];

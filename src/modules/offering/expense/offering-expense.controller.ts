@@ -17,21 +17,21 @@ import {
   ApiForbiddenResponse,
 } from '@nestjs/swagger';
 
-import {
-  UpdateOfferingExpenseDto,
-  CreateOfferingExpenseDto,
-} from '@/modules/offering/expense/dto';
+import { CreateOfferingExpenseDto } from '@/modules/offering/expense/dto/create-offering-expense.dto';
+import { UpdateOfferingExpenseDto } from '@/modules/offering/expense/dto/update-offering-expense.dto';
 
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
 
-import { UserRole } from '@/modules/auth/enums';
-import { Auth, GetUser } from '@/modules/auth/decorators';
+import { UserRole } from '@/modules/auth/enums/user-role.enum';
+import { Auth } from '@/modules/auth/decorators/auth.decorator';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 
-import { User } from '@/modules/user/entities';
+import { User } from '@/modules/user/entities/user.entity';
 
-import { InactivateOfferingDto } from '@/modules/offering/shared/dto';
+import { InactivateOfferingDto } from '@/modules/offering/shared/dto/inactivate-offering.dto';
 
-import { OfferingExpense } from '@/modules/offering/expense/entities';
+import { OfferingExpense } from '@/modules/offering/expense/entities/offering-expense.entity';
 import { OfferingExpenseService } from '@/modules/offering/expense/offering-expense.service';
 
 @Controller('offering-expenses')
@@ -42,7 +42,7 @@ export class OfferingExpenseController {
 
   //* CREATE
   @Post()
-  @Auth(UserRole.SuperUser, UserRole.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser, UserRole.TreasurerUser)
   @ApiCreatedResponse({
     description: 'Disciple has been successfully created.',
   })
@@ -95,7 +95,7 @@ export class OfferingExpenseController {
 
   //* UPDATE
   @Patch(':id')
-  @Auth(UserRole.SuperUser, UserRole.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser, UserRole.TreasurerUser)
   @ApiOkResponse({
     description: 'Successful operation',
   })
@@ -118,7 +118,7 @@ export class OfferingExpenseController {
   @ApiForbiddenResponse({
     description: 'Forbidden.',
   })
-  @Auth(UserRole.SuperUser, UserRole.AdminUser)
+  @Auth(UserRole.SuperUser, UserRole.AdminUser, UserRole.TreasurerUser)
   remove(
     @Param('id') id: string,
     @Query() inactivateOfferingExpenseDto: InactivateOfferingDto,

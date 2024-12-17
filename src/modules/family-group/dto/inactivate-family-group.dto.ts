@@ -1,10 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty } from 'class-validator';
 
-import {
-  FamilyGroupInactivationReason,
-  FamilyGroupInactivationCategory,
-} from '@/modules/family-group/enums';
+import { FamilyGroupInactivationReason } from '@/modules/family-group/enums/family-group-inactivation-reason.enum';
+import { FamilyGroupInactivationCategory } from '@/modules/family-group/enums/family-group-inactivation-category.enum';
 
 export class InactivateFamilyGroupDto {
   @ApiProperty({

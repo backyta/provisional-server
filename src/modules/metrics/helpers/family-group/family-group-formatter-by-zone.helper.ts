@@ -1,7 +1,7 @@
-import { RecordStatus } from '@/common/enums';
-import { getInitialFullNames } from '@/common/helpers';
+import { Zone } from '@/modules/zone/entities/zone.entity';
 
-import { Zone } from '@/modules/zone/entities';
+import { RecordStatus } from '@/common/enums/record-status.enum';
+import { getInitialFullNames } from '@/common/helpers/get-initial-full-names.helper';
 
 interface Options {
   zones: Zone[];

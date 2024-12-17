@@ -23,11 +23,14 @@ import {
 } from '@nestjs/swagger';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
-import { UserRole } from '@/modules/auth/enums';
-import { Auth, GetUser } from '@/modules/auth/decorators';
+import { UserRole } from '@/modules/auth/enums/user-role.enum';
+import { Auth } from '@/modules/auth/decorators/auth.decorator';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 
-import { User } from '@/modules/user/entities';
-import { CreateFileDto, DeleteFileDto } from '@/modules/files/dto';
+import { User } from '@/modules/user/entities/user.entity';
+
+import { CreateFileDto } from '@/modules/files/dto/create-file.dto';
+import { DeleteFileDto } from '@/modules/files/dto/delete-file.dto';
 
 import { CloudinaryService } from '@/modules/cloudinary/cloudinary.service';
 

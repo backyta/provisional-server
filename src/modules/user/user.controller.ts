@@ -23,17 +23,18 @@ import {
 } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
 
-import { UserRole } from '@/modules/auth/enums';
-import { Auth, GetUser } from '@/modules/auth/decorators';
+import { UserRole } from '@/modules/auth/enums/user-role.enum';
+import { Auth } from '@/modules/auth/decorators/auth.decorator';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 
-import {
-  UpdateUserDto,
-  CreateUserDto,
-  InactivateUserDto,
-} from '@/modules/user/dto';
-import { User } from '@/modules/user/entities';
+import { CreateUserDto } from '@/modules/user/dto/create-user.dto';
+import { UpdateUserDto } from '@/modules/user/dto/update-user.dto';
+import { InactivateUserDto } from '@/modules/user/dto/inactivate-user.dto';
+
+import { User } from '@/modules/user/entities/user.entity';
 import { UserService } from '@/modules/user/user.service';
 
 @ApiTags('Users')

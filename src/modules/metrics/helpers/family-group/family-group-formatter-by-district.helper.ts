@@ -1,4 +1,4 @@
-import { FamilyGroup } from '@/modules/family-group/entities';
+import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
 
 interface Options {
   familyGroups: FamilyGroup[];

@@ -11,9 +11,9 @@ import {
 } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 
-import { SearchAndPaginationDto } from '@/common/dtos';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
 
-import { Auth } from '@/modules/auth/decorators';
+import { Auth } from '@/modules/auth/decorators/auth.decorator';
 import { MetricsService } from '@/modules/metrics/metrics.service';
 
 @ApiTags('Métricas')

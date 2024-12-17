@@ -1,29 +1,28 @@
 import { addDays, format } from 'date-fns';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
-import { headerSection, footerSection } from '@/modules/reports/sections';
+import { headerSection } from '@/modules/reports/sections/header.section';
+import { footerSection } from '@/modules/reports/sections/footer.section';
 
-import { MetricSearchType } from '@/modules/metrics/enums';
+import { MetricSearchType } from '@/modules/metrics/enums/metrics-search-type.enum';
 
 import {
-  MemberTypeNames,
   OfferingIncomeCreationCategory,
-  OfferingIncomeCreationSubTypeNames,
   OfferingIncomeCreationCategoryNames,
-} from '@/modules/offering/income/enums';
+} from '@/modules/offering/income/enums/offering-income-creation-category.enum';
+import { MemberTypeNames } from '@/modules/offering/income/enums/member-type.enum';
 
-import {
-  OfferingIncomeByActivitiesDataResult,
-  OfferingIncomeByFamilyGroupDataResult,
-  OfferingIncomeByChurchGroundDataResult,
-  OfferingIncomeByYouthServiceDataResult,
-  OfferingIncomeBySundaySchoolDataResult,
-  OfferingIncomeBySundayServiceDataResult,
-  OfferingIncomeByUnitedServiceDataResult,
-  OfferingIncomeBySpecialOfferingDataResult,
-  OfferingIncomeByFastingAndVigilDataResult,
-  OfferingIncomeByIncomeAdjustmentDataResult,
-} from '@/modules/metrics/helpers/offering-income';
+import { OfferingIncomeCreationSubTypeNames } from '@/modules/offering/income/enums/offering-income-creation-sub-type.enum';
+import { OfferingIncomeByActivitiesDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-activities-formatter.helper';
+import { OfferingIncomeByFamilyGroupDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-family-group-formatter.helper';
+import { OfferingIncomeByChurchGroundDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-church-ground-formatter.helper';
+import { OfferingIncomeByYouthServiceDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-youth-service-formatter.helper';
+import { OfferingIncomeBySundaySchoolDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-sunday-school-formatter.helper';
+import { OfferingIncomeBySundayServiceDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-sunday-service-formatter.helper';
+import { OfferingIncomeByUnitedServiceDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-united-service-formatter.helper';
+import { OfferingIncomeBySpecialOfferingDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-special-offering-formatter.helper';
+import { OfferingIncomeByFastingAndVigilDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-fasting-and-vigil-formatter.helper';
+import { OfferingIncomeByIncomeAdjustmentDataResult } from '@/modules/metrics/helpers/offering-income/offering-income-by-income-adjustment-formatter.helper';
 
 const monthNames = {
   january: 'Enero',

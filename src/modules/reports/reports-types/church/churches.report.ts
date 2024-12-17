@@ -1,10 +1,11 @@
 import { addDays, format } from 'date-fns';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
-import { Church } from '@/modules/church/entities';
-import { ChurchServiceTimeNames } from '@/modules/church/enums';
+import { Church } from '@/modules/church/entities/church.entity';
+import { ChurchServiceTimeNames } from '@/modules/church/enums/church-service-time.enum';
 
-import { headerSection, footerSection } from '@/modules/reports/sections';
+import { footerSection } from '@/modules/reports/sections/footer.section';
+import { headerSection } from '@/modules/reports/sections/header.section';
 
 interface ReportOptions {
   title?: string;

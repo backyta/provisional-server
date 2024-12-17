@@ -1,5 +1,5 @@
-import { RecordStatus } from '@/common/enums';
-import { FamilyGroup } from '@/modules/family-group/entities';
+import { RecordStatus } from '@/common/enums/record-status.enum';
+import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
 
 interface Options {
   familyGroups: FamilyGroup[];

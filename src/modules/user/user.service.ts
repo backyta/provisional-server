@@ -12,18 +12,23 @@ import { FindOptionsOrderValue, ILike, Raw, Repository } from 'typeorm';
 
 import * as bcrypt from 'bcrypt';
 
-import { UserRole, UserRoleNames } from '@/modules/auth/enums';
+import { UserRole, UserRoleNames } from '@/modules/auth/enums/user-role.enum';
 
-import { GenderNames, RecordStatus } from '@/common/enums';
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import { GenderNames } from '@/common/enums/gender.enum';
+import { RecordStatus } from '@/common/enums/record-status.enum';
 
-import { User } from '@/modules/user/entities';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
+
 import {
-  CreateUserDto,
-  InactivateUserDto,
-  UpdateUserDto,
-} from '@/modules/user/dto';
-import { UserSearchType, UserSearchTypeNames } from '@/modules/user/enums';
+  UserSearchType,
+  UserSearchTypeNames,
+} from '@/modules/user/enums/user-search-type.enum';
+import { User } from '@/modules/user/entities/user.entity';
+
+import { CreateUserDto } from '@/modules/user/dto/create-user.dto';
+import { UpdateUserDto } from '@/modules/user/dto/update-user.dto';
+import { InactivateUserDto } from '@/modules/user/dto/inactivate-user.dto';
 
 @Injectable()
 export class UserService {

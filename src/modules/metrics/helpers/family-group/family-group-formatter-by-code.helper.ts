@@ -1,7 +1,7 @@
-import { Gender } from '@/common/enums';
-import { getInitialFullNames } from '@/common/helpers';
+import { Gender } from '@/common/enums/gender.enum';
+import { getInitialFullNames } from '@/common/helpers/get-initial-full-names.helper';
 
-import { FamilyGroup } from '@/modules/family-group/entities';
+import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
 
 interface Options {
   familyGroups: FamilyGroup[];

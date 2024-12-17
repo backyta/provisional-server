@@ -24,19 +24,20 @@ import {
 } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
 
-import { User } from '@/modules/user/entities';
+import { User } from '@/modules/user/entities/user.entity';
 
-import { UserRole } from '@/modules/auth/enums';
-import { Auth, GetUser } from '@/modules/auth/decorators';
+import { UserRole } from '@/modules/auth/enums/user-role.enum';
+import { Auth } from '@/modules/auth/decorators/auth.decorator';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 
-import {
-  CreateFamilyGroupDto,
-  UpdateFamilyGroupDto,
-  InactivateFamilyGroupDto,
-} from '@/modules/family-group/dto';
-import { FamilyGroup } from '@/modules/family-group/entities';
+import { CreateFamilyGroupDto } from '@/modules/family-group/dto/create-family-group.dto';
+import { UpdateFamilyGroupDto } from '@/modules/family-group/dto/update-family-group.dto';
+import { InactivateFamilyGroupDto } from '@/modules/family-group/dto/inactivate-family-group.dto';
+
+import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
 import { FamilyGroupService } from '@/modules/family-group/family-group.service';
 
 @ApiTags('Family-Groups')

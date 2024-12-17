@@ -1,19 +1,18 @@
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
-import { headerSection, footerSection } from '@/modules/reports/sections';
+import { footerSection } from '@/modules/reports/sections/footer.section';
+import { headerSection } from '@/modules/reports/sections/header.section';
 
-import { Church } from '@/modules/church/entities';
-import { MetricSearchType } from '@/modules/metrics/enums';
+import { Church } from '@/modules/church/entities/church.entity';
+import { MetricSearchType } from '@/modules/metrics/enums/metrics-search-type.enum';
 
-import {
-  YearlyIncomeExpenseComparativeDataResult,
-  OfferingIncomeComparativeByTypeDataResult,
-  GeneralOfferingIncomeComparativeDataResult,
-  OfferingExpenseComparativeByTypeDataResult,
-  GeneralOfferingExpensesComparativeDataResult,
-  OfferingExpenseComparativeBySubTypeDataResult,
-} from '@/modules/metrics/helpers/offering-comparative';
-import { OfferingIncomeCreationTypeNames } from '@/modules/offering/income/enums';
+import { OfferingIncomeCreationTypeNames } from '@/modules/offering/income/enums/offering-income-creation-type.enum';
+import { YearlyIncomeExpenseComparativeDataResult } from '@/modules/metrics/helpers/offering-comparative/income-and-expenses-comparative-formatter.helper';
+import { OfferingIncomeComparativeByTypeDataResult } from '@/modules/metrics/helpers/offering-comparative/comparative-offering-income-by-type-formatter.helper';
+import { GeneralOfferingIncomeComparativeDataResult } from '@/modules/metrics/helpers/offering-comparative/general-comparative-offering-income-formatter.helper';
+import { OfferingExpenseComparativeByTypeDataResult } from '@/modules/metrics/helpers/offering-comparative/comparative-offering-expenses-by-type-formatter.helper';
+import { GeneralOfferingExpensesComparativeDataResult } from '@/modules/metrics/helpers/offering-comparative/general-comparative-offering-expenses-formatter.helper';
+import { OfferingExpenseComparativeBySubTypeDataResult } from '@/modules/metrics/helpers/offering-comparative/comparative-offering-expenses-by-sub-type-formatter.helper';
 
 const monthNames = {
   january: 'Enero',

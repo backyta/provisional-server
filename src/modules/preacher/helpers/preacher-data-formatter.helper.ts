@@ -1,4 +1,4 @@
-import { Preacher } from '@/modules/preacher/entities';
+import { Preacher } from '@/modules/preacher/entities/preacher.entity';
 
 interface Options {
   preachers: Preacher[];

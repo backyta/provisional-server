@@ -1,6 +1,7 @@
-import { RecordStatus } from '@/common/enums';
-import { getInitialFullNames } from '@/common/helpers';
-import { FamilyGroup } from '@/modules/family-group/entities';
+import { RecordStatus } from '@/common/enums/record-status.enum';
+import { getInitialFullNames } from '@/common/helpers/get-initial-full-names.helper';
+
+import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
 
 interface Options {
   familyGroups: FamilyGroup[];
@@ -32,7 +33,8 @@ export const familyGroupFormatterByRecordStatus = ({
         acc[zoneName] = {
           copastor: familyGroup?.theirCopastor?.member?.firstNames
             ? `${getInitialFullNames({
-                firstNames: familyGroup?.theirCopastor?.member?.firstNames ?? '',
+                firstNames:
+                  familyGroup?.theirCopastor?.member?.firstNames ?? '',
                 lastNames: '',
               })} ${familyGroup?.theirCopastor?.member?.lastNames}`
             : 'Sin Co-Pastor',

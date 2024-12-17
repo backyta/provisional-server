@@ -1,5 +1,5 @@
-import { CurrencyType } from '@/modules/offering/shared/enums';
-import { OfferingExpense } from '@/modules/offering/expense/entities';
+import { CurrencyType } from '@/modules/offering/shared/enums/currency-type.enum';
+import { OfferingExpense } from '@/modules/offering/expense/entities/offering-expense.entity';
 
 interface Options {
   offeringExpenses: OfferingExpense[];

@@ -1,6 +1,6 @@
-import { CurrencyType } from '@/modules/offering/shared/enums';
-import { OfferingExpense } from '@/modules/offering/expense/entities';
-import { OfferingExpenseSearchSubTypeNames } from '@/modules/offering/expense/enums';
+import { CurrencyType } from '@/modules/offering/shared/enums/currency-type.enum';
+import { OfferingExpense } from '@/modules/offering/expense/entities/offering-expense.entity';
+import { OfferingExpenseSearchSubTypeNames } from '@/modules/offering/expense/enums/offering-expense-search-sub-type.enum';
 
 interface Options {
   offeringExpenses: OfferingExpense[];

@@ -1,15 +1,16 @@
 import { addDays, format } from 'date-fns';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
-import { MaritalStatusNames } from '@/common/enums';
+import { MaritalStatusNames } from '@/common/enums/marital-status.enum';
 
-import { Pastor } from '@/modules/pastor/entities';
-import { Copastor } from '@/modules/copastor/entities';
-import { Disciple } from '@/modules/disciple/entities';
-import { Preacher } from '@/modules/preacher/entities';
-import { Supervisor } from '@/modules/supervisor/entities';
+import { Pastor } from '@/modules/pastor/entities/pastor.entity';
+import { Copastor } from '@/modules/copastor/entities/copastor.entity';
+import { Disciple } from '@/modules/disciple/entities/disciple.entity';
+import { Preacher } from '@/modules/preacher/entities/preacher.entity';
+import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
 
-import { headerSection, footerSection } from '@/modules/reports/sections';
+import { footerSection } from '@/modules/reports/sections/footer.section';
+import { headerSection } from '@/modules/reports/sections/header.section';
 
 type MemberOptions = Pastor | Copastor | Supervisor | Preacher | Disciple;
 type DataOptions =

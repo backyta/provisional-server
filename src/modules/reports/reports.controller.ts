@@ -17,14 +17,15 @@ import {
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 
-import {
-  PaginationDto,
-  MetricsPaginationDto,
-  SearchAndPaginationDto,
-} from '@/common/dtos';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { MetricsPaginationDto } from '@/common/dtos/metrics-pagination.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
+
+import { Auth } from '@/modules/auth/decorators/auth.decorator';
 
 import { ReportsService } from '@/modules/reports/reports.service';
 
+//TODO : agregar la documentacion para las rutas que faltan
 @ApiTags('Reportes')
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({
@@ -43,6 +44,7 @@ export class ReportsController {
 
   //* STUDENT CERTIFICATE
   @Get('student-certificate/:id')
+  @Auth()
   async getStudyCertificateById(
     @Res() response: Response,
     @Param('id', ParseUUIDPipe) studentId: string,
@@ -58,6 +60,7 @@ export class ReportsController {
   //? CHURCHES
   //* CHURCHES GENERAL REPORT
   @Get('churches')
+  @Auth()
   async getGeneralChurches(
     @Res() response: Response,
     @Query() paginationDto: PaginationDto,
@@ -72,6 +75,7 @@ export class ReportsController {
 
   //* PASTORS GENERAL REPORT
   @Get('churches/:term')
+  @Auth()
   async getChurchesByTerm(
     @Res() response: Response,
     @Param('term') term: string,
@@ -91,6 +95,7 @@ export class ReportsController {
   //? PASTORS
   //* PASTORS GENERAL REPORT
   @Get('pastors')
+  @Auth()
   async getGeneralPastors(
     @Res() response: Response,
     @Query() paginationDto: PaginationDto,
@@ -105,6 +110,7 @@ export class ReportsController {
 
   //* PASTORS GENERAL REPORT
   @Get('pastors/:term')
+  @Auth()
   async getPastorsByTerm(
     @Res() response: Response,
     @Param('term') term: string,
@@ -124,6 +130,7 @@ export class ReportsController {
   //? COPASTORS
   //* COPASTORS GENERAL REPORT
   @Get('copastors')
+  @Auth()
   async getGeneralCopastors(
     @Res() response: Response,
     @Query() paginationDto: PaginationDto,
@@ -138,6 +145,7 @@ export class ReportsController {
 
   //* COPASTORS GENERAL REPORT
   @Get('copastors/:term')
+  @Auth()
   async getCopastorsByTerm(
     @Res() response: Response,
     @Param('term') term: string,
@@ -157,6 +165,7 @@ export class ReportsController {
   //? SUPERVISORS
   //* SUPERVISORS GENERAL REPORT
   @Get('supervisors')
+  @Auth()
   async getGeneralSupervisors(
     @Res() response: Response,
     @Query() paginationDto: PaginationDto,
@@ -172,6 +181,7 @@ export class ReportsController {
 
   //* SUPERVISORS GENERAL REPORT
   @Get('supervisors/:term')
+  @Auth()
   async getSupervisorsByTerm(
     @Res() response: Response,
     @Param('term') term: string,
@@ -191,6 +201,7 @@ export class ReportsController {
   //? PREACHERS
   //* PREACHERS GENERAL REPORT
   @Get('preachers')
+  @Auth()
   async getGeneralPreachers(
     @Res() response: Response,
     @Query() paginationDto: PaginationDto,
@@ -205,6 +216,7 @@ export class ReportsController {
 
   //* PREACHERS GENERAL REPORT
   @Get('preachers/:term')
+  @Auth()
   async getPreachersByTerm(
     @Res() response: Response,
     @Param('term') term: string,
@@ -224,6 +236,7 @@ export class ReportsController {
   //? DISCIPLES
   //* DISCIPLES GENERAL REPORT
   @Get('disciples')
+  @Auth()
   async getGeneralDisciples(
     @Res() response: Response,
     @Query() paginationDto: PaginationDto,
@@ -238,6 +251,7 @@ export class ReportsController {
 
   //* DISCIPLES GENERAL REPORT
   @Get('disciples/:term')
+  @Auth()
   async getDisciplesByTerm(
     @Res() response: Response,
     @Param('term') term: string,
@@ -257,6 +271,7 @@ export class ReportsController {
   //? ZONES
   //* ZONES GENERAL REPORT
   @Get('zones')
+  @Auth()
   async getGeneralZones(
     @Res() response: Response,
     @Query() paginationDto: PaginationDto,
@@ -271,6 +286,7 @@ export class ReportsController {
 
   //* ZONES BY TERM REPORT
   @Get('zones/:term')
+  @Auth()
   async getZonesByTerm(
     @Res() response: Response,
     @Param('term') term: string,
@@ -290,6 +306,7 @@ export class ReportsController {
   //? FAMILY GROUPS
   //* FAMILY GROUPS GENERAL REPORT
   @Get('family-groups')
+  @Auth()
   async getGeneralFamilyGroups(
     @Res() response: Response,
     @Query() paginationDto: PaginationDto,
@@ -305,6 +322,7 @@ export class ReportsController {
 
   //* FAMILY GROUPS BY TERM REPORT
   @Get('family-groups/:term')
+  @Auth()
   async getFamilyGroupsByTerm(
     @Res() response: Response,
     @Param('term') term: string,
@@ -324,6 +342,7 @@ export class ReportsController {
   //? OFFERING INCOME
   //* OFFERING INCOME GENERAL REPORT
   @Get('offering-income')
+  @Auth()
   async getGeneralOfferingIncome(
     @Res() response: Response,
     @Query() paginationDto: PaginationDto,
@@ -339,6 +358,7 @@ export class ReportsController {
 
   //* OFFERING INCOME BY TERM REPORT
   @Get('offering-income/:term')
+  @Auth()
   async getOfferingIncomeByTerm(
     @Res() response: Response,
     @Param('term') term: string,
@@ -358,6 +378,7 @@ export class ReportsController {
   //? OFFERING EXPENSES
   //* OFFERING EXPENSES GENERAL REPORT
   @Get('offering-expenses')
+  @Auth()
   async getGeneralOfferingExpenses(
     @Res() response: Response,
     @Query() paginationDto: PaginationDto,
@@ -373,6 +394,7 @@ export class ReportsController {
 
   //* OFFERING EXPENSES BY TERM REPORT
   @Get('offering-expenses/:term')
+  @Auth()
   async getOfferingExpensesByTerm(
     @Res() response: Response,
     @Param('term') term: string,
@@ -392,6 +414,7 @@ export class ReportsController {
   //? USERS
   //* USERS GENERAL REPORT
   @Get('users')
+  @Auth()
   async getGeneralUsers(
     @Res() response: Response,
     @Query() paginationDto: PaginationDto,
@@ -406,6 +429,7 @@ export class ReportsController {
 
   //* USERS BY TERM REPORT
   @Get('users/:term')
+  @Auth()
   async getUsersByTerm(
     @Res() response: Response,
     @Param('term') term: string,
@@ -425,6 +449,7 @@ export class ReportsController {
   //? METRICS
   //* MEMBER METRICS REPORT
   @Get('member-metrics')
+  @Auth()
   async getMemberMetrics(
     @Res() response: Response,
     @Query() paginationDto: MetricsPaginationDto,
@@ -440,6 +465,7 @@ export class ReportsController {
 
   //* FAMILY GROUP METRICS REPORT
   @Get('family-group-metrics')
+  @Auth()
   async getFamilyGroupMetrics(
     @Res() response: Response,
     @Query() paginationDto: MetricsPaginationDto,
@@ -456,6 +482,7 @@ export class ReportsController {
 
   //* OFFERING INCOME METRICS REPORT
   @Get('offering-income-metrics')
+  @Auth()
   async getOfferingIncomeMetrics(
     @Res() response: Response,
     @Query() paginationDto: MetricsPaginationDto,
@@ -472,6 +499,7 @@ export class ReportsController {
 
   //* OFFERING EXPENSE METRICS REPORT
   @Get('offering-expense-metrics')
+  @Auth()
   async getOfferingExpenseMetrics(
     @Res() response: Response,
     @Query() paginationDto: MetricsPaginationDto,
@@ -488,6 +516,7 @@ export class ReportsController {
 
   //* FINANCIAL BALANCE COMPARATIVE METRICS REPORT
   @Get('financial-balance-comparative-metrics')
+  @Auth()
   async getFinancialBalanceComparativeMetrics(
     @Res() response: Response,
     @Query() paginationDto: MetricsPaginationDto,

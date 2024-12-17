@@ -1,4 +1,3 @@
-import { RecordStatus } from '@/common/enums';
 import {
   Index,
   Column,
@@ -9,6 +8,8 @@ import {
   BeforeInsert,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
+import { RecordStatus } from '@/common/enums/record-status.enum';
 
 @Entity({ name: 'users' })
 @Index(['firstNames', 'lastNames'])

@@ -1,21 +1,20 @@
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
-import { headerSection, footerSection } from '@/modules/reports/sections';
+import { footerSection } from '@/modules/reports/sections/footer.section';
+import { headerSection } from '@/modules/reports/sections/header.section';
 
-import {
-  MonthlyMemberDataResult,
-  MembersByZoneDataResult,
-  PreachersByZoneDataResult,
-  MembersByCategoryDataResult,
-  MemberByRoleAndGenderDataResult,
-  MembersByRecordStatusDataResult,
-  MembersByMaritalStatusDataResult,
-  MonthlyMemberFluctuationDataResult,
-  MembersByCategoryAndGenderDataResult,
-  MembersByDistrictAndGenderDataResult,
-} from '@/modules/metrics/helpers/member';
-import { MetricSearchType } from '@/modules/metrics/enums';
-import { Church } from '@/modules/church/entities';
+import { Church } from '@/modules/church/entities/church.entity';
+import { MetricSearchType } from '@/modules/metrics/enums/metrics-search-type.enum';
+import { MonthlyMemberDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-birth-month.helper';
+import { MembersByCategoryDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-category.helper';
+import { MembersByZoneDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-zone-and-gender.helper';
+import { MonthlyMemberFluctuationDataResult } from '@/modules/metrics/helpers/member/member-fluctuation-formatter.helper';
+import { PreachersByZoneDataResult } from '@/modules/metrics/helpers/member/preacher-formatter-by-zone-and-gender.helper';
+import { MembersByRecordStatusDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-record-status.helper';
+import { MemberByRoleAndGenderDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-role-and-gender.helper';
+import { MembersByMaritalStatusDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-marital-status.helper';
+import { MembersByCategoryAndGenderDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-category-and-gender.helper';
+import { MembersByDistrictAndGenderDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-district-and-gender.helper';
 
 interface ReportOptions {
   title?: string;

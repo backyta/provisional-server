@@ -179,6 +179,15 @@ export enum SearchSubType {
   EducationalMaterials = 'educational_materials',
   GiftsAndPrizesParticipants = 'gifts_and_prizes_participants',
   OtherRelatedExpenses = 'other_related_expenses',
+
+  //* Other Expenses
+  FraternalSupport = 'fraternal_Support',
+  EmergencyRepairs = 'emergency_repairs',
+  HospitalityExpenses = 'hospitality_expenses',
+  MissionDonations = 'mission_donations',
+  TrainingAndEducation = 'training_and_education',
+  LegalAndAdministrative = 'legal_and_administrative',
+  SpecialsProjects = 'special_projects',
 }
 
 export const SearchSubTypeNames: Record<SearchSubType, string> = {
@@ -390,4 +399,14 @@ export const SearchSubTypeNames: Record<SearchSubType, string> = {
   [SearchSubType.EducationalMaterials]: 'Material didáctico',
   [SearchSubType.GiftsAndPrizesParticipants]: 'Premios y regalos',
   [SearchSubType.OtherRelatedExpenses]: 'Otros gastos relacionados',
+
+  // Other Expenses
+  [SearchSubType.FraternalSupport]: 'Apoyo a hermanos de la iglesia',
+  [SearchSubType.EmergencyRepairs]: 'Rep. urgentes de instalaciones y equipos',
+  [SearchSubType.HospitalityExpenses]:
+    'Alojamiento y alimentación de invitados',
+  [SearchSubType.MissionDonations]: 'Apoyo económico a misiones y misioneros',
+  [SearchSubType.TrainingAndEducation]: 'Capacitación para líderes y pastores',
+  [SearchSubType.LegalAndAdministrative]: 'Gastos legales o administrativos',
+  [SearchSubType.SpecialsProjects]: 'Proyectos especiales',
 };

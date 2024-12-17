@@ -1,7 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Zone } from '@/modules/zone/entities';
+import { Zone } from '@/modules/zone/entities/zone.entity';
 import { ZoneService } from '@/modules/zone/zone.service';
 import { ZoneController } from '@/modules/zone/zone.controller';
 

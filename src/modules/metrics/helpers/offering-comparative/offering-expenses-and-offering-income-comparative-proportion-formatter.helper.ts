@@ -1,6 +1,7 @@
-import { RecordStatus } from '@/common/enums';
-import { OfferingExpense } from '@/modules/offering/expense/entities';
-import { OfferingIncome } from '@/modules/offering/income/entities';
+import { RecordStatus } from '@/common/enums/record-status.enum';
+
+import { OfferingIncome } from '@/modules/offering/income/entities/offering-income.entity';
+import { OfferingExpense } from '@/modules/offering/expense/entities/offering-expense.entity';
 
 interface Options {
   offeringIncome: OfferingIncome[];

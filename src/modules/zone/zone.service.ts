@@ -9,30 +9,32 @@ import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsOrderValue, ILike, In, Repository } from 'typeorm';
 
-import { RecordStatus } from '@/common/enums';
+import { RecordStatus } from '@/common/enums/record-status.enum';
+
 import {
-  ZoneSearchSubType,
   ZoneSearchType,
   ZoneSearchTypeNames,
-} from '@/modules/zone/enums';
-import { PaginationDto, SearchAndPaginationDto } from '@/common/dtos';
+} from '@/modules/zone/enums/zone-search-type.enum';
+import { ZoneSearchSubType } from '@/modules/zone/enums/zone-search-sub-type.enum';
 
-import { zoneDataFormatter } from '@/modules/zone/helpers';
-import {
-  CreateZoneDto,
-  InactivateZoneDto,
-  UpdateZoneDto,
-} from '@/modules/zone/dto';
+import { PaginationDto } from '@/common/dtos/pagination.dto';
+import { SearchAndPaginationDto } from '@/common/dtos/search-and-pagination.dto';
 
-import { User } from '@/modules/user/entities';
-import { Zone } from '@/modules/zone/entities';
-import { Pastor } from '@/modules/pastor/entities';
-import { Church } from '@/modules/church/entities';
-import { Copastor } from '@/modules/copastor/entities';
-import { Preacher } from '@/modules/preacher/entities';
-import { Disciple } from '@/modules/disciple/entities';
-import { Supervisor } from '@/modules/supervisor/entities';
-import { FamilyGroup } from '@/modules/family-group/entities';
+import { zoneDataFormatter } from '@/modules/zone/helpers/zone-data-formatter.helper';
+
+import { CreateZoneDto } from '@/modules/zone/dto/create-zone.dto';
+import { UpdateZoneDto } from '@/modules/zone/dto/update-zone.dto';
+import { InactivateZoneDto } from '@/modules/zone/dto/inactivate-zone.dto';
+
+import { User } from '@/modules/user/entities/user.entity';
+import { Zone } from '@/modules/zone/entities/zone.entity';
+import { Pastor } from '@/modules/pastor/entities/pastor.entity';
+import { Church } from '@/modules/church/entities/church.entity';
+import { Copastor } from '@/modules/copastor/entities/copastor.entity';
+import { Preacher } from '@/modules/preacher/entities/preacher.entity';
+import { Disciple } from '@/modules/disciple/entities/disciple.entity';
+import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
+import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
 
 @Injectable()
 export class ZoneService {

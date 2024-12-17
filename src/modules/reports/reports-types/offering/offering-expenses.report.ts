@@ -1,13 +1,13 @@
 import { addDays, format } from 'date-fns';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
-import {
-  OfferingExpenseSearchTypeNames,
-  OfferingExpenseSearchSubTypeNames,
-} from '@/modules/offering/expense/enums';
-import { OfferingExpense } from '@/modules/offering/expense/entities';
+import { OfferingExpenseSearchTypeNames } from '@/modules/offering/expense/enums/offering-expense-search-type.enum';
+import { OfferingExpenseSearchSubTypeNames } from '@/modules/offering/expense/enums/offering-expense-search-sub-type.enum';
 
-import { headerSection, footerSection } from '@/modules/reports/sections';
+import { OfferingExpense } from '@/modules/offering/expense/entities/offering-expense.entity';
+
+import { headerSection } from '@/modules/reports/sections/header.section';
+import { footerSection } from '@/modules/reports/sections/footer.section';
 
 interface ReportOptions {
   title?: string;
