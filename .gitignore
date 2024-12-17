@@ -2,7 +2,6 @@
 /dist
 /node_modules
 postgres-db/
-.husky/*
 .env
 
 # Logs
