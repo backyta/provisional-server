@@ -8,7 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, FindOptionsOrderValue, In, Repository } from 'typeorm';
 
-import { toZonedTime } from 'date-fns-tz';
+import { fromZonedTime } from 'date-fns-tz';
 import { endOfMonth, startOfMonth } from 'date-fns';
 
 import { RecordStatus } from '@/common/enums/record-status.enum';
@@ -164,7 +164,7 @@ export class MetricsService {
         const timeZone = 'America/Lima';
         const sundays = [];
         const newDate = new Date(dateTerm);
-        const zonedDate = toZonedTime(newDate, timeZone);
+        const zonedDate = fromZonedTime(newDate, timeZone);
 
         zonedDate.setDate(
           newDate.getDay() === 6
