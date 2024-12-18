@@ -168,17 +168,17 @@ export class MetricsService {
         const zonedDate = fromZonedTime(newDate, timeZone);
 
         console.log(zonedDate);
-        console.log(zonedDate.getDay());
+        console.log(zonedDate.getUTCDay());
 
         zonedDate.setDate(
-          newDate.getDay() === 6
-            ? zonedDate.getDate()
-            : zonedDate.getDate() - (zonedDate.getDay() + 1),
+          newDate.getUTCDay() === 0
+            ? zonedDate.getUTCDate()
+            : zonedDate.getUTCDate() - zonedDate.getUTCDay(),
         ); // Domingo mas cercano
 
         for (let i = 0; i < 14; i++) {
           sundays.push(zonedDate.toISOString().split('T')[0]);
-          zonedDate.setDate(zonedDate.getDate() - 7);
+          zonedDate.setDate(zonedDate.getUTCDate() - 7);
         }
 
         console.log(sundays);
