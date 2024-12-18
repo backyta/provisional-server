@@ -160,6 +160,7 @@ export class MetricsService {
         }
 
         console.log(church);
+        console.log(new Date(dateTerm));
 
         const timeZone = 'America/Lima';
         const sundays = [];
