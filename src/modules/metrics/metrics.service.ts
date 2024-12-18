@@ -168,7 +168,7 @@ export class MetricsService {
         const zonedDate = fromZonedTime(newDate, timeZone);
 
         console.log(zonedDate);
-        console.log(zonedDate.getDate());
+        console.log(zonedDate.getDay());
 
         zonedDate.setDate(
           newDate.getDay() === 6
