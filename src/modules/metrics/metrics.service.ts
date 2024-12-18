@@ -159,6 +159,8 @@ export class MetricsService {
           );
         }
 
+        console.log(church);
+
         const timeZone = 'America/Lima';
         const sundays = [];
         const newDate = new Date(dateTerm);
@@ -174,6 +176,8 @@ export class MetricsService {
           sundays.push(zonedDate.toISOString().split('T')[0]);
           zonedDate.setDate(zonedDate.getDate() - 7);
         }
+
+        console.log(sundays);
 
         const offeringIncome = await this.offeringIncomeRepository.find({
           where: {
@@ -198,6 +202,8 @@ export class MetricsService {
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
+
+        console.log(offeringIncome);
 
         return lastSundayOfferingsDataFormatter({
           offeringIncome: offeringIncome,
