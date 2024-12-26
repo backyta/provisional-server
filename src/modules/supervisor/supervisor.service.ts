@@ -184,8 +184,8 @@ export class SupervisorService {
           maritalStatus: createSupervisorDto.maritalStatus,
           numberChildren: +createSupervisorDto.numberChildren,
           conversionDate: createSupervisorDto.conversionDate,
-          email: createSupervisorDto.email,
-          phoneNumber: createSupervisorDto.phoneNumber,
+          email: createSupervisorDto.email ?? null,
+          phoneNumber: createSupervisorDto.phoneNumber ?? null,
           residenceCountry: createSupervisorDto.residenceCountry,
           residenceDepartment: createSupervisorDto.residenceDepartment,
           residenceProvince: createSupervisorDto.residenceProvince,
@@ -1879,8 +1879,8 @@ export class SupervisorService {
             maritalStatus: updateSupervisorDto.maritalStatus,
             numberChildren: +updateSupervisorDto.numberChildren,
             conversionDate: updateSupervisorDto.conversionDate,
-            email: updateSupervisorDto.email,
-            phoneNumber: updateSupervisorDto.phoneNumber,
+            email: updateSupervisorDto.email ?? null,
+            phoneNumber: updateSupervisorDto.phoneNumber ?? null,
             residenceCountry: updateSupervisorDto.residenceCountry,
             residenceDepartment: updateSupervisorDto.residenceDepartment,
             residenceProvince: updateSupervisorDto.residenceProvince,
@@ -1950,6 +1950,8 @@ export class SupervisorService {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: newCopastor,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -1965,6 +1967,8 @@ export class SupervisorService {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: newCopastor,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -1981,6 +1985,8 @@ export class SupervisorService {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: newCopastor,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -1996,6 +2002,8 @@ export class SupervisorService {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: newCopastor,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -2064,8 +2072,8 @@ export class SupervisorService {
             maritalStatus: updateSupervisorDto.maritalStatus,
             numberChildren: +updateSupervisorDto.numberChildren,
             conversionDate: updateSupervisorDto.conversionDate,
-            email: updateSupervisorDto.email,
-            phoneNumber: updateSupervisorDto.phoneNumber,
+            email: updateSupervisorDto.email ?? null,
+            phoneNumber: updateSupervisorDto.phoneNumber ?? null,
             residenceCountry: updateSupervisorDto.residenceCountry,
             residenceDepartment: updateSupervisorDto.residenceDepartment,
             residenceProvince: updateSupervisorDto.residenceProvince,
@@ -2135,6 +2143,8 @@ export class SupervisorService {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: null,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -2150,6 +2160,8 @@ export class SupervisorService {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: null,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -2166,6 +2178,8 @@ export class SupervisorService {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: null,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -2181,6 +2195,8 @@ export class SupervisorService {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
                 theirCopastor: null,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -2206,8 +2222,8 @@ export class SupervisorService {
             maritalStatus: updateSupervisorDto.maritalStatus,
             numberChildren: +updateSupervisorDto.numberChildren,
             conversionDate: updateSupervisorDto.conversionDate,
-            email: updateSupervisorDto.email,
-            phoneNumber: updateSupervisorDto.phoneNumber,
+            email: updateSupervisorDto.email ?? null,
+            phoneNumber: updateSupervisorDto.phoneNumber ?? null,
             residenceCountry: updateSupervisorDto.residenceCountry,
             residenceDepartment: updateSupervisorDto.residenceDepartment,
             residenceProvince: updateSupervisorDto.residenceProvince,
@@ -2262,8 +2278,8 @@ export class SupervisorService {
             maritalStatus: updateSupervisorDto.maritalStatus,
             numberChildren: +updateSupervisorDto.numberChildren,
             conversionDate: updateSupervisorDto.conversionDate,
-            email: updateSupervisorDto.email,
-            phoneNumber: updateSupervisorDto.phoneNumber,
+            email: updateSupervisorDto.email ?? null,
+            phoneNumber: updateSupervisorDto.phoneNumber ?? null,
             residenceCountry: updateSupervisorDto.residenceCountry,
             residenceDepartment: updateSupervisorDto.residenceDepartment,
             residenceProvince: updateSupervisorDto.residenceProvince,
@@ -2384,8 +2400,8 @@ export class SupervisorService {
           maritalStatus: updateSupervisorDto.maritalStatus,
           numberChildren: +updateSupervisorDto.numberChildren,
           conversionDate: updateSupervisorDto.conversionDate,
-          email: updateSupervisorDto.email,
-          phoneNumber: updateSupervisorDto.phoneNumber,
+          email: updateSupervisorDto.email ?? null,
+          phoneNumber: updateSupervisorDto.phoneNumber ?? null,
           residenceCountry: updateSupervisorDto.residenceCountry,
           residenceDepartment: updateSupervisorDto.residenceDepartment,
           residenceProvince: updateSupervisorDto.residenceProvince,

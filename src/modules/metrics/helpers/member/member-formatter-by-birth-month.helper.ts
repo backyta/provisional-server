@@ -69,7 +69,7 @@ export const memberFormatterByBirthMonth = ({
             membersCount
           ).toFixed(0)
         : 0;
-    return { membersCount, averageAge };
+    return { averageAge, membersCount };
   };
 
   const dataResult: MonthlyMemberDataResult[] = monthNames.map((_, index) => {

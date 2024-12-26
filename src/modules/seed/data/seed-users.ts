@@ -20,7 +20,7 @@ export const dataUsers: SeedDataUsers = {
       lastNames: 'Torres Zapata',
       email: 'luisa@google.com',
       gender: 'female',
-      password: bcrypt.hashSync('Abc1234', 10),
+      password: bcrypt.hashSync('Abc1234$', 10),
       roles: ['admin-user'],
     },
     {
@@ -28,7 +28,7 @@ export const dataUsers: SeedDataUsers = {
       lastNames: 'Carranza Valle',
       email: 'eva@google.com',
       gender: 'female',
-      password: bcrypt.hashSync('Abc1234', 10),
+      password: bcrypt.hashSync('Abc1234$', 10),
       roles: ['treasurer-user'],
     },
     {
@@ -36,7 +36,7 @@ export const dataUsers: SeedDataUsers = {
       lastNames: 'Vallejo Zambrano',
       email: 'luz@google.com',
       gender: 'female',
-      password: bcrypt.hashSync('Abc1234', 10),
+      password: bcrypt.hashSync('Abc1234$', 10),
       roles: ['user'],
     },
   ],

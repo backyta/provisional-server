@@ -155,8 +155,8 @@ export class CopastorService {
         maritalStatus: createCopastorDto.maritalStatus,
         numberChildren: +createCopastorDto.numberChildren,
         conversionDate: createCopastorDto.conversionDate,
-        email: createCopastorDto.email,
-        phoneNumber: createCopastorDto.phoneNumber,
+        email: createCopastorDto.email ?? null,
+        phoneNumber: createCopastorDto.phoneNumber ?? null,
         residenceCountry: createCopastorDto.residenceCountry,
         residenceDepartment: createCopastorDto.residenceDepartment,
         residenceProvince: createCopastorDto.residenceProvince,
@@ -1433,8 +1433,8 @@ export class CopastorService {
             maritalStatus: updateCopastorDto.maritalStatus,
             numberChildren: +updateCopastorDto.numberChildren,
             conversionDate: updateCopastorDto.conversionDate,
-            email: updateCopastorDto.email,
-            phoneNumber: updateCopastorDto.phoneNumber,
+            email: updateCopastorDto.email ?? null,
+            phoneNumber: updateCopastorDto.phoneNumber ?? null,
             residenceCountry: updateCopastorDto.residenceCountry,
             residenceDepartment: updateCopastorDto.residenceDepartment,
             residenceProvince: updateCopastorDto.residenceProvince,
@@ -1507,6 +1507,8 @@ export class CopastorService {
               await this.supervisorRepository.update(supervisor?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -1521,6 +1523,8 @@ export class CopastorService {
               await this.zoneRepository.update(zone?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -1535,6 +1539,8 @@ export class CopastorService {
               await this.preacherRepository.update(preacher?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -1549,6 +1555,8 @@ export class CopastorService {
               await this.familyGroupRepository.update(familyGroup?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -1563,6 +1571,8 @@ export class CopastorService {
               await this.discipleRepository.update(disciple?.id, {
                 theirChurch: newChurch,
                 theirPastor: newPastor,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -1590,8 +1600,8 @@ export class CopastorService {
             maritalStatus: updateCopastorDto.maritalStatus,
             numberChildren: +updateCopastorDto.numberChildren,
             conversionDate: updateCopastorDto.conversionDate,
-            email: updateCopastorDto.email,
-            phoneNumber: updateCopastorDto.phoneNumber,
+            email: updateCopastorDto.email ?? null,
+            phoneNumber: updateCopastorDto.phoneNumber ?? null,
             residenceCountry: updateCopastorDto.residenceCountry,
             residenceDepartment: updateCopastorDto.residenceDepartment,
             residenceProvince: updateCopastorDto.residenceProvince,
@@ -1683,8 +1693,8 @@ export class CopastorService {
           maritalStatus: updateCopastorDto.maritalStatus,
           numberChildren: +updateCopastorDto.numberChildren,
           conversionDate: updateCopastorDto.conversionDate,
-          email: updateCopastorDto.email,
-          phoneNumber: updateCopastorDto.phoneNumber,
+          email: updateCopastorDto.email ?? null,
+          phoneNumber: updateCopastorDto.phoneNumber ?? null,
           residenceCountry: updateCopastorDto.residenceCountry,
           residenceDepartment: updateCopastorDto.residenceDepartment,
           residenceProvince: updateCopastorDto.residenceProvince,

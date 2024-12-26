@@ -7,7 +7,7 @@ export enum MetricSearchType {
   MembersByCategoryAndGender = 'members_by_category_and_gender',
   MembersByRoleAndGender = 'members_by_role_and_gender',
   MembersByMaritalStatus = 'members_by_marital_status',
-  MembersByZoneAndGender = 'members_by_zone_and_gender',
+  DisciplesByZoneAndGender = 'disciples_by_zone_and_gender',
   PreachersByZoneAndGender = 'preachers_by_zone_and_gender',
   MembersByDistrictAndGender = 'members_by_district_and_gender',
   MembersByRecordStatus = 'members_by_record_status',
@@ -15,8 +15,8 @@ export enum MetricSearchType {
   // Family Groups
   FamilyGroupsByProportion = 'family_groups_by_proportion',
   FamilyGroupsFluctuationByYear = 'family_groups_fluctuation_by_year',
-  FamilyGroupsByCode = 'family_groups_by_code',
   FamilyGroupsByZone = 'family_groups_by_zone',
+  FamilyGroupsByCopastorAndZone = 'family_groups_by_copastor_and_zone',
   FamilyGroupsByDistrict = 'family_groups_by_district',
   FamilyGroupsByServiceTime = 'family_groups_by_service_time',
   FamilyGroupsByRecordStatus = 'family_groups_by_record_status',

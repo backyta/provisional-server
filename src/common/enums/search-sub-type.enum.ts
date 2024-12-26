@@ -26,7 +26,7 @@ export enum SearchSubType {
   ByCopastorFullNames = 'by_copastor_full_names',
 
   //* Supervisor
-  SupervisorByPastorFirstNames = 'supervisor_by_pastor_names',
+  SupervisorByPastorFirstNames = 'supervisor_by_pastor_first_names',
   SupervisorByPastorLastNames = 'supervisor_by_pastor_last_names',
   SupervisorByPastorFullNames = 'supervisor_by_pastor_full_names',
   SupervisorByCopastorFirstNames = 'supervisor_by_copastor_first_names',

@@ -20,6 +20,7 @@ export const churchDataFormatter = ({ churches, mainChurch }: Options) => {
     anexes: church.anexes.map((anexe) => ({
       id: anexe?.id,
       churchName: anexe?.churchName,
+      abbreviatedChurchName: anexe?.abbreviatedChurchName,
       district: anexe?.district,
       urbanSector: anexe?.urbanSector,
     })),

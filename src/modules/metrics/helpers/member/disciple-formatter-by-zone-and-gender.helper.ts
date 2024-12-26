@@ -22,7 +22,7 @@ export interface MembersByZoneDataResult {
   };
 }
 
-export const memberFormatterByZoneAndGender = ({ zones }: Options) => {
+export const discipleFormatterByZoneAndGender = ({ zones }: Options) => {
   const result: MembersByZoneDataResult = zones.reduce((acc, zone) => {
     const menCount = zone.disciples.filter(
       (disciple) => disciple?.member?.gender === Gender.Male,

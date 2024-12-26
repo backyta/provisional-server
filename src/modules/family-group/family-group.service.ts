@@ -2260,6 +2260,7 @@ export class FamilyGroupService {
         );
       }
 
+      let savedFamilyGroup: FamilyGroup;
       try {
         const updatedFamilyGroup = await this.familyGroupRepository.preload({
           id: familyGroup?.id,
@@ -2287,7 +2288,42 @@ export class FamilyGroupService {
         newPreacher.theirFamilyGroup = updatedFamilyGroup;
         await this.preacherRepository.save(newPreacher);
 
-        return await this.familyGroupRepository.save(updatedFamilyGroup);
+        savedFamilyGroup =
+          await this.familyGroupRepository.save(updatedFamilyGroup);
+      } catch (error) {
+        this.handleDBExceptions(error);
+      }
+
+      //? Update in subordinate relations
+      const allDisciples = await this.discipleRepository.find({
+        relations: ['theirFamilyGroup', 'theirPreacher'],
+      });
+
+      //* Update in all family groups the new relations.
+      try {
+        const disciplesByFamilyGroup = allDisciples.filter(
+          (disciple) =>
+            disciple?.theirFamilyGroup?.id === familyGroup?.id ||
+            disciple?.theirPreacher?.id === newPreacher?.id,
+        );
+
+        await Promise.all(
+          disciplesByFamilyGroup.map(async (disciple) => {
+            await this.discipleRepository.update(disciple?.id, {
+              theirChurch: newChurch,
+              theirPastor: newPastor,
+              theirCopastor: newCopastor,
+              theirSupervisor: newSupervisor,
+              theirPreacher: newPreacher,
+              theirFamilyGroup: savedFamilyGroup,
+              theirZone: newZone,
+              updatedAt: new Date(),
+              updatedBy: user,
+            });
+          }),
+        );
+
+        return savedFamilyGroup;
       } catch (error) {
         this.handleDBExceptions(error);
       }
@@ -2323,7 +2359,7 @@ export class FamilyGroupService {
         id: familyGroup.id,
         updatedAt: new Date(),
         updatedBy: user,
-        //* Ver si inactiva el predicador para dejarlo solo
+        theirPreacher: null,
         inactivationCategory: familyGroupInactivationCategory,
         inactivationReason: familyGroupInactivationReason,
         recordStatus: RecordStatus.Inactive,

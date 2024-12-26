@@ -30,7 +30,7 @@ export class FamilyGroup {
   @Column('text', { name: 'family_group_name', unique: true })
   familyGroupName: string;
 
-  @Column('int', { name: 'family_group_number', nullable: true })
+  @Column('int', { name: 'family_group_number' })
   familyGroupNumber: number;
 
   @Index()

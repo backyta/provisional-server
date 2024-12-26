@@ -35,6 +35,15 @@ export const familyGroupFormatterByServiceTime = ({
             : familyGroup?.theirSupervisor?.member?.firstNames === undefined
               ? ''
               : 'Sin Supervisor',
+          copastor: familyGroup?.theirCopastor?.member?.firstNames
+            ? `${getInitialFullNames({
+                firstNames:
+                  familyGroup?.theirCopastor?.member?.firstNames ?? '',
+                lastNames: '',
+              })} ${familyGroup?.theirCopastor?.member?.lastNames}`
+            : familyGroup?.theirCopastor?.member?.firstNames === undefined
+              ? ''
+              : 'Sin Co-Pastor',
           church: {
             isAnexe: familyGroups[0]?.theirChurch?.isAnexe,
             abbreviatedChurchName:

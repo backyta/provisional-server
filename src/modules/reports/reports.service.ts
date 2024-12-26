@@ -87,7 +87,7 @@ import { OfferingExpense } from '@/modules/offering/expense/entities/offering-ex
 
 import { MonthlyMemberDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-birth-month.helper';
 import { MembersByCategoryDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-category.helper';
-import { MembersByZoneDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-zone-and-gender.helper';
+import { MembersByZoneDataResult } from '@/modules/metrics/helpers/member/disciple-formatter-by-zone-and-gender.helper';
 import { PreachersByZoneDataResult } from '@/modules/metrics/helpers/member/preacher-formatter-by-zone-and-gender.helper';
 import { MonthlyMemberFluctuationDataResult } from '@/modules/metrics/helpers/member/member-fluctuation-formatter.helper';
 import { MembersByRecordStatusDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-record-status.helper';
@@ -96,8 +96,8 @@ import { MemberByRoleAndGenderDataResult } from '@/modules/metrics/helpers/membe
 import { MembersByDistrictAndGenderDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-district-and-gender.helper';
 import { MembersByCategoryAndGenderDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-category-and-gender.helper';
 
-import { FamilyGroupsByCodeDataResult } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-code.helper';
 import { FamilyGroupsByZoneDataResult } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-zone.helper';
+import { FamilyGroupsByCopastorAndZoneDataResult } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-copastor-and-zone.helper';
 import { FamilyGroupsByDistrictDataResult } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-district.helper';
 import { FamilyGroupsByServiceTimeDataResult } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-service-time.helper';
 import { MonthlyFamilyGroupsFluctuationDataResult } from '@/modules/metrics/helpers/family-group/family-group-fluctuation-formatter.helper';
@@ -2002,15 +2002,15 @@ export class ReportsService {
       }
 
       //*Members by zone and gender
-      let membersByZoneAndGenderDataResult: MembersByZoneDataResult;
-      if (metricsTypesArray.includes(MetricSearchType.MembersByZoneAndGender)) {
-        membersByZoneAndGenderDataResult = await this.metricsService.findByTerm(
-          `${churchId}&{''}`,
-          {
-            'search-type': MetricSearchType.MembersByZoneAndGender,
+      let disciplesByZoneAndGenderDataResult: MembersByZoneDataResult;
+      if (
+        metricsTypesArray.includes(MetricSearchType.DisciplesByZoneAndGender)
+      ) {
+        disciplesByZoneAndGenderDataResult =
+          await this.metricsService.findByTerm(`${churchId}&{''}`, {
+            'search-type': MetricSearchType.DisciplesByZoneAndGender,
             allZones: true,
-          },
-        );
+          });
       }
 
       //*Preacher by zone and gender
@@ -2060,7 +2060,7 @@ export class ReportsService {
           membersByCategoryAndGenderDataResult,
         membersByRoleAndGenderDataResult: membersByRoleAndGenderDataResult,
         membersByMaritalStatusDataResult: membersByMaritalStatusDataResult,
-        membersByZoneAndGenderDataResult: membersByZoneAndGenderDataResult,
+        disciplesByZoneAndGenderDataResult: disciplesByZoneAndGenderDataResult,
         preachersByZoneAndGenderDataResult: preachersByZoneAndGenderDataResult,
         membersByDistrictAndGenderDataResult:
           membersByDistrictAndGenderDataResult,
@@ -2116,19 +2116,6 @@ export class ReportsService {
           });
       }
 
-      //* Family groups by code
-      let familyGroupsByCodeDataResult: FamilyGroupsByCodeDataResult;
-      if (metricsTypesArray.includes(MetricSearchType.FamilyGroupsByCode)) {
-        familyGroupsByCodeDataResult = await this.metricsService.findByTerm(
-          `${churchId}&{''}`,
-          {
-            'search-type': MetricSearchType.FamilyGroupsByCode,
-            allFamilyGroups: true,
-            order: 'ASC',
-          },
-        );
-      }
-
       //* Family groups by zone
       let familyGroupsByZoneDataResult: FamilyGroupsByZoneDataResult;
       if (metricsTypesArray.includes(MetricSearchType.FamilyGroupsByZone)) {
@@ -2136,10 +2123,25 @@ export class ReportsService {
           `${churchId}&{''}`,
           {
             'search-type': MetricSearchType.FamilyGroupsByZone,
-            allZones: true,
-            order: 'DESC',
+            allFamilyGroups: true,
+            order: 'ASC',
           },
         );
+      }
+
+      //* Family groups by copastor and zone
+      let familyGroupsByCopastorAndZoneDataResult: FamilyGroupsByCopastorAndZoneDataResult;
+      if (
+        metricsTypesArray.includes(
+          MetricSearchType.FamilyGroupsByCopastorAndZone,
+        )
+      ) {
+        familyGroupsByCopastorAndZoneDataResult =
+          await this.metricsService.findByTerm(`${churchId}&{''}`, {
+            'search-type': MetricSearchType.FamilyGroupsByCopastorAndZone,
+            allZones: true,
+            order: 'DESC',
+          });
       }
 
       //* Family groups by district
@@ -2187,8 +2189,9 @@ export class ReportsService {
         year: year,
         familyGroupsFluctuationByYearDataResult:
           familyGroupsFluctuationByYearDataResult,
-        familyGroupsByCodeDataResult: familyGroupsByCodeDataResult,
         familyGroupsByZoneDataResult: familyGroupsByZoneDataResult,
+        familyGroupsByCopastorAndZoneDataResult:
+          familyGroupsByCopastorAndZoneDataResult,
         familyGroupsByDistrictDataResult: familyGroupsByDistrictDataResult,
         familyGroupsByServiceTimeDataResult:
           familyGroupsByServiceTimeDataResult,

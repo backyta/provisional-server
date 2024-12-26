@@ -128,8 +128,8 @@ export class PastorService {
         maritalStatus: createPastorDto.maritalStatus,
         numberChildren: +createPastorDto.numberChildren,
         conversionDate: createPastorDto.conversionDate,
-        email: createPastorDto.email,
-        phoneNumber: createPastorDto.phoneNumber,
+        email: createPastorDto.email ?? null,
+        phoneNumber: createPastorDto.phoneNumber ?? null,
         residenceCountry: createPastorDto.residenceCountry,
         residenceDepartment: createPastorDto.residenceDepartment,
         residenceProvince: createPastorDto.residenceProvince,
@@ -1155,8 +1155,8 @@ export class PastorService {
             maritalStatus: updatePastorDto.maritalStatus,
             numberChildren: +updatePastorDto.numberChildren,
             conversionDate: updatePastorDto.conversionDate,
-            email: updatePastorDto.email,
-            phoneNumber: updatePastorDto.phoneNumber,
+            email: updatePastorDto.email ?? null,
+            phoneNumber: updatePastorDto.phoneNumber ?? null,
             residenceCountry: updatePastorDto.residenceCountry,
             residenceDepartment: updatePastorDto.residenceDepartment,
             residenceProvince: updatePastorDto.residenceProvince,
@@ -1226,6 +1226,8 @@ export class PastorService {
             copastorsByPastor.map(async (copastor) => {
               await this.copastorRepository.update(copastor?.id, {
                 theirChurch: newChurch,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -1239,6 +1241,8 @@ export class PastorService {
             supervisorsByPastor.map(async (supervisor) => {
               await this.supervisorRepository.update(supervisor?.id, {
                 theirChurch: newChurch,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -1252,6 +1256,8 @@ export class PastorService {
             zonesByPastor.map(async (zone) => {
               await this.zoneRepository.update(zone?.id, {
                 theirChurch: newChurch,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -1265,6 +1271,8 @@ export class PastorService {
             preachersByPastor.map(async (preacher) => {
               await this.preacherRepository.update(preacher?.id, {
                 theirChurch: newChurch,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -1278,6 +1286,8 @@ export class PastorService {
             familyGroupsByPastor.map(async (familyGroup) => {
               await this.familyGroupRepository.update(familyGroup?.id, {
                 theirChurch: newChurch,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -1291,6 +1301,8 @@ export class PastorService {
             disciplesByPastor.map(async (disciple) => {
               await this.discipleRepository.update(disciple?.id, {
                 theirChurch: newChurch,
+                updatedAt: new Date(),
+                updatedBy: user,
               });
             }),
           );
@@ -1303,6 +1315,8 @@ export class PastorService {
 
       //? Update and save if is same Church
       if (pastor.theirChurch?.id === theirChurch) {
+        console.log(updatePastorDto.email, updatePastorDto.phoneNumber);
+
         try {
           const updatedMember = await this.memberRepository.preload({
             id: pastor.member.id,
@@ -1314,8 +1328,8 @@ export class PastorService {
             maritalStatus: updatePastorDto.maritalStatus,
             numberChildren: +updatePastorDto.numberChildren,
             conversionDate: updatePastorDto.conversionDate,
-            email: updatePastorDto.email,
-            phoneNumber: updatePastorDto.phoneNumber,
+            email: updatePastorDto.email ?? null,
+            phoneNumber: updatePastorDto.phoneNumber ?? null,
             residenceCountry: updatePastorDto.residenceCountry,
             residenceDepartment: updatePastorDto.residenceDepartment,
             residenceProvince: updatePastorDto.residenceProvince,

@@ -7,7 +7,7 @@ import { Church } from '@/modules/church/entities/church.entity';
 import { MetricSearchType } from '@/modules/metrics/enums/metrics-search-type.enum';
 import { MonthlyMemberDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-birth-month.helper';
 import { MembersByCategoryDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-category.helper';
-import { MembersByZoneDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-zone-and-gender.helper';
+import { MembersByZoneDataResult } from '@/modules/metrics/helpers/member/disciple-formatter-by-zone-and-gender.helper';
 import { MonthlyMemberFluctuationDataResult } from '@/modules/metrics/helpers/member/member-fluctuation-formatter.helper';
 import { PreachersByZoneDataResult } from '@/modules/metrics/helpers/member/preacher-formatter-by-zone-and-gender.helper';
 import { MembersByRecordStatusDataResult } from '@/modules/metrics/helpers/member/member-formatter-by-record-status.helper';
@@ -24,7 +24,7 @@ interface ReportOptions {
   metricsTypesArray: string[];
   membersByBirthMonthDataResult: MonthlyMemberDataResult[];
   membersByCategoryDataResult: MembersByCategoryDataResult;
-  membersByZoneAndGenderDataResult: MembersByZoneDataResult;
+  disciplesByZoneAndGenderDataResult: MembersByZoneDataResult;
   preachersByZoneAndGenderDataResult: PreachersByZoneDataResult;
   membersByRecordStatusDataResult: MembersByRecordStatusDataResult;
   membersByRoleAndGenderDataResult: MemberByRoleAndGenderDataResult;
@@ -52,7 +52,7 @@ export const getMemberMetricsReport = (
     membersByBirthMonthDataResult,
     membersByRecordStatusDataResult,
     membersByRoleAndGenderDataResult,
-    membersByZoneAndGenderDataResult,
+    disciplesByZoneAndGenderDataResult,
     membersByMaritalStatusDataResult,
     membersFluctuationByYearDataResult,
     preachersByZoneAndGenderDataResult,
@@ -907,8 +907,8 @@ export const getMemberMetricsReport = (
           ]
         : null,
 
-      //* MembersByZoneAndGender
-      metricsTypesArray.includes(MetricSearchType.MembersByZoneAndGender)
+      //* DisciplesByZoneAndGender
+      metricsTypesArray.includes(MetricSearchType.DisciplesByZoneAndGender)
         ? [
             // Table Title
             {
@@ -919,7 +919,7 @@ export const getMemberMetricsReport = (
                 body: [
                   [
                     {
-                      text: `Miembros por Zona y Género`,
+                      text: `Discípulos por Zona y Género`,
                       color: '#1d96d3',
                       fontSize: 19,
                       bold: true,
@@ -966,29 +966,28 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: 'Nro. M. Varones',
+                      text: 'Nro. D. Varones',
                       style: {
                         bold: true,
                       },
                     },
                     {
-                      text: 'Nro. M. Mujeres',
+                      text: 'Nro. D. Mujeres',
                       style: {
                         bold: true,
                       },
                     },
                   ],
-                  ...Object.entries(membersByZoneAndGenderDataResult).map(
+                  ...Object.entries(disciplesByZoneAndGenderDataResult).map(
                     ([key, value]) => [
                       value?.church?.abbreviatedChurchName,
                       value.copastor,
                       value.supervisor,
                       `${key} (${calculatePercentage(
                         value.men + value.women,
-                        Object.values(membersByZoneAndGenderDataResult).reduce(
-                          (acc, item) => acc + item.men + item.women,
-                          0,
-                        ),
+                        Object.values(
+                          disciplesByZoneAndGenderDataResult,
+                        ).reduce((acc, item) => acc + item.men + item.women, 0),
                       )}%)`,
                       `${value.men} (${calculatePercentage(
                         value.men,
@@ -1016,12 +1015,13 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(membersByZoneAndGenderDataResult).reduce((acc, item) => acc + item.men, 0)} varones (${calculatePercentage(
-                        Object.values(membersByZoneAndGenderDataResult).reduce(
-                          (acc, item) => acc + item?.men,
-                          0,
-                        ),
-                        Object.values(membersByZoneAndGenderDataResult).reduce(
+                      text: `${Object.values(disciplesByZoneAndGenderDataResult).reduce((acc, item) => acc + item.men, 0)} varones (${calculatePercentage(
+                        Object.values(
+                          disciplesByZoneAndGenderDataResult,
+                        ).reduce((acc, item) => acc + item?.men, 0),
+                        Object.values(
+                          disciplesByZoneAndGenderDataResult,
+                        ).reduce(
                           (acc, item) => acc + item?.men + item.women,
                           0,
                         ),
@@ -1034,12 +1034,13 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(membersByZoneAndGenderDataResult).reduce((acc, item) => acc + item.women, 0)} mujeres (${calculatePercentage(
-                        Object.values(membersByZoneAndGenderDataResult).reduce(
-                          (acc, item) => acc + item?.women,
-                          0,
-                        ),
-                        Object.values(membersByZoneAndGenderDataResult).reduce(
+                      text: `${Object.values(disciplesByZoneAndGenderDataResult).reduce((acc, item) => acc + item.women, 0)} mujeres (${calculatePercentage(
+                        Object.values(
+                          disciplesByZoneAndGenderDataResult,
+                        ).reduce((acc, item) => acc + item?.women, 0),
+                        Object.values(
+                          disciplesByZoneAndGenderDataResult,
+                        ).reduce(
                           (acc, item) => acc + item?.men + item.women,
                           0,
                         ),
@@ -1117,13 +1118,13 @@ export const getMemberMetricsReport = (
                       },
                     },
                     {
-                      text: 'Nro. M. Varones',
+                      text: 'Nro. P. Varones',
                       style: {
                         bold: true,
                       },
                     },
                     {
-                      text: 'Nro. M. Mujeres',
+                      text: 'Nro. P. Mujeres',
                       style: {
                         bold: true,
                       },

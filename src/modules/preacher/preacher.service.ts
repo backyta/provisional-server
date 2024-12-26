@@ -219,8 +219,8 @@ export class PreacherService {
         maritalStatus: createPreacherDto.maritalStatus,
         numberChildren: +createPreacherDto.numberChildren,
         conversionDate: createPreacherDto.conversionDate,
-        email: createPreacherDto.email,
-        phoneNumber: createPreacherDto.phoneNumber,
+        email: createPreacherDto.email ?? null,
+        phoneNumber: createPreacherDto.phoneNumber ?? null,
         residenceCountry: createPreacherDto.residenceCountry,
         residenceDepartment: createPreacherDto.residenceDepartment,
         residenceProvince: createPreacherDto.residenceProvince,
@@ -2129,8 +2129,8 @@ export class PreacherService {
             maritalStatus: updatePreacherDto.maritalStatus,
             numberChildren: +updatePreacherDto.numberChildren,
             conversionDate: updatePreacherDto.conversionDate,
-            email: updatePreacherDto.email,
-            phoneNumber: updatePreacherDto.phoneNumber,
+            email: updatePreacherDto.email ?? null,
+            phoneNumber: updatePreacherDto.phoneNumber ?? null,
             residenceCountry: updatePreacherDto.residenceCountry,
             residenceDepartment: updatePreacherDto.residenceDepartment,
             residenceProvince: updatePreacherDto.residenceProvince,
@@ -2376,8 +2376,8 @@ export class PreacherService {
             maritalStatus: updatePreacherDto.maritalStatus,
             numberChildren: +updatePreacherDto.numberChildren,
             conversionDate: updatePreacherDto.conversionDate,
-            email: updatePreacherDto.email,
-            phoneNumber: updatePreacherDto.phoneNumber,
+            email: updatePreacherDto.email ?? null,
+            phoneNumber: updatePreacherDto.phoneNumber ?? null,
             residenceCountry: updatePreacherDto.residenceCountry,
             residenceDepartment: updatePreacherDto.residenceDepartment,
             residenceProvince: updatePreacherDto.residenceProvince,
@@ -2470,6 +2470,8 @@ export class PreacherService {
               });
             }),
           );
+
+          return savedPreacher;
         } catch (error) {
           this.handleDBExceptions(error);
         }
@@ -2581,8 +2583,8 @@ export class PreacherService {
             maritalStatus: updatePreacherDto.maritalStatus,
             numberChildren: +updatePreacherDto.numberChildren,
             conversionDate: updatePreacherDto.conversionDate,
-            email: updatePreacherDto.email,
-            phoneNumber: updatePreacherDto.phoneNumber,
+            email: updatePreacherDto.email ?? null,
+            phoneNumber: updatePreacherDto.phoneNumber ?? null,
             residenceCountry: updatePreacherDto.residenceCountry,
             residenceDepartment: updatePreacherDto.residenceDepartment,
             residenceProvince: updatePreacherDto.residenceProvince,
@@ -2695,8 +2697,8 @@ export class PreacherService {
             maritalStatus: updatePreacherDto.maritalStatus,
             numberChildren: +updatePreacherDto.numberChildren,
             conversionDate: updatePreacherDto.conversionDate,
-            email: updatePreacherDto.email,
-            phoneNumber: updatePreacherDto.phoneNumber,
+            email: updatePreacherDto.email ?? null,
+            phoneNumber: updatePreacherDto.phoneNumber ?? null,
             residenceCountry: updatePreacherDto.residenceCountry,
             residenceDepartment: updatePreacherDto.residenceDepartment,
             residenceProvince: updatePreacherDto.residenceProvince,
@@ -2785,6 +2787,7 @@ export class PreacherService {
         id: preacher.id,
         updatedAt: new Date(),
         updatedBy: user,
+        theirFamilyGroup: null,
         inactivationCategory: memberInactivationCategory,
         inactivationReason: memberInactivationReason,
         recordStatus: RecordStatus.Inactive,

@@ -49,8 +49,8 @@ import { offeringExpenseChartFormatter } from '@/modules/metrics/helpers/offerin
 import { offeringExpenseProportionFormatter } from '@/modules/metrics/helpers/offering-expense/offering-expense-proportion-formatter.helper';
 import { offeringExpensesAdjustmentFormatter } from '@/modules/metrics/helpers/offering-expense/offering-expenses-adjustment-formatter.helper';
 
-import { familyGroupFormatterByCode } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-code.helper';
 import { familyGroupFormatterByZone } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-zone.helper';
+import { familyGroupFormatterByCopastorAndZone } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-copastor-and-zone.helper';
 import { familyGroupProportionFormatter } from '@/modules/metrics/helpers/family-group/family-group-proportion-formatter.helper';
 import { familyGroupFormatterByDistrict } from '@/modules/metrics/helpers/family-group/family-group-formatter-by-district.helper';
 import { familyGroupFluctuationFormatter } from '@/modules/metrics/helpers/family-group/family-group-fluctuation-formatter.helper';
@@ -64,7 +64,7 @@ import { memberFormatterByBirthMonth } from '@/modules/metrics/helpers/member/me
 import { memberFormatterByRecordStatus } from '@/modules/metrics/helpers/member/member-formatter-by-record-status.helper';
 import { memberFormatterByMaritalStatus } from '@/modules/metrics/helpers/member/member-formatter-by-marital-status.helper';
 import { memberFormatterByRoleAndGender } from '@/modules/metrics/helpers/member/member-formatter-by-role-and-gender.helper';
-import { memberFormatterByZoneAndGender } from '@/modules/metrics/helpers/member/member-formatter-by-zone-and-gender.helper';
+import { discipleFormatterByZoneAndGender } from '@/modules/metrics/helpers/member/disciple-formatter-by-zone-and-gender.helper';
 import { preacherFormatterByZoneAndGender } from '@/modules/metrics/helpers/member/preacher-formatter-by-zone-and-gender.helper';
 import { memberFormatterByDistrictAndGender } from '@/modules/metrics/helpers/member/member-formatter-by-district-and-gender.helper';
 import { memberFormatterByCategoryAndGender } from '@/modules/metrics/helpers/member/member-formatter-by-category-and-gender.helper';
@@ -159,16 +159,10 @@ export class MetricsService {
           );
         }
 
-        console.log(church);
-        console.log(new Date(dateTerm));
-
         const timeZone = 'America/Lima';
         const sundays = [];
-        const newDate = new Date(dateTerm);
-        const zonedDate = fromZonedTime(newDate, timeZone);
-
-        console.log(zonedDate);
-        console.log(zonedDate.getUTCDay());
+        const newDate = new Date();
+        const zonedDate = fromZonedTime(dateTerm, timeZone);
 
         zonedDate.setDate(
           newDate.getUTCDay() === 0
@@ -180,8 +174,6 @@ export class MetricsService {
           sundays.push(zonedDate.toISOString().split('T')[0]);
           zonedDate.setDate(zonedDate.getUTCDate() - 7);
         }
-
-        console.log(sundays);
 
         const offeringIncome = await this.offeringIncomeRepository.find({
           where: {
@@ -206,8 +198,6 @@ export class MetricsService {
           ],
           order: { createdAt: order as FindOptionsOrderValue },
         });
-
-        console.log(offeringIncome);
 
         return lastSundayOfferingsDataFormatter({
           offeringIncome: offeringIncome,
@@ -746,8 +736,8 @@ export class MetricsService {
       }
     }
 
-    //* Members analysis by zone and gender
-    if (term && searchType === MetricSearchType.MembersByZoneAndGender) {
+    //* Disciples analysis by zone and gender
+    if (term && searchType === MetricSearchType.DisciplesByZoneAndGender) {
       const [churchId, copastorId] = term.split('&');
 
       if (!allZones) {
@@ -788,7 +778,7 @@ export class MetricsService {
             ],
           });
 
-          return memberFormatterByZoneAndGender({
+          return discipleFormatterByZoneAndGender({
             zones,
           }) as any;
         } catch (error) {
@@ -841,7 +831,7 @@ export class MetricsService {
             ],
           });
 
-          return memberFormatterByZoneAndGender({
+          return discipleFormatterByZoneAndGender({
             zones: allZones,
           }) as any;
         } catch (error) {
@@ -1182,8 +1172,8 @@ export class MetricsService {
       }
     }
 
-    //* Family Groups by code
-    if (term && searchType === MetricSearchType.FamilyGroupsByCode) {
+    //* Family Groups by zone
+    if (term && searchType === MetricSearchType.FamilyGroupsByZone) {
       const [churchId, zoneId] = term.split('&');
 
       if (!allFamilyGroups) {
@@ -1218,13 +1208,15 @@ export class MetricsService {
             },
             order: { createdAt: order as FindOptionsOrderValue },
             relations: [
+              'theirCopastor.member',
+              'theirSupervisor.member',
               'theirPreacher.member',
               'theirChurch',
               'disciples.member',
             ],
           });
 
-          return familyGroupFormatterByCode({
+          return familyGroupFormatterByZone({
             familyGroups,
           }) as any;
         } catch (error) {
@@ -1271,13 +1263,15 @@ export class MetricsService {
             },
             order: { createdAt: order as FindOptionsOrderValue },
             relations: [
+              'theirCopastor.member',
+              'theirSupervisor.member',
               'theirPreacher.member',
               'theirChurch',
               'disciples.member',
             ],
           });
 
-          return familyGroupFormatterByCode({
+          return familyGroupFormatterByZone({
             familyGroups,
           }) as any;
         } catch (error) {
@@ -1290,9 +1284,10 @@ export class MetricsService {
       }
     }
 
-    //* Family Groups by zone
-    if (term && searchType === MetricSearchType.FamilyGroupsByZone) {
+    //* Family Groups by copastor and zone
+    if (term && searchType === MetricSearchType.FamilyGroupsByCopastorAndZone) {
       const [churchId, copastorId] = term.split('&');
+      console.log(churchId, copastorId);
 
       if (!allZones) {
         try {
@@ -1332,7 +1327,7 @@ export class MetricsService {
             ],
           });
 
-          return familyGroupFormatterByZone({
+          return familyGroupFormatterByCopastorAndZone({
             zones,
           }) as any;
         } catch (error) {
@@ -1385,7 +1380,9 @@ export class MetricsService {
             ],
           });
 
-          return familyGroupFormatterByZone({
+          console.log(allZones);
+
+          return familyGroupFormatterByCopastorAndZone({
             zones: allZones,
           }) as any;
         } catch (error) {
@@ -1497,6 +1494,7 @@ export class MetricsService {
               'familyGroups',
               'familyGroups.theirChurch',
               'familyGroups.theirSupervisor.member',
+              'familyGroups.theirCopastor.member',
             ],
           });
 

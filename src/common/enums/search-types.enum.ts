@@ -3,6 +3,11 @@ export enum SearchType {
   ChurchName = 'church_name',
   FoundingDate = 'founding_date',
 
+  Department = 'department',
+  Province = 'province',
+  District = 'district',
+  UrbanSector = 'urban_sector',
+
   //* Disciple, Pastor, Copastor, Supervisor, Preacher, Offering, User
   FirstNames = 'first_names',
   LastNames = 'last_names',
@@ -83,15 +88,15 @@ export enum SearchType {
   MembersByCategoryAndGender = 'members_by_category_and_gender',
   MembersByRoleAndGender = 'members_by_role_and_gender',
   MembersByMaritalStatus = 'members_by_marital_status',
-  MembersByZoneAndGender = 'members_by_zone_and_gender',
+  DisciplesByZoneAndGender = 'disciples_by_zone_and_gender',
   PreachersByZoneAndGender = 'preachers_by_zone_and_gender',
   MembersByDistrictAndGender = 'members_by_district_and_gender',
   MembersByRecordStatus = 'members_by_record_status',
 
   FamilyGroupsByProportion = 'family_groups_by_proportion',
   FamilyGroupsFluctuationByYear = 'family_groups_fluctuation_by_year',
-  FamilyGroupsByCode = 'family_groups_by_code',
   FamilyGroupsByZone = 'family_groups_by_zone',
+  FamilyGroupsByCopastorAndZone = 'family_groups_by_copastor_and_zone',
   FamilyGroupsByDistrict = 'family_groups_by_district',
   FamilyGroupsByServiceTime = 'family_groups_by_service_time',
   FamilyGroupsByRecordStatus = 'family_groups_by_record_status',
@@ -130,6 +135,11 @@ export const SearchTypeNames: Record<SearchType, string> = {
   //* Membership
   [SearchType.ChurchName]: 'Nombre de Iglesia',
   [SearchType.FoundingDate]: 'Fecha de Fundación',
+
+  [SearchType.Department]: 'Departamento',
+  [SearchType.Province]: 'Provincia',
+  [SearchType.District]: 'Distrito',
+  [SearchType.UrbanSector]: 'Sector Urbano',
 
   [SearchType.FirstNames]: 'Nombres',
   [SearchType.LastNames]: 'Apellidos',
@@ -206,7 +216,8 @@ export const SearchTypeNames: Record<SearchType, string> = {
     'Análisis de miembros por categoría y género',
   [SearchType.MembersByRoleAndGender]: 'Análisis de miembros por rol y género',
   [SearchType.MembersByMaritalStatus]: 'Análisis de miembros por estado civil',
-  [SearchType.MembersByZoneAndGender]: 'Análisis de miembros por zona y genero',
+  [SearchType.DisciplesByZoneAndGender]:
+    'Análisis de discípulos por zona y genero',
   [SearchType.PreachersByZoneAndGender]:
     'Análisis de predicadores por zona y genero',
   [SearchType.MembersByDistrictAndGender]:
@@ -218,8 +229,9 @@ export const SearchTypeNames: Record<SearchType, string> = {
     'Análisis de proporción de grupos familiares',
   [SearchType.FamilyGroupsFluctuationByYear]:
     'Análisis de fluctuación de grupos familiares por año',
-  [SearchType.FamilyGroupsByCode]: 'Análisis de grupos familiares por código',
   [SearchType.FamilyGroupsByZone]: 'Análisis de grupos familiares por zona',
+  [SearchType.FamilyGroupsByCopastorAndZone]:
+    'Análisis de grupos familiares por co-pastor y zona',
   [SearchType.FamilyGroupsByDistrict]:
     'Análisis de grupos familiares por distrito',
   [SearchType.FamilyGroupsByServiceTime]:

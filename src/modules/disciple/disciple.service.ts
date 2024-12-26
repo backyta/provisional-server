@@ -249,8 +249,8 @@ export class DiscipleService {
         maritalStatus: createDiscipleDto.maritalStatus,
         numberChildren: +createDiscipleDto.numberChildren,
         conversionDate: createDiscipleDto.conversionDate,
-        email: createDiscipleDto.email,
-        phoneNumber: createDiscipleDto.phoneNumber,
+        email: createDiscipleDto.email ?? null,
+        phoneNumber: createDiscipleDto.phoneNumber ?? null,
         residenceCountry: createDiscipleDto.residenceCountry,
         residenceDepartment: createDiscipleDto.residenceDepartment,
         residenceProvince: createDiscipleDto.residenceProvince,
@@ -2122,16 +2122,6 @@ export class DiscipleService {
       (roles.includes(MemberRole.Copastor) ||
         roles.includes(MemberRole.Pastor) ||
         roles.includes(MemberRole.Supervisor))
-      //     ||
-      // (disciple.member.roles.includes(MemberRole.Disciple) &&
-      //   disciple.member.roles.includes(MemberRole.Treasurer) &&
-      //   !disciple.member.roles.includes(MemberRole.Preacher) &&
-      //   !disciple.member.roles.includes(MemberRole.Copastor) &&
-      //   !disciple.member.roles.includes(MemberRole.Pastor) &&
-      //   !disciple.member.roles.includes(MemberRole.Preacher) &&
-      //   (roles.includes(MemberRole.Copastor) ||
-      //     roles.includes(MemberRole.Pastor) ||
-      //     roles.includes(MemberRole.Supervisor)))
     ) {
       throw new BadRequestException(
         `No se puede asignar un rol superior sin pasar por la jerarquía: [discípulo, predicador, supervisor, copastor, pastor].`,
@@ -2310,8 +2300,8 @@ export class DiscipleService {
             maritalStatus: updateDiscipleDto.maritalStatus,
             numberChildren: +updateDiscipleDto.numberChildren,
             conversionDate: updateDiscipleDto.conversionDate,
-            email: updateDiscipleDto.email,
-            phoneNumber: updateDiscipleDto.phoneNumber,
+            email: updateDiscipleDto.email ?? null,
+            phoneNumber: updateDiscipleDto.phoneNumber ?? null,
             residenceCountry: updateDiscipleDto.residenceCountry,
             residenceDepartment: updateDiscipleDto.residenceDepartment,
             residenceProvince: updateDiscipleDto.residenceProvince,
@@ -2370,8 +2360,8 @@ export class DiscipleService {
             maritalStatus: updateDiscipleDto.maritalStatus,
             numberChildren: +updateDiscipleDto.numberChildren,
             conversionDate: updateDiscipleDto.conversionDate,
-            email: updateDiscipleDto.email,
-            phoneNumber: updateDiscipleDto.phoneNumber,
+            email: updateDiscipleDto.email ?? null,
+            phoneNumber: updateDiscipleDto.phoneNumber ?? null,
             residenceCountry: updateDiscipleDto.residenceCountry,
             residenceDepartment: updateDiscipleDto.residenceDepartment,
             residenceProvince: updateDiscipleDto.residenceProvince,
@@ -2539,8 +2529,8 @@ export class DiscipleService {
           maritalStatus: updateDiscipleDto.maritalStatus,
           numberChildren: +updateDiscipleDto.numberChildren,
           conversionDate: updateDiscipleDto.conversionDate,
-          email: updateDiscipleDto.email,
-          phoneNumber: updateDiscipleDto.phoneNumber,
+          email: updateDiscipleDto.email ?? null,
+          phoneNumber: updateDiscipleDto.phoneNumber ?? null,
           residenceCountry: updateDiscipleDto.residenceCountry,
           residenceDepartment: updateDiscipleDto.residenceDepartment,
           residenceProvince: updateDiscipleDto.residenceProvince,

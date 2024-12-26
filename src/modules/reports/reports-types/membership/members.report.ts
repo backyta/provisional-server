@@ -131,7 +131,7 @@ export const getMembersReport = (
                 new Date(addDays(item.member.conversionDate, 1)),
                 'dd/MM/yyyy',
               ),
-              item.member.phoneNumber,
+              item.member.phoneNumber ?? '-',
               `${item?.member?.residenceDistrict} - ${item?.member?.residenceUrbanSector}`,
               `${item?.member?.residenceAddress} (${item?.member?.referenceAddress})`,
             ]),

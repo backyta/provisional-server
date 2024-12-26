@@ -1192,7 +1192,7 @@ export class ZoneService {
         );
       }
 
-      //? Validation relation exists in current zone
+      //? Validation if relation exists in current zone
       //* Supervisor
       if (!zone?.theirSupervisor) {
         throw new BadRequestException(
@@ -1281,7 +1281,7 @@ export class ZoneService {
         );
       }
 
-      //? Validate new supervisor
+      //? Validation if relation exists in new zone
       //* Validate Copastor according new supervisor
       if (!newSupervisor?.theirCopastor) {
         throw new BadRequestException(
@@ -1333,7 +1333,7 @@ export class ZoneService {
         );
       }
 
-      //! Exchange of supervisors and family groups and disciples between zones
+      //! Exchange of supervisors, preacher and family groups and disciples between zones
       //* Current Values
       const currentZoneSupervisor = supervisor;
       const currentZonePreachers = zone?.preachers?.map((preacher) => preacher);
@@ -1345,7 +1345,7 @@ export class ZoneService {
       //* New values
       if (!newSupervisor?.theirZone) {
         throw new BadRequestException(
-          `Ese necesario tener un grupo familiar asignado en el nuevo predicador, para poder intercambiarlos.`,
+          `Ese necesario tener una zona asignado en el nuevo supervisor, para poder intercambiarlos.`,
         );
       }
 
@@ -1413,7 +1413,7 @@ export class ZoneService {
         this.handleDBExceptions(error);
       }
 
-      //! Remove relationships from new family group and preacher
+      //! Remove relationships from new zone and supervisor
       //* Supervisor
       try {
         const updateNewSupervisor = await this.supervisorRepository.preload({
@@ -1494,7 +1494,7 @@ export class ZoneService {
         this.handleDBExceptions(error);
       }
 
-      //? Update relationships subordinate in zone
+      //? Update and exchange subordinate relationships
       //* Preacher
       try {
         await Promise.all(
@@ -1616,22 +1616,20 @@ export class ZoneService {
       );
 
       try {
-        await Promise.all(
-          familyGroupsByZone.map(async (familyGroup) => {
-            const number = familyGroup.familyGroupCode.split('-')[1];
+        if (updateZoneDto.zoneName !== zone.zoneName) {
+          await Promise.all(
+            familyGroupsByZone.map(async (familyGroup) => {
+              const number = familyGroup.familyGroupCode.split('-')[1];
 
-            await this.familyGroupRepository.update(familyGroup?.id, {
-              theirChurch: zone.theirChurch,
-              theirPastor: zone.theirPastor,
-              theirCopastor: zone.theirCopastor,
-              theirSupervisor: zone.theirSupervisor,
-              familyGroupCode: `${updateZoneDto.zoneName.toUpperCase()}-${number}`,
-              updatedAt: new Date(),
-              updatedBy: user,
-              recordStatus: recordStatus,
-            });
-          }),
-        );
+              await this.familyGroupRepository.update(familyGroup?.id, {
+                familyGroupCode: `${updateZoneDto?.zoneName?.toUpperCase()}-${number}`,
+                updatedAt: new Date(),
+                updatedBy: user,
+                recordStatus: recordStatus,
+              });
+            }),
+          );
+        }
 
         return await this.zoneRepository.save(updatedZone);
       } catch (error) {
@@ -1714,6 +1712,7 @@ export class ZoneService {
         );
       }
 
+      let savedZone: Zone;
       try {
         const updatedZone = await this.zoneRepository.preload({
           id: zone?.id,
@@ -1739,14 +1738,93 @@ export class ZoneService {
         newSupervisor.theirZone = updatedZone;
         await this.supervisorRepository.save(newSupervisor);
 
-        return await this.zoneRepository.save(updatedZone);
+        savedZone = await this.zoneRepository.save(updatedZone);
       } catch (error) {
         this.handleDBExceptions(error);
       }
+
+      //? Update and set new zone in subordinate relations contains new supervisor
+      const allPreachers = await this.preacherRepository.find({
+        relations: ['theirSupervisor'],
+      });
+      const allFamilyGroups = await this.familyGroupRepository.find({
+        relations: ['theirSupervisor'],
+      });
+      const allDisciples = await this.discipleRepository.find({
+        relations: ['theirSupervisor'],
+      });
+
+      try {
+        //* Update and set new relationships in Preacher
+        const preachersBySupervisor = allPreachers.filter(
+          (preacher) => preacher?.theirSupervisor?.id === newSupervisor?.id,
+        );
+
+        await Promise.all(
+          preachersBySupervisor.map(async (preacher) => {
+            await this.preacherRepository.update(preacher?.id, {
+              theirChurch: newChurch,
+              theirPastor: newPastor,
+              theirCopastor: newCopastor,
+              theirSupervisor: newSupervisor,
+              theirZone: savedZone,
+              updatedAt: new Date(),
+              updatedBy: user,
+            });
+          }),
+        );
+
+        //* Update and set new relationships in Family group
+        const familyGroupsByCopastor = allFamilyGroups.filter(
+          (familyGroup) =>
+            familyGroup?.theirSupervisor?.id === newSupervisor?.id,
+        );
+
+        await Promise.all(
+          familyGroupsByCopastor.map(async (familyGroup) => {
+            await this.familyGroupRepository.update(familyGroup?.id, {
+              theirChurch: newChurch,
+              theirPastor: newPastor,
+              theirCopastor: newCopastor,
+              theirSupervisor: newSupervisor,
+              theirZone: savedZone,
+              familyGroupCode: `${savedZone.zoneName.toUpperCase()}-${familyGroup.familyGroupCode.split('-')[1]}`,
+              updatedAt: new Date(),
+              updatedBy: user,
+            });
+          }),
+        );
+
+        //* Update and set new relationships in Disciple
+        const disciplesByCopastor = allDisciples.filter(
+          (disciple) => disciple?.theirSupervisor?.id === newSupervisor?.id,
+        );
+
+        await Promise.all(
+          disciplesByCopastor.map(async (disciple) => {
+            await this.discipleRepository.update(disciple?.id, {
+              theirChurch: newChurch,
+              theirPastor: newPastor,
+              theirCopastor: newCopastor,
+              theirSupervisor: newSupervisor,
+              theirZone: savedZone,
+              updatedAt: new Date(),
+              updatedBy: user,
+            });
+          }),
+        );
+      } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+
+        this.handleDBExceptions(error);
+      }
+
+      return savedZone;
     }
   }
 
-  // TODO : revisar todos los comentario de delete si seran necesario almenos en membrsesia si.
   //! INACTIVATE ZONE
   async remove(
     id: string,
@@ -1775,6 +1853,7 @@ export class ZoneService {
         id: zone.id,
         updatedAt: new Date(),
         updatedBy: user,
+        theirSupervisor: null,
         inactivationCategory: zoneInactivationCategory,
         inactivationReason: zoneInactivationReason,
         recordStatus: RecordStatus.Inactive,

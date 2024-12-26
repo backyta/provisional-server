@@ -42,7 +42,17 @@ export const familyGroupFormatterByDistrict = ({ familyGroups }: Options) => {
   );
 
   const sortedResult: FamilyGroupsByDistrictDataResult = Object.keys(result)
-    .sort()
+    .sort((a, b) => {
+      const districtA = result[a].district.toUpperCase();
+      const districtB = result[b].district.toUpperCase();
+      if (districtA < districtB) {
+        return -1;
+      }
+      if (districtA > districtB) {
+        return 1;
+      }
+      return 0;
+    })
     .reduce((acc, key) => {
       acc[key] = result[key];
       return acc;
