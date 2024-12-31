@@ -12,6 +12,12 @@ interface Church {
   abbreviatedChurchName: string;
 }
 
+interface Supervisor {
+  id: string;
+  firstNames: string;
+  lastNames: string;
+}
+
 interface Preacher {
   id: string;
   firstNames: string;
@@ -31,6 +37,7 @@ export interface OfferingIncomeByFamilyGroupDataResult {
   accumulatedOfferingUSD: number;
   accumulatedOfferingEUR: number;
   familyGroup: FamilyGroup;
+  supervisor: Supervisor;
   preacher: Preacher;
   church: Church;
   disciples: number;
@@ -84,6 +91,17 @@ export const offeringIncomeByFamilyGroupFormatter = ({
             }),
             lastNames: offering?.familyGroup?.theirPreacher?.member?.lastNames,
           },
+          supervisor: {
+            id: offering?.familyGroup?.theirSupervisor?.id,
+            firstNames: getInitialFullNames({
+              firstNames:
+                offering?.familyGroup?.theirSupervisor?.member?.firstNames ??
+                '',
+              lastNames: '',
+            }),
+            lastNames:
+              offering?.familyGroup?.theirSupervisor?.member?.lastNames,
+          },
           church: {
             isAnexe: offering?.church?.isAnexe,
             abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
@@ -102,5 +120,9 @@ export const offeringIncomeByFamilyGroupFormatter = ({
       return acc;
     }, []);
 
-  return dataResult;
+  return dataResult.sort((a, b) => {
+    const codeA = a.familyGroup?.familyGroupCode ?? '';
+    const codeB = b.familyGroup?.familyGroupCode ?? '';
+    return codeA.localeCompare(codeB, undefined, { numeric: true });
+  });
 };

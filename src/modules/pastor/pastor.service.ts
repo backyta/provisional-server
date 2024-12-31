@@ -1315,8 +1315,6 @@ export class PastorService {
 
       //? Update and save if is same Church
       if (pastor.theirChurch?.id === theirChurch) {
-        console.log(updatePastorDto.email, updatePastorDto.phoneNumber);
-
         try {
           const updatedMember = await this.memberRepository.preload({
             id: pastor.member.id,

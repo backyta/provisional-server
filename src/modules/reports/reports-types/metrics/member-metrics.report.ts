@@ -154,7 +154,7 @@ export const getMemberMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -263,7 +263,7 @@ export const getMemberMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -396,7 +396,7 @@ export const getMemberMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -579,7 +579,7 @@ export const getMemberMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -759,7 +759,7 @@ export const getMemberMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -888,7 +888,7 @@ export const getMemberMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -1011,7 +1011,7 @@ export const getMemberMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -1163,7 +1163,7 @@ export const getMemberMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -1310,7 +1310,7 @@ export const getMemberMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -1493,7 +1493,7 @@ export const getMemberMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {

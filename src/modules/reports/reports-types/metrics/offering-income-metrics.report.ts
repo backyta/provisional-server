@@ -80,6 +80,9 @@ export const getOfferingIncomeMetricsReport = (
     offeringIncomeByIncomeAdjustmentDataResult,
   } = options;
 
+  // console.log(offeringIncomeByFamilyGroupDataResult);
+  // console.log(offeringIncomeBySundaySchoolDataResult);
+
   return {
     pageOrientation: 'landscape',
     header: headerSection({
@@ -206,9 +209,9 @@ export const getOfferingIncomeMetricsReport = (
                       text: 'Totales',
                       style: {
                         bold: true,
+                        color: 'red',
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
                       },
                     },
                     {
@@ -354,7 +357,7 @@ export const getOfferingIncomeMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -420,7 +423,7 @@ export const getOfferingIncomeMetricsReport = (
               layout: 'customLayout01', // optional
               table: {
                 headerRows: 1,
-                widths: [60, 65, 65, '*', '*', '*', '*', 60, 60, 60],
+                widths: [80, '*', 75, '*', '*', '*', '*'],
                 body: [
                   [
                     {
@@ -448,152 +451,231 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: 'Tot. x Turno (PEN)',
+                      text: 'Total Acu. (PEN)',
                       style: {
                         color: 'blue',
                         bold: true,
                       },
                     },
                     {
-                      text: 'Tot. x Turno (USD)',
+                      text: 'Total Acu. (USD)',
                       style: {
                         color: 'purple',
                         bold: true,
                       },
                     },
                     {
-                      text: 'Tot. x Turno (EUR)',
-                      style: {
-                        color: 'green',
-                        bold: true,
-                      },
-                    },
-                    {
-                      text: 'Tot. o Acu. (PEN)',
-                      style: {
-                        color: 'blue',
-                        bold: true,
-                      },
-                    },
-                    {
-                      text: 'Tot. o Acu. (USD)',
-                      style: {
-                        color: 'purple',
-                        bold: true,
-                      },
-                    },
-                    {
-                      text: 'Tot. o Acu. (EUR)',
+                      text: 'Total Acu. (EUR)',
                       style: {
                         color: 'green',
                         bold: true,
                       },
                     },
                   ],
-                  ...offeringIncomeBySundaySchoolDataResult.map((offering) => [
-                    offering?.church?.abbreviatedChurchName,
-                    offering.category ===
-                      OfferingIncomeCreationCategory.InternalDonation ||
-                    offering.category ===
-                      OfferingIncomeCreationCategory.ExternalDonation
-                      ? `${monthNames[startMonth]} - ${monthNames[endMonth]}`
-                      : format(addDays(offering?.date, 1), 'dd/MM/yyyy'),
-                    OfferingIncomeCreationCategoryNames[offering.category],
-                    offering?.memberType
-                      ? ` ${offering?.memberFullName} (${MemberTypeNames[offering?.memberType]})`
-                      : '-',
-                    offering?.dayPEN || offering?.afternoonPEN
-                      ? `D: ${offering?.dayPEN} PEN\nT: ${offering?.afternoonPEN} PEN\nTot: ${offering?.dayPEN + offering?.afternoonPEN} PEN`
-                      : '-',
-                    offering?.dayUSD || offering?.afternoonUSD
-                      ? `D: ${offering?.dayUSD} USD\nT: ${offering?.afternoonUSD} USD\nTot.: ${offering?.dayUSD + offering?.afternoonUSD} USD`
-                      : '-',
-                    offering?.dayEUR || offering?.afternoonEUR
-                      ? `D: ${offering?.dayEUR} EUR\nT: ${offering?.afternoonEUR} EUR\nTot.: ${offering?.dayEUR + offering?.afternoonEUR} EUR`
-                      : '-',
-                    offering.accumulatedOfferingPEN
-                      ? `${offering.accumulatedOfferingPEN} PEN`
-                      : '-',
-                    offering.accumulatedOfferingUSD
-                      ? `${offering.accumulatedOfferingUSD} USD`
-                      : '-',
-                    offering.accumulatedOfferingEUR
-                      ? `${offering.accumulatedOfferingEUR} EUR`
-                      : '-',
-                  ]),
-                  ['', '', '', '', '', '', '', '', '', ''],
-                  ['', '', '', '', '', '', '', '', '', ''],
+                  ...offeringIncomeBySundaySchoolDataResult
+                    .reduce((acc, offering) => {
+                      const existingEntry = acc.find((item) => {
+                        if (
+                          offering.category ===
+                            OfferingIncomeCreationCategory.InternalDonation &&
+                          offering.internalDonor.memberId
+                        ) {
+                          return (
+                            item.category === offering.category &&
+                            item.internalDonor?.memberId ===
+                              offering?.internalDonor?.memberId
+                          );
+                        }
+
+                        if (
+                          offering.category ===
+                            OfferingIncomeCreationCategory.ExternalDonation &&
+                          offering.externalDonor.donorId
+                        ) {
+                          return (
+                            item.category === offering.category &&
+                            item.externalDonor?.donorId ===
+                              offering?.externalDonor?.donorId
+                          );
+                        }
+
+                        if (
+                          monthNames[startMonth] === monthNames[endMonth] &&
+                          offering.category ===
+                            OfferingIncomeCreationCategory.OfferingBox
+                        ) {
+                          return (
+                            item.date === item.category &&
+                            item.category === offering.category
+                          );
+                        }
+
+                        return item.category === offering.category;
+                      });
+
+                      if (existingEntry) {
+                        if (
+                          monthNames[startMonth] !== monthNames[endMonth] &&
+                          offering.category ===
+                            OfferingIncomeCreationCategory.OfferingBox
+                        ) {
+                          existingEntry.dayPEN += offering.dayPEN;
+                          existingEntry.dayUSD += offering.dayUSD;
+                          existingEntry.dayEUR += offering.dayEUR;
+                          existingEntry.afternoonPEN += offering.afternoonPEN;
+                          existingEntry.afternoonUSD += offering.afternoonUSD;
+                          existingEntry.afternoonEUR += offering.afternoonEUR;
+                        }
+
+                        if (
+                          offering.category ===
+                          OfferingIncomeCreationCategory.InternalDonation
+                        ) {
+                          existingEntry.accumulatedOfferingPEN +=
+                            offering.accumulatedOfferingPEN;
+                          existingEntry.accumulatedOfferingUSD +=
+                            offering.accumulatedOfferingUSD;
+                          existingEntry.accumulatedOfferingEUR +=
+                            offering.accumulatedOfferingEUR;
+                        }
+
+                        if (
+                          offering.category ===
+                          OfferingIncomeCreationCategory.ExternalDonation
+                        ) {
+                          existingEntry.accumulatedOfferingPEN +=
+                            offering.accumulatedOfferingPEN;
+                          existingEntry.accumulatedOfferingUSD +=
+                            offering.accumulatedOfferingUSD;
+                          existingEntry.accumulatedOfferingEUR +=
+                            offering.accumulatedOfferingEUR;
+                        }
+
+                        if (
+                          offering.category ===
+                          OfferingIncomeCreationCategory.FundraisingProMinistry
+                        ) {
+                          existingEntry.accumulatedOfferingPEN +=
+                            offering.accumulatedOfferingPEN;
+                          existingEntry.accumulatedOfferingUSD +=
+                            offering.accumulatedOfferingUSD;
+                          existingEntry.accumulatedOfferingEUR +=
+                            offering.accumulatedOfferingEUR;
+                        }
+                      } else {
+                        acc.push({
+                          date: offering.date,
+                          category: offering.category,
+                          dayPEN: offering.dayPEN ? offering.dayPEN : 0,
+                          afternoonPEN: offering.afternoonPEN
+                            ? offering.afternoonPEN
+                            : 0,
+                          dayUSD: offering.dayUSD ? offering.dayUSD : 0,
+                          afternoonUSD: offering.afternoonUSD
+                            ? offering.afternoonUSD
+                            : 0,
+                          dayEUR: offering.dayEUR ? offering.dayEUR : 0,
+                          afternoonEUR: offering.afternoonEUR
+                            ? offering.afternoonEUR
+                            : 0,
+                          accumulatedOfferingPEN:
+                            offering.category !==
+                            OfferingIncomeCreationCategory.OfferingBox
+                              ? offering.accumulatedOfferingPEN
+                              : 0,
+                          accumulatedOfferingUSD:
+                            offering.category !==
+                            OfferingIncomeCreationCategory.OfferingBox
+                              ? offering.accumulatedOfferingUSD
+                              : 0,
+                          accumulatedOfferingEUR:
+                            offering.category !==
+                            OfferingIncomeCreationCategory.OfferingBox
+                              ? offering.accumulatedOfferingEUR
+                              : 0,
+                          internalDonor: {
+                            memberType:
+                              offering.category ===
+                              OfferingIncomeCreationCategory.InternalDonation
+                                ? offering.internalDonor.memberType
+                                : null,
+                            memberFullName: offering?.internalDonor
+                              ?.memberFullName
+                              ? offering?.internalDonor?.memberFullName
+                              : null,
+                            memberId: offering?.internalDonor?.memberId
+                              ? offering?.internalDonor?.memberId
+                              : null,
+                          },
+                          externalDonor: {
+                            donorFullName: offering?.externalDonor
+                              ?.donorFullName
+                              ? offering?.externalDonor?.donorFullName
+                              : null,
+                            donorId: offering?.externalDonor?.donorId ?? null,
+                            sendingCountry:
+                              offering?.externalDonor?.sendingCountry ??
+                              'País anónimo',
+                          },
+                          church: {
+                            isAnexe: offering?.church?.isAnexe,
+                            abbreviatedChurchName:
+                              offering?.church?.abbreviatedChurchName,
+                          },
+                        });
+                      }
+
+                      return acc;
+                    }, [])
+                    .sort((a, b) => {
+                      const categoryA =
+                        OfferingIncomeCreationCategoryNames[
+                          a.category
+                        ].toLowerCase();
+                      const categoryB =
+                        OfferingIncomeCreationCategoryNames[
+                          b.category
+                        ].toLowerCase();
+
+                      if (categoryA < categoryB) return -1;
+                      if (categoryA > categoryB) return 1;
+                      return 0;
+                    })
+                    .map((offering) => [
+                      offering?.church?.abbreviatedChurchName,
+                      monthNames[startMonth] === monthNames[endMonth] &&
+                      offering.category ===
+                        OfferingIncomeCreationCategory.OfferingBox
+                        ? format(addDays(offering?.date, 1), 'dd/MM/yyyy')
+                        : `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
+                      OfferingIncomeCreationCategoryNames[offering.category],
+                      offering?.internalDonor?.memberType
+                        ? ` ${offering?.internalDonor?.memberFullName} (${MemberTypeNames[offering?.internalDonor?.memberType]})`
+                        : offering?.externalDonor?.donorId
+                          ? ` ${offering?.externalDonor?.donorFullName} (Donador Externo)`
+                          : '-',
+                      offering?.dayPEN || offering?.afternoonPEN
+                        ? `D: ${offering?.dayPEN} PEN\nT: ${offering?.afternoonPEN} PEN\nTot: ${offering?.dayPEN + offering?.afternoonPEN} PEN`
+                        : offering.accumulatedOfferingPEN
+                          ? `${offering.accumulatedOfferingPEN} PEN`
+                          : '-',
+                      offering?.dayUSD || offering?.afternoonUSD
+                        ? `D: ${offering?.dayUSD} USD\nT: ${offering?.afternoonUSD} USD\nTot.: ${offering?.dayUSD + offering?.afternoonUSD} USD`
+                        : offering.accumulatedOfferingUSD
+                          ? `${offering.accumulatedOfferingUSD} USD`
+                          : '-',
+                      offering?.dayEUR || offering?.afternoonEUR
+                        ? `D: ${offering?.dayEUR} EUR\nT: ${offering?.afternoonEUR} EUR\nTot.: ${offering?.dayEUR + offering?.afternoonEUR} EUR`
+                        : offering.accumulatedOfferingEUR
+                          ? `${offering.accumulatedOfferingEUR} EUR`
+                          : '-',
+                    ]),
+                  ['', '', '', '', '', '', ''],
+                  ['', '', '', '', '', '', ''],
                   [
                     '',
                     '',
                     '',
-                    {
-                      text: 'Sub-Totales',
-                      style: {
-                        bold: true,
-                        fontSize: 13,
-                        italics: true,
-                        color: '#475569',
-                      },
-                    },
-                    {
-                      text: `${offeringIncomeBySundaySchoolDataResult.reduce((acc, offering) => acc + offering?.dayPEN + offering?.afternoonPEN, 0)} PEN`,
-                      style: {
-                        bold: true,
-                        fontSize: 13,
-                        italics: true,
-                        color: '#475569',
-                      },
-                    },
-                    {
-                      text: `${offeringIncomeBySundaySchoolDataResult.reduce((acc, offering) => acc + offering?.dayUSD + offering?.afternoonUSD, 0)} USD`,
-                      style: {
-                        bold: true,
-                        fontSize: 13,
-                        italics: true,
-                        color: '#475569',
-                      },
-                    },
-                    {
-                      text: `${offeringIncomeBySundaySchoolDataResult.reduce((acc, offering) => acc + offering?.dayEUR + offering?.afternoonEUR, 0)} EUR`,
-                      style: {
-                        bold: true,
-                        fontSize: 13,
-                        italics: true,
-                        color: '#475569',
-                      },
-                    },
-                    {
-                      text: `${offeringIncomeBySundaySchoolDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
-                      style: {
-                        bold: true,
-                        fontSize: 13,
-                        italics: true,
-                        color: '#475569',
-                      },
-                    },
-                    {
-                      text: `${offeringIncomeBySundaySchoolDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
-                      style: {
-                        bold: true,
-                        fontSize: 13,
-                        italics: true,
-                        color: '#475569',
-                      },
-                    },
-                    {
-                      text: `${offeringIncomeBySundaySchoolDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
-                      style: {
-                        bold: true,
-                        fontSize: 13,
-                        italics: true,
-                        color: '#475569',
-                      },
-                    },
-                  ],
-                  ['', '', '', '', '', '', '', '', '', ''],
-                  ['', '', '', '', '', '', '', '', '', ''],
-                  [
                     {
                       text: 'Totales',
                       style: {
@@ -664,12 +746,6 @@ export const getOfferingIncomeMetricsReport = (
                         color: '#475569',
                       },
                     },
-                    '',
-                    '',
-                    '',
-                    '',
-                    '',
-                    '',
                   ],
                 ],
               },
@@ -768,7 +844,7 @@ export const getOfferingIncomeMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -927,7 +1003,7 @@ export const getOfferingIncomeMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -993,7 +1069,7 @@ export const getOfferingIncomeMetricsReport = (
               layout: 'customLayout01', // optional
               table: {
                 headerRows: 1,
-                widths: [65, 80, 75, 100, '*', '*', '*'],
+                widths: [65, '*', 75, 100, '*', '*', '*'],
                 body: [
                   [
                     {
@@ -1021,49 +1097,201 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: 'Tot. o Tot. Acu. (PEN)',
+                      text: 'Total Acu. (PEN)',
                       style: {
                         color: 'blue',
                         bold: true,
                       },
                     },
                     {
-                      text: 'Tot. o Tot. Acu. (USD)',
+                      text: 'Total Acu. (USD)',
                       style: {
                         color: 'purple',
                         bold: true,
                       },
                     },
                     {
-                      text: 'Tot. o Tot. Acu. (EUR)',
+                      text: 'Total Acu. (EUR)',
                       style: {
                         color: 'green',
                         bold: true,
                       },
                     },
                   ],
-                  ...offeringIncomeByYouthServiceDataResult.map((offering) => [
-                    offering?.church?.abbreviatedChurchName,
-                    offering.category ===
-                      OfferingIncomeCreationCategory.InternalDonation ||
-                    offering.category ===
-                      OfferingIncomeCreationCategory.ExternalDonation
-                      ? `${monthNames[startMonth]} - ${monthNames[endMonth]}`
-                      : format(addDays(offering?.date, 1), 'dd/MM/yyyy'),
-                    OfferingIncomeCreationCategoryNames[offering.category],
-                    offering?.memberType
-                      ? ` ${offering?.memberFullName} (${MemberTypeNames[offering?.memberType]})`
-                      : '-',
-                    offering.accumulatedOfferingPEN
-                      ? `${offering.accumulatedOfferingPEN} PEN`
-                      : '-',
-                    offering.accumulatedOfferingUSD
-                      ? `${offering.accumulatedOfferingUSD} USD`
-                      : '-',
-                    offering.accumulatedOfferingEUR
-                      ? `${offering.accumulatedOfferingEUR} EUR`
-                      : '-',
-                  ]),
+                  ...offeringIncomeByYouthServiceDataResult
+                    .reduce((acc, offering) => {
+                      const existingEntry = acc.find((item) => {
+                        if (
+                          offering.category ===
+                            OfferingIncomeCreationCategory.InternalDonation &&
+                          offering.internalDonor.memberId
+                        ) {
+                          return (
+                            item.category === offering.category &&
+                            item.internalDonor?.memberId ===
+                              offering?.internalDonor?.memberId
+                          );
+                        }
+
+                        if (
+                          offering.category ===
+                            OfferingIncomeCreationCategory.ExternalDonation &&
+                          offering.externalDonor.donorId
+                        ) {
+                          return (
+                            item.category === offering.category &&
+                            item.externalDonor?.donorId ===
+                              offering?.externalDonor?.donorId
+                          );
+                        }
+
+                        if (
+                          monthNames[startMonth] === monthNames[endMonth] &&
+                          offering.category ===
+                            OfferingIncomeCreationCategory.OfferingBox
+                        ) {
+                          return (
+                            item.date === item.category &&
+                            item.category === offering.category
+                          );
+                        }
+
+                        return item.category === offering.category;
+                      });
+
+                      if (existingEntry) {
+                        if (
+                          monthNames[startMonth] !== monthNames[endMonth] &&
+                          offering.category ===
+                            OfferingIncomeCreationCategory.OfferingBox
+                        ) {
+                          existingEntry.accumulatedOfferingPEN +=
+                            offering.accumulatedOfferingPEN;
+                          existingEntry.accumulatedOfferingUSD +=
+                            offering.accumulatedOfferingUSD;
+                          existingEntry.accumulatedOfferingEUR +=
+                            offering.accumulatedOfferingEUR;
+                        }
+
+                        if (
+                          offering.category ===
+                          OfferingIncomeCreationCategory.InternalDonation
+                        ) {
+                          existingEntry.accumulatedOfferingPEN +=
+                            offering.accumulatedOfferingPEN;
+                          existingEntry.accumulatedOfferingUSD +=
+                            offering.accumulatedOfferingUSD;
+                          existingEntry.accumulatedOfferingEUR +=
+                            offering.accumulatedOfferingEUR;
+                        }
+
+                        if (
+                          offering.category ===
+                          OfferingIncomeCreationCategory.ExternalDonation
+                        ) {
+                          existingEntry.accumulatedOfferingPEN +=
+                            offering.accumulatedOfferingPEN;
+                          existingEntry.accumulatedOfferingUSD +=
+                            offering.accumulatedOfferingUSD;
+                          existingEntry.accumulatedOfferingEUR +=
+                            offering.accumulatedOfferingEUR;
+                        }
+
+                        if (
+                          offering.category ===
+                          OfferingIncomeCreationCategory.FundraisingProMinistry
+                        ) {
+                          existingEntry.accumulatedOfferingPEN +=
+                            offering.accumulatedOfferingPEN;
+                          existingEntry.accumulatedOfferingUSD +=
+                            offering.accumulatedOfferingUSD;
+                          existingEntry.accumulatedOfferingEUR +=
+                            offering.accumulatedOfferingEUR;
+                        }
+                      } else {
+                        acc.push({
+                          date: offering.date,
+                          category: offering.category,
+                          accumulatedOfferingPEN: offering.category
+                            ? offering.accumulatedOfferingPEN
+                            : 0,
+                          accumulatedOfferingUSD: offering.category
+                            ? offering.accumulatedOfferingUSD
+                            : 0,
+                          accumulatedOfferingEUR: offering.category
+                            ? offering.accumulatedOfferingEUR
+                            : 0,
+                          internalDonor: {
+                            memberType:
+                              offering.category ===
+                              OfferingIncomeCreationCategory.InternalDonation
+                                ? offering.internalDonor.memberType
+                                : null,
+                            memberFullName: offering?.internalDonor
+                              ?.memberFullName
+                              ? offering?.internalDonor?.memberFullName
+                              : null,
+                            memberId: offering?.internalDonor?.memberId
+                              ? offering?.internalDonor?.memberId
+                              : null,
+                          },
+                          externalDonor: {
+                            donorFullName: offering?.externalDonor
+                              ?.donorFullName
+                              ? offering?.externalDonor?.donorFullName
+                              : null,
+                            donorId: offering?.externalDonor?.donorId ?? null,
+                            sendingCountry:
+                              offering?.externalDonor?.sendingCountry ??
+                              'País anónimo',
+                          },
+                          church: {
+                            isAnexe: offering?.church?.isAnexe,
+                            abbreviatedChurchName:
+                              offering?.church?.abbreviatedChurchName,
+                          },
+                        });
+                      }
+
+                      return acc;
+                    }, [])
+                    .sort((a, b) => {
+                      const categoryA =
+                        OfferingIncomeCreationCategoryNames[
+                          a.category
+                        ].toLowerCase();
+                      const categoryB =
+                        OfferingIncomeCreationCategoryNames[
+                          b.category
+                        ].toLowerCase();
+
+                      if (categoryA < categoryB) return -1;
+                      if (categoryA > categoryB) return 1;
+                      return 0;
+                    })
+                    .map((offering) => [
+                      offering?.church?.abbreviatedChurchName,
+                      monthNames[startMonth] === monthNames[endMonth] &&
+                      offering.category ===
+                        OfferingIncomeCreationCategory.OfferingBox
+                        ? format(addDays(offering?.date, 1), 'dd/MM/yyyy')
+                        : `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
+                      OfferingIncomeCreationCategoryNames[offering.category],
+                      offering?.internalDonor?.memberType
+                        ? ` ${offering?.internalDonor?.memberFullName} (${MemberTypeNames[offering?.internalDonor?.memberType]})`
+                        : offering?.externalDonor?.donorId
+                          ? ` ${offering?.externalDonor?.donorFullName} (Donador Externo)`
+                          : '-',
+                      offering.accumulatedOfferingPEN
+                        ? `${offering.accumulatedOfferingPEN} PEN`
+                        : '-',
+                      offering.accumulatedOfferingUSD
+                        ? `${offering.accumulatedOfferingUSD} USD`
+                        : '-',
+                      offering.accumulatedOfferingEUR
+                        ? `${offering.accumulatedOfferingEUR} EUR`
+                        : '-',
+                    ]),
                   ['', '', '', '', '', '', ''],
                   ['', '', '', '', '', '', ''],
                   [
@@ -1076,7 +1304,7 @@ export const getOfferingIncomeMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -1099,6 +1327,280 @@ export const getOfferingIncomeMetricsReport = (
                     },
                     {
                       text: `${offeringIncomeByYouthServiceDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      style: {
+                        bold: true,
+                        fontSize: 13,
+                        italics: true,
+                        color: '#475569',
+                      },
+                    },
+                  ],
+                ],
+              },
+            },
+          ]
+        : null,
+
+      //* OfferingIncomeByChurchGround
+      metricsTypesArray.includes(MetricSearchType.OfferingIncomeByChurchGround)
+        ? [
+            // Table Title
+            {
+              layout: 'noBorders',
+              table: {
+                headerRows: 1,
+                widths: ['*'],
+                body: [
+                  [
+                    {
+                      text: `Ofrendas por Terreno Iglesia`,
+                      color: '#1d96d3',
+                      fontSize: 20,
+                      bold: true,
+                      alignment: 'center',
+                      margin: [0, -10, 0, 0],
+                    },
+                  ],
+                ],
+              },
+            },
+            // Table body (content)
+            {
+              pageBreak: 'after',
+              layout: 'customLayout01', // optional
+              table: {
+                headerRows: 1,
+                widths: [65, '*', 80, 120, '*', '*', '*'],
+                body: [
+                  [
+                    {
+                      text: 'Iglesia',
+                      style: {
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Fecha o Rango',
+                      style: {
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Categoría',
+                      style: {
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Miembro',
+                      style: {
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Total Acu. (PEN)',
+                      style: {
+                        color: 'blue',
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Total Acu. (USD)',
+                      style: {
+                        color: 'purple',
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Total Acu. (EUR)',
+                      style: {
+                        color: 'green',
+                        bold: true,
+                      },
+                    },
+                  ],
+                  ...offeringIncomeByChurchGroundDataResult.map((offering) => [
+                    offering?.church?.abbreviatedChurchName,
+                    `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
+                    OfferingIncomeCreationCategoryNames[offering.category],
+                    offering?.memberType && !offering?.externalDonor?.donorId
+                      ? ` ${offering?.memberFullName} (${MemberTypeNames[offering?.memberType]})`
+                      : offering?.externalDonor?.donorId
+                        ? ` ${offering?.memberFullName} (En General)`
+                        : 'Actividades Pro-Terreno (En General)',
+                    offering.accumulatedOfferingPEN
+                      ? `${offering.accumulatedOfferingPEN} PEN`
+                      : '-',
+                    offering.accumulatedOfferingUSD
+                      ? `${offering.accumulatedOfferingUSD} USD`
+                      : '-',
+                    offering.accumulatedOfferingEUR
+                      ? `${offering.accumulatedOfferingEUR} EUR`
+                      : '-',
+                  ]),
+                  ['', '', '', '', '', '', ''],
+                  ['', '', '', '', '', '', ''],
+                  [
+                    '',
+                    '',
+                    '',
+                    {
+                      text: 'Totales',
+                      style: {
+                        bold: true,
+                        fontSize: 13,
+                        italics: true,
+                        color: 'red',
+                      },
+                    },
+                    {
+                      text: `${offeringIncomeByChurchGroundDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      style: {
+                        bold: true,
+                        fontSize: 13,
+                        italics: true,
+                        color: '#475569',
+                      },
+                    },
+                    {
+                      text: `${offeringIncomeByChurchGroundDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      style: {
+                        bold: true,
+                        fontSize: 13,
+                        italics: true,
+                        color: '#475569',
+                      },
+                    },
+                    {
+                      text: `${offeringIncomeByChurchGroundDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      style: {
+                        bold: true,
+                        fontSize: 13,
+                        italics: true,
+                        color: '#475569',
+                      },
+                    },
+                  ],
+                ],
+              },
+            },
+          ]
+        : null,
+
+      //* OfferingIncomeByActivities
+      metricsTypesArray.includes(MetricSearchType.OfferingIncomeByActivities)
+        ? [
+            // Table Title
+            {
+              layout: 'noBorders',
+              table: {
+                headerRows: 1,
+                widths: ['*'],
+                body: [
+                  [
+                    {
+                      text: `Ofrendas por Actividades`,
+                      color: '#1d96d3',
+                      fontSize: 20,
+                      bold: true,
+                      alignment: 'center',
+                      margin: [0, -10, 0, 0],
+                    },
+                  ],
+                ],
+              },
+            },
+            // Table body (content)
+            {
+              pageBreak: 'after',
+              layout: 'customLayout01', // optional
+              table: {
+                headerRows: 1,
+                widths: [100, 70, '*', '*', '*', '*'],
+                body: [
+                  [
+                    {
+                      text: 'Iglesia',
+                      style: {
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Fecha',
+                      style: {
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Categoría',
+                      style: {
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Total Acu. (PEN)',
+                      style: {
+                        color: 'blue',
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Total Acu. (USD)',
+                      style: {
+                        color: 'purple',
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Total Acu. (EUR)',
+                      style: {
+                        color: 'green',
+                        bold: true,
+                      },
+                    },
+                  ],
+                  ...offeringIncomeByActivitiesDataResult.map((offering) => [
+                    offering?.church?.abbreviatedChurchName,
+                    format(addDays(offering?.date, 1), 'dd/MM/yyyy'),
+                    OfferingIncomeCreationCategoryNames[offering.category],
+                    `${offering.accumulatedOfferingPEN} PEN`,
+                    `${offering.accumulatedOfferingUSD} USD`,
+                    `${offering.accumulatedOfferingEUR} EUR`,
+                  ]),
+                  ['', '', '', '', '', ''],
+                  ['', '', '', '', '', ''],
+                  [
+                    '',
+                    '',
+                    {
+                      text: 'Totales',
+                      style: {
+                        bold: true,
+                        fontSize: 13,
+                        italics: true,
+                        color: 'red',
+                      },
+                    },
+                    {
+                      text: `${offeringIncomeByActivitiesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      style: {
+                        bold: true,
+                        fontSize: 13,
+                        italics: true,
+                        color: '#475569',
+                      },
+                    },
+                    {
+                      text: `${offeringIncomeByActivitiesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      style: {
+                        bold: true,
+                        fontSize: 13,
+                        italics: true,
+                        color: '#475569',
+                      },
+                    },
+                    {
+                      text: `${offeringIncomeByActivitiesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1144,7 +1646,7 @@ export const getOfferingIncomeMetricsReport = (
               layout: 'customLayout01', // optional
               table: {
                 headerRows: 1,
-                widths: [65, 65, 65, '*', '*', '*', '*'],
+                widths: [100, '*', 65, 120, '*', '*', '*'],
                 body: [
                   [
                     {
@@ -1224,7 +1726,7 @@ export const getOfferingIncomeMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -1261,284 +1763,7 @@ export const getOfferingIncomeMetricsReport = (
           ]
         : null,
 
-      //* OfferingIncomeByChurchGround
-      metricsTypesArray.includes(MetricSearchType.OfferingIncomeByChurchGround)
-        ? [
-            // Table Title
-            {
-              layout: 'noBorders',
-              table: {
-                headerRows: 1,
-                widths: ['*'],
-                body: [
-                  [
-                    {
-                      text: `Ofrendas por Terreno Iglesia`,
-                      color: '#1d96d3',
-                      fontSize: 20,
-                      bold: true,
-                      alignment: 'center',
-                      margin: [0, -10, 0, 0],
-                    },
-                  ],
-                ],
-              },
-            },
-            // Table body (content)
-            {
-              pageBreak: 'after',
-              layout: 'customLayout01', // optional
-              table: {
-                headerRows: 1,
-                widths: [65, 80, 65, '*', '*', '*', '*'],
-                body: [
-                  [
-                    {
-                      text: 'Iglesia',
-                      style: {
-                        bold: true,
-                      },
-                    },
-                    {
-                      text: 'Fecha o Rango',
-                      style: {
-                        bold: true,
-                      },
-                    },
-                    {
-                      text: 'Categoría',
-                      style: {
-                        bold: true,
-                      },
-                    },
-                    {
-                      text: 'Miembro',
-                      style: {
-                        bold: true,
-                      },
-                    },
-                    {
-                      text: 'Tot. o Tot. Acu. (PEN)',
-                      style: {
-                        color: 'blue',
-                        bold: true,
-                      },
-                    },
-                    {
-                      text: 'Tot. o Tot. Acu. (USD)',
-                      style: {
-                        color: 'purple',
-                        bold: true,
-                      },
-                    },
-                    {
-                      text: 'Tot. o Tot. Acu. (EUR)',
-                      style: {
-                        color: 'green',
-                        bold: true,
-                      },
-                    },
-                  ],
-                  ...offeringIncomeByChurchGroundDataResult.map((offering) => [
-                    offering?.church?.abbreviatedChurchName,
-                    offering.category ===
-                      OfferingIncomeCreationCategory.InternalDonation ||
-                    offering.category ===
-                      OfferingIncomeCreationCategory.ExternalDonation
-                      ? `${monthNames[startMonth]} - ${monthNames[endMonth]}`
-                      : format(addDays(offering?.date, 1), 'dd/MM/yyyy'),
-                    OfferingIncomeCreationCategoryNames[offering.category],
-                    offering?.memberType
-                      ? ` ${offering?.memberFullName} (${MemberTypeNames[offering?.memberType]})`
-                      : '-',
-                    offering.accumulatedOfferingPEN
-                      ? `${offering.accumulatedOfferingPEN} PEN`
-                      : '-',
-                    offering.accumulatedOfferingUSD
-                      ? `${offering.accumulatedOfferingUSD} USD`
-                      : '-',
-                    offering.accumulatedOfferingEUR
-                      ? `${offering.accumulatedOfferingEUR} EUR`
-                      : '-',
-                  ]),
-                  ['', '', '', '', '', '', ''],
-                  ['', '', '', '', '', '', ''],
-                  [
-                    '',
-                    '',
-                    '',
-                    {
-                      text: 'Totales',
-                      style: {
-                        bold: true,
-                        fontSize: 13,
-                        italics: true,
-                        color: '#475569',
-                      },
-                    },
-                    {
-                      text: `${offeringIncomeByChurchGroundDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
-                      style: {
-                        bold: true,
-                        fontSize: 13,
-                        italics: true,
-                        color: '#475569',
-                      },
-                    },
-                    {
-                      text: `${offeringIncomeByChurchGroundDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
-                      style: {
-                        bold: true,
-                        fontSize: 13,
-                        italics: true,
-                        color: '#475569',
-                      },
-                    },
-                    {
-                      text: `${offeringIncomeByChurchGroundDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
-                      style: {
-                        bold: true,
-                        fontSize: 13,
-                        italics: true,
-                        color: '#475569',
-                      },
-                    },
-                  ],
-                ],
-              },
-            },
-          ]
-        : null,
-
-      //* OfferingIncomeByActivities
-      metricsTypesArray.includes(MetricSearchType.OfferingIncomeByActivities)
-        ? [
-            // Table Title
-            {
-              layout: 'noBorders',
-              table: {
-                headerRows: 1,
-                widths: ['*'],
-                body: [
-                  [
-                    {
-                      text: `Ofrendas por Actividades`,
-                      color: '#1d96d3',
-                      fontSize: 20,
-                      bold: true,
-                      alignment: 'center',
-                      margin: [0, -10, 0, 0],
-                    },
-                  ],
-                ],
-              },
-            },
-            // Table body (content)
-            {
-              pageBreak: 'after',
-              layout: 'customLayout01', // optional
-              table: {
-                headerRows: 1,
-                widths: [100, 70, 70, '*', '*', '*'],
-                body: [
-                  [
-                    {
-                      text: 'Iglesia',
-                      style: {
-                        bold: true,
-                      },
-                    },
-                    {
-                      text: 'Fecha',
-                      style: {
-                        bold: true,
-                      },
-                    },
-                    {
-                      text: 'Categoría',
-                      style: {
-                        bold: true,
-                      },
-                    },
-                    {
-                      text: 'Total (PEN)',
-                      style: {
-                        color: 'blue',
-                        bold: true,
-                      },
-                    },
-                    {
-                      text: 'Total (USD)',
-                      style: {
-                        color: 'purple',
-                        bold: true,
-                      },
-                    },
-                    {
-                      text: 'Total (EUR)',
-                      style: {
-                        color: 'green',
-                        bold: true,
-                      },
-                    },
-                  ],
-                  ...offeringIncomeByActivitiesDataResult.map((offering) => [
-                    offering?.church?.abbreviatedChurchName,
-                    format(addDays(offering?.date, 1), 'dd/MM/yyyy'),
-                    OfferingIncomeCreationCategoryNames[offering.category],
-                    `${offering.accumulatedOfferingPEN} PEN`,
-                    `${offering.accumulatedOfferingUSD} USD`,
-                    `${offering.accumulatedOfferingEUR} EUR`,
-                  ]),
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
-                  [
-                    '',
-                    '',
-                    {
-                      text: 'Totales',
-                      style: {
-                        bold: true,
-                        fontSize: 13,
-                        italics: true,
-                        color: '#475569',
-                      },
-                    },
-                    {
-                      text: `${offeringIncomeByActivitiesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
-                      style: {
-                        bold: true,
-                        fontSize: 13,
-                        italics: true,
-                        color: '#475569',
-                      },
-                    },
-                    {
-                      text: `${offeringIncomeByActivitiesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
-                      style: {
-                        bold: true,
-                        fontSize: 13,
-                        italics: true,
-                        color: '#475569',
-                      },
-                    },
-                    {
-                      text: `${offeringIncomeByActivitiesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
-                      style: {
-                        bold: true,
-                        fontSize: 13,
-                        italics: true,
-                        color: '#475569',
-                      },
-                    },
-                  ],
-                ],
-              },
-            },
-          ]
-        : null,
-
-      //* OfferingIncomeByActivities
+      //* OfferingIncomeByIncomeAdjustment
       metricsTypesArray.includes(MetricSearchType.OfferingIncomeAdjustment)
         ? [
             // Table Title
@@ -1631,7 +1856,7 @@ export const getOfferingIncomeMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {

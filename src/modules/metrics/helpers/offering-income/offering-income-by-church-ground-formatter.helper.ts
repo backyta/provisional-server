@@ -23,14 +23,23 @@ export interface OfferingIncomeByChurchGroundDataResult {
   memberType: string;
   memberFullName: string;
   memberId: string | undefined;
+  externalDonor: {
+    donorId: string;
+    donorFullName: string;
+    sendingCountry: string;
+  };
   church: Church;
   allOfferings: Array<{
+    donorId: string | null;
+    lastDonor: string | null;
+    sendingCountry: string | null;
     offering: number;
     currency: string;
     date: string;
   }>;
 }
 
+//TODO : poner como opcional o null el externalk donor porpiedades y tmb en internal donor replicar ene l front en las interfaces
 export const offeringIncomeByChurchGroundFormatter = ({
   offeringIncome,
 }: Options): OfferingIncomeByChurchGroundDataResult[] => {
@@ -62,6 +71,10 @@ export const offeringIncomeByChurchGroundFormatter = ({
           existingEntry.accumulatedOfferingEUR += +offering.amount;
         }
         existingEntry.allOfferings.push({
+          lastDonor: `${getInitialFullNames({ firstNames: offering?.externalDonor?.firstNames ?? '', lastNames: '' })} ${offering?.externalDonor?.lastNames}`,
+          donorId: offering?.externalDonor?.id ?? null,
+          sendingCountry:
+            offering.externalDonor?.residenceCity ?? 'País Anónimo',
           offering: +offering?.amount,
           currency: offering?.currency,
           date: offering?.date,
@@ -100,12 +113,26 @@ export const offeringIncomeByChurchGroundFormatter = ({
                 : offering?.preacher
                   ? offering?.preacher?.id
                   : offering?.disciple?.id,
+          externalDonor: {
+            donorFullName: offering?.externalDonor
+              ? `${getInitialFullNames({ firstNames: offering?.externalDonor?.firstNames ?? '', lastNames: '' })} ${offering?.externalDonor?.lastNames}`
+              : null,
+            donorId: offering?.externalDonor?.id ?? null,
+            sendingCountry:
+              offering?.externalDonor?.residenceCity ?? 'País Anónimo',
+          },
           church: {
             isAnexe: offering?.church?.isAnexe,
             abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
           },
           allOfferings: [
             {
+              lastDonor: offering?.externalDonor
+                ? `${getInitialFullNames({ firstNames: offering?.externalDonor?.firstNames ?? '', lastNames: '' })} ${offering?.externalDonor?.lastNames}`
+                : null,
+              sendingCountry:
+                offering?.externalDonor?.residenceCity ?? 'País Anónimo',
+              donorId: offering?.externalDonor?.id ?? null,
               offering: +offering?.amount,
               currency: offering?.currency,
               date: offering?.date,

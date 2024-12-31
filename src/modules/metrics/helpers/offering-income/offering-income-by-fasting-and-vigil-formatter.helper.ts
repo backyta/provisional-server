@@ -21,6 +21,12 @@ interface Zone {
   disciples: number;
 }
 
+interface Copastor {
+  id: string;
+  firstNames: string;
+  lastNames: string;
+}
+
 interface Supervisor {
   id: string;
   firstNames: string;
@@ -34,6 +40,7 @@ export interface OfferingIncomeByFastingAndVigilDataResult {
   accumulatedOfferingPEN: number;
   accumulatedOfferingUSD: number;
   accumulatedOfferingEUR: number;
+  copastor: Copastor | null;
   supervisor: Supervisor | null;
   zone?: Zone | null;
   church: Church;
@@ -82,6 +89,15 @@ export const offeringIncomeByFastingAndVigilFormatter = ({
             zoneName: offering?.zone?.zoneName,
             district: offering?.zone?.district,
             disciples: offering?.zone?.disciples?.length,
+          },
+          copastor: {
+            id: offering?.zone?.theirCopastor?.id,
+            firstNames: getInitialFullNames({
+              firstNames:
+                offering?.zone?.theirCopastor?.member?.firstNames ?? '',
+              lastNames: '',
+            }),
+            lastNames: offering?.zone?.theirCopastor?.member?.lastNames,
           },
           supervisor: {
             id: offering?.zone?.theirSupervisor?.id,

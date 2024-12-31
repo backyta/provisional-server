@@ -46,7 +46,10 @@ import {
   OfferingIncomeCreationCategory,
   OfferingIncomeCreationCategoryNames,
 } from '@/modules/offering/income/enums/offering-income-creation-category.enum';
-import { OfferingIncomeCreationType } from '@/modules/offering/income/enums/offering-income-creation-type.enum';
+import {
+  OfferingIncomeCreationType,
+  OfferingIncomeCreationTypeNames,
+} from '@/modules/offering/income/enums/offering-income-creation-type.enum';
 import { OfferingIncomeSearchSubType } from '@/modules/offering/income/enums/offering-income-search-sub-type.enum';
 import { OfferingIncomeCreationShiftTypeNames } from '@/modules/offering/income/enums/offering-income-creation-shift-type.enum';
 
@@ -126,8 +129,8 @@ export class OfferingIncomeService {
       memberId,
       externalDonorId,
       isNewExternalDonor,
-      externalDonorFirstNames: externalDonorFirstName,
-      externalDonorLastNames: externalDonorLastName,
+      externalDonorFirstNames,
+      externalDonorLastNames,
       externalDonorGender,
       externalDonorBirthDate,
       externalDonorPhoneNumber,
@@ -387,8 +390,24 @@ export class OfferingIncomeService {
         }
 
         if (
+          category === OfferingIncomeCreationCategory.OfferingBox &&
+          subType === OfferingIncomeCreationSubType.YouthService
+        ) {
+          existsOffering = await this.offeringIncomeRepository.find({
+            where: {
+              subType: subType,
+              category: category,
+              church: church,
+              date: new Date(date),
+              currency: currency,
+              recordStatus: RecordStatus.Active,
+            },
+          });
+        }
+
+        if (
           category ===
-            OfferingIncomeCreationCategory.ActivitiesProChurchGround ||
+            OfferingIncomeCreationCategory.FundraisingProChurchGround ||
           category === OfferingIncomeCreationCategory.FundraisingProMinistry
         ) {
           existsOffering = await this.offeringIncomeRepository.find({
@@ -550,23 +569,43 @@ export class OfferingIncomeService {
             new Date(date).getTime(),
           );
 
-          if (category === OfferingIncomeCreationCategory.OfferingBox) {
+          if (
+            category === OfferingIncomeCreationCategory.OfferingBox &&
+            subType !== OfferingIncomeCreationSubType.YouthService
+          ) {
             throw new NotFoundException(
               `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Iglesia: ${church.abbreviatedChurchName}, Categoría: ${OfferingIncomeCreationCategoryNames[category]}, Divisa: ${currency}, Turno: ${OfferingIncomeCreationShiftTypeNames[shift]} y Fecha: ${offeringDate}.`,
             );
           }
+
           if (
-            category ===
-              OfferingIncomeCreationCategory.ActivitiesProChurchGround ||
-            category === OfferingIncomeCreationCategory.ExternalDonation
+            category === OfferingIncomeCreationCategory.OfferingBox &&
+            subType === OfferingIncomeCreationSubType.YouthService
           ) {
             throw new NotFoundException(
-              `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Iglesia: ${church.abbreviatedChurchName}, Categoría: ${OfferingIncomeCreationCategoryNames[category]}, Divisa: ${currency} y Fecha: ${offeringDate}.`,
+              `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Iglesia: ${church.abbreviatedChurchName}, Categoría: ${OfferingIncomeCreationCategoryNames[category]}, y Fecha: ${offeringDate}.`,
             );
           }
+
+          if (
+            category ===
+              OfferingIncomeCreationCategory.FundraisingProChurchGround ||
+            category === OfferingIncomeCreationCategory.FundraisingProMinistry
+          ) {
+            throw new NotFoundException(
+              `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, Iglesia: ${church.abbreviatedChurchName}, Categoría: ${OfferingIncomeCreationCategoryNames[category]}, Divisa: ${currency} y Fecha: ${offeringDate}.`,
+            );
+          }
+
+          if (category === OfferingIncomeCreationCategory.ExternalDonation) {
+            throw new NotFoundException(
+              `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, Iglesia: ${church.abbreviatedChurchName}, Categoría: ${OfferingIncomeCreationCategoryNames[category]} (mismos nombres y apellidos), Divisa: ${currency} y Fecha: ${offeringDate}.`,
+            );
+          }
+
           if (category === OfferingIncomeCreationCategory.InternalDonation) {
             throw new NotFoundException(
-              `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]} (mismos datos), Iglesia: ${church.abbreviatedChurchName}, Categoría: ${OfferingIncomeCreationCategoryNames[category]}, Divisa: ${currency}, Tipo de miembro: ${MemberTypeNames[memberType]} (mismos nombres) y Fecha: ${offeringDate}.`,
+              `Ya existe un registro con este Tipo: ${OfferingIncomeCreationSubTypeNames[subType]}, Iglesia: ${church.abbreviatedChurchName}, Categoría: ${OfferingIncomeCreationCategoryNames[category]}, Divisa: ${currency}, Tipo de miembro: ${MemberTypeNames[memberType]} (mismos nombres y apellidos) y Fecha: ${offeringDate}.`,
             );
           }
         }
@@ -593,8 +632,8 @@ export class OfferingIncomeService {
         if (isNewExternalDonor) {
           try {
             const newDonor = this.externalDonorRepository.create({
-              firstNames: externalDonorFirstName,
-              lastNames: externalDonorLastName,
+              firstNames: externalDonorFirstNames,
+              lastNames: externalDonorLastNames,
               birthDate:
                 externalDonorBirthDate &&
                 !isNaN(new Date(externalDonorBirthDate).getTime())
@@ -653,7 +692,16 @@ export class OfferingIncomeService {
             church: church ?? null,
             zone: null,
             familyGroup: null,
-            memberType: !memberType || memberType === '' ? null : memberType,
+            memberType:
+              (!memberType || memberType === '') &&
+              createOfferingIncomeDto.category !==
+                OfferingIncomeCreationCategory.ExternalDonation &&
+              createOfferingIncomeDto.category !==
+                OfferingIncomeCreationCategory.InternalDonation
+                ? null
+                : memberType
+                  ? memberType
+                  : MemberType.ExternalDonor,
             shift: !shift || shift === '' ? null : shift,
             category: category,
             externalDonor: externalDonor ?? null,
@@ -784,6 +832,18 @@ export class OfferingIncomeService {
           relations: ['theirMainChurch'],
         });
 
+        if (!church) {
+          throw new NotFoundException(
+            `Iglesia con id: ${churchId}, no fue encontrado.`,
+          );
+        }
+
+        if (!church?.recordStatus) {
+          throw new BadRequestException(
+            `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
+          );
+        }
+
         //* Validate if exists record already
         const existsOffering = await this.offeringIncomeRepository.find({
           where: {
@@ -852,6 +912,25 @@ export class OfferingIncomeService {
       if (!church?.recordStatus) {
         throw new BadRequestException(
           `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
+        );
+      }
+
+      //* Validate if exists record already
+      const existsOffering = await this.offeringIncomeRepository.find({
+        where: {
+          type: type,
+          church: church,
+          date: new Date(date),
+          currency: currency,
+          recordStatus: RecordStatus.Active,
+        },
+      });
+
+      if (existsOffering.length > 0) {
+        const offeringDate = dateFormatterToDDMMYYYY(new Date(date).getTime());
+
+        throw new NotFoundException(
+          `Ya existe un registro con este Tipo: ${OfferingIncomeCreationTypeNames[type]} (mismos datos), Divisa: ${currency} y Fecha: ${offeringDate}.`,
         );
       }
 

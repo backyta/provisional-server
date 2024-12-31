@@ -15,6 +15,7 @@ interface Church {
 export interface OfferingExpenseDataResult {
   subType: string;
   date: Date;
+  comments: string;
   accumulatedOfferingPEN: number;
   accumulatedOfferingUSD: number;
   accumulatedOfferingEUR: number;

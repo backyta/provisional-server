@@ -9,21 +9,6 @@ import { MetricSearchType } from '@/modules/metrics/enums/metrics-search-type.en
 import { OfferingExpenseDataResult } from '@/modules/metrics/helpers/offering-expense/offering-expense-chart-formatter.helper';
 import { OfferingExpensesAdjustmentDataResult } from '@/modules/metrics/helpers/offering-expense/offering-expenses-adjustment-formatter.helper';
 
-const monthNames = {
-  january: 'Enero',
-  february: 'Febrero',
-  march: 'Marzo',
-  april: 'Abril',
-  may: 'Mayo',
-  june: 'Junio',
-  july: 'Julio',
-  august: 'Agosto',
-  september: 'Septiembre',
-  october: 'Octubre',
-  november: 'Noviembre',
-  december: 'Diciembre',
-};
-
 interface ReportOptions {
   title?: string;
   subTitle?: string;
@@ -100,7 +85,7 @@ export const getOfferingExpensesMetricsReport = (
               layout: 'customLayout01', // optional
               table: {
                 headerRows: 1,
-                widths: ['*', '*', '*', '*', '*', '*'],
+                widths: [80, 70, 100, '*', 80, 80, 80],
                 body: [
                   [
                     {
@@ -110,7 +95,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: 'Rango',
+                      text: 'Fecha',
                       style: {
                         bold: true,
                       },
@@ -122,38 +107,46 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: 'Total Acu. (PEN)',
+                      text: 'Detalles',
+                      style: {
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Total (PEN)',
                       style: {
                         color: 'blue',
                         bold: true,
                       },
                     },
                     {
-                      text: 'Total Acu. (USD)',
+                      text: 'Total (USD)',
                       style: {
                         color: 'purple',
                         bold: true,
                       },
                     },
                     {
-                      text: 'Total Acu. (EUR)',
+                      text: 'Total (EUR)',
                       style: {
                         color: 'green',
                         bold: true,
                       },
                     },
                   ],
-                  ...operationalOfferingExpensesDataResult.map((expense) => [
+                  ...operationalOfferingExpensesDataResult?.map((expense) => [
                     expense?.church?.abbreviatedChurchName,
-                    `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
+                    format(addDays(expense?.date, 1), 'dd/MM/yyyy'),
                     expense.subType,
+                    expense.comments,
                     expense.accumulatedOfferingPEN,
                     expense.accumulatedOfferingUSD,
                     expense.accumulatedOfferingEUR,
                   ]),
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
+                  ['', '', '', '', '', '', ''],
+                  ['', '', '', '', '', '', ''],
                   [
+                    '',
                     '',
                     '',
                     {
@@ -162,7 +155,8 @@ export const getOfferingExpensesMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
+                        alignment: 'right',
                       },
                     },
                     {
@@ -230,7 +224,7 @@ export const getOfferingExpensesMetricsReport = (
               layout: 'customLayout01', // optional
               table: {
                 headerRows: 1,
-                widths: ['*', '*', '*', '*', '*', '*'],
+                widths: [80, 70, 100, '*', 80, 80, 80],
                 body: [
                   [
                     {
@@ -240,7 +234,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: 'Rango',
+                      text: 'Fecha',
                       style: {
                         bold: true,
                       },
@@ -252,21 +246,27 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: 'Total Acu. (PEN)',
+                      text: 'Detalles',
+                      style: {
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Total (PEN)',
                       style: {
                         color: 'blue',
                         bold: true,
                       },
                     },
                     {
-                      text: 'Total Acu. (USD)',
+                      text: 'Total (USD)',
                       style: {
                         color: 'purple',
                         bold: true,
                       },
                     },
                     {
-                      text: 'Total Acu. (EUR)',
+                      text: 'Total (EUR)',
                       style: {
                         color: 'green',
                         bold: true,
@@ -276,16 +276,18 @@ export const getOfferingExpensesMetricsReport = (
                   ...maintenanceAndRepairOfferingExpensesDataResult.map(
                     (expense) => [
                       expense?.church?.abbreviatedChurchName,
-                      `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
+                      format(addDays(expense?.date, 1), 'dd/MM/yyyy'),
                       expense.subType,
+                      expense.comments,
                       expense.accumulatedOfferingPEN,
                       expense.accumulatedOfferingUSD,
                       expense.accumulatedOfferingEUR,
                     ],
                   ),
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
+                  ['', '', '', '', '', '', ''],
+                  ['', '', '', '', '', '', ''],
                   [
+                    '',
                     '',
                     '',
                     {
@@ -294,7 +296,8 @@ export const getOfferingExpensesMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
+                        alignment: 'right',
                       },
                     },
                     {
@@ -360,7 +363,7 @@ export const getOfferingExpensesMetricsReport = (
               layout: 'customLayout01', // optional
               table: {
                 headerRows: 1,
-                widths: ['*', '*', '*', '*', '*', '*'],
+                widths: [80, 70, 100, '*', 80, 80, 80],
                 body: [
                   [
                     {
@@ -370,7 +373,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: 'Rango',
+                      text: 'Fecha',
                       style: {
                         bold: true,
                       },
@@ -382,21 +385,27 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: 'Total Acu. (PEN)',
+                      text: 'Detalles',
+                      style: {
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Total (PEN)',
                       style: {
                         color: 'blue',
                         bold: true,
                       },
                     },
                     {
-                      text: 'Total Acu. (USD)',
+                      text: 'Total (USD)',
                       style: {
                         color: 'purple',
                         bold: true,
                       },
                     },
                     {
-                      text: 'Total Acu. (EUR)',
+                      text: 'Total (EUR)',
                       style: {
                         color: 'green',
                         bold: true,
@@ -405,15 +414,17 @@ export const getOfferingExpensesMetricsReport = (
                   ],
                   ...decorationOfferingExpensesDataResult.map((expense) => [
                     expense?.church?.abbreviatedChurchName,
-                    `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
+                    format(addDays(expense?.date, 1), 'dd/MM/yyyy'),
                     expense.subType,
+                    expense.comments,
                     expense.accumulatedOfferingPEN,
                     expense.accumulatedOfferingUSD,
                     expense.accumulatedOfferingEUR,
                   ]),
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
+                  ['', '', '', '', '', '', ''],
+                  ['', '', '', '', '', '', ''],
                   [
+                    '',
                     '',
                     '',
                     {
@@ -422,7 +433,8 @@ export const getOfferingExpensesMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
+                        alignment: 'right',
                       },
                     },
                     {
@@ -490,7 +502,7 @@ export const getOfferingExpensesMetricsReport = (
               layout: 'customLayout01', // optional
               table: {
                 headerRows: 1,
-                widths: ['*', '*', '*', '*', '*', '*'],
+                widths: [80, 70, 100, '*', 80, 80, 80],
                 body: [
                   [
                     {
@@ -500,7 +512,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: 'Rango',
+                      text: 'Fecha',
                       style: {
                         bold: true,
                       },
@@ -512,21 +524,27 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: 'Total Acu. (PEN)',
+                      text: 'Detalles',
+                      style: {
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Total (PEN)',
                       style: {
                         color: 'blue',
                         bold: true,
                       },
                     },
                     {
-                      text: 'Total Acu. (USD)',
+                      text: 'Total (USD)',
                       style: {
                         color: 'purple',
                         bold: true,
                       },
                     },
                     {
-                      text: 'Total Acu. (EUR)',
+                      text: 'Total (EUR)',
                       style: {
                         color: 'green',
                         bold: true,
@@ -536,16 +554,18 @@ export const getOfferingExpensesMetricsReport = (
                   ...equipmentAndTechnologyOfferingExpensesDataResult.map(
                     (expense) => [
                       expense?.church?.abbreviatedChurchName,
-                      `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
+                      format(addDays(expense?.date, 1), 'dd/MM/yyyy'),
                       expense.subType,
+                      expense.comments,
                       expense.accumulatedOfferingPEN,
                       expense.accumulatedOfferingUSD,
                       expense.accumulatedOfferingEUR,
                     ],
                   ),
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
+                  ['', '', '', '', '', '', ''],
+                  ['', '', '', '', '', '', ''],
                   [
+                    '',
                     '',
                     '',
                     {
@@ -554,7 +574,8 @@ export const getOfferingExpensesMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
+                        alignment: 'right',
                       },
                     },
                     {
@@ -620,7 +641,7 @@ export const getOfferingExpensesMetricsReport = (
               layout: 'customLayout01', // optional
               table: {
                 headerRows: 1,
-                widths: ['*', '*', '*', '*', '*', '*'],
+                widths: [80, 70, 100, '*', 80, 80, 80],
                 body: [
                   [
                     {
@@ -630,7 +651,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: 'Rango',
+                      text: 'Fecha',
                       style: {
                         bold: true,
                       },
@@ -642,14 +663,20 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: 'Total Acu. (PEN)',
+                      text: 'Detalles',
+                      style: {
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Total (PEN)',
                       style: {
                         color: 'blue',
                         bold: true,
                       },
                     },
                     {
-                      text: 'Total Acu. (USD)',
+                      text: 'Total (USD)',
                       style: {
                         color: 'purple',
                         bold: true,
@@ -665,15 +692,17 @@ export const getOfferingExpensesMetricsReport = (
                   ],
                   ...suppliesOfferingExpensesDataResult.map((expense) => [
                     expense?.church?.abbreviatedChurchName,
-                    `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
+                    format(addDays(expense?.date, 1), 'dd/MM/yyyy'),
                     expense.subType,
+                    expense.comments,
                     expense.accumulatedOfferingPEN,
                     expense.accumulatedOfferingUSD,
                     expense.accumulatedOfferingEUR,
                   ]),
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
+                  ['', '', '', '', '', '', ''],
+                  ['', '', '', '', '', '', ''],
                   [
+                    '',
                     '',
                     '',
                     {
@@ -682,7 +711,8 @@ export const getOfferingExpensesMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
+                        alignment: 'right',
                       },
                     },
                     {
@@ -748,7 +778,7 @@ export const getOfferingExpensesMetricsReport = (
               layout: 'customLayout01', // optional
               table: {
                 headerRows: 1,
-                widths: ['*', '*', '*', '*', '*', '*'],
+                widths: [80, 70, 100, '*', 80, 80, 80],
                 body: [
                   [
                     {
@@ -758,7 +788,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: 'Rango',
+                      text: 'Fecha',
                       style: {
                         bold: true,
                       },
@@ -770,21 +800,27 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: 'Total Acu. (PEN)',
+                      text: 'Detalles',
+                      style: {
+                        bold: true,
+                      },
+                    },
+                    {
+                      text: 'Total (PEN)',
                       style: {
                         color: 'blue',
                         bold: true,
                       },
                     },
                     {
-                      text: 'Total Acu. (USD)',
+                      text: 'Total (USD)',
                       style: {
                         color: 'purple',
                         bold: true,
                       },
                     },
                     {
-                      text: 'Total Acu. (EUR)',
+                      text: 'Total (EUR)',
                       style: {
                         color: 'green',
                         bold: true,
@@ -793,15 +829,17 @@ export const getOfferingExpensesMetricsReport = (
                   ],
                   ...planingEventsOfferingExpensesDataResult.map((expense) => [
                     expense?.church?.abbreviatedChurchName,
-                    `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
+                    format(addDays(expense?.date, 1), 'dd/MM/yyyy'),
                     expense.subType,
+                    expense.comments,
                     expense.accumulatedOfferingPEN,
                     expense.accumulatedOfferingUSD,
                     expense.accumulatedOfferingEUR,
                   ]),
-                  ['', '', '', '', '', ''],
-                  ['', '', '', '', '', ''],
+                  ['', '', '', '', '', '', ''],
+                  ['', '', '', '', '', '', ''],
                   [
+                    '',
                     '',
                     '',
                     {
@@ -810,7 +848,8 @@ export const getOfferingExpensesMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
+                        alignment: 'right',
                       },
                     },
                     {
@@ -876,7 +915,7 @@ export const getOfferingExpensesMetricsReport = (
               layout: 'customLayout01', // optional
               table: {
                 headerRows: 1,
-                widths: ['*', '*', '*', '*', '*', '*'],
+                widths: [100, 100, '*', 100, 100, 100],
                 body: [
                   [
                     {
@@ -892,27 +931,27 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: 'Comentarios',
+                      text: 'Detalles',
                       style: {
                         bold: true,
                       },
                     },
                     {
-                      text: 'Total Acu. (PEN)',
+                      text: 'Total (PEN)',
                       style: {
                         color: 'blue',
                         bold: true,
                       },
                     },
                     {
-                      text: 'Total Acu. (USD)',
+                      text: 'Total (USD)',
                       style: {
                         color: 'purple',
                         bold: true,
                       },
                     },
                     {
-                      text: 'Total Acu. (EUR)',
+                      text: 'Total (EUR)',
                       style: {
                         color: 'green',
                         bold: true,
@@ -938,7 +977,8 @@ export const getOfferingExpensesMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
+                        alignment: 'right',
                       },
                     },
                     {

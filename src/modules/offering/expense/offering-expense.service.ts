@@ -52,7 +52,8 @@ export class OfferingExpenseService {
     createOfferingExpenseDto: CreateOfferingExpenseDto,
     user: User,
   ): Promise<OfferingExpense> {
-    const { churchId, type, imageUrls, amount } = createOfferingExpenseDto;
+    const { churchId, type, imageUrls, amount, date, currency } =
+      createOfferingExpenseDto;
 
     //? All Types
     if (
@@ -121,6 +122,25 @@ export class OfferingExpenseService {
       if (!church?.recordStatus) {
         throw new BadRequestException(
           `La propiedad "Estado de registro" en Iglesia debe ser "Activo".`,
+        );
+      }
+
+      //* Validate if exists record already
+      const existsOffering = await this.offeringExpenseRepository.find({
+        where: {
+          type: type,
+          church: church,
+          date: new Date(date),
+          currency: currency,
+          recordStatus: RecordStatus.Active,
+        },
+      });
+
+      if (existsOffering.length > 0) {
+        const offeringDate = dateFormatterToDDMMYYYY(new Date(date).getTime());
+
+        throw new NotFoundException(
+          `Ya existe un registro con este Tipo: ${OfferingExpenseSearchTypeNames[type]} (mismos datos), Divisa: ${currency} y Fecha: ${offeringDate}.`,
         );
       }
 

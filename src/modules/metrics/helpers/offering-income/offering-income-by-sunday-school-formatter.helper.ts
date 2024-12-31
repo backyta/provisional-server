@@ -25,9 +25,16 @@ export interface OfferingIncomeBySundaySchoolDataResult {
   afternoonUSD: number;
   dayEUR: number;
   afternoonEUR: number;
-  memberType: string;
-  memberId: string;
-  memberFullName: string;
+  internalDonor: {
+    memberType: string;
+    memberId: string;
+    memberFullName: string;
+  };
+  externalDonor: {
+    donorId: string;
+    donorFullName: string;
+    sendingCountry: string;
+  };
   church: Church;
   accumulatedOfferingPEN: number;
   accumulatedOfferingUSD: number;
@@ -51,11 +58,30 @@ export const offeringIncomeBySundaySchoolFormatter = ({
           return (
             item.date === offering.date &&
             item.category === offering.category &&
-            (item.memberId === offering?.pastor?.id ||
-              item.memberId === offering?.copastor?.id ||
-              item.memberId === offering?.supervisor?.id ||
-              item.memberId === offering?.preacher?.id ||
-              item.memberId === offering?.disciple?.id)
+            (item?.internalDonor?.memberId === offering?.pastor?.id ||
+              item?.internalDonor?.memberId === offering?.copastor?.id ||
+              item?.internalDonor?.memberId === offering?.supervisor?.id ||
+              item?.internalDonor?.memberId === offering?.preacher?.id ||
+              item?.internalDonor?.memberId === offering?.disciple?.id)
+          );
+        }
+
+        if (
+          offering.category === OfferingIncomeCreationCategory.ExternalDonation
+        ) {
+          return (
+            item.date === offering.date &&
+            item.category === offering.category &&
+            item.externalDonor?.donorId === offering?.externalDonor?.id
+          );
+        }
+
+        if (
+          offering.category ===
+          OfferingIncomeCreationCategory.FundraisingProMinistry
+        ) {
+          return (
+            item.date === offering.date && item.category === offering.category
           );
         }
 
@@ -141,33 +167,43 @@ export const offeringIncomeBySundaySchoolFormatter = ({
             offering.currency === CurrencyType.EUR
               ? +offering.amount
               : 0,
-          memberType:
-            offering.category ===
-            OfferingIncomeCreationCategory.InternalDonation
-              ? offering.memberType
+          internalDonor: {
+            memberType:
+              offering.category ===
+              OfferingIncomeCreationCategory.InternalDonation
+                ? offering.memberType
+                : null,
+            memberFullName: offering?.pastor
+              ? `${getInitialFullNames({ firstNames: offering?.pastor?.member?.firstNames ?? '', lastNames: '' })} ${offering?.pastor?.member?.lastNames}`
+              : offering?.copastor
+                ? `${getInitialFullNames({ firstNames: offering?.copastor?.member?.firstNames ?? '', lastNames: '' })} ${offering?.copastor?.member?.lastNames}`
+                : offering?.supervisor
+                  ? `${getInitialFullNames({ firstNames: offering?.supervisor?.member?.firstNames ?? '', lastNames: '' })} ${offering?.supervisor?.member?.lastNames}`
+                  : offering?.preacher
+                    ? `${getInitialFullNames({ firstNames: offering?.preacher?.member?.firstNames ?? '', lastNames: '' })} ${offering?.preacher?.member?.lastNames}`
+                    : offering?.disciple
+                      ? `${getInitialFullNames({ firstNames: offering?.disciple?.member?.firstNames ?? '', lastNames: '' })} ${offering?.disciple?.member?.lastNames}`
+                      : null,
+            memberId: offering?.pastor
+              ? offering?.pastor?.id
+              : offering?.copastor
+                ? offering?.copastor?.id
+                : offering?.supervisor
+                  ? offering?.supervisor?.id
+                  : offering?.preacher
+                    ? offering?.preacher?.id
+                    : offering?.disciple
+                      ? offering?.disciple?.id
+                      : null,
+          },
+          externalDonor: {
+            donorFullName: offering?.externalDonor
+              ? `${getInitialFullNames({ firstNames: offering?.externalDonor?.firstNames ?? '', lastNames: '' })} ${offering?.externalDonor?.lastNames}`
               : null,
-          memberFullName: offering?.pastor
-            ? `${getInitialFullNames({ firstNames: offering?.pastor?.member?.firstNames ?? '', lastNames: '' })} ${offering?.pastor?.member?.lastNames}`
-            : offering?.copastor
-              ? `${getInitialFullNames({ firstNames: offering?.copastor?.member?.firstNames ?? '', lastNames: '' })} ${offering?.copastor?.member?.lastNames}`
-              : offering?.supervisor
-                ? `${getInitialFullNames({ firstNames: offering?.supervisor?.member?.firstNames ?? '', lastNames: '' })} ${offering?.supervisor?.member?.lastNames}`
-                : offering?.preacher
-                  ? `${getInitialFullNames({ firstNames: offering?.preacher?.member?.firstNames ?? '', lastNames: '' })} ${offering?.preacher?.member?.lastNames}`
-                  : offering?.disciple
-                    ? `${getInitialFullNames({ firstNames: offering?.disciple?.member?.firstNames ?? '', lastNames: '' })} ${offering?.disciple?.member?.lastNames}`
-                    : null,
-          memberId: offering?.pastor
-            ? offering?.pastor?.id
-            : offering?.copastor
-              ? offering?.copastor?.id
-              : offering?.supervisor
-                ? offering?.supervisor?.id
-                : offering?.preacher
-                  ? offering?.preacher?.id
-                  : offering?.disciple
-                    ? offering?.disciple?.id
-                    : null,
+            donorId: offering?.externalDonor?.id ?? null,
+            sendingCountry:
+              offering?.externalDonor?.residenceCity ?? 'País anónimo',
+          },
           church: {
             isAnexe: offering?.church?.isAnexe,
             abbreviatedChurchName: offering?.church?.abbreviatedChurchName,
@@ -184,7 +220,7 @@ export const offeringIncomeBySundaySchoolFormatter = ({
               : [],
         });
       }
-
+      // console.log(acc);
       return acc;
     }, []);
 
@@ -194,6 +230,8 @@ export const offeringIncomeBySundaySchoolFormatter = ({
     const dateB = parse(dateFormatterToDDMMYY(b.date), 'dd/MM/yy', new Date());
     return compareAsc(dateA, dateB);
   });
+
+  // console.log(resultSorted);
 
   return resultSorted;
 };

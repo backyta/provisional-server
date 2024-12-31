@@ -29,7 +29,10 @@ export const offeringIncomeByActivitiesFormatter = ({
 }: Options): OfferingIncomeByActivitiesDataResult[] => {
   const dataResult: OfferingIncomeByActivitiesDataResult[] =
     offeringIncome?.reduce((acc, offering) => {
-      const existing = acc.find((item) => item.date === offering.date);
+      const existing = acc.find(
+        (item) =>
+          item.date === offering.date && item.category === offering.category,
+      );
 
       if (existing) {
         if (offering.currency === CurrencyType.PEN) {

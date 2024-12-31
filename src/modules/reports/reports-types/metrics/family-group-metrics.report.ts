@@ -140,7 +140,7 @@ export const getFamilyGroupMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -267,7 +267,7 @@ export const getFamilyGroupMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -407,7 +407,7 @@ export const getFamilyGroupMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -492,7 +492,7 @@ export const getFamilyGroupMetricsReport = (
                       key,
                       `${payload?.familyGroupsCount} (${calculatePercentage(
                         payload?.familyGroupsCount,
-                        Object.values(familyGroupsByZoneDataResult).reduce(
+                        Object.values(familyGroupsByDistrictDataResult).reduce(
                           (acc, payload) => acc + payload.familyGroupsCount,
                           0,
                         ),
@@ -510,7 +510,7 @@ export const getFamilyGroupMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -607,7 +607,7 @@ export const getFamilyGroupMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
@@ -725,22 +725,11 @@ export const getFamilyGroupMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
-                        color: '#475569',
+                        color: 'red',
                       },
                     },
                     {
-                      text: `${Object.values(familyGroupsByRecordStatusDataResult).reduce((acc, payload) => acc + payload?.active, 0)} G. Familiares (${calculatePercentage(
-                        Object.values(familyGroupsByZoneDataResult).reduce(
-                          (acc, item) => acc + item?.men,
-                          0,
-                        ),
-                        Object.values(
-                          familyGroupsByRecordStatusDataResult,
-                        ).reduce(
-                          (acc, item) => acc + item?.active + item.inactive,
-                          0,
-                        ),
-                      )}%)`,
+                      text: `${Object.values(familyGroupsByRecordStatusDataResult).reduce((acc, payload) => acc + payload?.active, 0)} G. Familiares`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -749,17 +738,7 @@ export const getFamilyGroupMetricsReport = (
                       },
                     },
                     {
-                      text: `${Object.values(familyGroupsByRecordStatusDataResult).reduce((acc, payload) => acc + payload?.inactive, 0)} G. Familiares (${calculatePercentage(
-                        Object.values(
-                          familyGroupsByRecordStatusDataResult,
-                        ).reduce((acc, item) => acc + item?.inactive, 0),
-                        Object.values(
-                          familyGroupsByRecordStatusDataResult,
-                        ).reduce(
-                          (acc, item) => acc + item?.active + item.inactive,
-                          0,
-                        ),
-                      )}%)`,
+                      text: `${Object.values(familyGroupsByRecordStatusDataResult).reduce((acc, payload) => acc + payload?.inactive, 0)} G. Familiares`,
                       style: {
                         bold: true,
                         fontSize: 13,

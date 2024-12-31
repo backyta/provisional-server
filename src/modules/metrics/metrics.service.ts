@@ -79,6 +79,7 @@ import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
 import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
 import { OfferingIncome } from '@/modules/offering/income/entities/offering-income.entity';
 import { OfferingExpense } from '@/modules/offering/expense/entities/offering-expense.entity';
+import { offeringExpenseReportFormatter } from './helpers/offering-expense/offering-expense-report-formatter.helper';
 
 @Injectable()
 export class MetricsService {
@@ -1287,7 +1288,6 @@ export class MetricsService {
     //* Family Groups by copastor and zone
     if (term && searchType === MetricSearchType.FamilyGroupsByCopastorAndZone) {
       const [churchId, copastorId] = term.split('&');
-      console.log(churchId, copastorId);
 
       if (!allZones) {
         try {
@@ -1379,8 +1379,6 @@ export class MetricsService {
               'familyGroups',
             ],
           });
-
-          console.log(allZones);
 
           return familyGroupFormatterByCopastorAndZone({
             zones: allZones,
@@ -1757,7 +1755,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: {
-              date: order as FindOptionsOrderValue,
+              createdAt: order as FindOptionsOrderValue,
             },
             relations: ['church'],
           });
@@ -1813,6 +1811,7 @@ export class MetricsService {
               'church',
               'familyGroup',
               'familyGroup.disciples.member',
+              'familyGroup.theirSupervisor.member',
               'familyGroup.theirPreacher.member',
               'familyGroup.theirZone',
             ],
@@ -1864,6 +1863,7 @@ export class MetricsService {
               'church',
               'familyGroup',
               'familyGroup.disciples.member',
+              'familyGroup.theirSupervisor.member',
               'familyGroup.theirPreacher.member',
               'familyGroup.theirZone',
             ],
@@ -1914,6 +1914,7 @@ export class MetricsService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
           });
 
@@ -1961,6 +1962,7 @@ export class MetricsService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
           });
 
@@ -2026,11 +2028,12 @@ export class MetricsService {
                 recordStatus: RecordStatus.Active,
               },
               order: {
-                date: order as FindOptionsOrderValue,
+                createdAt: order as FindOptionsOrderValue,
               },
               relations: [
                 'church',
                 'zone',
+                'zone.theirCopastor.member',
                 'zone.theirSupervisor.member',
                 'zone.disciples.member',
               ],
@@ -2097,11 +2100,12 @@ export class MetricsService {
                 recordStatus: RecordStatus.Active,
               },
               order: {
-                date: order as FindOptionsOrderValue,
+                createdAt: order as FindOptionsOrderValue,
               },
               relations: [
                 'church',
                 'zone',
+                'zone.theirCopastor.member',
                 'zone.theirSupervisor.member',
                 'zone.disciples.member',
               ],
@@ -2146,7 +2150,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: {
-              date: order as FindOptionsOrderValue,
+              createdAt: order as FindOptionsOrderValue,
             },
             relations: [
               'church',
@@ -2155,6 +2159,7 @@ export class MetricsService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
           });
 
@@ -2193,7 +2198,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: {
-              date: order as FindOptionsOrderValue,
+              createdAt: order as FindOptionsOrderValue,
             },
             relations: [
               'church',
@@ -2202,6 +2207,7 @@ export class MetricsService {
               'supervisor.member',
               'preacher.member',
               'disciple.member',
+              'externalDonor',
             ],
           });
 
@@ -2245,7 +2251,7 @@ export class MetricsService {
                 recordStatus: RecordStatus.Active,
               },
               order: {
-                date: order as FindOptionsOrderValue,
+                createdAt: order as FindOptionsOrderValue,
               },
               relations: [
                 'church',
@@ -2254,6 +2260,7 @@ export class MetricsService {
                 'supervisor.member',
                 'preacher.member',
                 'disciple.member',
+                'externalDonor',
               ],
             });
 
@@ -2293,7 +2300,7 @@ export class MetricsService {
                 recordStatus: RecordStatus.Active,
               },
               order: {
-                date: order as FindOptionsOrderValue,
+                createdAt: order as FindOptionsOrderValue,
               },
               relations: [
                 'church',
@@ -2302,6 +2309,7 @@ export class MetricsService {
                 'supervisor.member',
                 'preacher.member',
                 'disciple.member',
+                'externalDonor',
               ],
             });
 
@@ -2342,7 +2350,7 @@ export class MetricsService {
                 recordStatus: RecordStatus.Active,
               },
               order: {
-                date: order as FindOptionsOrderValue,
+                createdAt: order as FindOptionsOrderValue,
               },
               relations: [
                 'church',
@@ -2351,6 +2359,7 @@ export class MetricsService {
                 'supervisor.member',
                 'preacher.member',
                 'disciple.member',
+                'externalDonor',
               ],
             });
 
@@ -2390,7 +2399,7 @@ export class MetricsService {
                 recordStatus: RecordStatus.Active,
               },
               order: {
-                date: order as FindOptionsOrderValue,
+                createdAt: order as FindOptionsOrderValue,
               },
               relations: [
                 'church',
@@ -2399,6 +2408,7 @@ export class MetricsService {
                 'supervisor.member',
                 'preacher.member',
                 'disciple.member',
+                'externalDonor',
               ],
             });
 
@@ -2438,7 +2448,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: {
-              date: order as FindOptionsOrderValue,
+              createdAt: order as FindOptionsOrderValue,
             },
             relations: ['church'],
           });
@@ -2478,7 +2488,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: {
-              date: order as FindOptionsOrderValue,
+              createdAt: order as FindOptionsOrderValue,
             },
             relations: ['church'],
           });
@@ -2519,7 +2529,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: {
-              date: order as FindOptionsOrderValue,
+              createdAt: order as FindOptionsOrderValue,
             },
             relations: ['church'],
           });
@@ -2559,7 +2569,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: {
-              date: order as FindOptionsOrderValue,
+              createdAt: order as FindOptionsOrderValue,
             },
             relations: ['church'],
           });
@@ -2600,7 +2610,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: {
-              date: order as FindOptionsOrderValue,
+              createdAt: order as FindOptionsOrderValue,
             },
             relations: ['church'],
           });
@@ -2640,7 +2650,7 @@ export class MetricsService {
               recordStatus: RecordStatus.Active,
             },
             order: {
-              date: order as FindOptionsOrderValue,
+              createdAt: order as FindOptionsOrderValue,
             },
             relations: ['church'],
           });
@@ -2752,7 +2762,7 @@ export class MetricsService {
             relations: ['church'],
           });
 
-          return offeringExpenseChartFormatter({
+          return offeringExpenseReportFormatter({
             offeringExpenses,
           }) as any;
         } catch (error) {
@@ -2836,7 +2846,7 @@ export class MetricsService {
             relations: ['church'],
           });
 
-          return offeringExpenseChartFormatter({
+          return offeringExpenseReportFormatter({
             offeringExpenses,
           }) as any;
         } catch (error) {
@@ -2845,7 +2855,7 @@ export class MetricsService {
       }
     }
 
-    //* Decoration and repair offering expenses
+    //* Decoration offering expenses
     if (term && searchType === MetricSearchType.DecorationOfferingExpenses) {
       if (isSingleMonth) {
         const [churchId, monthName, year] = term.split('&');
@@ -2917,7 +2927,7 @@ export class MetricsService {
             relations: ['church'],
           });
 
-          return offeringExpenseChartFormatter({
+          return offeringExpenseReportFormatter({
             offeringExpenses,
           }) as any;
         } catch (error) {
@@ -3001,7 +3011,7 @@ export class MetricsService {
             relations: ['church'],
           });
 
-          return offeringExpenseChartFormatter({
+          return offeringExpenseReportFormatter({
             offeringExpenses,
           }) as any;
         } catch (error) {
@@ -3082,7 +3092,7 @@ export class MetricsService {
             relations: ['church'],
           });
 
-          return offeringExpenseChartFormatter({
+          return offeringExpenseReportFormatter({
             offeringExpenses,
           }) as any;
         } catch (error) {
@@ -3163,7 +3173,7 @@ export class MetricsService {
             relations: ['church'],
           });
 
-          return offeringExpenseChartFormatter({
+          return offeringExpenseReportFormatter({
             offeringExpenses,
           }) as any;
         } catch (error) {
