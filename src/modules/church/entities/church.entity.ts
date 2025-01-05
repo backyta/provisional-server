@@ -77,6 +77,10 @@ export class Church {
   @Column('text', { name: 'address' })
   address: string;
 
+  // @Index()
+  // @Column('text', { name: 'address' })
+  // address2: string;
+
   @Column('text', { name: 'reference_address' })
   referenceAddress: string;
 

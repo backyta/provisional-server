@@ -48,9 +48,12 @@ export class CloudinaryService {
           folder: offeringSubType
             ? `${fileType}/${offeringType}/${offeringSubType}`
             : `${fileType}/${offeringType}`,
+          format: 'webp',
+          quality: 'auto',
         },
         (error, result) => {
-          if (error) return reject(error);
+          if (error)
+            return reject(`Error uploading to Cloudinary: ${error.message}`);
           resolve(result);
         },
       );

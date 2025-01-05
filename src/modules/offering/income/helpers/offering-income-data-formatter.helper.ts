@@ -65,9 +65,14 @@ export const offeringIncomeDataFormatter = ({ offeringIncome }: Options) => {
       id: offering?.externalDonor?.id,
       firstNames: offering?.externalDonor?.firstNames,
       lastNames: offering?.externalDonor?.lastNames,
+      gender: offering?.externalDonor?.gender,
+      birthDate: offering?.externalDonor?.birthDate,
+      email: offering?.externalDonor?.email,
+      phoneNumber: offering?.externalDonor?.phoneNumber,
       originCountry: offering?.externalDonor?.originCountry,
       residenceCountry: offering?.externalDonor?.residenceCountry,
       residenceCity: offering?.externalDonor?.residenceCity,
+      postalCode: offering?.externalDonor?.postalCode,
     },
   }));
 };

@@ -72,7 +72,7 @@ export const getOfferingExpensesMetricsReport = (
                       color: '#1d96d3',
                       fontSize: 20,
                       bold: true,
-                      alignment: 'center',
+                      alignment: 'right',
                       margin: [0, -10, 0, 0],
                     },
                   ],
@@ -139,9 +139,9 @@ export const getOfferingExpensesMetricsReport = (
                     format(addDays(expense?.date, 1), 'dd/MM/yyyy'),
                     expense.subType,
                     expense.comments,
-                    expense.accumulatedOfferingPEN,
-                    expense.accumulatedOfferingUSD,
-                    expense.accumulatedOfferingEUR,
+                    expense.accumulatedOfferingPEN.toFixed(2),
+                    expense.accumulatedOfferingUSD.toFixed(2),
+                    expense.accumulatedOfferingEUR.toFixed(2),
                   ]),
                   ['', '', '', '', '', '', ''],
                   ['', '', '', '', '', '', ''],
@@ -160,7 +160,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${operationalOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      text: `${operationalOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -169,7 +169,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${operationalOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      text: `${operationalOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -178,7 +178,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${operationalOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      text: `${operationalOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -211,7 +211,7 @@ export const getOfferingExpensesMetricsReport = (
                       color: '#1d96d3',
                       fontSize: 20,
                       bold: true,
-                      alignment: 'center',
+                      alignment: 'right',
                       margin: [0, -10, 0, 0],
                     },
                   ],
@@ -279,9 +279,9 @@ export const getOfferingExpensesMetricsReport = (
                       format(addDays(expense?.date, 1), 'dd/MM/yyyy'),
                       expense.subType,
                       expense.comments,
-                      expense.accumulatedOfferingPEN,
-                      expense.accumulatedOfferingUSD,
-                      expense.accumulatedOfferingEUR,
+                      expense.accumulatedOfferingPEN.toFixed(2),
+                      expense.accumulatedOfferingUSD.toFixed(2),
+                      expense.accumulatedOfferingEUR.toFixed(2),
                     ],
                   ),
                   ['', '', '', '', '', '', ''],
@@ -301,7 +301,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${maintenanceAndRepairOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      text: `${maintenanceAndRepairOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -310,7 +310,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${maintenanceAndRepairOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      text: `${maintenanceAndRepairOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -319,7 +319,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${maintenanceAndRepairOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      text: `${maintenanceAndRepairOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -350,7 +350,7 @@ export const getOfferingExpensesMetricsReport = (
                       color: '#1d96d3',
                       fontSize: 20,
                       bold: true,
-                      alignment: 'center',
+                      alignment: 'right',
                       margin: [0, -10, 0, 0],
                     },
                   ],
@@ -417,9 +417,9 @@ export const getOfferingExpensesMetricsReport = (
                     format(addDays(expense?.date, 1), 'dd/MM/yyyy'),
                     expense.subType,
                     expense.comments,
-                    expense.accumulatedOfferingPEN,
-                    expense.accumulatedOfferingUSD,
-                    expense.accumulatedOfferingEUR,
+                    expense.accumulatedOfferingPEN.toFixed(2),
+                    expense.accumulatedOfferingUSD.toFixed(2),
+                    expense.accumulatedOfferingEUR.toFixed(2),
                   ]),
                   ['', '', '', '', '', '', ''],
                   ['', '', '', '', '', '', ''],
@@ -438,7 +438,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${decorationOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      text: `${decorationOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -447,7 +447,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${decorationOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      text: `${decorationOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -456,7 +456,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${decorationOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      text: `${decorationOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -489,7 +489,7 @@ export const getOfferingExpensesMetricsReport = (
                       color: '#1d96d3',
                       fontSize: 20,
                       bold: true,
-                      alignment: 'center',
+                      alignment: 'right',
                       margin: [0, -10, 0, 0],
                     },
                   ],
@@ -557,9 +557,9 @@ export const getOfferingExpensesMetricsReport = (
                       format(addDays(expense?.date, 1), 'dd/MM/yyyy'),
                       expense.subType,
                       expense.comments,
-                      expense.accumulatedOfferingPEN,
-                      expense.accumulatedOfferingUSD,
-                      expense.accumulatedOfferingEUR,
+                      expense.accumulatedOfferingPEN.toFixed(2),
+                      expense.accumulatedOfferingUSD.toFixed(2),
+                      expense.accumulatedOfferingEUR.toFixed(2),
                     ],
                   ),
                   ['', '', '', '', '', '', ''],
@@ -579,7 +579,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${equipmentAndTechnologyOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      text: `${equipmentAndTechnologyOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -588,7 +588,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${equipmentAndTechnologyOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      text: `${equipmentAndTechnologyOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -597,7 +597,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${equipmentAndTechnologyOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      text: `${equipmentAndTechnologyOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -628,7 +628,7 @@ export const getOfferingExpensesMetricsReport = (
                       color: '#1d96d3',
                       fontSize: 20,
                       bold: true,
-                      alignment: 'center',
+                      alignment: 'right',
                       margin: [0, -10, 0, 0],
                     },
                   ],
@@ -695,9 +695,9 @@ export const getOfferingExpensesMetricsReport = (
                     format(addDays(expense?.date, 1), 'dd/MM/yyyy'),
                     expense.subType,
                     expense.comments,
-                    expense.accumulatedOfferingPEN,
-                    expense.accumulatedOfferingUSD,
-                    expense.accumulatedOfferingEUR,
+                    expense.accumulatedOfferingPEN.toFixed(2),
+                    expense.accumulatedOfferingUSD.toFixed(2),
+                    expense.accumulatedOfferingEUR.toFixed(2),
                   ]),
                   ['', '', '', '', '', '', ''],
                   ['', '', '', '', '', '', ''],
@@ -716,7 +716,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${suppliesOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      text: `${suppliesOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -725,7 +725,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${suppliesOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      text: `${suppliesOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -734,7 +734,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${suppliesOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      text: `${suppliesOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -765,7 +765,7 @@ export const getOfferingExpensesMetricsReport = (
                       color: '#1d96d3',
                       fontSize: 20,
                       bold: true,
-                      alignment: 'center',
+                      alignment: 'right',
                       margin: [0, -10, 0, 0],
                     },
                   ],
@@ -832,9 +832,9 @@ export const getOfferingExpensesMetricsReport = (
                     format(addDays(expense?.date, 1), 'dd/MM/yyyy'),
                     expense.subType,
                     expense.comments,
-                    expense.accumulatedOfferingPEN,
-                    expense.accumulatedOfferingUSD,
-                    expense.accumulatedOfferingEUR,
+                    expense.accumulatedOfferingPEN.toFixed(2),
+                    expense.accumulatedOfferingUSD.toFixed(2),
+                    expense.accumulatedOfferingEUR.toFixed(2),
                   ]),
                   ['', '', '', '', '', '', ''],
                   ['', '', '', '', '', '', ''],
@@ -853,7 +853,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${planingEventsOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      text: `${planingEventsOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -862,7 +862,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${planingEventsOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      text: `${planingEventsOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -871,7 +871,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${planingEventsOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      text: `${planingEventsOfferingExpensesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -902,7 +902,7 @@ export const getOfferingExpensesMetricsReport = (
                       color: '#1d96d3',
                       fontSize: 20,
                       bold: true,
-                      alignment: 'center',
+                      alignment: 'right',
                       margin: [0, -10, 0, 0],
                     },
                   ],
@@ -962,9 +962,9 @@ export const getOfferingExpensesMetricsReport = (
                     expense?.church?.abbreviatedChurchName,
                     format(addDays(expense?.date, 1), 'dd/MM/yyyy'),
                     expense.comments,
-                    `${expense.accumulatedOfferingPEN} PEN`,
-                    `${expense.accumulatedOfferingUSD} USD`,
-                    `${expense.accumulatedOfferingEUR} EUR`,
+                    `${expense.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                    `${expense.accumulatedOfferingUSD.toFixed(2)} USD`,
+                    `${expense.accumulatedOfferingEUR.toFixed(2)} EUR`,
                   ]),
                   ['', '', '', '', '', ''],
                   ['', '', '', '', '', ''],
@@ -982,7 +982,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringExpensesAdjustmentsDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      text: `${offeringExpensesAdjustmentsDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -991,7 +991,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringExpensesAdjustmentsDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      text: `${offeringExpensesAdjustmentsDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1000,7 +1000,7 @@ export const getOfferingExpensesMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringExpensesAdjustmentsDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      text: `${offeringExpensesAdjustmentsDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,

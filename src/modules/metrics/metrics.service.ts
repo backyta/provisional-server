@@ -3307,15 +3307,23 @@ export class MetricsService {
       const [churchId, currency, yearValue] = term.split('&');
       const year = +yearValue;
 
-      const currentYearStartDate = new Date(Date.UTC(year, 0, 1, 0, 0, 0));
-      const currentYearEndDate = new Date(
-        Date.UTC(year, 11, 31, 23, 59, 59, 999),
-      );
+      // const currentYearStartDate = new Date(year, 0, 1);
+      // const currentYearEndDate = new Date(year, 11, 31);
 
-      const previousYearStartDate = new Date(Date.UTC(year - 1, 0, 1, 0, 0, 0));
-      const previousYearEndDate = new Date(
-        Date.UTC(year - 1, 11, 31, 23, 59, 59, 999),
-      );
+      // const previousYearStartDate = new Date(year - 1, 0, 1);
+      // const previousYearEndDate = new Date(year - 1, 11, 31);
+
+      const currentStartMonthDate = new Date(`January 1, ${year}`);
+      const currentEndMonthDate = new Date(`December 1, ${year}`);
+
+      const currentYearStartDate = startOfMonth(currentStartMonthDate);
+      const currentYearEndDate = endOfMonth(currentEndMonthDate);
+
+      const previousStartMonthDate = new Date(`January 1, ${year - 1}`);
+      const previousEndMonthDate = new Date(`December 1, ${year - 1}`);
+
+      const previousYearStartDate = startOfMonth(previousStartMonthDate);
+      const previousYearEndDate = endOfMonth(previousEndMonthDate);
 
       try {
         const church = await this.churchRepository.findOne({
@@ -3447,8 +3455,14 @@ export class MetricsService {
       const [churchId, type, yearValue] = term.split('&');
       const year = +yearValue;
 
-      const startDate = new Date(Date.UTC(year, 0, 1, 0, 0, 0));
-      const endDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
+      // const startDate = new Date(Date.UTC(year, 0, 1, 0, 0, 0));
+      // const endDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
+
+      const startMonthDate = new Date(`January 1, ${year}`);
+      const endMonthDate = new Date(`December 1, ${year}`);
+
+      const startDate = startOfMonth(startMonthDate);
+      const endDate = endOfMonth(endMonthDate);
 
       try {
         const church = await this.churchRepository.findOne({
@@ -3550,8 +3564,14 @@ export class MetricsService {
       const [churchId, type, yearValue] = term.split('&');
       const year = +yearValue;
 
-      const startDate = new Date(Date.UTC(year, 0, 1, 0, 0, 0));
-      const endDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
+      // const startDate = new Date(Date.UTC(year, 0, 1, 0, 0, 0));
+      // const endDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
+
+      const startMonthDate = new Date(`January 1, ${year}`);
+      const endMonthDate = new Date(`December 1, ${year}`);
+
+      const startDate = startOfMonth(startMonthDate);
+      const endDate = endOfMonth(endMonthDate);
 
       try {
         const church = await this.churchRepository.findOne({

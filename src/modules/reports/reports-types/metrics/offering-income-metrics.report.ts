@@ -112,7 +112,7 @@ export const getOfferingIncomeMetricsReport = (
                       fontSize: 20,
                       bold: true,
                       alignment: 'center',
-                      margin: [0, -10, 0, 0],
+                      margin: [0, -10, 0, 3],
                     },
                   ],
                 ],
@@ -146,7 +146,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: 'Turnos(PEN)',
+                      text: 'Turnos (PEN)',
                       style: {
                         color: 'blue',
                         bold: true,
@@ -160,7 +160,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: 'Turnos(USD)',
+                      text: 'Turnos (USD)',
                       style: {
                         color: 'purple',
                         bold: true,
@@ -174,7 +174,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: 'Turnos(EUR)',
+                      text: 'Turnos (EUR)',
                       style: {
                         color: 'green',
                         bold: true,
@@ -192,12 +192,12 @@ export const getOfferingIncomeMetricsReport = (
                     offering?.church?.abbreviatedChurchName,
                     format(addDays(offering?.date, 1), 'dd/MM/yyyy'),
                     OfferingIncomeCreationCategoryNames[offering.category],
-                    `Dia: ${offering?.dayPEN} PEN  Tarde: ${offering?.afternoonPEN} PEN`,
-                    `${offering?.dayPEN + offering?.afternoonPEN} PEN`,
-                    `Dia: ${offering?.dayUSD} USD  Tarde: ${offering?.afternoonUSD} USD`,
-                    `${offering?.dayUSD + offering?.afternoonUSD} USD`,
-                    `Dia: ${offering?.dayEUR} EUR  Tarde: ${offering?.afternoonEUR} EUR`,
-                    `${offering?.dayEUR + offering?.afternoonEUR} USD`,
+                    `D: ${offering?.dayPEN.toFixed(2)} PEN\nT: ${offering?.afternoonPEN.toFixed(2)} PEN`,
+                    `${(offering?.dayPEN + offering?.afternoonPEN).toFixed(2)} PEN`,
+                    `D: ${offering?.dayUSD.toFixed(2)} USD\nT: ${offering?.afternoonUSD} USD`,
+                    `${(offering?.dayUSD + offering?.afternoonUSD).toFixed(2)} USD`,
+                    `D: ${offering?.dayEUR.toFixed(2)} EUR\nT: ${offering?.afternoonEUR.toFixed(2)} EUR`,
+                    `${(offering?.dayEUR + offering?.afternoonEUR).toFixed(2)} USD`,
                   ]),
                   ['', '', '', '', '', '', '', '', ''],
                   ['', '', '', '', '', '', '', '', ''],
@@ -212,10 +212,11 @@ export const getOfferingIncomeMetricsReport = (
                         color: 'red',
                         fontSize: 13,
                         italics: true,
+                        alignment: 'center',
                       },
                     },
                     {
-                      text: `${offeringIncomeBySundayServiceDataResult.reduce((acc, offering) => acc + offering?.dayPEN + offering?.afternoonPEN, 0)} PEN`,
+                      text: `${offeringIncomeBySundayServiceDataResult.reduce((acc, offering) => acc + offering?.dayPEN + offering?.afternoonPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -225,7 +226,7 @@ export const getOfferingIncomeMetricsReport = (
                     },
                     '',
                     {
-                      text: `${offeringIncomeBySundayServiceDataResult.reduce((acc, offering) => acc + offering?.dayUSD + offering?.afternoonUSD, 0)} USD`,
+                      text: `${offeringIncomeBySundayServiceDataResult.reduce((acc, offering) => acc + offering?.dayUSD + offering?.afternoonUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -235,7 +236,7 @@ export const getOfferingIncomeMetricsReport = (
                     },
                     '',
                     {
-                      text: `${offeringIncomeBySundayServiceDataResult.reduce((acc, offering) => acc + offering?.dayEUR + offering?.afternoonEUR, 0)} EUR`,
+                      text: `${offeringIncomeBySundayServiceDataResult.reduce((acc, offering) => acc + offering?.dayEUR + offering?.afternoonEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -267,7 +268,7 @@ export const getOfferingIncomeMetricsReport = (
                       fontSize: 20,
                       bold: true,
                       alignment: 'center',
-                      margin: [0, -10, 0, 0],
+                      margin: [0, -10, 0, 3],
                     },
                   ],
                 ],
@@ -340,9 +341,9 @@ export const getOfferingIncomeMetricsReport = (
                     OfferingIncomeCreationCategoryNames[offering?.category],
                     offering?.familyGroup?.familyGroupCode,
                     `${offering?.preacher?.firstNames} ${offering?.preacher?.lastNames}`,
-                    offering.accumulatedOfferingPEN,
-                    offering.accumulatedOfferingUSD,
-                    offering.accumulatedOfferingEUR,
+                    offering.accumulatedOfferingPEN.toFixed(2),
+                    offering.accumulatedOfferingUSD.toFixed(2),
+                    offering.accumulatedOfferingEUR.toFixed(2),
                   ]),
                   ['', '', '', '', '', '', '', ''],
                   ['', '', '', '', '', '', '', ''],
@@ -358,10 +359,11 @@ export const getOfferingIncomeMetricsReport = (
                         fontSize: 13,
                         italics: true,
                         color: 'red',
+                        alignment: 'center',
                       },
                     },
                     {
-                      text: `${offeringIncomeByFamilyGroupDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      text: `${offeringIncomeByFamilyGroupDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -370,7 +372,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringIncomeByFamilyGroupDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      text: `${offeringIncomeByFamilyGroupDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -379,7 +381,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringIncomeByFamilyGroupDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      text: `${offeringIncomeByFamilyGroupDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -411,7 +413,7 @@ export const getOfferingIncomeMetricsReport = (
                       fontSize: 20,
                       bold: true,
                       alignment: 'center',
-                      margin: [0, -10, 0, 0],
+                      margin: [0, -10, 0, 3],
                     },
                   ],
                 ],
@@ -655,19 +657,19 @@ export const getOfferingIncomeMetricsReport = (
                           ? ` ${offering?.externalDonor?.donorFullName} (Donador Externo)`
                           : '-',
                       offering?.dayPEN || offering?.afternoonPEN
-                        ? `D: ${offering?.dayPEN} PEN\nT: ${offering?.afternoonPEN} PEN\nTot: ${offering?.dayPEN + offering?.afternoonPEN} PEN`
+                        ? `D: ${offering?.dayPEN.toFixed(2)} PEN\nT: ${offering?.afternoonPEN.toFixed(2)} PEN\nTot: ${(offering?.dayPEN + offering?.afternoonPEN).toFixed(2)} PEN`
                         : offering.accumulatedOfferingPEN
-                          ? `${offering.accumulatedOfferingPEN} PEN`
+                          ? `${offering.accumulatedOfferingPEN.toFixed(2)} PEN`
                           : '-',
                       offering?.dayUSD || offering?.afternoonUSD
-                        ? `D: ${offering?.dayUSD} USD\nT: ${offering?.afternoonUSD} USD\nTot.: ${offering?.dayUSD + offering?.afternoonUSD} USD`
+                        ? `D: ${offering?.dayUSD.toFixed(2)} USD\nT: ${offering?.afternoonUSD.toFixed(2)} USD\nTot.: ${(offering?.dayUSD + offering?.afternoonUSD).toFixed(2)} USD`
                         : offering.accumulatedOfferingUSD
-                          ? `${offering.accumulatedOfferingUSD} USD`
+                          ? `${offering.accumulatedOfferingUSD.toFixed(2)} USD`
                           : '-',
                       offering?.dayEUR || offering?.afternoonEUR
-                        ? `D: ${offering?.dayEUR} EUR\nT: ${offering?.afternoonEUR} EUR\nTot.: ${offering?.dayEUR + offering?.afternoonEUR} EUR`
+                        ? `D: ${offering?.dayEUR.toFixed(2)} EUR\nT: ${offering?.afternoonEUR.toFixed(2)} EUR\nTot.: ${(offering?.dayEUR + offering?.afternoonEUR).toFixed(2)} EUR`
                         : offering.accumulatedOfferingEUR
-                          ? `${offering.accumulatedOfferingEUR} EUR`
+                          ? `${offering.accumulatedOfferingEUR.toFixed(2)} EUR`
                           : '-',
                     ]),
                   ['', '', '', '', '', '', ''],
@@ -687,7 +689,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${
+                      text: `${(
                         offeringIncomeBySundaySchoolDataResult.reduce(
                           (acc, offering) =>
                             acc + offering?.dayPEN + offering?.afternoonPEN,
@@ -698,7 +700,7 @@ export const getOfferingIncomeMetricsReport = (
                             acc + offering?.accumulatedOfferingPEN,
                           0,
                         )
-                      } PEN`,
+                      ).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -707,7 +709,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${
+                      text: `${(
                         offeringIncomeBySundaySchoolDataResult.reduce(
                           (acc, offering) =>
                             acc + offering?.dayUSD + offering?.afternoonUSD,
@@ -718,7 +720,7 @@ export const getOfferingIncomeMetricsReport = (
                             acc + offering?.accumulatedOfferingUSD,
                           0,
                         )
-                      } USD`,
+                      ).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -727,7 +729,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${
+                      text: `${(
                         offeringIncomeBySundaySchoolDataResult.reduce(
                           (acc, offering) =>
                             acc + offering?.dayEUR + offering?.afternoonEUR,
@@ -738,7 +740,7 @@ export const getOfferingIncomeMetricsReport = (
                             acc + offering?.accumulatedOfferingEUR,
                           0,
                         )
-                      } EUR`,
+                      ).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -770,7 +772,7 @@ export const getOfferingIncomeMetricsReport = (
                       fontSize: 20,
                       bold: true,
                       alignment: 'center',
-                      margin: [0, -10, 0, 0],
+                      margin: [0, -10, 0, 3],
                     },
                   ],
                 ],
@@ -829,9 +831,9 @@ export const getOfferingIncomeMetricsReport = (
                     offering?.church?.abbreviatedChurchName,
                     format(addDays(offering?.date, 1), 'dd/MM/yyyy'),
                     OfferingIncomeCreationCategoryNames[offering.category],
-                    `${offering.accumulatedOfferingPEN} PEN`,
-                    `${offering.accumulatedOfferingUSD} USD`,
-                    `${offering.accumulatedOfferingEUR} EUR`,
+                    `${offering.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                    `${offering.accumulatedOfferingUSD.toFixed(2)} USD`,
+                    `${offering.accumulatedOfferingEUR.toFixed(2)} EUR`,
                   ]),
                   ['', '', '', '', '', ''],
                   ['', '', '', '', '', ''],
@@ -845,10 +847,11 @@ export const getOfferingIncomeMetricsReport = (
                         fontSize: 13,
                         italics: true,
                         color: 'red',
+                        alignment: 'center',
                       },
                     },
                     {
-                      text: `${offeringIncomeByUnitedServiceDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      text: `${offeringIncomeByUnitedServiceDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -857,7 +860,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringIncomeByUnitedServiceDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      text: `${offeringIncomeByUnitedServiceDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -866,7 +869,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringIncomeByUnitedServiceDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      text: `${offeringIncomeByUnitedServiceDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -900,7 +903,7 @@ export const getOfferingIncomeMetricsReport = (
                       fontSize: 20,
                       bold: true,
                       alignment: 'center',
-                      margin: [0, -10, 0, 0],
+                      margin: [0, -10, 0, 3],
                     },
                   ],
                 ],
@@ -984,9 +987,9 @@ export const getOfferingIncomeMetricsReport = (
                         ? `${offering?.supervisor?.firstNames} ${offering?.supervisor?.lastNames}`
                         : '-',
                       offering.zone.zoneName ? offering?.zone?.zoneName : '-',
-                      `${offering.accumulatedOfferingPEN} PEN`,
-                      `${offering.accumulatedOfferingUSD} USD`,
-                      `${offering.accumulatedOfferingEUR} EUR`,
+                      `${offering.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                      `${offering.accumulatedOfferingUSD.toFixed(2)} USD`,
+                      `${offering.accumulatedOfferingEUR.toFixed(2)} EUR`,
                     ],
                   ),
                   ['', '', '', '', '', '', '', '', ''],
@@ -1004,10 +1007,11 @@ export const getOfferingIncomeMetricsReport = (
                         fontSize: 13,
                         italics: true,
                         color: 'red',
+                        alignment: 'center',
                       },
                     },
                     {
-                      text: `${offeringIncomeByFastingAndVigilDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      text: `${offeringIncomeByFastingAndVigilDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1016,7 +1020,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringIncomeByFastingAndVigilDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      text: `${offeringIncomeByFastingAndVigilDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1025,7 +1029,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringIncomeByFastingAndVigilDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      text: `${offeringIncomeByFastingAndVigilDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1057,7 +1061,7 @@ export const getOfferingIncomeMetricsReport = (
                       fontSize: 20,
                       bold: true,
                       alignment: 'center',
-                      margin: [0, -10, 0, 0],
+                      margin: [0, -10, 0, 3],
                     },
                   ],
                 ],
@@ -1278,18 +1282,18 @@ export const getOfferingIncomeMetricsReport = (
                         : `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
                       OfferingIncomeCreationCategoryNames[offering.category],
                       offering?.internalDonor?.memberType
-                        ? ` ${offering?.internalDonor?.memberFullName} (${MemberTypeNames[offering?.internalDonor?.memberType]})`
+                        ? `${offering?.internalDonor?.memberFullName} (${MemberTypeNames[offering?.internalDonor?.memberType]})`
                         : offering?.externalDonor?.donorId
                           ? ` ${offering?.externalDonor?.donorFullName} (Donador Externo)`
                           : '-',
                       offering.accumulatedOfferingPEN
-                        ? `${offering.accumulatedOfferingPEN} PEN`
+                        ? `${offering.accumulatedOfferingPEN.toFixed(2)} PEN`
                         : '-',
                       offering.accumulatedOfferingUSD
-                        ? `${offering.accumulatedOfferingUSD} USD`
+                        ? `${offering.accumulatedOfferingUSD.toFixed(2)} USD`
                         : '-',
                       offering.accumulatedOfferingEUR
-                        ? `${offering.accumulatedOfferingEUR} EUR`
+                        ? `${offering.accumulatedOfferingEUR.toFixed(2)} EUR`
                         : '-',
                     ]),
                   ['', '', '', '', '', '', ''],
@@ -1305,10 +1309,11 @@ export const getOfferingIncomeMetricsReport = (
                         fontSize: 13,
                         italics: true,
                         color: 'red',
+                        alignment: 'center',
                       },
                     },
                     {
-                      text: `${offeringIncomeByYouthServiceDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      text: `${offeringIncomeByYouthServiceDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1317,7 +1322,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringIncomeByYouthServiceDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      text: `${offeringIncomeByYouthServiceDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1326,7 +1331,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringIncomeByYouthServiceDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      text: `${offeringIncomeByYouthServiceDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1358,7 +1363,7 @@ export const getOfferingIncomeMetricsReport = (
                       fontSize: 20,
                       bold: true,
                       alignment: 'center',
-                      margin: [0, -10, 0, 0],
+                      margin: [0, -10, 0, 3],
                     },
                   ],
                 ],
@@ -1429,13 +1434,13 @@ export const getOfferingIncomeMetricsReport = (
                         ? ` ${offering?.memberFullName} (En General)`
                         : 'Actividades Pro-Terreno (En General)',
                     offering.accumulatedOfferingPEN
-                      ? `${offering.accumulatedOfferingPEN} PEN`
+                      ? `${offering.accumulatedOfferingPEN.toFixed(2)} PEN`
                       : '-',
                     offering.accumulatedOfferingUSD
-                      ? `${offering.accumulatedOfferingUSD} USD`
+                      ? `${offering.accumulatedOfferingUSD.toFixed(2)} USD`
                       : '-',
                     offering.accumulatedOfferingEUR
-                      ? `${offering.accumulatedOfferingEUR} EUR`
+                      ? `${offering.accumulatedOfferingEUR.toFixed(2)} EUR`
                       : '-',
                   ]),
                   ['', '', '', '', '', '', ''],
@@ -1451,10 +1456,11 @@ export const getOfferingIncomeMetricsReport = (
                         fontSize: 13,
                         italics: true,
                         color: 'red',
+                        alignment: 'center',
                       },
                     },
                     {
-                      text: `${offeringIncomeByChurchGroundDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      text: `${offeringIncomeByChurchGroundDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1463,7 +1469,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringIncomeByChurchGroundDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      text: `${offeringIncomeByChurchGroundDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1472,7 +1478,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringIncomeByChurchGroundDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      text: `${offeringIncomeByChurchGroundDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1504,7 +1510,7 @@ export const getOfferingIncomeMetricsReport = (
                       fontSize: 20,
                       bold: true,
                       alignment: 'center',
-                      margin: [0, -10, 0, 0],
+                      margin: [0, -10, 0, 3],
                     },
                   ],
                 ],
@@ -1563,9 +1569,9 @@ export const getOfferingIncomeMetricsReport = (
                     offering?.church?.abbreviatedChurchName,
                     format(addDays(offering?.date, 1), 'dd/MM/yyyy'),
                     OfferingIncomeCreationCategoryNames[offering.category],
-                    `${offering.accumulatedOfferingPEN} PEN`,
-                    `${offering.accumulatedOfferingUSD} USD`,
-                    `${offering.accumulatedOfferingEUR} EUR`,
+                    `${offering.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                    `${offering.accumulatedOfferingUSD.toFixed(2)} USD`,
+                    `${offering.accumulatedOfferingEUR.toFixed(2)} EUR`,
                   ]),
                   ['', '', '', '', '', ''],
                   ['', '', '', '', '', ''],
@@ -1579,10 +1585,11 @@ export const getOfferingIncomeMetricsReport = (
                         fontSize: 13,
                         italics: true,
                         color: 'red',
+                        alignment: 'center',
                       },
                     },
                     {
-                      text: `${offeringIncomeByActivitiesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      text: `${offeringIncomeByActivitiesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1591,7 +1598,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringIncomeByActivitiesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      text: `${offeringIncomeByActivitiesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1600,7 +1607,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringIncomeByActivitiesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      text: `${offeringIncomeByActivitiesDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1634,7 +1641,7 @@ export const getOfferingIncomeMetricsReport = (
                       fontSize: 20,
                       bold: true,
                       alignment: 'center',
-                      margin: [0, -10, 0, 0],
+                      margin: [0, -10, 0, 3],
                     },
                   ],
                 ],
@@ -1704,13 +1711,13 @@ export const getOfferingIncomeMetricsReport = (
                         ? ` ${offering?.memberFullName} (${MemberTypeNames[offering?.memberType]})`
                         : '-',
                       offering.accumulatedOfferingPEN
-                        ? `${offering.accumulatedOfferingPEN} PEN`
+                        ? `${offering.accumulatedOfferingPEN.toFixed(2)} PEN`
                         : '-',
                       offering.accumulatedOfferingUSD
-                        ? `${offering.accumulatedOfferingUSD} USD`
+                        ? `${offering.accumulatedOfferingUSD.toFixed(2)} USD`
                         : '-',
                       offering.accumulatedOfferingEUR
-                        ? `${offering.accumulatedOfferingEUR} EUR`
+                        ? `${offering.accumulatedOfferingEUR.toFixed(2)} EUR`
                         : '-',
                     ],
                   ),
@@ -1727,10 +1734,11 @@ export const getOfferingIncomeMetricsReport = (
                         fontSize: 13,
                         italics: true,
                         color: 'red',
+                        alignment: 'center',
                       },
                     },
                     {
-                      text: `${offeringIncomeBySpecialOfferingDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      text: `${offeringIncomeBySpecialOfferingDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1739,7 +1747,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringIncomeBySpecialOfferingDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      text: `${offeringIncomeBySpecialOfferingDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1748,7 +1756,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringIncomeBySpecialOfferingDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      text: `${offeringIncomeBySpecialOfferingDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1780,7 +1788,7 @@ export const getOfferingIncomeMetricsReport = (
                       fontSize: 20,
                       bold: true,
                       alignment: 'center',
-                      margin: [0, -10, 0, 0],
+                      margin: [0, -10, 0, 3],
                     },
                   ],
                 ],
@@ -1840,9 +1848,9 @@ export const getOfferingIncomeMetricsReport = (
                       offering?.church?.abbreviatedChurchName,
                       format(addDays(offering?.date, 1), 'dd/MM/yyyy'),
                       offering.comments,
-                      `${offering.accumulatedOfferingPEN} PEN`,
-                      `${offering.accumulatedOfferingUSD} USD`,
-                      `${offering.accumulatedOfferingEUR} EUR`,
+                      `${offering.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                      `${offering.accumulatedOfferingUSD.toFixed(2)} USD`,
+                      `${offering.accumulatedOfferingEUR.toFixed(2)} EUR`,
                     ],
                   ),
                   ['', '', '', '', '', ''],
@@ -1857,10 +1865,11 @@ export const getOfferingIncomeMetricsReport = (
                         fontSize: 13,
                         italics: true,
                         color: 'red',
+                        alignment: 'center',
                       },
                     },
                     {
-                      text: `${offeringIncomeByIncomeAdjustmentDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      text: `${offeringIncomeByIncomeAdjustmentDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1869,7 +1878,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringIncomeByIncomeAdjustmentDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      text: `${offeringIncomeByIncomeAdjustmentDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -1878,7 +1887,7 @@ export const getOfferingIncomeMetricsReport = (
                       },
                     },
                     {
-                      text: `${offeringIncomeByIncomeAdjustmentDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      text: `${offeringIncomeByIncomeAdjustmentDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,

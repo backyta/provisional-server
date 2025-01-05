@@ -45,8 +45,11 @@ import { OfferingExpenseModule } from '@/modules/offering/expense/offering-expen
       database: process.env.DB_NAME,
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
+      // entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      // migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
+      // migrationsRun: true,
       autoLoadEntities: true,
-      // synchronize: process.env.STAGE === 'prod' ? false : true,
+      //synchronize: process.env.STAGE === 'prod' ? false : true,
       synchronize: true,
     }),
     ThrottlerModule.forRoot([

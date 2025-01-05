@@ -634,11 +634,7 @@ export class OfferingIncomeService {
             const newDonor = this.externalDonorRepository.create({
               firstNames: externalDonorFirstNames,
               lastNames: externalDonorLastNames,
-              birthDate:
-                externalDonorBirthDate &&
-                !isNaN(new Date(externalDonorBirthDate).getTime())
-                  ? externalDonorBirthDate
-                  : null,
+              birthDate: externalDonorBirthDate ?? new Date(1900, 0, 1),
               gender: externalDonorGender,
               email: externalDonorEmail,
               phoneNumber: externalDonorPhoneNumber,

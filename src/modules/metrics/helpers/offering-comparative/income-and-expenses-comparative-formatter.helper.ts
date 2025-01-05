@@ -113,6 +113,8 @@ export const IncomeAndExpensesComparativeFormatter = ({
       return previousMonthResult;
     });
 
+  // console.log(previousYearResults);
+
   //? Current
   //* Filtrar los ingresos y gastos del año actual por mes
   const currentYearDataByMonth = monthNames.map((_, index) =>
@@ -128,6 +130,8 @@ export const IncomeAndExpensesComparativeFormatter = ({
       const { totalIncome, totalExpenses } = calculateIncomeAndExpenses(
         currentYearDataByMonth[index],
       );
+
+      // console.log(previousYearResults.at(-1).netResult);
 
       const currentMonthResult: YearlyIncomeExpenseComparativeDataResult = {
         month: monthNames[index],
@@ -150,6 +154,8 @@ export const IncomeAndExpensesComparativeFormatter = ({
       currentNetResult = currentMonthResult.netResult;
       return currentMonthResult;
     });
+
+  // console.log(currentYearResults);
 
   return currentYearResults;
 };

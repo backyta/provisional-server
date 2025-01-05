@@ -24,9 +24,9 @@ export interface OfferingIncomeByChurchGroundDataResult {
   memberFullName: string;
   memberId: string | undefined;
   externalDonor: {
-    donorId: string;
-    donorFullName: string;
-    sendingCountry: string;
+    donorId: string | null;
+    donorFullName: string | null;
+    sendingCountry: string | null;
   };
   church: Church;
   allOfferings: Array<{
@@ -39,7 +39,6 @@ export interface OfferingIncomeByChurchGroundDataResult {
   }>;
 }
 
-//TODO : poner como opcional o null el externalk donor porpiedades y tmb en internal donor replicar ene l front en las interfaces
 export const offeringIncomeByChurchGroundFormatter = ({
   offeringIncome,
 }: Options): OfferingIncomeByChurchGroundDataResult[] => {

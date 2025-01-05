@@ -21,14 +21,14 @@ export interface OfferingIncomeByYouthServiceDataResult {
   accumulatedOfferingEUR: number;
   church: Church;
   internalDonor: {
-    memberType: string;
-    memberId: string;
-    memberFullName: string;
+    memberType: string | null;
+    memberId: string | null;
+    memberFullName: string | null;
   };
   externalDonor: {
-    donorId: string;
-    donorFullName: string;
-    sendingCountry: string;
+    donorId: string | null;
+    donorFullName: string | null;
+    sendingCountry: string | null;
   };
   allOfferings: Array<{
     offering: number;

@@ -38,7 +38,6 @@ import { dataPreachers } from '@/modules/seed/data/seed-preachers';
 import { dataSupervisors } from '@/modules/seed/data/seed-supervisor';
 import { dataFamilyGroups } from '@/modules/seed/data/seed-family-group';
 
-// TODO : agregar offerings mediante el id creado de la iglesia y pastores,zones etc
 @Injectable()
 export class SeedService {
   private readonly logger = new Logger('SeedService');

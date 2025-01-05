@@ -230,10 +230,10 @@ export const getFinancialBalanceComparativeMetricsReport = (
                     .map((item) => [
                       item?.church?.abbreviatedChurchName,
                       `${item?.month} - ${year}`,
-                      `${item?.netResultPrevious} ${item?.currency !== 'S/D' ? item?.currency : 'PEN'}`,
-                      `${item?.totalIncome} ${item?.currency !== 'S/D' ? item?.currency : 'PEN'}`,
-                      `${item?.totalExpenses} ${item?.currency !== 'S/D' ? item?.currency : 'PEN'}`,
-                      `${+item?.netResultPrevious + item?.totalIncome - item?.totalExpenses} ${item?.currency !== 'S/D' ? item?.currency : 'PEN'}`,
+                      `${item?.netResultPrevious.toFixed(2)} ${item?.currency !== 'S/D' ? item?.currency : 'PEN'}`,
+                      `${item?.totalIncome.toFixed(2)} ${item?.currency !== 'S/D' ? item?.currency : 'PEN'}`,
+                      `${item?.totalExpenses.toFixed(2)} ${item?.currency !== 'S/D' ? item?.currency : 'PEN'}`,
+                      `${(+item?.netResultPrevious + item?.totalIncome - item?.totalExpenses).toFixed(2)} ${item?.currency !== 'S/D' ? item?.currency : 'PEN'}`,
                     ]),
                   ['', '', '', '', '', ''],
                   ['', '', '', '', '', ''],
@@ -245,6 +245,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       style: {
                         bold: true,
                         fontSize: 13,
+                        alignment: 'right',
                         italics: true,
                         color: '#475569',
                       },
@@ -261,7 +262,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         .reduce(
                           (acc, offering) => acc + offering?.totalIncome,
                           0,
-                        )} PEN`,
+                        )
+                        .toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -281,7 +283,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         .reduce(
                           (acc, offering) => acc + offering?.totalExpenses,
                           0,
-                        )} PEN`,
+                        )
+                        .toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -289,33 +292,33 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         color: '#475569',
                       },
                     },
+                    '-',
+                  ],
+                  [
+                    '',
+                    '',
+                    '',
+                    '',
                     {
-                      text: `${
-                        yearlyIncomeExpenseComparativePenDataResult
-                          .filter(
-                            (item) =>
-                              Object.values(monthNames).indexOf(item.month) <=
-                              Object.values(monthNames).indexOf(
-                                monthNames[endMonth],
-                              ),
-                          )
-                          .reduce(
-                            (acc, offering) => acc + offering?.totalIncome,
-                            0,
-                          ) -
-                        yearlyIncomeExpenseComparativePenDataResult
-                          .filter(
-                            (item) =>
-                              Object.values(monthNames).indexOf(item.month) <=
-                              Object.values(monthNames).indexOf(
-                                monthNames[endMonth],
-                              ),
-                          )
-                          .reduce(
-                            (acc, offering) => acc + offering?.totalExpenses,
-                            0,
-                          )
-                      } PEN`,
+                      text: `Saldo actual (${monthNames[endMonth]})`,
+                      style: {
+                        bold: true,
+                        fontSize: 13,
+                        italics: true,
+                        color: '#e89c37',
+                      },
+                    },
+                    {
+                      text: `${yearlyIncomeExpenseComparativePenDataResult
+                        .filter(
+                          (item) =>
+                            Object.values(monthNames).indexOf(item.month) <=
+                            Object.values(monthNames).indexOf(
+                              monthNames[endMonth],
+                            ),
+                        )
+                        .at(-1)
+                        .netResult.toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -427,10 +430,10 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       item?.church?.abbreviatedChurchName ??
                         church?.abbreviatedChurchName,
                       `${item?.month} - ${year}`,
-                      `${item?.netResultPrevious} ${item?.currency !== 'S/D' ? item?.currency : 'USD'}`,
-                      `${item?.totalIncome} ${item?.currency !== 'S/D' ? item?.currency : 'USD'}`,
-                      `${item?.totalExpenses} ${item?.currency !== 'S/D' ? item?.currency : 'USD'}`,
-                      `${+item?.netResultPrevious + item?.totalIncome - item?.totalExpenses} ${item?.currency !== 'S/D' ? item?.currency : 'USD'}`,
+                      `${item?.netResultPrevious.toFixed(2)} ${item?.currency !== 'S/D' ? item?.currency : 'USD'}`,
+                      `${item?.totalIncome.toFixed(2)} ${item?.currency !== 'S/D' ? item?.currency : 'USD'}`,
+                      `${item?.totalExpenses.toFixed(2)} ${item?.currency !== 'S/D' ? item?.currency : 'USD'}`,
+                      `${(+item?.netResultPrevious + item?.totalIncome - item?.totalExpenses).toFixed(2)} ${item?.currency !== 'S/D' ? item?.currency : 'USD'}`,
                     ]),
                   ['', '', '', '', '', ''],
                   ['', '', '', '', '', ''],
@@ -442,6 +445,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       style: {
                         bold: true,
                         fontSize: 13,
+                        alignment: 'right',
                         italics: true,
                         color: '#475569',
                       },
@@ -458,7 +462,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         .reduce(
                           (acc, offering) => acc + offering?.totalIncome,
                           0,
-                        )} USD`,
+                        )
+                        .toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -478,7 +483,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         .reduce(
                           (acc, offering) => acc + offering?.totalExpenses,
                           0,
-                        )} USD`,
+                        )
+                        .toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -486,33 +492,34 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         color: '#475569',
                       },
                     },
+                    '-',
+                  ],
+                  [
+                    '',
+                    '',
+                    '',
+                    '',
                     {
-                      text: `${
-                        yearlyIncomeExpenseComparativeUsdDataResult
-                          .filter(
-                            (item) =>
-                              Object.values(monthNames).indexOf(item.month) <=
-                              Object.values(monthNames).indexOf(
-                                monthNames[endMonth],
-                              ),
-                          )
-                          .reduce(
-                            (acc, offering) => acc + offering?.totalIncome,
-                            0,
-                          ) -
-                        yearlyIncomeExpenseComparativeUsdDataResult
-                          .filter(
-                            (item) =>
-                              Object.values(monthNames).indexOf(item.month) <=
-                              Object.values(monthNames).indexOf(
-                                monthNames[endMonth],
-                              ),
-                          )
-                          .reduce(
-                            (acc, offering) => acc + offering?.totalExpenses,
-                            0,
-                          )
-                      } USD`,
+                      text: `Saldo actual (${monthNames[endMonth]})`,
+                      style: {
+                        bold: true,
+                        fontSize: 13,
+                        italics: true,
+                        colSpan: 2,
+                        color: '#e89c37',
+                      },
+                    },
+                    {
+                      text: `${yearlyIncomeExpenseComparativeUsdDataResult
+                        .filter(
+                          (item) =>
+                            Object.values(monthNames).indexOf(item.month) <=
+                            Object.values(monthNames).indexOf(
+                              monthNames[endMonth],
+                            ),
+                        )
+                        .at(-1)
+                        .netResult.toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -624,10 +631,10 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       item?.church?.abbreviatedChurchName ??
                         church?.abbreviatedChurchName,
                       `${item?.month} - ${year}`,
-                      `${item?.netResultPrevious} ${item?.currency !== 'S/D' ? item?.currency : 'EUR'}`,
-                      `${item?.totalIncome} ${item?.currency !== 'S/D' ? item?.currency : 'EUR'}`,
-                      `${item?.totalExpenses} ${item?.currency !== 'S/D' ? item?.currency : 'EUR'}`,
-                      `${+item?.netResultPrevious + item?.totalIncome - item?.totalExpenses} ${item?.currency !== 'S/D' ? item?.currency : 'EUR'}`,
+                      `${item?.netResultPrevious.toFixed(2)} ${item?.currency !== 'S/D' ? item?.currency : 'EUR'}`,
+                      `${item?.totalIncome.toFixed(2)} ${item?.currency !== 'S/D' ? item?.currency : 'EUR'}`,
+                      `${item?.totalExpenses.toFixed(2)} ${item?.currency !== 'S/D' ? item?.currency : 'EUR'}`,
+                      `${(+item?.netResultPrevious + item?.totalIncome - item?.totalExpenses).toFixed(2)} ${item?.currency !== 'S/D' ? item?.currency : 'EUR'}`,
                     ]),
                   ['', '', '', '', '', ''],
                   ['', '', '', '', '', ''],
@@ -639,6 +646,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       style: {
                         bold: true,
                         fontSize: 13,
+                        alignment: 'right',
                         italics: true,
                         color: '#475569',
                       },
@@ -655,7 +663,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         .reduce(
                           (acc, offering) => acc + offering?.totalIncome,
                           0,
-                        )} EUR`,
+                        )
+                        .toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -675,7 +684,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         .reduce(
                           (acc, offering) => acc + offering?.totalExpenses,
                           0,
-                        )} EUR`,
+                        )
+                        .toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -683,33 +693,34 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         color: '#475569',
                       },
                     },
+                    '',
+                  ],
+                  [
+                    '',
+                    '',
+                    '',
+                    '',
                     {
-                      text: `${
-                        yearlyIncomeExpenseComparativeEurDataResult
-                          .filter(
-                            (item) =>
-                              Object.values(monthNames).indexOf(item.month) <=
-                              Object.values(monthNames).indexOf(
-                                monthNames[endMonth],
-                              ),
-                          )
-                          .reduce(
-                            (acc, offering) => acc + offering?.totalIncome,
-                            0,
-                          ) -
-                        yearlyIncomeExpenseComparativeEurDataResult
-                          .filter(
-                            (item) =>
-                              Object.values(monthNames).indexOf(item.month) <=
-                              Object.values(monthNames).indexOf(
-                                monthNames[endMonth],
-                              ),
-                          )
-                          .reduce(
-                            (acc, offering) => acc + offering?.totalExpenses,
-                            0,
-                          )
-                      } EUR`,
+                      text: `Saldo actual (${monthNames[endMonth]})`,
+                      style: {
+                        bold: true,
+                        fontSize: 13,
+                        italics: true,
+                        colSpan: 2,
+                        color: '#e89c37',
+                      },
+                    },
+                    {
+                      text: `${yearlyIncomeExpenseComparativeEurDataResult
+                        .filter(
+                          (item) =>
+                            Object.values(monthNames).indexOf(item.month) <=
+                            Object.values(monthNames).indexOf(
+                              monthNames[endMonth],
+                            ),
+                        )
+                        .at(-1)
+                        .netResult.toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -739,7 +750,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                   [
                     {
                       text: `Comparativa Ingresos de Ofrenda`,
-                      color: '#1d96d3',
+                      color: '#1d59d3',
                       fontSize: 20,
                       bold: true,
                       alignment: 'center',
@@ -757,12 +768,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                 body: [
                   [
                     {
-                      text: `(Tipo y Sub-tipo)`,
+                      text: `Búsqueda General`,
                       color: '#1d96d3',
-                      fontSize: 15,
+                      fontSize: 18,
+                      italics: true,
                       bold: true,
                       alignment: 'center',
-                      margin: [0, -3, 0, 0],
+                      margin: [0, 0, 0, 5],
                     },
                   ],
                 ],
@@ -776,13 +788,12 @@ export const getFinancialBalanceComparativeMetricsReport = (
                 body: [
                   [
                     {
-                      text: `Búsqueda General por Rango de Meses`,
+                      text: `(Acumulado por sub-tipo, rango de meses y año)`,
                       color: '#1d96d3',
-                      fontSize: 16,
-                      italics: true,
+                      fontSize: 15,
                       bold: true,
                       alignment: 'center',
-                      margin: [0, 0, 0, 5],
+                      margin: [0, -8, 0, 8],
                     },
                   ],
                 ],
@@ -851,9 +862,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                     OfferingIncomeCreationTypeNames.income_adjustment
                       ? '-'
                       : item?.subType,
-                    item?.accumulatedOfferingPEN,
-                    item?.accumulatedOfferingUSD,
-                    item?.accumulatedOfferingEUR,
+                    item?.accumulatedOfferingPEN.toFixed(2),
+                    item?.accumulatedOfferingUSD.toFixed(2),
+                    item?.accumulatedOfferingEUR.toFixed(2),
                   ]),
                   ['', '', '', '', '', '', ''],
                   ['', '', '', '', '', '', ''],
@@ -867,11 +878,12 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
+                        alignment: 'right',
                         color: '#475569',
                       },
                     },
                     {
-                      text: `${generalOfferingIncomeComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      text: `${generalOfferingIncomeComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -880,7 +892,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       },
                     },
                     {
-                      text: `${generalOfferingIncomeComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      text: `${generalOfferingIncomeComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -889,7 +901,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       },
                     },
                     {
-                      text: `${generalOfferingIncomeComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      text: `${generalOfferingIncomeComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -926,7 +938,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         [
                           {
                             text: `Comparativa Ingresos de Ofrenda`,
-                            color: '#1d96d3',
+                            color: '#1d59d3',
                             fontSize: 20,
                             bold: true,
                             alignment: 'center',
@@ -944,12 +956,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `(Tipo y Sub-tipo)`,
+                            text: `Búsqueda Detallada`,
                             color: '#1d96d3',
-                            fontSize: 15,
+                            fontSize: 18,
+                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
@@ -963,19 +976,17 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por mes`,
+                            text: `(Acumulado por sub-tipo, mes y año)`,
                             color: '#1d96d3',
                             fontSize: 15,
-                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -1, 0, 0],
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -989,7 +1000,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -1066,9 +1077,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             OfferingIncomeCreationTypeNames.income_adjustment
                               ? '-'
                               : item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', '', ''],
                         ['', '', '', '', '', '', ''],
@@ -1082,6 +1093,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -1100,7 +1112,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -1123,7 +1136,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -1146,7 +1160,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -1178,7 +1193,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         [
                           {
                             text: `Comparativa Ingresos de Ofrenda`,
-                            color: '#1d96d3',
+                            color: '#1d59d3',
                             fontSize: 20,
                             bold: true,
                             alignment: 'center',
@@ -1196,12 +1211,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `(Tipo y Sub-tipo)`,
+                            text: `Búsqueda Detallada`,
                             color: '#1d96d3',
-                            fontSize: 15,
+                            fontSize: 18,
+                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
@@ -1215,13 +1231,12 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por mes`,
+                            text: `(Acumulado por sub-tipo, mes y año)`,
                             color: '#1d96d3',
                             fontSize: 15,
-                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -1, 0, 0],
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
@@ -1241,7 +1256,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -1318,9 +1333,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             OfferingIncomeCreationTypeNames.income_adjustment
                               ? '-'
                               : item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', '', ''],
                         ['', '', '', '', '', '', ''],
@@ -1334,6 +1349,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -1352,7 +1368,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -1375,7 +1392,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -1398,7 +1416,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -1430,7 +1449,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         [
                           {
                             text: `Comparativa Ingresos de Ofrenda`,
-                            color: '#1d96d3',
+                            color: '#1d59d3',
                             fontSize: 20,
                             bold: true,
                             alignment: 'center',
@@ -1448,12 +1467,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `(Tipo y Sub-tipo)`,
+                            text: `Búsqueda Detallada`,
                             color: '#1d96d3',
-                            fontSize: 15,
+                            fontSize: 18,
+                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
@@ -1467,13 +1487,12 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por mes`,
+                            text: `(Acumulado por sub-tipo, mes y año)`,
                             color: '#1d96d3',
                             fontSize: 15,
-                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -1, 0, 0],
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
@@ -1493,7 +1512,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -1570,9 +1589,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             OfferingIncomeCreationTypeNames.income_adjustment
                               ? '-'
                               : item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', '', ''],
                         ['', '', '', '', '', '', ''],
@@ -1586,6 +1605,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -1604,7 +1624,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -1627,7 +1648,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -1650,7 +1672,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -1682,7 +1705,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         [
                           {
                             text: `Comparativa Ingresos de Ofrenda`,
-                            color: '#1d96d3',
+                            color: '#1d59d3',
                             fontSize: 20,
                             bold: true,
                             alignment: 'center',
@@ -1700,12 +1723,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `(Tipo y Sub-tipo)`,
+                            text: `Búsqueda Detallada`,
                             color: '#1d96d3',
-                            fontSize: 15,
+                            fontSize: 18,
+                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
@@ -1719,13 +1743,12 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por mes`,
+                            text: `(Acumulado por sub-tipo, mes y año)`,
                             color: '#1d96d3',
                             fontSize: 15,
-                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -1, 0, 0],
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
@@ -1745,7 +1768,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -1822,9 +1845,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             OfferingIncomeCreationTypeNames.income_adjustment
                               ? '-'
                               : item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', '', ''],
                         ['', '', '', '', '', '', ''],
@@ -1838,6 +1861,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -1856,7 +1880,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -1879,7 +1904,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -1902,7 +1928,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -1934,7 +1961,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         [
                           {
                             text: `Comparativa Ingresos de Ofrenda`,
-                            color: '#1d96d3',
+                            color: '#1d59d3',
                             fontSize: 20,
                             bold: true,
                             alignment: 'center',
@@ -1952,12 +1979,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `(Tipo y Sub-tipo)`,
+                            text: `Búsqueda Detallada`,
                             color: '#1d96d3',
-                            fontSize: 15,
+                            fontSize: 18,
+                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
@@ -1971,13 +1999,12 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por mes`,
+                            text: `(Acumulado por sub-tipo, mes y año)`,
                             color: '#1d96d3',
                             fontSize: 15,
-                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -1, 0, 0],
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
@@ -1997,7 +2024,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -2074,9 +2101,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             OfferingIncomeCreationTypeNames.income_adjustment
                               ? '-'
                               : item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', '', ''],
                         ['', '', '', '', '', '', ''],
@@ -2090,6 +2117,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -2108,7 +2136,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -2131,7 +2160,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -2154,7 +2184,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -2186,7 +2217,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         [
                           {
                             text: `Comparativa Ingresos de Ofrenda`,
-                            color: '#1d96d3',
+                            color: '#1d59d3',
                             fontSize: 20,
                             bold: true,
                             alignment: 'center',
@@ -2204,12 +2235,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `(Tipo y Sub-tipo)`,
+                            text: `Búsqueda Detallada`,
                             color: '#1d96d3',
-                            fontSize: 15,
+                            fontSize: 18,
+                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
@@ -2223,13 +2255,12 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por mes`,
+                            text: `(Acumulado por sub-tipo, mes y año)`,
                             color: '#1d96d3',
                             fontSize: 15,
-                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -1, 0, 0],
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
@@ -2249,7 +2280,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -2326,9 +2357,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             OfferingIncomeCreationTypeNames.income_adjustment
                               ? '-'
                               : item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', '', ''],
                         ['', '', '', '', '', '', ''],
@@ -2342,6 +2373,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -2360,7 +2392,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -2383,7 +2416,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -2406,7 +2440,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -2438,7 +2473,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         [
                           {
                             text: `Comparativa Ingresos de Ofrenda`,
-                            color: '#1d96d3',
+                            color: '#1d59d3',
                             fontSize: 20,
                             bold: true,
                             alignment: 'center',
@@ -2456,12 +2491,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `(Tipo y Sub-tipo)`,
+                            text: `Búsqueda Detallada`,
                             color: '#1d96d3',
-                            fontSize: 15,
+                            fontSize: 18,
+                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
@@ -2475,13 +2511,12 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por mes`,
+                            text: `(Acumulado por sub-tipo, mes y año)`,
                             color: '#1d96d3',
                             fontSize: 15,
-                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -1, 0, 0],
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
@@ -2501,7 +2536,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -2578,9 +2613,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             OfferingIncomeCreationTypeNames.income_adjustment
                               ? '-'
                               : item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', '', ''],
                         ['', '', '', '', '', '', ''],
@@ -2594,6 +2629,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -2612,7 +2648,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -2635,7 +2672,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -2658,7 +2696,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -2690,7 +2729,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         [
                           {
                             text: `Comparativa Ingresos de Ofrenda`,
-                            color: '#1d96d3',
+                            color: '#1d59d3',
                             fontSize: 20,
                             bold: true,
                             alignment: 'center',
@@ -2708,12 +2747,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `(Tipo y Sub-tipo)`,
+                            text: `Búsqueda Detallada`,
                             color: '#1d96d3',
-                            fontSize: 15,
+                            fontSize: 18,
+                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
@@ -2727,13 +2767,12 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por mes`,
+                            text: `(Acumulado por sub-tipo, mes y año)`,
                             color: '#1d96d3',
                             fontSize: 15,
-                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -1, 0, 0],
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
@@ -2753,7 +2792,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -2830,9 +2869,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             OfferingIncomeCreationTypeNames.income_adjustment
                               ? '-'
                               : item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', '', ''],
                         ['', '', '', '', '', '', ''],
@@ -2846,6 +2885,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -2864,7 +2904,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -2887,7 +2928,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -2910,7 +2952,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -2942,7 +2985,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         [
                           {
                             text: `Comparativa Ingresos de Ofrenda`,
-                            color: '#1d96d3',
+                            color: '#1d59d3',
                             fontSize: 20,
                             bold: true,
                             alignment: 'center',
@@ -2960,12 +3003,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `(Tipo y Sub-tipo)`,
+                            text: `Búsqueda Detallada`,
                             color: '#1d96d3',
-                            fontSize: 15,
+                            fontSize: 18,
+                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
@@ -2979,13 +3023,12 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por mes`,
+                            text: `(Acumulado por sub-tipo, mes y año)`,
                             color: '#1d96d3',
                             fontSize: 15,
-                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -1, 0, 0],
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
@@ -3005,7 +3048,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -3082,9 +3125,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             OfferingIncomeCreationTypeNames.income_adjustment
                               ? '-'
                               : item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', '', ''],
                         ['', '', '', '', '', '', ''],
@@ -3098,6 +3141,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -3116,7 +3160,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -3139,7 +3184,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -3162,7 +3208,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -3194,7 +3241,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         [
                           {
                             text: `Comparativa Ingresos de Ofrenda`,
-                            color: '#1d96d3',
+                            color: '#1d59d3',
                             fontSize: 20,
                             bold: true,
                             alignment: 'center',
@@ -3212,12 +3259,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `(Tipo y Sub-tipo)`,
+                            text: `Búsqueda Detallada`,
                             color: '#1d96d3',
-                            fontSize: 15,
+                            fontSize: 18,
+                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
@@ -3231,19 +3279,17 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por mes`,
+                            text: `(Acumulado por sub-tipo, mes y año)`,
                             color: '#1d96d3',
                             fontSize: 15,
-                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -1, 0, 0],
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -3257,7 +3303,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -3334,9 +3380,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             OfferingIncomeCreationTypeNames.income_adjustment
                               ? '-'
                               : item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', '', ''],
                         ['', '', '', '', '', '', ''],
@@ -3350,6 +3396,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -3368,7 +3415,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -3391,7 +3439,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -3414,7 +3463,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -3446,7 +3496,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         [
                           {
                             text: `Comparativa Ingresos de Ofrenda`,
-                            color: '#1d96d3',
+                            color: '#1d59d3',
                             fontSize: 20,
                             bold: true,
                             alignment: 'center',
@@ -3464,12 +3514,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `(Tipo y Sub-tipo)`,
+                            text: `Búsqueda Detallada`,
                             color: '#1d96d3',
-                            fontSize: 15,
+                            fontSize: 18,
+                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
@@ -3483,13 +3534,12 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por mes`,
+                            text: `(Acumulado por sub-tipo, mes y año)`,
                             color: '#1d96d3',
                             fontSize: 15,
-                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -1, 0, 0],
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
@@ -3509,7 +3559,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -3586,9 +3636,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             OfferingIncomeCreationTypeNames.income_adjustment
                               ? '-'
                               : item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', '', ''],
                         ['', '', '', '', '', '', ''],
@@ -3602,6 +3652,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -3620,7 +3671,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -3643,7 +3695,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -3666,7 +3719,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -3698,7 +3752,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         [
                           {
                             text: `Comparativa Ingresos de Ofrenda`,
-                            color: '#1d96d3',
+                            color: '#1d59d3',
                             fontSize: 20,
                             bold: true,
                             alignment: 'center',
@@ -3716,12 +3770,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `(Tipo y Sub-tipo)`,
+                            text: `Búsqueda Detallada`,
                             color: '#1d96d3',
-                            fontSize: 15,
+                            fontSize: 18,
+                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
@@ -3735,13 +3790,12 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por mes`,
+                            text: `(Acumulado por sub-tipo, mes y año)`,
                             color: '#1d96d3',
                             fontSize: 15,
-                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -1, 0, 0],
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
@@ -3761,7 +3815,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -3838,9 +3892,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             OfferingIncomeCreationTypeNames.income_adjustment
                               ? '-'
                               : item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', '', ''],
                         ['', '', '', '', '', '', ''],
@@ -3854,6 +3908,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -3872,7 +3927,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -3895,7 +3951,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -3918,7 +3975,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -3950,7 +4008,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         [
                           {
                             text: `Comparativa Ingresos de Ofrenda`,
-                            color: '#1d96d3',
+                            color: '#1d59d3',
                             fontSize: 20,
                             bold: true,
                             alignment: 'center',
@@ -3968,12 +4026,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `(Tipo y Sub-tipo)`,
+                            text: `Búsqueda Detallada`,
                             color: '#1d96d3',
-                            fontSize: 15,
+                            fontSize: 18,
+                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -3, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
@@ -3987,13 +4046,12 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por mes`,
+                            text: `(Acumulado por tipo, mes y año)`,
                             color: '#1d96d3',
                             fontSize: 15,
-                            italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -1, 0, 0],
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
@@ -4090,9 +4148,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             OfferingIncomeCreationTypeNames.income_adjustment
                               ? '-'
                               : item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', '', ''],
                         ['', '', '', '', '', '', ''],
@@ -4106,6 +4164,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -4124,7 +4183,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -4147,7 +4207,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -4170,7 +4231,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -4220,18 +4282,38 @@ export const getFinancialBalanceComparativeMetricsReport = (
                 body: [
                   [
                     {
-                      text: `Búsqueda General por Tipo y Rango de Meses`,
-                      color: 'red',
-                      fontSize: 16,
+                      text: `Búsqueda General`,
+                      color: '#1d96d3',
+                      fontSize: 18,
                       italics: true,
                       bold: true,
                       alignment: 'center',
-                      margin: [0, 2, 0, 5],
+                      margin: [0, 0, 0, 5],
                     },
                   ],
                 ],
               },
             },
+            {
+              layout: 'noBorders',
+              table: {
+                headerRows: 1,
+                widths: ['*'],
+                body: [
+                  [
+                    {
+                      text: `(Acumulado por tipo, rango de meses y año)`,
+                      color: '#1d96d3',
+                      fontSize: 15,
+                      bold: true,
+                      alignment: 'center',
+                      margin: [0, -8, 0, 8],
+                    },
+                  ],
+                ],
+              },
+            },
+
             // Table body (content)
             {
               pageBreak: 'after',
@@ -4286,9 +4368,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       item?.church?.abbreviatedChurchName,
                       `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
                       item?.type,
-                      item?.accumulatedOfferingPEN,
-                      item?.accumulatedOfferingUSD,
-                      item?.accumulatedOfferingEUR,
+                      item?.accumulatedOfferingPEN.toFixed(2),
+                      item?.accumulatedOfferingUSD.toFixed(2),
+                      item?.accumulatedOfferingEUR.toFixed(2),
                     ],
                   ),
                   ['', '', '', '', '', ''],
@@ -4302,11 +4384,12 @@ export const getFinancialBalanceComparativeMetricsReport = (
                         bold: true,
                         fontSize: 13,
                         italics: true,
+                        alignment: 'right',
                         color: '#475569',
                       },
                     },
                     {
-                      text: `${generalOfferingExpensesComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0)} PEN`,
+                      text: `${generalOfferingExpensesComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingPEN, 0).toFixed(2)} PEN`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -4315,7 +4398,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       },
                     },
                     {
-                      text: `${generalOfferingExpensesComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0)} USD`,
+                      text: `${generalOfferingExpensesComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingUSD, 0).toFixed(2)} USD`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -4324,7 +4407,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       },
                     },
                     {
-                      text: `${generalOfferingExpensesComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0)} EUR`,
+                      text: `${generalOfferingExpensesComparativeDataResult.reduce((acc, offering) => acc + offering?.accumulatedOfferingEUR, 0).toFixed(2)} EUR`,
                       style: {
                         bold: true,
                         fontSize: 13,
@@ -4371,7 +4454,6 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       ],
                     },
                   },
-
                   {
                     layout: 'noBorders',
                     table: {
@@ -4380,13 +4462,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por tipo y mes`,
-                            color: 'red',
-                            fontSize: 15,
+                            text: `Búsqueda Detallada`,
+                            color: '#1d96d3',
+                            fontSize: 18,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -2, 0, 0],
+                            margin: [0, 0, 0, 5],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `(Acumulado por tipo, mes y año)`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
@@ -4406,7 +4507,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -4473,9 +4574,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             item?.church?.abbreviatedChurchName,
                             item?.month,
                             item?.type,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', ''],
                         ['', '', '', '', '', ''],
@@ -4488,6 +4589,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -4506,7 +4608,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -4529,7 +4632,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -4552,7 +4656,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -4603,13 +4708,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por tipo y mes`,
-                            color: 'red',
-                            fontSize: 15,
+                            text: `Búsqueda Detallada`,
+                            color: '#1d96d3',
+                            fontSize: 18,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -2, 0, 0],
+                            margin: [0, 0, 0, 5],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `(Acumulado por tipo, mes y año)`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
@@ -4629,7 +4753,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -4696,9 +4820,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             item?.church?.abbreviatedChurchName,
                             item?.month,
                             item?.type,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', ''],
                         ['', '', '', '', '', ''],
@@ -4711,6 +4835,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -4729,7 +4854,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -4752,7 +4878,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -4775,7 +4902,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -4825,13 +4953,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por tipo y mes`,
-                            color: 'red',
-                            fontSize: 15,
+                            text: `Búsqueda Detallada`,
+                            color: '#1d96d3',
+                            fontSize: 18,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -2, 0, 0],
+                            margin: [0, 0, 0, 5],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `(Acumulado por tipo, mes y año)`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
@@ -4851,7 +4998,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -4918,9 +5065,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             item?.church?.abbreviatedChurchName,
                             item?.month,
                             item?.type,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', ''],
                         ['', '', '', '', '', ''],
@@ -4933,6 +5080,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -4951,7 +5099,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -4974,7 +5123,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -4997,7 +5147,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -5048,13 +5199,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por tipo y mes`,
-                            color: 'red',
-                            fontSize: 15,
+                            text: `Búsqueda Detallada`,
+                            color: '#1d96d3',
+                            fontSize: 18,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -2, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
@@ -5068,12 +5219,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
+                            text: `(Acumulado por tipo, mes y año)`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -8, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
                             text: `Gastos de Equipamiento y Tecnología`,
                             color: '#e77f08',
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -5140,9 +5311,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             item?.church?.abbreviatedChurchName,
                             item?.month,
                             item?.type,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', ''],
                         ['', '', '', '', '', ''],
@@ -5155,6 +5326,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -5173,7 +5345,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -5196,7 +5369,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -5219,7 +5393,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -5269,13 +5444,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por tipo y mes`,
-                            color: 'red',
-                            fontSize: 15,
+                            text: `Búsqueda Detallada`,
+                            color: '#1d96d3',
+                            fontSize: 18,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -2, 0, 0],
+                            margin: [0, 0, 0, 5],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `(Acumulado por tipo, mes y año)`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
@@ -5295,7 +5489,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -5362,9 +5556,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             item?.church?.abbreviatedChurchName,
                             item?.month,
                             item?.type,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', ''],
                         ['', '', '', '', '', ''],
@@ -5377,6 +5571,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -5395,7 +5590,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -5418,7 +5614,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -5441,7 +5638,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -5491,13 +5689,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por tipo y mes`,
-                            color: 'red',
-                            fontSize: 15,
+                            text: `Búsqueda Detallada`,
+                            color: '#1d96d3',
+                            fontSize: 18,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -2, 0, 0],
+                            margin: [0, 0, 0, 5],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `(Acumulado por tipo, mes y año)`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
@@ -5517,7 +5734,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -5584,9 +5801,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             item?.church?.abbreviatedChurchName,
                             item?.month,
                             item?.type,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', ''],
                         ['', '', '', '', '', ''],
@@ -5599,6 +5816,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -5617,7 +5835,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -5640,7 +5859,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -5663,7 +5883,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -5714,13 +5935,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda detallada por tipo y mes`,
-                            color: 'red',
-                            fontSize: 15,
+                            text: `Búsqueda Detallada`,
+                            color: '#1d96d3',
+                            fontSize: 18,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -2, 0, 0],
+                            margin: [0, 0, 0, 5],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `(Acumulado por tipo, mes y año)`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -8, 0, 0],
                           },
                         ],
                       ],
@@ -5807,9 +6047,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             item?.church?.abbreviatedChurchName,
                             item?.month,
                             item?.type,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ]),
                         ['', '', '', '', '', ''],
                         ['', '', '', '', '', ''],
@@ -5822,6 +6062,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -5840,7 +6081,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingPEN,
                                 0,
-                              )} PEN`,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -5863,7 +6105,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingUSD,
                                 0,
-                              )} USD`,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -5886,7 +6129,8 @@ export const getFinancialBalanceComparativeMetricsReport = (
                                 (acc, offering) =>
                                   acc + offering?.accumulatedOfferingEUR,
                                 0,
-                              )} EUR`,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -5938,13 +6182,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda general por sub-tipo y rango de meses`,
-                            color: 'red',
-                            fontSize: 15,
+                            text: `Búsqueda Detallada`,
+                            color: '#1d96d3',
+                            fontSize: 18,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -2, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
@@ -5958,12 +6202,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
+                            text: `(Acumulado por sub-tipo, rango de meses y año)`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -8, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
                             text: `Gastos Operativos`,
                             color: '#e77f08',
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -6023,9 +6287,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             item?.church?.abbreviatedChurchName,
                             `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
                             item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ],
                         ),
                         ['', '', '', '', '', ''],
@@ -6039,6 +6303,7 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
@@ -6119,13 +6384,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda general por sub-tipo y rango de meses`,
-                            color: 'red',
-                            fontSize: 15,
+                            text: `Búsqueda Detallada`,
+                            color: '#1d96d3',
+                            fontSize: 18,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -2, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
@@ -6139,12 +6404,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
+                            text: `(Acumulado por sub-tipo, rango de meses y año)`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -8, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
                             text: `Gastos de Mantenimiento y Reparación`,
                             color: '#e77f08',
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -6204,9 +6489,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             item?.church?.abbreviatedChurchName,
                             `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
                             item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ],
                         ),
                         ['', '', '', '', '', ''],
@@ -6220,15 +6505,18 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
                           {
-                            text: `${offeringMaintenanceAndRepairExpensesBySubTypeComparativeDataResult.reduce(
-                              (acc, offering) =>
-                                acc + offering?.accumulatedOfferingPEN,
-                              0,
-                            )} PEN`,
+                            text: `${offeringMaintenanceAndRepairExpensesBySubTypeComparativeDataResult
+                              .reduce(
+                                (acc, offering) =>
+                                  acc + offering?.accumulatedOfferingPEN,
+                                0,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -6237,11 +6525,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             },
                           },
                           {
-                            text: `${offeringMaintenanceAndRepairExpensesBySubTypeComparativeDataResult.reduce(
-                              (acc, offering) =>
-                                acc + offering?.accumulatedOfferingUSD,
-                              0,
-                            )} USD`,
+                            text: `${offeringMaintenanceAndRepairExpensesBySubTypeComparativeDataResult
+                              .reduce(
+                                (acc, offering) =>
+                                  acc + offering?.accumulatedOfferingUSD,
+                                0,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -6250,11 +6540,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             },
                           },
                           {
-                            text: `${offeringOperationalExpensesBySubTypeComparativeDataResult.reduce(
-                              (acc, offering) =>
-                                acc + offering?.accumulatedOfferingEUR,
-                              0,
-                            )} EUR`,
+                            text: `${offeringOperationalExpensesBySubTypeComparativeDataResult
+                              .reduce(
+                                (acc, offering) =>
+                                  acc + offering?.accumulatedOfferingEUR,
+                                0,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -6299,18 +6591,38 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda general por sub-tipo y rango de meses`,
-                            color: 'red',
-                            fontSize: 15,
+                            text: `Búsqueda Detallada`,
+                            color: '#1d96d3',
+                            fontSize: 18,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -2, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
                     },
                   },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `(Acumulado por sub-tipo, rango de meses y año)`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -8, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+
                   {
                     layout: 'noBorders',
                     table: {
@@ -6384,9 +6696,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             item?.church?.abbreviatedChurchName,
                             `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
                             item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ],
                         ),
                         ['', '', '', '', '', ''],
@@ -6400,15 +6712,18 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
                           {
-                            text: `${offeringDecorationExpensesBySubTypeComparativeDataResult.reduce(
-                              (acc, offering) =>
-                                acc + offering?.accumulatedOfferingPEN,
-                              0,
-                            )} PEN`,
+                            text: `${offeringDecorationExpensesBySubTypeComparativeDataResult
+                              .reduce(
+                                (acc, offering) =>
+                                  acc + offering?.accumulatedOfferingPEN,
+                                0,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -6417,11 +6732,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             },
                           },
                           {
-                            text: `${offeringDecorationExpensesBySubTypeComparativeDataResult.reduce(
-                              (acc, offering) =>
-                                acc + offering?.accumulatedOfferingUSD,
-                              0,
-                            )} USD`,
+                            text: `${offeringDecorationExpensesBySubTypeComparativeDataResult
+                              .reduce(
+                                (acc, offering) =>
+                                  acc + offering?.accumulatedOfferingUSD,
+                                0,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -6430,11 +6747,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             },
                           },
                           {
-                            text: `${offeringDecorationExpensesBySubTypeComparativeDataResult.reduce(
-                              (acc, offering) =>
-                                acc + offering?.accumulatedOfferingEUR,
-                              0,
-                            )} EUR`,
+                            text: `${offeringDecorationExpensesBySubTypeComparativeDataResult
+                              .reduce(
+                                (acc, offering) =>
+                                  acc + offering?.accumulatedOfferingEUR,
+                                0,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -6480,18 +6799,38 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda general por sub-tipo y rango de meses`,
-                            color: 'red',
-                            fontSize: 15,
+                            text: `Búsqueda Detallada`,
+                            color: '#1d96d3',
+                            fontSize: 18,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -2, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
                     },
                   },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `(Acumulado por sub-tipo, rango de meses y año)`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -8, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+
                   {
                     layout: 'noBorders',
                     table: {
@@ -6565,9 +6904,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             item?.church?.abbreviatedChurchName,
                             `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
                             item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ],
                         ),
                         ['', '', '', '', '', ''],
@@ -6581,15 +6920,18 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
                           {
-                            text: `${offeringEquipmentAndTechnologyExpensesBySubTypeComparativeDataResult.reduce(
-                              (acc, offering) =>
-                                acc + offering?.accumulatedOfferingPEN,
-                              0,
-                            )} PEN`,
+                            text: `${offeringEquipmentAndTechnologyExpensesBySubTypeComparativeDataResult
+                              .reduce(
+                                (acc, offering) =>
+                                  acc + offering?.accumulatedOfferingPEN,
+                                0,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -6598,11 +6940,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             },
                           },
                           {
-                            text: `${offeringEquipmentAndTechnologyExpensesBySubTypeComparativeDataResult.reduce(
-                              (acc, offering) =>
-                                acc + offering?.accumulatedOfferingUSD,
-                              0,
-                            )} USD`,
+                            text: `${offeringEquipmentAndTechnologyExpensesBySubTypeComparativeDataResult
+                              .reduce(
+                                (acc, offering) =>
+                                  acc + offering?.accumulatedOfferingUSD,
+                                0,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -6611,11 +6955,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             },
                           },
                           {
-                            text: `${offeringEquipmentAndTechnologyExpensesBySubTypeComparativeDataResult.reduce(
-                              (acc, offering) =>
-                                acc + offering?.accumulatedOfferingEUR,
-                              0,
-                            )} EUR`,
+                            text: `${offeringEquipmentAndTechnologyExpensesBySubTypeComparativeDataResult
+                              .reduce(
+                                (acc, offering) =>
+                                  acc + offering?.accumulatedOfferingEUR,
+                                0,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -6660,13 +7006,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda general por sub-tipo y rango de meses`,
-                            color: 'red',
-                            fontSize: 15,
+                            text: `Búsqueda Detallada`,
+                            color: '#1d96d3',
+                            fontSize: 18,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -2, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
@@ -6680,12 +7026,32 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
+                            text: `(Acumulado por sub-tipo, rango de meses y año)`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -8, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
                             text: `Gastos de Suministros`,
                             color: '#e77f08',
                             fontSize: 18,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, 5, 0, 2],
+                            margin: [0, 2, 0, 2],
                           },
                         ],
                       ],
@@ -6745,9 +7111,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             item?.church?.abbreviatedChurchName,
                             `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
                             item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ],
                         ),
                         ['', '', '', '', '', ''],
@@ -6761,15 +7127,18 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
                           {
-                            text: `${offeringSuppliesExpensesBySubTypeComparativeDataResult.reduce(
-                              (acc, offering) =>
-                                acc + offering?.accumulatedOfferingPEN,
-                              0,
-                            )} PEN`,
+                            text: `${offeringSuppliesExpensesBySubTypeComparativeDataResult
+                              .reduce(
+                                (acc, offering) =>
+                                  acc + offering?.accumulatedOfferingPEN,
+                                0,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -6778,11 +7147,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             },
                           },
                           {
-                            text: `${offeringSuppliesExpensesBySubTypeComparativeDataResult.reduce(
-                              (acc, offering) =>
-                                acc + offering?.accumulatedOfferingUSD,
-                              0,
-                            )} USD`,
+                            text: `${offeringSuppliesExpensesBySubTypeComparativeDataResult
+                              .reduce(
+                                (acc, offering) =>
+                                  acc + offering?.accumulatedOfferingUSD,
+                                0,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -6791,11 +7162,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             },
                           },
                           {
-                            text: `${offeringSuppliesExpensesBySubTypeComparativeDataResult.reduce(
-                              (acc, offering) =>
-                                acc + offering?.accumulatedOfferingEUR,
-                              0,
-                            )} EUR`,
+                            text: `${offeringSuppliesExpensesBySubTypeComparativeDataResult
+                              .reduce(
+                                (acc, offering) =>
+                                  acc + offering?.accumulatedOfferingEUR,
+                                0,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -6841,18 +7214,38 @@ export const getFinancialBalanceComparativeMetricsReport = (
                       body: [
                         [
                           {
-                            text: `Búsqueda general por sub-tipo y rango de meses`,
-                            color: 'red',
-                            fontSize: 15,
+                            text: `Búsqueda Detallada`,
+                            color: '#1d96d3',
+                            fontSize: 18,
                             italics: true,
                             bold: true,
                             alignment: 'center',
-                            margin: [0, -2, 0, 0],
+                            margin: [0, 0, 0, 5],
                           },
                         ],
                       ],
                     },
                   },
+                  {
+                    layout: 'noBorders',
+                    table: {
+                      headerRows: 1,
+                      widths: ['*'],
+                      body: [
+                        [
+                          {
+                            text: `(Acumulado por sub-tipo, rango de meses y año)`,
+                            color: '#1d96d3',
+                            fontSize: 15,
+                            bold: true,
+                            alignment: 'center',
+                            margin: [0, -8, 0, 0],
+                          },
+                        ],
+                      ],
+                    },
+                  },
+
                   {
                     layout: 'noBorders',
                     table: {
@@ -6926,9 +7319,9 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             item?.church?.abbreviatedChurchName,
                             `${monthNames[startMonth]} - ${monthNames[endMonth]}`,
                             item?.subType,
-                            `${item?.accumulatedOfferingPEN} PEN`,
-                            `${item?.accumulatedOfferingUSD} USD`,
-                            `${item?.accumulatedOfferingEUR} EUR`,
+                            `${item?.accumulatedOfferingPEN.toFixed(2)} PEN`,
+                            `${item?.accumulatedOfferingUSD.toFixed(2)} USD`,
+                            `${item?.accumulatedOfferingEUR.toFixed(2)} EUR`,
                           ],
                         ),
                         ['', '', '', '', '', ''],
@@ -6942,15 +7335,18 @@ export const getFinancialBalanceComparativeMetricsReport = (
                               bold: true,
                               fontSize: 13,
                               italics: true,
+                              alignment: 'right',
                               color: '#475569',
                             },
                           },
                           {
-                            text: `${offeringPlaningEventsExpensesBySubTypeComparativeDataResult.reduce(
-                              (acc, offering) =>
-                                acc + offering?.accumulatedOfferingPEN,
-                              0,
-                            )} PEN`,
+                            text: `${offeringPlaningEventsExpensesBySubTypeComparativeDataResult
+                              .reduce(
+                                (acc, offering) =>
+                                  acc + offering?.accumulatedOfferingPEN,
+                                0,
+                              )
+                              .toFixed(2)} PEN`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -6959,11 +7355,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             },
                           },
                           {
-                            text: `${offeringPlaningEventsExpensesBySubTypeComparativeDataResult.reduce(
-                              (acc, offering) =>
-                                acc + offering?.accumulatedOfferingUSD,
-                              0,
-                            )} USD`,
+                            text: `${offeringPlaningEventsExpensesBySubTypeComparativeDataResult
+                              .reduce(
+                                (acc, offering) =>
+                                  acc + offering?.accumulatedOfferingUSD,
+                                0,
+                              )
+                              .toFixed(2)} USD`,
                             style: {
                               bold: true,
                               fontSize: 13,
@@ -6972,11 +7370,13 @@ export const getFinancialBalanceComparativeMetricsReport = (
                             },
                           },
                           {
-                            text: `${offeringPlaningEventsExpensesBySubTypeComparativeDataResult.reduce(
-                              (acc, offering) =>
-                                acc + offering?.accumulatedOfferingEUR,
-                              0,
-                            )} EUR`,
+                            text: `${offeringPlaningEventsExpensesBySubTypeComparativeDataResult
+                              .reduce(
+                                (acc, offering) =>
+                                  acc + offering?.accumulatedOfferingEUR,
+                                0,
+                              )
+                              .toFixed(2)} EUR`,
                             style: {
                               bold: true,
                               fontSize: 13,
