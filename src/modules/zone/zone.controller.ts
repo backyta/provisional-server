@@ -130,7 +130,8 @@ export class ZoneController {
   @ApiForbiddenResponse({
     description: 'Forbidden.',
   })
-  @Auth(UserRole.SuperUser, UserRole.AdminUser)
+  @Auth(UserRole.SuperUser)
+  // @Auth(UserRole.SuperUser, UserRole.AdminUser)
   remove(
     @Param('id') id: string,
     @Query() inactivateZoneDto: InactivateZoneDto,

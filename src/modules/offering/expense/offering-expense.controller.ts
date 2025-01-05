@@ -118,7 +118,8 @@ export class OfferingExpenseController {
   @ApiForbiddenResponse({
     description: 'Forbidden.',
   })
-  @Auth(UserRole.SuperUser, UserRole.AdminUser, UserRole.TreasurerUser)
+  @Auth(UserRole.SuperUser)
+  // @Auth(UserRole.SuperUser, UserRole.AdminUser, UserRole.TreasurerUser)
   remove(
     @Param('id') id: string,
     @Query() inactivateOfferingExpenseDto: InactivateOfferingDto,

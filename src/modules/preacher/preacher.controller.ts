@@ -124,7 +124,8 @@ export class PreacherController {
 
   //! INACTIVATE
   @Delete(':id')
-  @Auth(UserRole.SuperUser, UserRole.AdminUser)
+  @Auth(UserRole.SuperUser)
+  // @Auth(UserRole.SuperUser, UserRole.AdminUser)
   @ApiOkResponse({
     description: 'Successful operation.',
   })
