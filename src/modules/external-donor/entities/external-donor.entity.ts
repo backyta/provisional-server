@@ -1,5 +1,4 @@
 import {
-  Index,
   Column,
   Entity,
   ManyToOne,
@@ -10,29 +9,25 @@ import {
 } from 'typeorm';
 import { IsDate } from 'class-validator';
 
-import { RecordStatus } from '@/common/enums/record-status.enum';
+import { RecordStatus } from '../../../common/enums/record-status.enum';
 
-import { User } from '@/modules/user/entities/user.entity';
+import { User } from '../../../modules/user/entities/user.entity';
 
 @Entity({ name: 'external_donors' })
-@Index(['firstNames', 'lastNames'])
 export class ExternalDonor {
   //* General and personal info
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Index()
   @Column('text', { name: 'first_names' })
   firstNames: string;
 
-  @Index()
   @Column('text', { name: 'last_names' })
   lastNames: string;
 
   @Column('int', { name: 'age', nullable: true })
   age: number;
 
-  // @Index()
   @Column('date', {
     name: 'birth_date',
     default: null,
@@ -44,7 +39,6 @@ export class ExternalDonor {
   @Column('text', { name: 'gender' })
   gender: string;
 
-  @Index()
   @Column('text', { name: 'email', unique: true, nullable: true })
   email: string;
 

@@ -1,5 +1,4 @@
 import {
-  Index,
   Column,
   Entity,
   ManyToOne,
@@ -7,21 +6,20 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { RecordStatus } from '@/common/enums/record-status.enum';
+import { RecordStatus } from '../../../../common/enums/record-status.enum';
 
-import { Zone } from '@/modules/zone/entities/zone.entity';
-import { User } from '@/modules/user/entities/user.entity';
-import { Pastor } from '@/modules/pastor/entities/pastor.entity';
-import { Church } from '@/modules/church/entities/church.entity';
-import { Disciple } from '@/modules/disciple/entities/disciple.entity';
-import { Copastor } from '@/modules/copastor/entities/copastor.entity';
-import { Preacher } from '@/modules/preacher/entities/preacher.entity';
-import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
-import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
-import { ExternalDonor } from '@/modules/external-donor/entities/external-donor.entity';
+import { Zone } from '../../../../modules/zone/entities/zone.entity';
+import { User } from '../../../../modules/user/entities/user.entity';
+import { Pastor } from '../../../../modules/pastor/entities/pastor.entity';
+import { Church } from '../../../../modules/church/entities/church.entity';
+import { Disciple } from '../../../../modules/disciple/entities/disciple.entity';
+import { Copastor } from '../../../../modules/copastor/entities/copastor.entity';
+import { Preacher } from '../../../../modules/preacher/entities/preacher.entity';
+import { Supervisor } from '../../../../modules/supervisor/entities/supervisor.entity';
+import { FamilyGroup } from '../../../../modules/family-group/entities/family-group.entity';
+import { ExternalDonor } from '../../../../modules/external-donor/entities/external-donor.entity';
 
 @Entity({ name: 'offering_income' })
-@Index(['type', 'subType'])
 export class OfferingIncome {
   //* General data
   @PrimaryGeneratedColumn('uuid')
@@ -30,11 +28,9 @@ export class OfferingIncome {
   @Column('text')
   type: string;
 
-  @Index()
   @Column('text', { name: 'sub_type', nullable: true })
   subType: string;
 
-  @Index()
   @Column('text', { name: 'category', nullable: true })
   category: string;
 
@@ -47,7 +43,6 @@ export class OfferingIncome {
   @Column('text', { name: 'comments', nullable: true })
   comments: string;
 
-  @Index()
   @Column('date', { name: 'date' })
   date: Date;
 

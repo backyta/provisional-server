@@ -1,7 +1,7 @@
 import {
-  IsArray,
   IsEnum,
   IsEmail,
+  IsArray,
   IsString,
   MaxLength,
   MinLength,

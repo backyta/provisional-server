@@ -386,6 +386,7 @@ export class CopastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
             },
@@ -499,6 +500,7 @@ export class CopastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               lastNames: ILike(`%${lastNames}%`),
             },
@@ -615,6 +617,7 @@ export class CopastorService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
               lastNames: ILike(`%${lastNames}%`),

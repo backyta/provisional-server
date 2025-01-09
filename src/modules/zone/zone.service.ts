@@ -319,6 +319,7 @@ export class ZoneService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
             },
@@ -378,6 +379,7 @@ export class ZoneService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
             },
@@ -437,6 +439,7 @@ export class ZoneService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
             },
@@ -497,6 +500,7 @@ export class ZoneService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               lastNames: ILike(`%${lastNames}%`),
             },
@@ -556,6 +560,7 @@ export class ZoneService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               lastNames: ILike(`%${lastNames}%`),
             },
@@ -615,6 +620,7 @@ export class ZoneService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               lastNames: ILike(`%${lastNames}%`),
             },
@@ -676,6 +682,7 @@ export class ZoneService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
               lastNames: ILike(`%${lastNames}%`),
@@ -737,6 +744,7 @@ export class ZoneService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
               lastNames: ILike(`%${lastNames}%`),
@@ -798,6 +806,7 @@ export class ZoneService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
               lastNames: ILike(`%${lastNames}%`),

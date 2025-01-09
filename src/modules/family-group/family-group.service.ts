@@ -269,7 +269,6 @@ export class FamilyGroupService {
 
         const familyGroups = await this.familyGroupRepository.find({
           where: { theirChurch: church, recordStatus: RecordStatus.Active },
-
           order: { createdAt: order as FindOptionsOrderValue },
         });
 
@@ -386,6 +385,7 @@ export class FamilyGroupService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
             },
@@ -446,6 +446,7 @@ export class FamilyGroupService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
             },
@@ -505,6 +506,7 @@ export class FamilyGroupService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
             },
@@ -564,6 +566,7 @@ export class FamilyGroupService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
             },
@@ -624,6 +627,7 @@ export class FamilyGroupService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
+            theirChurch: church,
             member: {
               lastNames: ILike(`%${lastNames}%`),
             },
@@ -684,6 +688,7 @@ export class FamilyGroupService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               lastNames: ILike(`%${lastNames}%`),
             },
@@ -743,6 +748,7 @@ export class FamilyGroupService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               lastNames: ILike(`%${lastNames}%`),
             },
@@ -802,6 +808,7 @@ export class FamilyGroupService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               lastNames: ILike(`%${lastNames}%`),
             },
@@ -863,6 +870,7 @@ export class FamilyGroupService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
               lastNames: ILike(`%${lastNames}%`),
@@ -925,6 +933,7 @@ export class FamilyGroupService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
               lastNames: ILike(`%${lastNames}%`),
@@ -986,6 +995,7 @@ export class FamilyGroupService {
       try {
         const copastors = await this.copastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
               lastNames: ILike(`%${lastNames}%`),
@@ -1047,6 +1057,7 @@ export class FamilyGroupService {
       try {
         const pastors = await this.pastorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
               lastNames: ILike(`%${lastNames}%`),
@@ -1183,6 +1194,7 @@ export class FamilyGroupService {
       try {
         const zones = await this.zoneRepository.find({
           where: {
+            theirChurch: church,
             zoneName: ILike(`%${term}%`),
             recordStatus: RecordStatus.Active,
           },

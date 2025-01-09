@@ -1305,6 +1305,7 @@ export class OfferingIncomeService {
       try {
         const zones = await this.zoneRepository.find({
           where: {
+            theirChurch: church,
             zoneName: ILike(`%${term}%`),
           },
           relations: ['familyGroups'],
@@ -1381,6 +1382,7 @@ export class OfferingIncomeService {
 
         const zones = await this.zoneRepository.find({
           where: {
+            theirChurch: church,
             zoneName: ILike(`%${zone}%`),
           },
           relations: ['familyGroups'],
@@ -1450,6 +1452,7 @@ export class OfferingIncomeService {
       try {
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             familyGroupCode: ILike(`%${term}%`),
           },
         });
@@ -1521,6 +1524,7 @@ export class OfferingIncomeService {
 
         const familyGroups = await this.familyGroupRepository.find({
           where: {
+            theirChurch: church,
             familyGroupCode: ILike(`%${code}%`),
           },
         });
@@ -1587,6 +1591,7 @@ export class OfferingIncomeService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
             },
@@ -1652,6 +1657,7 @@ export class OfferingIncomeService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
+            theirChurch: church,
             member: {
               lastNames: ILike(`%${lastNames}%`),
             },
@@ -1718,6 +1724,7 @@ export class OfferingIncomeService {
       try {
         const preachers = await this.preacherRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
               lastNames: ILike(`%${lastNames}%`),
@@ -1784,6 +1791,7 @@ export class OfferingIncomeService {
       try {
         const zones = await this.zoneRepository.find({
           where: {
+            theirChurch: church,
             zoneName: ILike(`%${term}%`),
           },
         });
@@ -1853,6 +1861,7 @@ export class OfferingIncomeService {
 
         const zones = await this.zoneRepository.find({
           where: {
+            theirChurch: church,
             zoneName: ILike(`%${zone}%`),
           },
         });
@@ -1919,6 +1928,7 @@ export class OfferingIncomeService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
             },
@@ -1986,6 +1996,7 @@ export class OfferingIncomeService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               lastNames: ILike(`%${lastNames}%`),
             },
@@ -2054,6 +2065,7 @@ export class OfferingIncomeService {
       try {
         const supervisors = await this.supervisorRepository.find({
           where: {
+            theirChurch: church,
             member: {
               firstNames: ILike(`%${firstNames}%`),
               lastNames: ILike(`%${lastNames}%`),
@@ -3515,7 +3527,7 @@ export class OfferingIncomeService {
           });
         }
 
-        //* Si existe, se suma el monto transformado al registro existente.
+        //* If it exists, the transformed amount is added to the existing record.
         if (offeringDestiny) {
           const currentComments = offeringDestiny.comments || '';
           const newComments = `💲 Monto anterior: ${offeringDestiny.amount} ${offeringDestiny.currency}\n💲 Monto añadido: ${(offeringIncome.amount * +exchangeRate).toFixed(2)} ${offeringDestiny.currency} (${offeringIncome.amount} ${offeringIncome.currency})\n💰Tipo de cambio (precio): ${exchangeRate}`;
@@ -3539,7 +3551,7 @@ export class OfferingIncomeService {
           await this.offeringIncomeRepository.save(updatedOffering);
         }
 
-        //* Si no existe un registro a donde aumentar el cambio, se crea.
+        //* If there is no record to add the change to, it is created.
         if (!offeringDestiny) {
           const newComments = `💲 Monto convertido: ${(+offeringIncome.amount * +exchangeRate).toFixed(2)} ${
             exchangeCurrencyTypes === ExchangeCurrencyTypes.USDtoPEN ||

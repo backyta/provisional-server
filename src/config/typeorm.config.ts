@@ -1,6 +1,8 @@
 import { ConfigService } from '@nestjs/config';
-import { config } from 'dotenv';
 import { DataSource } from 'typeorm';
+
+import { config } from 'dotenv';
+import { resolve } from 'path';
 
 config();
 
@@ -13,6 +15,8 @@ export default new DataSource({
   database: configService.getOrThrow('DB_NAME'),
   username: configService.getOrThrow('DB_USERNAME'),
   password: configService.getOrThrow('DB_PASSWORD'),
-  entities: [__dirname + '/**/*.entity{.ts,.js}'],
-  migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
+  entities: ['src/modules/**/entities/*.ts'],
+  migrations: [
+    resolve(__dirname, '..', 'database', 'migrations', '*{.ts,.js}'),
+  ],
 });

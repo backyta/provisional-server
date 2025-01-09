@@ -1,5 +1,4 @@
 import {
-  Index,
   Column,
   Entity,
   ManyToOne,
@@ -7,13 +6,12 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { RecordStatus } from '@/common/enums/record-status.enum';
+import { RecordStatus } from '../../../../common/enums/record-status.enum';
 
-import { User } from '@/modules/user/entities/user.entity';
-import { Church } from '@/modules/church/entities/church.entity';
+import { User } from '../../../../modules/user/entities/user.entity';
+import { Church } from '../../../../modules/church/entities/church.entity';
 
 @Entity({ name: 'offering_expenses' })
-@Index(['type', 'subType'])
 export class OfferingExpense {
   //* General data
   @PrimaryGeneratedColumn('uuid')

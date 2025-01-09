@@ -1,5 +1,4 @@
 import {
-  Index,
   Column,
   Entity,
   ManyToOne,
@@ -9,28 +8,23 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { RecordStatus } from '@/common/enums/record-status.enum';
+import { RecordStatus } from '../../../common/enums/record-status.enum';
 
 @Entity({ name: 'users' })
-@Index(['firstNames', 'lastNames'])
 export class User {
   //* General info
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Index()
   @Column('text', { name: 'first_names' })
   firstNames: string;
 
-  @Index()
   @Column('text', { name: 'last_names' })
   lastNames: string;
 
-  @Index()
   @Column('text')
   gender: string;
 
-  @Index()
   @Column('text', { unique: true })
   email: string;
 

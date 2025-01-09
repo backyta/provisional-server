@@ -25,7 +25,6 @@ import { Auth } from '@/modules/auth/decorators/auth.decorator';
 
 import { ReportsService } from '@/modules/reports/reports.service';
 
-//TODO : agregar la documentacion para las rutas que faltan
 @ApiTags('Reportes')
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({

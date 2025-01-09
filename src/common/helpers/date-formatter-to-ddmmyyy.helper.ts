@@ -7,8 +7,8 @@ export const dateFormatterToDDMMYYYY = (timestamp: number): string => {
   return `${day}/${month}/${year}`;
 };
 
-export const dateFormatterToDDMMYY = (dateString: Date): string => {
-  const date = new Date(dateString);
+export const dateFormatterToDDMMYY = (timestamp: Date): string => {
+  const date = new Date(timestamp);
   const day = date.getDate().toString().padStart(2, '0');
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const year = date.getFullYear().toString().slice(-2);

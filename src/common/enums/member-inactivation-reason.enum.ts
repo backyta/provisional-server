@@ -29,11 +29,11 @@ export enum MemberInactivationReason {
   Inactivity = 'inactivity',
   LackOfCommitment = 'lack_of_commitment',
 
-  //* Razones administrativas
+  //* Administrative reasons
   RequestForRemoval = 'request_for_removal',
   DataCorrection = 'data_correction',
 
-  //* Administrative reasons
+  //* Legal reasons
   LegalIssues = 'legal_issues',
   ImmigrationChallenges = 'immigration_challenges',
   CulturalBarriers = 'cultural_barriers',

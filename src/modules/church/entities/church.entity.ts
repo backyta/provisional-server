@@ -1,5 +1,4 @@
 import {
-  Index,
   Column,
   Entity,
   ManyToOne,
@@ -8,16 +7,16 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { RecordStatus } from '@/common/enums/record-status.enum';
+import { RecordStatus } from '../../../common/enums/record-status.enum';
 
-import { Zone } from '@/modules/zone/entities/zone.entity';
-import { User } from '@/modules/user/entities/user.entity';
-import { Pastor } from '@/modules/pastor/entities/pastor.entity';
-import { Copastor } from '@/modules/copastor/entities/copastor.entity';
-import { Preacher } from '@/modules/preacher/entities/preacher.entity';
-import { Disciple } from '@/modules/disciple/entities/disciple.entity';
-import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
-import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
+import { Zone } from '../../../modules/zone/entities/zone.entity';
+import { User } from '../../../modules/user/entities/user.entity';
+import { Pastor } from '../../../modules/pastor/entities/pastor.entity';
+import { Copastor } from '../../../modules/copastor/entities/copastor.entity';
+import { Preacher } from '../../../modules/preacher/entities/preacher.entity';
+import { Disciple } from '../../../modules/disciple/entities/disciple.entity';
+import { Supervisor } from '../../../modules/supervisor/entities/supervisor.entity';
+import { FamilyGroup } from '../../../modules/family-group/entities/family-group.entity';
 
 @Entity({ name: 'churches' })
 export class Church {
@@ -25,7 +24,6 @@ export class Church {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Index()
   @Column('text', { name: 'church_name', unique: true })
   churchName: string;
 
@@ -35,7 +33,6 @@ export class Church {
   })
   abbreviatedChurchName: string;
 
-  @Index()
   @Column('text', { name: 'church_code', unique: true, nullable: true })
   churchCode: string;
 
@@ -49,7 +46,7 @@ export class Church {
   foundingDate: Date;
 
   //* Contact Info
-  @Index()
+
   @Column('text', { name: 'email', unique: true })
   email: string;
 
@@ -65,21 +62,14 @@ export class Church {
   @Column('text', { name: 'province', default: 'Lima' })
   province: string;
 
-  @Index()
   @Column('text', { name: 'district' })
   district: string;
 
-  @Index()
   @Column('text', { name: 'urban_sector' })
   urbanSector: string;
 
-  @Index()
   @Column('text', { name: 'address' })
   address: string;
-
-  // @Index()
-  // @Column('text', { name: 'address' })
-  // address2: string;
 
   @Column('text', { name: 'reference_address' })
   referenceAddress: string;

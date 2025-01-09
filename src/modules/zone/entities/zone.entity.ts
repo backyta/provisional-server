@@ -1,5 +1,4 @@
 import {
-  Index,
   Column,
   Entity,
   OneToOne,
@@ -9,16 +8,16 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { RecordStatus } from '@/common/enums/record-status.enum';
+import { RecordStatus } from '../../../common/enums/record-status.enum';
 
-import { User } from '@/modules/user/entities/user.entity';
-import { Church } from '@/modules/church/entities/church.entity';
-import { Pastor } from '@/modules/pastor/entities/pastor.entity';
-import { Copastor } from '@/modules/copastor/entities/copastor.entity';
-import { Preacher } from '@/modules/preacher/entities/preacher.entity';
-import { Disciple } from '@/modules/disciple/entities/disciple.entity';
-import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
-import { FamilyGroup } from '@/modules/family-group/entities/family-group.entity';
+import { User } from '../../../modules/user/entities/user.entity';
+import { Church } from '../../../modules/church/entities/church.entity';
+import { Pastor } from '../../../modules/pastor/entities/pastor.entity';
+import { Copastor } from '../../../modules/copastor/entities/copastor.entity';
+import { Preacher } from '../../../modules/preacher/entities/preacher.entity';
+import { Disciple } from '../../../modules/disciple/entities/disciple.entity';
+import { Supervisor } from '../../../modules/supervisor/entities/supervisor.entity';
+import { FamilyGroup } from '../../../modules/family-group/entities/family-group.entity';
 
 @Entity({ name: 'zones' })
 export class Zone {
@@ -26,7 +25,6 @@ export class Zone {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Index()
   @Column('text', { name: 'zone_name' })
   zoneName: string;
 
@@ -39,7 +37,6 @@ export class Zone {
   @Column('text', { name: 'province', default: 'Lima' })
   province: string;
 
-  @Index()
   @Column('text', { name: 'district' })
   district: string;
 

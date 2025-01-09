@@ -29,7 +29,6 @@ import { ExternalDonorModule } from '@/modules/external-donor/external-donor.mod
 import { OfferingIncomeModule } from '@/modules/offering/income/offering-income.module';
 import { OfferingExpenseModule } from '@/modules/offering/expense/offering-expense.module';
 
-// TODO : Probar despliegues con migraciones
 @Module({
   imports: [
     ConfigModule.forRoot(), // Access to environment variables global in all modules
@@ -45,12 +44,14 @@ import { OfferingExpenseModule } from '@/modules/offering/expense/offering-expen
       database: process.env.DB_NAME,
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
-      // entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      // migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
-      // migrationsRun: true,
-      autoLoadEntities: true,
+      entities: ['dist/modules/**/entities/*.js'],
+      migrations: ['dist/database/migrations/*.js'],
+      migrationsRun: true,
+      migrationsTableName: 'migrations',
+      // logging: true,
+      // autoLoadEntities: true,
       //synchronize: process.env.STAGE === 'prod' ? false : true,
-      synchronize: true,
+      // synchronize: true,
     }),
     ThrottlerModule.forRoot([
       {

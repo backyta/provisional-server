@@ -1,5 +1,4 @@
 import {
-  Index,
   Column,
   Entity,
   OneToOne,
@@ -9,16 +8,16 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { RecordStatus } from '@/common/enums/record-status.enum';
+import { RecordStatus } from '../../../common/enums/record-status.enum';
 
-import { Zone } from '@/modules/zone/entities/zone.entity';
-import { User } from '@/modules/user/entities/user.entity';
-import { Church } from '@/modules/church/entities/church.entity';
-import { Pastor } from '@/modules/pastor/entities/pastor.entity';
-import { Copastor } from '@/modules/copastor/entities/copastor.entity';
-import { Preacher } from '@/modules/preacher/entities/preacher.entity';
-import { Disciple } from '@/modules/disciple/entities/disciple.entity';
-import { Supervisor } from '@/modules/supervisor/entities/supervisor.entity';
+import { Zone } from '../../../modules/zone/entities/zone.entity';
+import { User } from '../../../modules/user/entities/user.entity';
+import { Church } from '../../../modules/church/entities/church.entity';
+import { Pastor } from '../../../modules/pastor/entities/pastor.entity';
+import { Copastor } from '../../../modules/copastor/entities/copastor.entity';
+import { Preacher } from '../../../modules/preacher/entities/preacher.entity';
+import { Disciple } from '../../../modules/disciple/entities/disciple.entity';
+import { Supervisor } from '../../../modules/supervisor/entities/supervisor.entity';
 
 @Entity({ name: 'family_groups' })
 export class FamilyGroup {
@@ -26,14 +25,12 @@ export class FamilyGroup {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Index()
   @Column('text', { name: 'family_group_name', unique: true })
   familyGroupName: string;
 
   @Column('int', { name: 'family_group_number' })
   familyGroupNumber: number;
 
-  @Index()
   @Column('text', { name: 'family_group_code', nullable: true })
   familyGroupCode: string;
 
@@ -50,15 +47,12 @@ export class FamilyGroup {
   @Column('text', { name: 'province', default: 'Lima' })
   province: string;
 
-  @Index()
   @Column('text', { name: 'district' })
   district: string;
 
-  @Index()
   @Column('text', { name: 'urban_sector' })
   urbanSector: string;
 
-  @Index()
   @Column('text')
   address: string;
 

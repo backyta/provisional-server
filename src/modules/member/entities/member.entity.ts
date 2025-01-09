@@ -1,5 +1,4 @@
 import {
-  Index,
   Column,
   Entity,
   BeforeInsert,
@@ -7,19 +6,15 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-//NOTE : crear indices o en las entitades especiales.
 @Entity({ name: 'members' })
-@Index(['firstNames', 'lastNames'])
 export class Member {
   //* General and personal info
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Index()
   @Column('text', { name: 'first_names' })
   firstNames: string;
 
-  @Index()
   @Column('text', { name: 'last_names' })
   lastNames: string;
 
@@ -29,14 +24,12 @@ export class Member {
   @Column('text', { name: 'origin_country' })
   originCountry: string;
 
-  @Index()
   @Column('date', { name: 'birth_date' })
   birthDate: Date;
 
   @Column('int', { name: 'age' })
   age: number;
 
-  @Index()
   @Column('text', { name: 'marital_status' })
   maritalStatus: string;
 
@@ -47,7 +40,7 @@ export class Member {
   conversionDate: Date;
 
   //* Contact Info
-  @Index()
+
   @Column('text', { name: 'email', unique: true, nullable: true })
   email: string;
 
@@ -63,15 +56,12 @@ export class Member {
   @Column('text', { name: 'residence_province', default: 'Lima' })
   residenceProvince: string;
 
-  @Index()
   @Column('text', { name: 'residence_district' })
   residenceDistrict: string;
 
-  @Index()
   @Column('text', { name: 'residence_urban_sector' })
   residenceUrbanSector: string;
 
-  @Index()
   @Column('text', { name: 'residence_address' })
   residenceAddress: string;
 
